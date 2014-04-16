@@ -1,7 +1,9 @@
 *.iml
 .classpath
 .project
-
+*.ipr
+*.iml
+*.iws
 target/
 build/
 bin/

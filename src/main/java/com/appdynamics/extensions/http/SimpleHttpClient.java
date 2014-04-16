@@ -99,8 +99,23 @@ public class SimpleHttpClient {
         return new WebTarget(this);
     }
 
-    public WebTarget target(String uri) {
-        return new WebTarget(this).uri(uri);
+    public WebTarget target(String url) {
+        try {
+            if(!Strings.isNullOrEmpty(url)) {
+                URI uri = new URI(url);
+                if (isSSLEnabled(uri)) {
+                    String host = getHost(uri);
+                    int port = getSSLPort(uri);
+                    if (!Strings.isNullOrEmpty(host)) {
+                        setEasySSLProtocol(host, port);
+                    }
+                }
+                return new WebTarget(this).uri(url);
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return new WebTarget(this);
     }
 
 
@@ -134,14 +149,9 @@ public class SimpleHttpClient {
         URI uri = getURI();
         if (isSSLEnabled(uri, taskArgs.get(TaskInputArgs.USE_SSL))) {
             String host = getHost(uri);
+            int port = getSSLPort(uri);
             if (!Strings.isNullOrEmpty(host)) {
-                int port = getPort(uri);
-                if (port < 0) {
-                    port = 443;
-                }
-                ProtocolSocketFactory factory = new EasySSLProtocolSocketFactory();
-                Protocol protocol = new Protocol("https", factory, port);
-                httpClient.getHostConfiguration().setHost(host, port, protocol);
+                setEasySSLProtocol(host, port);
                 isSSLSupported = true;
             } else {
                 logger.info("SSL support is disabled since the host is not set");
@@ -151,12 +161,30 @@ public class SimpleHttpClient {
         }
     }
 
+    private int getSSLPort(URI uri){
+        int port = getPort(uri);
+        if (port < 0) {
+            port = 443;
+        }
+        return port;
+    }
+
+    private void setEasySSLProtocol(String host, int port){
+        ProtocolSocketFactory factory = new EasySSLProtocolSocketFactory();
+        Protocol protocol = new Protocol("https", factory, port);
+        httpClient.getHostConfiguration().setHost(host, port, protocol);
+    }
+
     private boolean isSSLEnabled(URI uri, String useSSL) {
         if (uri != null) {
-            return uri.getScheme().equals("https");
+            return isSSLEnabled(uri);
         } else {
             return !Strings.isNullOrEmpty(useSSL) && Boolean.valueOf(useSSL);
         }
+    }
+
+    private boolean isSSLEnabled(URI uri){
+        return uri.getScheme().equals("https");
     }
 
     private URI getURI() {

@@ -24,6 +24,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -198,6 +200,8 @@ public class SimpleHttpClientTest {
         SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
         client.target().uri(DEFAULT_HTTPS_URL + "/test?key=value&key=value3#test/abey").get().string();
     }
+
+
 
 
     private Server startJettySSl(final Handler handler) {
