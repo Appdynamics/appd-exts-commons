@@ -1,0 +1,54 @@
+package com.appdynamics.extensions;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: abey.tom
+ * Date: 4/4/14
+ * Time: 9:10 AM
+ * To change this template use File | Settings | File Templates.
+ */
+public class PathResolver {
+    public static final Logger logger = LoggerFactory.getLogger(PathResolver.class);
+
+    public static File resolveDirectory(Class clazz) {
+        File installDir=null;
+        try{
+            ProtectionDomain pd = clazz.getProtectionDomain();
+            if(pd!=null){
+                CodeSource cs = pd.getCodeSource();
+                if(cs!=null){
+                    URL url = cs.getLocation();
+                    String path = URLDecoder.decode(url.getFile(), "UTF-8");
+                    File dir = new File(path).getParentFile();
+                    if(dir.exists()){
+                        installDir = dir;
+                    } else{
+                        logger.error("Install dir resolved to "+dir.getAbsolutePath()+", however it doesnt exist.");
+                    }
+                } else{
+                    logger.warn("Cannot resolve path for the class {} since CodeSource is null",clazz.getName());
+                }
+
+            }
+        }catch (Exception e){
+            logger.error("Error while resolving the Install Dir",e);
+        }
+        if(installDir!=null){
+            logger.info("Install dir resolved to "+installDir.getAbsolutePath());
+            return installDir;
+        } else{
+            File workDir = new File("");
+            logger.info("Failed to resolve install dir, returning current work dir"+workDir.getAbsolutePath());
+            return workDir;
+        }
+    }
+}
