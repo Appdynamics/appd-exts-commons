@@ -40,7 +40,7 @@ public class SimpleHttpClientBuilder {
     }
 
     public SimpleHttpClientBuilder socketTimeout(int timeout) {
-        if (params != null) {
+        if (params == null) {
             params = new HttpConnectionManagerParams();
         }
         params.setSoTimeout(timeout);
@@ -48,7 +48,7 @@ public class SimpleHttpClientBuilder {
     }
 
     public SimpleHttpClientBuilder connectionTimeout(int timeout) {
-        if (params != null) {
+        if (params == null) {
             params = new HttpConnectionManagerParams();
         }
         params.setConnectionTimeout(timeout);

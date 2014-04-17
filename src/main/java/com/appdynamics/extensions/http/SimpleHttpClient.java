@@ -184,6 +184,9 @@ public class SimpleHttpClient {
     }
 
     private boolean isSSLEnabled(URI uri){
+        if(uri.getScheme() == null){
+            return false;
+        }
         return uri.getScheme().equals("https");
     }
 
