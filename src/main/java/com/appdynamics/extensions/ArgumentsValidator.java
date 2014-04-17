@@ -1,0 +1,52 @@
+package com.appdynamics.extensions;
+
+import com.appdynamics.TaskInputArgs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: abey.tom
+ * Date: 4/16/14
+ * Time: 6:34 PM
+ * This class can be used to validate the arguments,
+ * as of now, it validates on the metric prefix and default the garuments which are not available in the input.
+ */
+public class ArgumentsValidator {
+    public static final Logger logger = LoggerFactory.getLogger(ArgumentsValidator.class);
+
+    /**
+     * Set the default value if the argument is not present in the input args.
+     *
+     * @param argsMap
+     * @param defaultArgs
+     */
+    public static void validateArguments(Map<String, String> argsMap, Map<String, String> defaultArgs) {
+        if (defaultArgs != null) {
+            for (String defaultKey : defaultArgs.keySet()) {
+                if (!argsMap.containsKey(defaultKey)) {
+                    String value = defaultArgs.get(defaultKey);
+                    logger.debug("Adding the default argument {} with value {}", defaultKey, value);
+                    argsMap.put(defaultKey, value);
+                }
+            }
+        }
+        validate(argsMap);
+    }
+
+    private static void validate(Map<String, String> argsMap) {
+        String metricPrefix = argsMap.get(TaskInputArgs.METRIC_PREFIX);
+        if (metricPrefix != null) {
+            argsMap.put(TaskInputArgs.METRIC_PREFIX, trimTrailingPipe(metricPrefix.trim()));
+        }
+    }
+
+    private static String trimTrailingPipe(String str) {
+        while (str.endsWith("|")) {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
+    }
+}
