@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.http;
 
+import com.appdynamics.extensions.io.Lines;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.StatusLine;
@@ -36,7 +37,8 @@ public class Response {
     }
 
     public InputStream inputStream() throws IOException {
-        return httpMethod.getResponseBodyAsStream();
+        InputStream in = httpMethod.getResponseBodyAsStream();
+        return in;
     }
 
     public String string() {
@@ -151,14 +153,46 @@ public class Response {
 
     public void close() {
         try {
-            httpMethod.getResponseBodyAsStream().close();
+            InputStream in = httpMethod.getResponseBodyAsStream();
+            if (in != null) {
+                in.close();
+            }
         } catch (IOException e) {
         }
         httpMethod.releaseConnection();
     }
 
+    /**
+     * Gets an Iterable which can be use to iterate over the response lines.
+     *
+     * @return a Lines which implements an iterator.
+     */
+    public Lines lines() {
+        try {
+            InputStream in = inputStream();
+            if (in != null) {
+                return new Lines(in, new CloseCallback() {
+                    public void onClose() {
+                        close();
+                    }
+                });
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Exception while reading the input stream " + url, e);
+        }
+    }
+
 
     public int getStatus() {
         return status;
+    }
+
+    /**
+     * This is a callback to listen to onClose.
+     */
+    public interface CloseCallback {
+        public void onClose();
     }
 }

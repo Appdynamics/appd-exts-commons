@@ -1,6 +1,7 @@
 package com.appdynamics.extensions;
 
 import com.appdynamics.TaskInputArgs;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,17 +24,23 @@ public class ArgumentsValidator {
      * @param argsMap
      * @param defaultArgs
      */
-    public static void validateArguments(Map<String, String> argsMap, Map<String, String> defaultArgs) {
+    public static Map<String, String> validateArguments(Map<String, String> argsMap, Map<String, String> defaultArgs) {
+        if (argsMap == null) {
+            argsMap = Maps.newHashMap();
+        }
         if (defaultArgs != null) {
-            for (String defaultKey : defaultArgs.keySet()) {
-                if (!argsMap.containsKey(defaultKey)) {
-                    String value = defaultArgs.get(defaultKey);
-                    logger.debug("Adding the default argument {} with value {}", defaultKey, value);
-                    argsMap.put(defaultKey, value);
+            if (argsMap != null && !argsMap.isEmpty()) {
+                for (String defaultKey : defaultArgs.keySet()) {
+                    if (!argsMap.containsKey(defaultKey)) {
+                        String value = defaultArgs.get(defaultKey);
+                        logger.debug("Adding the default argument {} with value {}", defaultKey, value);
+                        argsMap.put(defaultKey, value);
+                    }
                 }
             }
         }
         validate(argsMap);
+        return argsMap;
     }
 
     private static void validate(Map<String, String> argsMap) {
