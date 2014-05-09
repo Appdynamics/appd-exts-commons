@@ -29,15 +29,15 @@ public class ArgumentsValidator {
             argsMap = Maps.newHashMap();
         }
         if (defaultArgs != null) {
-            if (argsMap != null && !argsMap.isEmpty()) {
-                for (String defaultKey : defaultArgs.keySet()) {
-                    if (!argsMap.containsKey(defaultKey)) {
-                        String value = defaultArgs.get(defaultKey);
-                        logger.debug("Adding the default argument {} with value {}", defaultKey, value);
-                        argsMap.put(defaultKey, value);
-                    }
+            for (String defaultKey : defaultArgs.keySet()) {
+                if (!argsMap.containsKey(defaultKey)) {
+                    String value = defaultArgs.get(defaultKey);
+                    logger.debug("Adding the default argument {} with value {}", defaultKey, value);
+                    argsMap.put(defaultKey, value);
                 }
             }
+        } else {
+            throw new IllegalArgumentException("The default argument map cannot be null");
         }
         validate(argsMap);
         return argsMap;
@@ -50,10 +50,26 @@ public class ArgumentsValidator {
         }
     }
 
+    public static void assertNotEmpty(Map<String, String> argsMap, String... args) {
+        for (String arg : args) {
+            String value = argsMap.get(arg);
+            if (!StringUtils.hasText(value)) {
+                String message = "The value is not set for the argument '%s' in the input map %s";
+                throw new InvalidInputException(String.format(message, arg, argsMap));
+            }
+        }
+    }
+
     private static String trimTrailingPipe(String str) {
         while (str.endsWith("|")) {
             str = str.substring(0, str.length() - 1);
         }
         return str;
+    }
+
+    public static class InvalidInputException extends RuntimeException {
+        public InvalidInputException(String message) {
+            super(message);
+        }
     }
 }

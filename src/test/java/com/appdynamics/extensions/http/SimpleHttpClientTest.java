@@ -24,8 +24,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -189,7 +187,9 @@ public class SimpleHttpClientTest {
         taskArgs.put(TaskInputArgs.HOST, "localhost");
         taskArgs.put(TaskInputArgs.PORT, DEFAULT_SSL_PORT);
         SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
-        client.target().uri(DEFAULT_HTTPS_URL + "/test?key=value&key=value3#test/abey").get().string();
+        Response response = client.target().uri(DEFAULT_HTTPS_URL + "/test?key=value&key=value3#test/abey").get();
+        Assert.assertEquals(200,response.getStatus());
+        logger.info(response.string());
     }
 
     @Test
@@ -198,11 +198,10 @@ public class SimpleHttpClientTest {
         taskArgs.put(TaskInputArgs.USE_SSL, "true");
         taskArgs.put(TaskInputArgs.URI, DEFAULT_HTTPS_URL);
         SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
-        client.target().uri(DEFAULT_HTTPS_URL + "/test?key=value&key=value3#test/abey").get().string();
+        Response response = client.target().uri(DEFAULT_HTTPS_URL + "/test?key=value&key=value3#test/abey").get();
+        Assert.assertEquals(200,response.getStatus());
+        logger.info(response.string());
     }
-
-
-
 
     private Server startJettySSl(final Handler handler) {
         SslContextFactory factory = new SslContextFactory();

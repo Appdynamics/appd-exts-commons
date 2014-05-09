@@ -1,5 +1,8 @@
 package com.appdynamics.extensions;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  * Created with IntelliJ IDEA.
  * User: abey.tom
@@ -18,5 +21,9 @@ public class NumberUtils {
             }
         }
         return false;
+    }
+
+    public static String roundToWhole(BigDecimal value){
+        return value.setScale(0, RoundingMode.HALF_UP).toString();
     }
 }

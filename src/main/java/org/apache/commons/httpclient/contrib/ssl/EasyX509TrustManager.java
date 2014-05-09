@@ -72,11 +72,11 @@ public class EasyX509TrustManager implements X509TrustManager
                 LOG.debug("X509Certificate[" + i + "]=" + certificates[i]);
             }
         }
-        if ((certificates != null) && (certificates.length == 1)) {
-            certificates[0].checkValidity();
-        } else {
-            standardTrustManager.checkServerTrusted(certificates,authType);
-        }
+//        if ((certificates != null) && (certificates.length == 1)) {
+//            certificates[0].checkValidity();
+//        } else {
+//            standardTrustManager.checkServerTrusted(certificates,authType);
+//        }
     }
 
     /**

@@ -102,6 +102,7 @@ public class WebTarget {
 
     public Response post(String data) {
         String url = buildURL();
+        logger.debug("Invoking the url={} with data={}",url,data);
         PostMethod post = new PostMethod(url);
         addHeaders(post);
         try {
@@ -193,5 +194,12 @@ public class WebTarget {
         }
     }
 
+    public String getAbsoluteUrl(){
+        return urlBuilder.build();
+    }
+
+    public String getUrl(){
+        return buildURL();
+    }
 
 }

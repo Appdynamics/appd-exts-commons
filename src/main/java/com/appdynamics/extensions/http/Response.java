@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.io.Lines;
+import com.appdynamics.extensions.io.WrapperInputStream;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.StatusLine;
@@ -38,6 +39,9 @@ public class Response {
 
     public InputStream inputStream() throws IOException {
         InputStream in = httpMethod.getResponseBodyAsStream();
+        if (in != null) {
+            return new WrapperInputStream(in, httpMethod);
+        }
         return in;
     }
 
@@ -84,7 +88,6 @@ public class Response {
                     } catch (IOException e) {
                     }
                 }
-                httpMethod.releaseConnection();
             }
         } else {
             throw new IllegalArgumentException("Type Not Set");
@@ -117,7 +120,6 @@ public class Response {
                         } catch (IOException e) {
                         }
                     }
-                    httpMethod.releaseConnection();
                 }
             } else {
                 throw new RuntimeException("Cannot unmarshall because the JAXB Context cannot be instantiated.");
