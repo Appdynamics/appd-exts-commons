@@ -60,4 +60,11 @@ public class StringUtils {
         return str;
     }
 
+    public static String stripQuote(String str){
+        if(str != null){
+            return str.replaceAll("\"","");
+        }
+        return str;
+    }
+
 }
