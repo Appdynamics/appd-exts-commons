@@ -108,12 +108,20 @@ public class EventBuilder {
         event.setAffectedEntityType(cleanedArgs[9]);
         event.setAffectedEntityName(cleanedArgs[10]);
         event.setAffectedEntityID(cleanedArgs[11]);
-        setEvaluationDetails(event,cleanedArgs);
+        int currentArgPos = setEvaluationDetails(event,cleanedArgs);
         event.setSummaryMessage(cleanedArgs[cleanedArgs.length - 4]);
         event.setIncidentID(cleanedArgs[cleanedArgs.length - 3]);
         event.setDeepLinkUrl(cleanedArgs[cleanedArgs.length - 2]);
-        event.setEventType(cleanedArgs[cleanedArgs.length - 1]);
+        event.setEventType(getEventType(cleanedArgs[cleanedArgs.length - 1],currentArgPos + 4,cleanedArgs.length));
+        event.setIncidentUrl(event.getDeepLinkUrl()+event.getIncidentID());
         return event;
+    }
+
+    private String getEventType(String cleanedArg, int currentArgPos,int totalArgs) {
+        if(currentArgPos <= totalArgs){
+            return cleanedArg;
+        }
+        return "POLICY_OPEN";
     }
 
     private void setBasicEvent(String[] cleanedArgs, Event event) {
@@ -164,7 +172,7 @@ public class EventBuilder {
                 currentArgPos++;
                 triggerCond.setConditionId(cleanedArgs[currentArgPos]);
                 currentArgPos++;
-                triggerCond.setOperator(cleanedArgs[currentArgPos]);
+                triggerCond.setOperator(getOperator(cleanedArgs[currentArgPos]));
                 currentArgPos++;
                 triggerCond.setConditionUnitType(cleanedArgs[currentArgPos]);
                 if(triggerCond.getConditionUnitType() != null &&  triggerCond.getConditionUnitType().toUpperCase().startsWith("BASELINE")){
@@ -181,6 +189,28 @@ public class EventBuilder {
             logger.error("Cannot convert string to int because of mismatch of arguments", nfe);
         }
         return currentArgPos;
+    }
+
+    private String getOperator(String operator) {
+        if("LESS_THAN".equalsIgnoreCase(operator)){
+            return "<";
+        }
+        if("LESS_THAN_EQUALS".equalsIgnoreCase(operator)){
+            return "<=";
+        }
+        if("GREATER_THAN".equalsIgnoreCase(operator)){
+            return ">";
+        }
+        if("GREATER_THAN_EQUALS".equalsIgnoreCase(operator)){
+            return ">=";
+        }
+        if("EQUALS".equalsIgnoreCase(operator)){
+            return "==";
+        }
+        if("NOT_EQUALS".equalsIgnoreCase(operator)){
+            return "!=";
+        }
+        return "";
     }
 
     private int setBaseLineDetails(TriggerCondition triggerCond, String[] cleanedArgs, int currentArgPos) {

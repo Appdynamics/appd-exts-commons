@@ -16,6 +16,7 @@ public class HealthRuleViolationEvent extends Event{
     private String summaryMessage;
     private String incidentID;
     private String eventType;
+    private String incidentUrl;
 
     public String getPvnAlertTime() {
         return pvnAlertTime;
@@ -103,5 +104,13 @@ public class HealthRuleViolationEvent extends Event{
 
     public void setEvaluationEntity(List<EvaluationEntity> evaluationEntity) {
         this.evaluationEntity = evaluationEntity;
+    }
+
+    public String getIncidentUrl() {
+        return incidentUrl;
+    }
+
+    public void setIncidentUrl(String incidentUrl) {
+        this.incidentUrl = incidentUrl;
     }
 }
