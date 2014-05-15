@@ -14,6 +14,7 @@ import java.util.Map;
 public class TaskInputArgs {
     public static final String USER = "username";
     public static final String PASSWORD = "password";
+    public static final String PASSWORD_ENCRYPTED = "password-encrypted";
     public static final String AUTH_TYPE = "auth-type";
     public static final String HOST = "host";
     public static final String URI = "uri";
@@ -29,6 +30,7 @@ public class TaskInputArgs {
     public static final String PROXY_PORT = "proxy-port";
     public static final String PROXY_USER = "proxy-username";
     public static final String PROXY_PASSWORD = "proxy-password";
+    public static final String PROXY_PASSWORD_ENCRYPTED = "proxy-password-encrypted";
     public static final String PROXY_USE_SSL = "proxy-use-ssl";
 
     public static String getArg(Map<String, String> taskArgs, String key, String defaultValue) {
