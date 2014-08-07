@@ -77,14 +77,14 @@ public class SimpleHttpClientTest {
     @Test
     //THis requires a fwd proxy to be running
     public void testProxyWithEncryptedPassword() {
-        Map<String, String> taskArgs = new HashMap<String, String>();
-        taskArgs.put(TaskInputArgs.URI, "http://www.google.com");
-        taskArgs.put(TaskInputArgs.PROXY_HOST, "localhost");
-        taskArgs.put(TaskInputArgs.PROXY_PORT, "80");
-        taskArgs.put(TaskInputArgs.PROXY_USER, "username");
-        taskArgs.put(TaskInputArgs.PROXY_PASSWORD_ENCRYPTED, Encryptor.getInstance().encrypt("welcome"));
-        SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
-        String out = client.get().string();
+//        Map<String, String> taskArgs = new HashMap<String, String>();
+//        taskArgs.put(TaskInputArgs.URI, "http://www.google.com");
+//        taskArgs.put(TaskInputArgs.PROXY_HOST, "localhost");
+//        taskArgs.put(TaskInputArgs.PROXY_PORT, "80");
+//        taskArgs.put(TaskInputArgs.PROXY_USER, "username");
+//        taskArgs.put(TaskInputArgs.PROXY_PASSWORD_ENCRYPTED, Encryptor.getInstance().encrypt("welcome"));
+//        SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
+//        String out = client.get().string();
     }
 
     @Test
