@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.http;
 
+import com.appdynamics.extensions.encrypt.Encryptor;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -23,21 +24,20 @@ public class AuthenticationConfig {
     private String authHeader;
 
     public static enum AuthenticationMode {
-        BASIC;
+        BASIC
     }
 
     public static AuthenticationConfig build(Map<String, String> taskArgs) {
         String user = taskArgs.get(USER);
         if (!Strings.isNullOrEmpty(user)) {
-            String password = taskArgs.get(PASSWORD);
-            if (!!Strings.isNullOrEmpty(password)) {
+            String password = getPassword(taskArgs);
+            if (Strings.isNullOrEmpty(password)) {
                 password = "";
                 logger.warn("The password is empty, empty string will be used as the password");
             }
             String authType = taskArgs.get(AUTH_TYPE);
-            if (!!Strings.isNullOrEmpty(authType)) {
+            if (Strings.isNullOrEmpty(authType)) {
                 authType = AuthenticationMode.BASIC.toString();
-            } else {
                 logger.info("The authentication type is not set, defaulting to BASIC");
             }
             AuthenticationConfig config = new AuthenticationConfig();
@@ -47,6 +47,16 @@ public class AuthenticationConfig {
             return config;
         } else {
             logger.debug("The authentication is not enabled.");
+        }
+        return null;
+    }
+
+    private static String getPassword(Map<String, String> taskArgs) {
+        if(taskArgs.containsKey(PASSWORD)){
+            return taskArgs.get(PASSWORD);
+        } else if(taskArgs.containsKey(PASSWORD_ENCRYPTED)){
+            String encrypted = taskArgs.get(PASSWORD_ENCRYPTED);
+            return Encryptor.getInstance().decrypt(encrypted);
         }
         return null;
     }

@@ -2,6 +2,7 @@ package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.NumberUtils;
+import com.appdynamics.extensions.encrypt.Encryptor;
 import com.google.common.base.Strings;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -101,7 +102,7 @@ public class SimpleHttpClient {
 
     public WebTarget target(String url) {
         try {
-            if(!Strings.isNullOrEmpty(url)) {
+            if (!Strings.isNullOrEmpty(url)) {
                 URI uri = new URI(url);
                 if (isSSLEnabled(uri)) {
                     String host = getHost(uri);
@@ -131,7 +132,7 @@ public class SimpleHttpClient {
     protected void setProxyCredentials(Map<String, String> taskArgs) {
         String proxyUser = taskArgs.get(PROXY_USER);
         if (!Strings.isNullOrEmpty(proxyUser)) {
-            String proxyPassword = taskArgs.get(PROXY_PASSWORD);
+            String proxyPassword = getProxyPassword(taskArgs);
             if (!!Strings.isNullOrEmpty(proxyPassword)) {
                 logger.warn("Proxy Password was not set, defaulting to empty");
                 proxyPassword = "";
@@ -143,6 +144,17 @@ public class SimpleHttpClient {
         } else {
             logger.info("Proxy Credentials are not set, skipping");
         }
+    }
+
+    private String getProxyPassword(Map<String, String> taskArgs) {
+        //Password can be an empty String also.
+        if (taskArgs.containsKey(PROXY_PASSWORD)) {
+            return taskArgs.get(PROXY_PASSWORD);
+        } else if (taskArgs.containsKey(PROXY_PASSWORD_ENCRYPTED)) {
+            String encrypted = taskArgs.get(PROXY_PASSWORD_ENCRYPTED);
+            return Encryptor.getInstance().decrypt(encrypted);
+        }
+        return null;
     }
 
     private void initializeSSL() {
@@ -161,7 +173,7 @@ public class SimpleHttpClient {
         }
     }
 
-    private int getSSLPort(URI uri){
+    private int getSSLPort(URI uri) {
         int port = getPort(uri);
         if (port < 0) {
             port = 443;
@@ -169,7 +181,7 @@ public class SimpleHttpClient {
         return port;
     }
 
-    private void setEasySSLProtocol(String host, int port){
+    private void setEasySSLProtocol(String host, int port) {
         ProtocolSocketFactory factory = new EasySSLProtocolSocketFactory();
         Protocol protocol = new Protocol("https", factory, port);
         httpClient.getHostConfiguration().setHost(host, port, protocol);
@@ -183,8 +195,8 @@ public class SimpleHttpClient {
         }
     }
 
-    private boolean isSSLEnabled(URI uri){
-        if(uri.getScheme() == null){
+    private boolean isSSLEnabled(URI uri) {
+        if (uri.getScheme() == null) {
             return false;
         }
         return uri.getScheme().equals("https");

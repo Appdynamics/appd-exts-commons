@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.encrypt.Encryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -69,6 +70,19 @@ public class SimpleHttpClientTest {
         taskArgs.put(TaskInputArgs.PROXY_PORT, "80");
         taskArgs.put(TaskInputArgs.PROXY_USER, "username");
         taskArgs.put(TaskInputArgs.PROXY_PASSWORD, "welcome");
+        SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
+        String out = client.get().string();
+    }
+
+    @Test
+    //THis requires a fwd proxy to be running
+    public void testProxyWithEncryptedPassword() {
+        Map<String, String> taskArgs = new HashMap<String, String>();
+        taskArgs.put(TaskInputArgs.URI, "http://www.google.com");
+        taskArgs.put(TaskInputArgs.PROXY_HOST, "localhost");
+        taskArgs.put(TaskInputArgs.PROXY_PORT, "80");
+        taskArgs.put(TaskInputArgs.PROXY_USER, "username");
+        taskArgs.put(TaskInputArgs.PROXY_PASSWORD_ENCRYPTED, Encryptor.getInstance().encrypt("welcome"));
         SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
         String out = client.get().string();
     }
@@ -199,6 +213,30 @@ public class SimpleHttpClientTest {
         taskArgs.put(TaskInputArgs.URI, DEFAULT_HTTPS_URL);
         SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
         Response response = client.target().uri(DEFAULT_HTTPS_URL + "/test?key=value&key=value3#test/abey").get();
+        Assert.assertEquals(200,response.getStatus());
+        logger.info(response.string());
+    }
+
+    /**
+     * Sets the encrypted password and the http client should decrypt and sent it over the wire.
+     */
+    @Test
+    public void testPasswordEncryption(){
+        Map<String, String> taskArgs = new HashMap<String, String>();
+        taskArgs.put(TaskInputArgs.USER, DEFAULT_USER);
+        Encryptor encryptor = Encryptor.getInstance();
+        taskArgs.put(TaskInputArgs.PASSWORD_ENCRYPTED, encryptor.encrypt("password"));
+        SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
+        delegateHandler.setHandler(new AbstractHandler() {
+            public void handle(String target, Request baseRequest, HttpServletRequest request,
+                               HttpServletResponse response) throws IOException, ServletException {
+                String actual = request.getHeader("Authorization");
+                String expected = "Basic " + new String(Base64.encodeBase64((DEFAULT_USER + ":password").getBytes()), "ASCII");
+                logger.info("The expected header was '{}' and the actual is '{}'", expected, actual);
+                Assert.assertEquals(expected, actual);
+            }
+        });
+        Response response = client.target().uri(DEFAULT_HTTP_URL).get();
         Assert.assertEquals(200,response.getStatus());
         logger.info(response.string());
     }
