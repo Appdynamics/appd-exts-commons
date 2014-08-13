@@ -1,0 +1,23 @@
+- string1: level1
+  int1: 1
+  innerClasses:
+    - string2: level2-1
+      long2: 21
+
+    - string2: level2-2
+      long2: 22
+  innerClass:
+    string2: level3
+    long2: 30
+
+- string1: level1
+  int1: 1
+  innerClasses:
+    - string2: level2-1
+      long2: 21
+
+    - string2: level2-2
+      long2: 22
+  innerClass:
+    string2: level3
+    long2: 30

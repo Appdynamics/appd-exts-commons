@@ -20,35 +20,55 @@ public class PathResolver {
     public static final Logger logger = LoggerFactory.getLogger(PathResolver.class);
 
     public static File resolveDirectory(Class clazz) {
-        File installDir=null;
-        try{
+        File installDir = null;
+        try {
             ProtectionDomain pd = clazz.getProtectionDomain();
-            if(pd!=null){
+            if (pd != null) {
                 CodeSource cs = pd.getCodeSource();
-                if(cs!=null){
+                if (cs != null) {
                     URL url = cs.getLocation();
                     String path = URLDecoder.decode(url.getFile(), "UTF-8");
                     File dir = new File(path).getParentFile();
-                    if(dir.exists()){
+                    if (dir.exists()) {
                         installDir = dir;
-                    } else{
-                        logger.error("Install dir resolved to "+dir.getAbsolutePath()+", however it doesnt exist.");
+                    } else {
+                        logger.error("Install dir resolved to " + dir.getAbsolutePath() + ", however it doesnt exist.");
                     }
-                } else{
-                    logger.warn("Cannot resolve path for the class {} since CodeSource is null",clazz.getName());
+                } else {
+                    logger.warn("Cannot resolve path for the class {} since CodeSource is null", clazz.getName());
                 }
 
             }
-        }catch (Exception e){
-            logger.error("Error while resolving the Install Dir",e);
+        } catch (Exception e) {
+            logger.error("Error while resolving the Install Dir", e);
         }
-        if(installDir!=null){
-            logger.info("Install dir resolved to "+installDir.getAbsolutePath());
+        if (installDir != null) {
+            logger.info("Install dir resolved to " + installDir.getAbsolutePath());
             return installDir;
-        } else{
+        } else {
             File workDir = new File("");
-            logger.info("Failed to resolve install dir, returning current work dir"+workDir.getAbsolutePath());
+            logger.info("Failed to resolve install dir, returning current work dir" + workDir.getAbsolutePath());
             return workDir;
         }
+    }
+
+    public static File getFile(String path, Class<?> clazz) {
+        if (path == null) {
+            return null;
+        }
+
+        File file = new File(path);
+        if (file.exists()) {
+            return new File(path);
+        }
+
+        File installDir = resolveDirectory(clazz);
+        if (installDir != null) {
+            file = new File(installDir, path);
+            if (file.exists()) {
+                return file;
+            }
+        }
+        return null;
     }
 }
