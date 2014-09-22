@@ -93,7 +93,7 @@ public class WebTarget {
         try {
             HttpClient httpClient = simpleHttpClient.getHttpClient();
             int status = httpClient.executeMethod(get);
-            validateStatus(url, status);
+            validateStatus(url, status, get);
             return new Response(status, get, url, simpleHttpClient);
         } catch (IOException e) {
             throw new RuntimeException("Error while fetching the data " + url, e);
@@ -102,7 +102,7 @@ public class WebTarget {
 
     public Response post(String data) {
         String url = buildURL();
-        logger.debug("Invoking the url={} with data={}",url,data);
+        logger.debug("Invoking the url={} with data={}", url, data);
         PostMethod post = new PostMethod(url);
         addHeaders(post);
         try {
@@ -111,16 +111,17 @@ public class WebTarget {
                 post.setRequestEntity(new StringRequestEntity(data, null, null));
             }
             int status = httpClient.executeMethod(post);
-            validateStatus(url, status);
+            validateStatus(url, status, post);
             return new Response(status, post, url, simpleHttpClient);
         } catch (IOException e) {
             throw new RuntimeException("Error while fetching the data " + url, e);
         }
     }
 
-    private void validateStatus(String url, int status) {
+    private void validateStatus(String url, int status, HttpMethodBase method) {
         if (status != 200) {
-            logger.error("The url {} responded with a status code of {}", url, status);
+            logger.error("The url {} responded with a status code of {} and message '{}'", url, status
+                    ,method.getStatusLine().getReasonPhrase());
             switch (status) {
                 case 407:
                     throw new RuntimeException("The url '" + url + "' responded with a status code of 407. " +
@@ -194,11 +195,11 @@ public class WebTarget {
         }
     }
 
-    public String getAbsoluteUrl(){
+    public String getAbsoluteUrl() {
         return urlBuilder.build();
     }
 
-    public String getUrl(){
+    public String getUrl() {
         return buildURL();
     }
 
