@@ -1,6 +1,5 @@
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.extensions.encrypt.Encryptor;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -56,7 +55,8 @@ public class AuthenticationConfig {
             return taskArgs.get(PASSWORD);
         } else if(taskArgs.containsKey(PASSWORD_ENCRYPTED)){
             String encrypted = taskArgs.get(PASSWORD_ENCRYPTED);
-            return Encryptor.getInstance().decrypt(encrypted);
+            return encrypted;
+           // return Encryptor.getInstance().decrypt(encrypted);
         }
         return null;
     }

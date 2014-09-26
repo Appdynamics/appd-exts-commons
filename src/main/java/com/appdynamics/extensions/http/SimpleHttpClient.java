@@ -2,7 +2,7 @@ package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.NumberUtils;
-import com.appdynamics.extensions.encrypt.Encryptor;
+import com.appdynamics.extensions.crypto.Encryptor;
 import com.google.common.base.Strings;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -152,7 +152,8 @@ public class SimpleHttpClient {
             return taskArgs.get(PROXY_PASSWORD);
         } else if (taskArgs.containsKey(PROXY_PASSWORD_ENCRYPTED)) {
             String encrypted = taskArgs.get(PROXY_PASSWORD_ENCRYPTED);
-            return Encryptor.getInstance().decrypt(encrypted);
+            return encrypted;
+           // return Encryptor.getInstance().decrypt(encrypted);
         }
         return null;
     }
