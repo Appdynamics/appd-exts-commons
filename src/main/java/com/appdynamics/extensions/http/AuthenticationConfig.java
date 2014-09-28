@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.http;
 
+import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class AuthenticationConfig {
     public static AuthenticationConfig build(Map<String, String> taskArgs) {
         String user = taskArgs.get(USER);
         if (!Strings.isNullOrEmpty(user)) {
-            String password = getPassword(taskArgs);
+            String password = CryptoUtil.getPassword(taskArgs);
             if (Strings.isNullOrEmpty(password)) {
                 password = "";
                 logger.warn("The password is empty, empty string will be used as the password");
@@ -50,16 +51,7 @@ public class AuthenticationConfig {
         return null;
     }
 
-    private static String getPassword(Map<String, String> taskArgs) {
-        if(taskArgs.containsKey(PASSWORD)){
-            return taskArgs.get(PASSWORD);
-        } else if(taskArgs.containsKey(PASSWORD_ENCRYPTED)){
-            String encrypted = taskArgs.get(PASSWORD_ENCRYPTED);
-            return encrypted;
-           // return Encryptor.getInstance().decrypt(encrypted);
-        }
-        return null;
-    }
+   
 
     private void buildAuthentication(String user, String password, AuthenticationMode authMode) {
         this.mode = authMode;
