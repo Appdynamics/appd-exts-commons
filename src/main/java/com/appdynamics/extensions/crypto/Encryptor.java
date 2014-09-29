@@ -2,7 +2,9 @@ package com.appdynamics.extensions.crypto;
 
 import sun.misc.BASE64Encoder;
 
-import javax.crypto.*;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import java.io.UnsupportedEncodingException;
 
 

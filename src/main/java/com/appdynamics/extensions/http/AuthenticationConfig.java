@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static com.appdynamics.TaskInputArgs.*;
+import static com.appdynamics.TaskInputArgs.AUTH_TYPE;
+import static com.appdynamics.TaskInputArgs.USER;
 
 /**
  * Created with IntelliJ IDEA.

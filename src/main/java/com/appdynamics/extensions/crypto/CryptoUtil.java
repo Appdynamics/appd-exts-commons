@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static com.appdynamics.TaskInputArgs.PASSWORD;
-import static com.appdynamics.TaskInputArgs.PASSWORD_ENCRYPTED;
-import static com.appdynamics.TaskInputArgs.ENCRYPTION_KEY;
+import static com.appdynamics.TaskInputArgs.*;
 
 public class CryptoUtil {
 

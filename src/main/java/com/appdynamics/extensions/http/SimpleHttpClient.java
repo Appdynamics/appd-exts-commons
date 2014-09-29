@@ -2,7 +2,6 @@ package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.NumberUtils;
-import com.appdynamics.extensions.crypto.Encryptor;
 import com.google.common.base.Strings;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
