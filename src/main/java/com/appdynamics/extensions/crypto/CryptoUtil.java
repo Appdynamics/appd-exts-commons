@@ -23,14 +23,13 @@ public class CryptoUtil {
             String encryptionKey = taskArgs.get(ENCRYPTION_KEY);
             if(Strings.isNullOrEmpty(encryptionKey)){
                 encryptionKey = System.getProperty(SYSTEM_ARG_KEY);
-                if(!Strings.isNullOrEmpty(encryptionKey)){
-                    return new Decryptor(encryptionKey).decrypt(encryptedPassword);
-                }
-                else{
-                    String msg = "Encryption Key not specified";
-                    logger.error(msg);
-                    throw new IllegalArgumentException(msg);
-                }
+            }
+            if(!Strings.isNullOrEmpty(encryptionKey)){
+                return new Decryptor(encryptionKey).decrypt(encryptedPassword);
+            } else{
+                String msg = "Encryption Key not specified. Please set the property 'encryption-key' in monitor.xml or add the System Property '-Dappdynamics.extensions.key'";
+                logger.error(msg);
+                throw new IllegalArgumentException(msg);
             }
         }
         return "";
