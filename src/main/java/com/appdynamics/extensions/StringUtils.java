@@ -67,4 +67,10 @@ public class StringUtils {
         return str;
     }
 
+    public static String unescapeXml(String str) {
+        if(str != null){
+            return str.replaceAll("&amp;","&").replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&apos;","'").replaceAll("&quot;","\"");
+        }
+        return str;
+    }
 }

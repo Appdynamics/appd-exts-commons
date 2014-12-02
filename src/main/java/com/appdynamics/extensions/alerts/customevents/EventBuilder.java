@@ -41,7 +41,7 @@ public class EventBuilder {
         otherEvent.setEventNotificationId(cleanedArgs[7]);
         otherEvent.setEventNotificationIntervalInMin(cleanedArgs[8]);
         setOtherEventDetails(otherEvent, cleanedArgs);
-        otherEvent.setDeepLinkUrl(cleanedArgs[cleanedArgs.length - 1]);
+        otherEvent.setDeepLinkUrl(StringUtils.unescapeXml(cleanedArgs[cleanedArgs.length - 1]));
         return otherEvent;
     }
 
@@ -111,9 +111,9 @@ public class EventBuilder {
         int currentArgPos = setEvaluationDetails(event,cleanedArgs);
         event.setSummaryMessage(cleanedArgs[cleanedArgs.length - 4]);
         event.setIncidentID(cleanedArgs[cleanedArgs.length - 3]);
-        event.setDeepLinkUrl(cleanedArgs[cleanedArgs.length - 2]);
+        event.setDeepLinkUrl(StringUtils.unescapeXml(cleanedArgs[cleanedArgs.length - 2]));
         event.setEventType(getEventType(cleanedArgs[cleanedArgs.length - 1],currentArgPos + 4,cleanedArgs.length));
-        event.setIncidentUrl(event.getDeepLinkUrl()+event.getIncidentID());
+        event.setIncidentUrl(StringUtils.unescapeXml(event.getDeepLinkUrl()+event.getIncidentID()));
         return event;
     }
 
