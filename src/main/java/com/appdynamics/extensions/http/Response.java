@@ -162,6 +162,7 @@ public class Response {
         } catch (IOException e) {
         }
         httpMethod.releaseConnection();
+        logger.debug("Releasing the http connection");
     }
 
     /**

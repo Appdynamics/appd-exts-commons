@@ -32,6 +32,7 @@ import static com.appdynamics.TaskInputArgs.*;
  */
 public class SimpleHttpClient {
     public static final Logger logger = LoggerFactory.getLogger(SimpleHttpClient.class);
+    private final MultiThreadedHttpConnectionManager httpConnectionManager;
     private HttpClient httpClient;
     private Map<String, String> taskArgs;
     private JAXBContext jaxbContext;
@@ -40,7 +41,8 @@ public class SimpleHttpClient {
 
     public SimpleHttpClient(Map<String, String> taskArgs, JAXBContext jaxbContext, HttpConnectionManagerParams params) {
         this.taskArgs = taskArgs;
-        httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
+        httpConnectionManager = new MultiThreadedHttpConnectionManager();
+        httpClient = new HttpClient(httpConnectionManager);
         addProxyConfig();
         authConfig = AuthenticationConfig.build(taskArgs);
         initializeSSL();
@@ -152,7 +154,7 @@ public class SimpleHttpClient {
         } else if (taskArgs.containsKey(PROXY_PASSWORD_ENCRYPTED)) {
             String encrypted = taskArgs.get(PROXY_PASSWORD_ENCRYPTED);
             return encrypted;
-           // return Encryptor.getInstance().decrypt(encrypted);
+            // return Encryptor.getInstance().decrypt(encrypted);
         }
         return null;
     }
@@ -261,5 +263,12 @@ public class SimpleHttpClient {
 
     protected boolean isSSLSupported() {
         return isSSLSupported;
+    }
+
+    public void close() {
+        if (httpConnectionManager != null) {
+            httpConnectionManager.shutdown();
+            logger.debug("Shutting down the http connection pool");
+        }
     }
 }
