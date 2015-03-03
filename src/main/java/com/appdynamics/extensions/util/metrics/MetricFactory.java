@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.util.metrics;
 
 
+import com.appdynamics.extensions.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -9,30 +10,33 @@ import java.util.Map;
 
 
 
-public class MetricFactory {
+public class MetricFactory<T> {
 
     protected RegexMap<MetricOverride> regexMap = new RegexMap<MetricOverride>();
     public static final Logger logger = Logger.getLogger(MetricFactory.class);
 
     public MetricFactory(MetricOverride[] metricOverrides){
         if(metricOverrides != null){
-            for(MetricOverride override : metricOverrides){
-                regexMap.put(override.getMetricKey(),override);
+            for(MetricOverride override : metricOverrides) {
+                if (StringUtils.hasText(override.getMetricKey())) {
+                    regexMap.put(override.getMetricKey(), override);
+                }
             }
         }
     }
 
-    public List<Metric> process(Map<String,Object> metricsMap){
+    public List<Metric> process(Map<String,T> metricsMap){
         List<Metric> allMetrics = new ArrayList<Metric>();
-        for(Map.Entry<String,Object> entry : metricsMap.entrySet()){
-            String metricKey = entry.getKey();
-            Object metricValue = entry.getValue();
-            Metric metric = getMetric(metricKey, metricValue);
-            if(metric != null && !metric.isDisabled()) {
-                allMetrics.add(metric);
-            }
-            else{
-                logger.warn("Ignoring metric with metricKey= " + metricKey + " ,metricValue= " + metricValue);
+        if(metricsMap != null) {
+            for (Map.Entry<String, T> entry : metricsMap.entrySet()) {
+                String metricKey = entry.getKey();
+                Object metricValue = entry.getValue();
+                Metric metric = getMetric(metricKey, metricValue);
+                if (metric != null && !metric.isDisabled()) {
+                    allMetrics.add(metric);
+                } else {
+                    logger.warn("Ignoring metric with metricKey= " + metricKey + " ,metricValue= " + metricValue);
+                }
             }
         }
         return allMetrics;
@@ -55,7 +59,19 @@ public class MetricFactory {
     }
 
     private boolean isMetricValueValid(Object metricValue) {
-        if(metricValue != null && metricValue instanceof Number){
+        if(metricValue == null){
+            return false;
+        }
+        if(metricValue instanceof String){
+            try {
+                Double.valueOf((String) metricValue);
+                return true;
+            }
+            catch(NumberFormatException nfe){
+                logger.warn("Metric Value is invalid" + nfe);
+            }
+        }
+        else if(metricValue instanceof Number){
             return true;
         }
         return false;
