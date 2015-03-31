@@ -47,7 +47,7 @@ public class FileWatcher {
                     }
                 });
                 logger.info("Created the File Watcher for the file {} and Listener {}", file.getAbsolutePath(), listener);
-                executor.scheduleWithFixedDelay(new FileTimestampMonitor(), 1, 5, TimeUnit.SECONDS);
+                executor.scheduleWithFixedDelay(new FileTimestampMonitor(), 1, 60, TimeUnit.SECONDS);
             } else {
                 throw new IllegalStateException("Looks like the task has been already started");
             }

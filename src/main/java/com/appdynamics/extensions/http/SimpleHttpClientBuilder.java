@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -20,9 +21,14 @@ public class SimpleHttpClientBuilder {
     private Map<String, String> taskArgs;
     private JAXBContext jaxbContext;
     private HttpConnectionManagerParams params;
+    private boolean multiThreaded;
 
     public SimpleHttpClientBuilder(Map<String, String> taskArgs) {
         this.taskArgs = taskArgs;
+    }
+
+    public SimpleHttpClientBuilder() {
+        this.taskArgs = Collections.emptyMap();
     }
 
     public SimpleHttpClientBuilder jaxbClasses(Class... classes) {
@@ -55,9 +61,14 @@ public class SimpleHttpClientBuilder {
         return this;
     }
 
+    public SimpleHttpClientBuilder multiThreaded(){
+        this.multiThreaded = true;
+        return this;
+    }
+
 
     public SimpleHttpClient build() {
-        return new SimpleHttpClient(taskArgs, jaxbContext, params);
+        return new SimpleHttpClient(taskArgs, jaxbContext, params,multiThreaded);
     }
 
 

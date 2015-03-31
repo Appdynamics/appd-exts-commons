@@ -3,10 +3,7 @@ package com.appdynamics.extensions.http;
 import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.NumberUtils;
 import com.google.common.base.Strings;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
@@ -32,16 +29,21 @@ import static com.appdynamics.TaskInputArgs.*;
  */
 public class SimpleHttpClient {
     public static final Logger logger = LoggerFactory.getLogger(SimpleHttpClient.class);
-    private final MultiThreadedHttpConnectionManager httpConnectionManager;
+    private final HttpConnectionManager httpConnectionManager;
     private HttpClient httpClient;
     private Map<String, String> taskArgs;
     private JAXBContext jaxbContext;
     protected AuthenticationConfig authConfig;
     protected boolean isSSLSupported;
 
-    public SimpleHttpClient(Map<String, String> taskArgs, JAXBContext jaxbContext, HttpConnectionManagerParams params) {
+    public SimpleHttpClient(Map<String, String> taskArgs, JAXBContext jaxbContext, HttpConnectionManagerParams params, boolean multiThreaded) {
         this.taskArgs = taskArgs;
-        httpConnectionManager = new MultiThreadedHttpConnectionManager();
+        if (multiThreaded) {
+            httpConnectionManager = new MultiThreadedHttpConnectionManager();
+        } else {
+            httpConnectionManager = new SimpleHttpConnectionManager();
+        }
+        logger.debug("The HttpConnectionManager is {}", httpConnectionManager);
         httpClient = new HttpClient(httpConnectionManager);
         addProxyConfig();
         authConfig = AuthenticationConfig.build(taskArgs);
@@ -50,6 +52,10 @@ public class SimpleHttpClient {
         if (params != null) {
             httpClient.getHttpConnectionManager().setParams(params);
         }
+    }
+
+    public SimpleHttpClient(Map<String, String> taskArgs, JAXBContext jaxbContext, HttpConnectionManagerParams params) {
+        this(taskArgs, jaxbContext, params, false);
     }
 
     private void initializeJAXBContext(JAXBContext jaxbContext) {
@@ -266,9 +272,16 @@ public class SimpleHttpClient {
     }
 
     public void close() {
-        if (httpConnectionManager != null) {
-            httpConnectionManager.shutdown();
-            logger.debug("Shutting down the http connection pool");
+        if (httpConnectionManager instanceof MultiThreadedHttpConnectionManager) {
+            MultiThreadedHttpConnectionManager
+                    connectionManager = (MultiThreadedHttpConnectionManager) httpConnectionManager;
+            connectionManager.shutdown();
+        }
+        if (httpConnectionManager instanceof SimpleHttpConnectionManager) {
+            SimpleHttpConnectionManager
+                    connectionManager = (SimpleHttpConnectionManager) httpConnectionManager;
+            connectionManager.shutdown();
+
         }
     }
 }

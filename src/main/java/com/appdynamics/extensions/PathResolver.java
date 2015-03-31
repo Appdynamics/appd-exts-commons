@@ -27,12 +27,14 @@ public class PathResolver {
                 CodeSource cs = pd.getCodeSource();
                 if (cs != null) {
                     URL url = cs.getLocation();
-                    String path = URLDecoder.decode(url.getFile(), "UTF-8");
-                    File dir = new File(path).getParentFile();
-                    if (dir.exists()) {
-                        installDir = dir;
-                    } else {
-                        logger.error("Install dir resolved to " + dir.getAbsolutePath() + ", however it doesnt exist.");
+                    if (url != null) {
+                        String path = URLDecoder.decode(url.getFile(), "UTF-8");
+                        File dir = new File(path).getParentFile();
+                        if (dir.exists()) {
+                            installDir = dir;
+                        } else {
+                            logger.error("Install dir resolved to " + dir.getAbsolutePath() + ", however it doesnt exist.");
+                        }
                     }
                 } else {
                     logger.warn("Cannot resolve path for the class {} since CodeSource is null", clazz.getName());
@@ -64,6 +66,7 @@ public class PathResolver {
 
         File installDir = resolveDirectory(clazz);
         if (installDir != null) {
+            logger.debug("The install directory is resolved to {}", installDir.getAbsolutePath());
             file = new File(installDir, path);
             if (file.exists()) {
                 return file;

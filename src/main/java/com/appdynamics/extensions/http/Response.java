@@ -165,6 +165,19 @@ public class Response {
         logger.debug("Releasing the http connection");
     }
 
+    public void abort() {
+        httpMethod.abort();
+        try {
+            InputStream in = httpMethod.getResponseBodyAsStream();
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e) {
+        }
+        httpMethod.releaseConnection();
+        logger.debug("Aborted the http connection");
+    }
+
     /**
      * Gets an Iterable which can be use to iterate over the response lines.
      *
