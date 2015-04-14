@@ -1,5 +1,9 @@
 package com.appdynamics.extensions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: abey.tom
@@ -9,13 +13,15 @@ package com.appdynamics.extensions;
  */
 public class StringUtils {
 
+    public static final int INDEX_NOT_FOUND = -1;
+
     public static boolean hasText(String str) {
         return str != null && !str.trim().isEmpty();
     }
 
     /**
      * Removes the leading occurence of the string trim.
-     *
+     * <p/>
      * trim("||||FOO|BAR|||||","|") => FOO|BAR|||||
      *
      * @param str
@@ -31,7 +37,7 @@ public class StringUtils {
 
     /**
      * Removes the trailing occurence of the string trim.
-     *
+     * <p/>
      * trim("||||FOO|BAR|||||","|") => ||||FOO|BAR
      *
      * @param str
@@ -47,7 +53,7 @@ public class StringUtils {
 
     /**
      * Removes the leading and trailing occurence of the string trim.
-     *
+     * <p/>
      * trim("||||FOO|BAR|||||","|") => FOO|BAR
      *
      * @param str
@@ -60,16 +66,44 @@ public class StringUtils {
         return str;
     }
 
-    public static String stripQuote(String str){
-        if(str != null){
-            return str.replaceAll("\"","");
+    public static String stripQuote(String str) {
+        if (str != null) {
+            return str.replaceAll("\"", "");
         }
         return str;
     }
 
+
+    public static int countMatches(String str, String sub) {
+        if (!hasText(str) || !hasText(sub)) {
+            return 0;
+        }
+        int count = 0;
+        int idx = 0;
+        while ((idx = str.indexOf(sub, idx)) != INDEX_NOT_FOUND) {
+            count++;
+            idx += sub.length();
+        }
+        return count;
+    }
+
+    public static List<Integer> indicesOf(String str, String sub){
+        if (!hasText(str) || !hasText(sub)) {
+            return Collections.emptyList();
+        }
+        List<Integer> list = new ArrayList<Integer>();
+        int idx = 0;
+        while ((idx = str.indexOf(sub, idx)) != INDEX_NOT_FOUND) {
+            list.add(idx);
+            idx += sub.length();
+        }
+        return list;
+    }
+
+
     public static String unescapeXml(String str) {
-        if(str != null){
-            return str.replaceAll("&amp;","&").replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&apos;","'").replaceAll("&quot;","\"");
+        if (str != null) {
+            return str.replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&apos;", "'").replaceAll("&quot;", "\"");
         }
         return str;
     }

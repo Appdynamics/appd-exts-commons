@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
@@ -35,6 +38,19 @@ public class LocalXmlObjectFactory {
         }
     };
 
+    private static ThreadLocal<Transformer> transformerThreadLocal = new ThreadLocal<Transformer>() {
+        @Override
+        protected Transformer initialValue() {
+            TransformerFactory tf = TransformerFactory.newInstance();
+            try {
+                return tf.newTransformer();
+            } catch (TransformerConfigurationException e) {
+                logger.error("Error while building the transformer factory", e);
+                return null;
+            }
+        }
+    };
+
     private static ThreadLocal<XPath> xPathThreadLocal = new ThreadLocal<XPath>() {
         @Override
         protected XPath initialValue() {
@@ -59,9 +75,18 @@ public class LocalXmlObjectFactory {
         XPath xPath = local.get();
         if (xPath != null) {
             xPath.reset();
-            ;
             return xPath;
         } else {
+            return null;
+        }
+    }
+
+    public static Transformer getTransformer() {
+        Transformer transformer = transformerThreadLocal.get();
+        if (transformer != null) {
+            transformer.reset();
+            return transformer;
+        } else{
             return null;
         }
     }

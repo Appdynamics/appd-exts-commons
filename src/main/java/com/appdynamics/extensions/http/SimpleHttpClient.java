@@ -275,13 +275,20 @@ public class SimpleHttpClient {
         if (httpConnectionManager instanceof MultiThreadedHttpConnectionManager) {
             MultiThreadedHttpConnectionManager
                     connectionManager = (MultiThreadedHttpConnectionManager) httpConnectionManager;
-            connectionManager.shutdown();
+            try {
+                connectionManager.shutdown();
+            } catch (Exception e) {
+                logger.debug("There was an error while shutting down the connection pool", e);
+            }
         }
         if (httpConnectionManager instanceof SimpleHttpConnectionManager) {
             SimpleHttpConnectionManager
                     connectionManager = (SimpleHttpConnectionManager) httpConnectionManager;
-            connectionManager.shutdown();
-
+            try {
+                connectionManager.shutdown();
+            } catch (Exception e) {
+                logger.debug("There was an error while shutting down the connection pool", e);
+            }
         }
     }
 }

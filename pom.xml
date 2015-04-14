@@ -4,7 +4,7 @@
 
     <groupId>com.appdynamics</groupId>
     <artifactId>appd-exts-commons</artifactId>
-    <version>1.1.6</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
     <name>extension-utils</name>
     <properties>
@@ -56,6 +56,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.appdynamics</groupId>
+            <artifactId>machineagent</artifactId>
+            <version>4.0.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
@@ -82,6 +88,18 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <!--<scope>test</scope>-->
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

@@ -11,7 +11,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is a simple wrapper around the java xml implementation to lookup the elements with simple xpath expressions.
@@ -64,6 +66,14 @@ public class Xml {
         }
     }
 
+    public NodeList getElementsByTagName(String tagName) {
+        Node source = getSource();
+        if (source instanceof Document) {
+            return ((Document) source).getElementsByTagName(tagName);
+        }
+        return null;
+    }
+
     private DocumentBuilder getDocumentBuilder() {
         DocumentBuilder documentBuilder = LocalXmlObjectFactory.getDocumentBuilder();
         if (documentBuilder != null) {
@@ -73,7 +83,7 @@ public class Xml {
         }
     }
 
-    private XPath getXpath() {
+    private static XPath getXpath() {
         XPath xPath = LocalXmlObjectFactory.getXPath();
         if (xPath != null) {
             return xPath;
@@ -106,7 +116,7 @@ public class Xml {
         }
     }
 
-    private Object getSource() {
+    public Node getSource() {
         if (document != null) {
             return document;
         } else if (node != null) {
@@ -116,12 +126,82 @@ public class Xml {
     }
 
     public NodeList getNode(String xpathStr) {
+        return getNodes(xpathStr, getSource());
+    }
+
+    public Node getFirstNode(String xpathStr) {
+        NodeList nodes = getNodes(xpathStr, getSource());
+        if (nodes != null && nodes.getLength() > 0) {
+            return nodes.item(0);
+        }
+        return null;
+    }
+
+    public static NodeList getNodes(String xpathStr, Node node) {
         try {
             XPathExpression expression = getXpath().compile(xpathStr);
-            return (NodeList) expression.evaluate(getSource(), XPathConstants.NODESET);
+            return (NodeList) expression.evaluate(node, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
             throw new XmlException("The xpath expression " + xpathStr + " doesn't seem to be valid", e);
         }
+    }
+
+    public static Node getFirstDescendant(Node node, String nodeName) {
+        if(node!=null){
+            NodeList childNodes = node.getChildNodes();
+            if(childNodes!=null){
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    Node child = childNodes.item(i);
+                    if(child.getNodeName().equals(nodeName)){
+                        return child;
+                    } else{
+                        Node descendant = getFirstDescendant(child, nodeName);
+                        if(descendant!=null){
+                            return descendant;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static List<Node> getDescendants(Node node, String nodeName) {
+        if(node!=null){
+            List<Node> nodes = new ArrayList<Node>();
+            getDescendants(node,nodeName,nodes);
+            return nodes;
+        }
+        return null;
+    }
+
+    private static void getDescendants(Node node, String nodeName, List<Node> nodes) {
+        NodeList childNodes = node.getChildNodes();
+        if(childNodes!=null){
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                Node child = childNodes.item(i);
+                if(child.getNodeName().equals(nodeName)){
+                    nodes.add(child);
+                } else{
+                    getDescendants(child, nodeName, nodes);
+                }
+            }
+        }
+    }
+
+    public static Node getFirstChild(Node node, String nodeName) {
+        if(node!=null){
+            NodeList childNodes = node.getChildNodes();
+            if(childNodes!=null){
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    Node child = childNodes.item(i);
+                    if(child.getNodeName().equals(nodeName)){
+                        return child;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -135,22 +215,21 @@ public class Xml {
         }
     }
 
+
     @Override
     public String toString() {
-        try {
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
+        Transformer transformer = LocalXmlObjectFactory.getTransformer();
+        if (transformer != null) {
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             StringWriter writer = new StringWriter();
-            if (document != null) {
-                transformer.transform(new DOMSource(document), new StreamResult(writer));
-            } else if (node != null) {
-                transformer.transform(new DOMSource(node), new StreamResult(writer));
+            try {
+                transformer.transform(new DOMSource(getSource()), new StreamResult(writer));
+            } catch (TransformerException e) {
+                logger.error("Exception while transforming the xml", e);
             }
             return writer.getBuffer().toString();
-        } catch (Exception e) {
-            logger.error("Error while transforming the xml document " + getSource(), e);
-            return null;
+        } else {
+            throw new RuntimeException("Cannot transform the xml since the XML Transformer cannot be created");
         }
     }
 }
