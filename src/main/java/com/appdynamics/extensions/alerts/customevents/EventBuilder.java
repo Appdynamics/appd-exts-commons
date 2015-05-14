@@ -40,12 +40,13 @@ public class EventBuilder {
         otherEvent.setEventNotificationName(cleanedArgs[6]);
         otherEvent.setEventNotificationId(cleanedArgs[7]);
         otherEvent.setEventNotificationIntervalInMin(cleanedArgs[8]);
-        setOtherEventDetails(otherEvent, cleanedArgs);
-        otherEvent.setDeepLinkUrl(cleanedArgs[cleanedArgs.length - 1]);
+        int currentArgPos = setOtherEventDetails(otherEvent, cleanedArgs);
+        currentArgPos++;
+        otherEvent.setDeepLinkUrl(cleanedArgs[currentArgPos]);
         return otherEvent;
     }
 
-    private void setOtherEventDetails(OtherEvent otherEvent, String[] cleanedArgs) {
+    private int setOtherEventDetails(OtherEvent otherEvent, String[] cleanedArgs) {
         int currentArgPos = 9;
         try {
             int numOfEventTypes = Integer.parseInt(cleanedArgs[currentArgPos]);
@@ -58,14 +59,15 @@ public class EventBuilder {
                 eventType.setEventTypeNum(cleanedArgs[currentArgPos]);
                 otherEvent.getEventTypes().add(eventType);
             }
-            setEventSummary(otherEvent, cleanedArgs, currentArgPos);
+            currentArgPos = setEventSummary(otherEvent, cleanedArgs, currentArgPos);
         }
         catch(NumberFormatException nfe){
             logger.error("Cannot convert string to int because of mismatch of arguments ",nfe);
         }
+        return currentArgPos;
     }
 
-    private void setEventSummary(OtherEvent otherEvent, String[] cleanedArgs, int currentArgPos) {
+    private int setEventSummary(OtherEvent otherEvent, String[] cleanedArgs, int currentArgPos) {
         currentArgPos++;
         try {
             int numberOfEventSummaries = Integer.parseInt(cleanedArgs[currentArgPos]);
@@ -88,6 +90,7 @@ public class EventBuilder {
         catch(NumberFormatException nfe){
             logger.error("Cannot convert string to int because of mismatch of arguments ",nfe);
         }
+        return currentArgPos;
     }
 
     private boolean isEventValid(String[] args) {
@@ -109,10 +112,14 @@ public class EventBuilder {
         event.setAffectedEntityName(cleanedArgs[10]);
         event.setAffectedEntityID(cleanedArgs[11]);
         int currentArgPos = setEvaluationDetails(event,cleanedArgs);
-        event.setSummaryMessage(cleanedArgs[cleanedArgs.length - 4]);
-        event.setIncidentID(cleanedArgs[cleanedArgs.length - 3]);
-        event.setDeepLinkUrl(cleanedArgs[cleanedArgs.length - 2]);
-        event.setEventType(getEventType(cleanedArgs[cleanedArgs.length - 1],currentArgPos + 4,cleanedArgs.length));
+        currentArgPos++;
+        event.setSummaryMessage(cleanedArgs[currentArgPos]);
+        currentArgPos++;
+        event.setIncidentID(cleanedArgs[currentArgPos]);
+        currentArgPos++;
+        event.setDeepLinkUrl(cleanedArgs[currentArgPos]);
+        currentArgPos++;
+        event.setEventType(cleanedArgs[currentArgPos]);
         event.setIncidentUrl(event.getDeepLinkUrl()+event.getIncidentID());
         return event;
     }

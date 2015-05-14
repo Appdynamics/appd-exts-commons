@@ -28,10 +28,14 @@ public class EventArgs {
         strings.add("\"40.0\"");  //observed value 1
 
         generateTrailingArg(strings);
-
+        generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
     }
 
+    private void generateAccountArg(List<String> strings) {
+        strings.add("customer");
+        strings.add("customer1_90fa2233-18c5-488a-94df-4ccc19563c94");
+    }
 
 
     public String[] getHealthRuleViolationEventWithMultipleEvalEntityAndATriggerNoBaseline(){
@@ -68,6 +72,7 @@ public class EventArgs {
 
         //summary message
         generateTrailingArg(strings);
+        generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
     }
 
@@ -119,6 +124,7 @@ public class EventArgs {
 
         //summary message
         generateTrailingArg(strings);
+        generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
 
     }
@@ -175,6 +181,7 @@ public class EventArgs {
 
         //summary message
         generateTrailingArg(strings);
+        generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
     }
 
