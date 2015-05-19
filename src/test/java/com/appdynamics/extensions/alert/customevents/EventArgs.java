@@ -218,6 +218,7 @@ public class EventArgs {
         strings.add("summary string"); //event summary string 2
 
         strings.add("\"http://PRINHYLTPHP0158:8090/controller/#location=APP_EVENT_VIEWER_MODAL&amp;eventSummary=\"");
+        generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
     }
 

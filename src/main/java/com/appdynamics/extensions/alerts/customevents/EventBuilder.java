@@ -20,7 +20,7 @@ public class EventBuilder {
     public Event build(String[] args) {
         if (isEventValid(args)) {
             String[] cleanedArgs = cleanArgs(args);
-            if(isOtherEvent(cleanedArgs[(cleanedArgs.length - 1)])) { // if the last arg starts with http then other event else health rule violation event. (hackish :-/)
+            if(isOtherEvent(cleanedArgs[(cleanedArgs.length - 3)])) { // if the last arg starts with http then other event else health rule violation event. (hackish :-/)
                 OtherEvent otherEvent = createOtherEvent(cleanedArgs);
                 return otherEvent;
             }
