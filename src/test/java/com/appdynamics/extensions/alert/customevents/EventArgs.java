@@ -27,7 +27,10 @@ public class EventArgs {
         strings.add("\"4\"");  //threshhold value 1
         strings.add("\"40.0\"");  //observed value 1
 
-        generateTrailingArg(strings);
+        strings.add("\"CPU utilization is too high triggerded at Wed Apr 30 09:42:55 PDT 2014. This policy was violated because the following conditions were met for the MyMacMachineAgentNode1 Node for the last 1 minute(s):   For Evaluation Entity: MyMacMachineAgentNode1 Node - Hardware Resources|CPU|%Busy Condition is greater than 4. Observed value = 40.0\"");  //observed value 1
+        strings.add("\"3\"");  //incident id
+        strings.add("\"http://WIN-OAR4D8QEG3K:8090/controller/#location=APP_INCIDENT_DETAIL&amp;incident=\"");  //deep link url
+        strings.add("\"POLICY_CLOSE\"");  //event type
         generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
     }
@@ -71,7 +74,10 @@ public class EventArgs {
             strings.add("\"20.0\"");  //observed value 2
 
         //summary message
-        generateTrailingArg(strings);
+        strings.add("\"CPU utilization is too high triggerded at Wed Apr 30 09:42:55 PDT 2014. This policy was violated because the following conditions were met for the MyMacMachineAgentNode1 Node for the last 1 minute(s):   For Evaluation Entity: MyMacMachineAgentNode1 Node - Hardware Resources|CPU|%Busy Condition is greater than 4. Observed value = 40.0\"");  //observed value 1
+        strings.add("\"3\"");  //incident id
+        strings.add("\"http://WIN-OAR4D8QEG3K:8090/controller/#location=APP_INCIDENT_DETAIL&amp;incident=\"");  //deep link url
+        strings.add("\"POLICY_DOWNGRADED\"");  //event type
         generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
     }
@@ -123,7 +129,10 @@ public class EventArgs {
                 strings.add("\"20.0\"");  //observed value 1
 
         //summary message
-        generateTrailingArg(strings);
+        strings.add("\"CPU utilization is too high triggerded at Wed Apr 30 09:42:55 PDT 2014. This policy was violated because the following conditions were met for the MyMacMachineAgentNode1 Node for the last 1 minute(s):   For Evaluation Entity: MyMacMachineAgentNode1 Node - Hardware Resources|CPU|%Busy Condition is greater than 4. Observed value = 40.0\"");  //observed value 1
+        strings.add("\"3\"");  //incident id
+        strings.add("\"http://WIN-OAR4D8QEG3K:8090/controller/#location=APP_INCIDENT_DETAIL&amp;incident=\"");  //deep link url
+        strings.add("\"POLICY_CLOSE_WARNING\"");  //event type
         generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
 
@@ -180,7 +189,10 @@ public class EventArgs {
         strings.add("\"20.0\"");  //observed value 1
 
         //summary message
-        generateTrailingArg(strings);
+        strings.add("\"CPU utilization is too high triggerded at Wed Apr 30 09:42:55 PDT 2014. This policy was violated because the following conditions were met for the MyMacMachineAgentNode1 Node for the last 1 minute(s):   For Evaluation Entity: MyMacMachineAgentNode1 Node - Hardware Resources|CPU|%Busy Condition is greater than 4. Observed value = 40.0\"");  //observed value 1
+        strings.add("\"3\"");  //incident id
+        strings.add("\"http://WIN-OAR4D8QEG3K:8090/controller/#location=APP_INCIDENT_DETAIL&amp;incident=\"");  //deep link url
+        strings.add("\"POLICY_CONTINUES_CRITICAL\"");  //event type
         generateAccountArg(strings);
         return Iterables.toArray(strings, String.class);
     }
@@ -222,13 +234,7 @@ public class EventArgs {
         return Iterables.toArray(strings, String.class);
     }
 
-    private void generateTrailingArg(List<String> strings) {
-        //summary message
-        strings.add("\"CPU utilization is too high triggerded at Wed Apr 30 09:42:55 PDT 2014. This policy was violated because the following conditions were met for the MyMacMachineAgentNode1 Node for the last 1 minute(s):   For Evaluation Entity: MyMacMachineAgentNode1 Node - Hardware Resources|CPU|%Busy Condition is greater than 4. Observed value = 40.0\"");  //observed value 1
-        strings.add("\"3\"");  //incident id
-        strings.add("\"http://WIN-OAR4D8QEG3K:8090/controller/#location=APP_INCIDENT_DETAIL&amp;incident=\"");  //deep link url
-        strings.add("\"POLICY_OPEN_CRITICAL\"");  //event type
-    }
+
 
     private void generateLeadingArgs(List<String> strings) {
         strings.add("\"MyMacMachineAgent\""); //appname
