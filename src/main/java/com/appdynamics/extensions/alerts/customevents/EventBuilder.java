@@ -20,17 +20,25 @@ public class EventBuilder {
     public Event build(String[] args) {
         if (isEventValid(args)) {
             String[] cleanedArgs = cleanArgs(args);
-            if(isOtherEvent(cleanedArgs[(cleanedArgs.length - 3)])) { // if the last arg starts with http then other event else health rule violation event. (hackish :-/)
-                OtherEvent otherEvent = createOtherEvent(cleanedArgs);
-                return otherEvent;
-            }
-            else{
+            //confirmed with Jon Reid from controller team to determine the differentiating condition
+            if(isHRVEvent(cleanedArgs[(cleanedArgs.length - 3)])){
                 HealthRuleViolationEvent event = createHealthRuleViolationEvent(cleanedArgs);
                 return event;
+            }
+            else{
+                OtherEvent otherEvent = createOtherEvent(cleanedArgs);
+                return otherEvent;
             }
         }
         logger.error("Event is not valid. Args passed are ::" + args);
         return null;
+    }
+
+    private boolean isHRVEvent(String eventType) {
+        if (eventType != null) {
+            return eventType.startsWith("POLICY");
+        }
+        return false;
     }
 
     private OtherEvent createOtherEvent(String[] cleanedArgs) {
@@ -124,12 +132,6 @@ public class EventBuilder {
         return event;
     }
 
-    private String getEventType(String cleanedArg, int currentArgPos,int totalArgs) {
-        if(currentArgPos <= totalArgs){
-            return cleanedArg;
-        }
-        return "POLICY_OPEN";
-    }
 
     private void setBasicEvent(String[] cleanedArgs, Event event) {
         event.setAppName(cleanedArgs[0]);
@@ -244,10 +246,5 @@ public class EventBuilder {
         return stripped;
     }
 
-    private boolean isOtherEvent(String eventType) {
-        if (eventType != null) {
-            return eventType.startsWith("http")  || eventType.startsWith("https");
-        }
-        return false;
-    }
+
 }
