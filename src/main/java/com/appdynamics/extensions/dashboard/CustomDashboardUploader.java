@@ -35,13 +35,12 @@ public class CustomDashboardUploader {
                 if (header.getName().equalsIgnoreCase("set-cookie")) {
                     String value = header.getValue();
                     cookies.append(value).append(";");
-                    if (value.contains("X-CSRF-TOKEN")) {
+                    if (value.toLowerCase().contains("x-csrf-token")) {
                         csrf = value.split("=")[1];
                     }
-
                 }
             }
-
+            logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
             boolean isPresent = isDashboardPresent(client, cookies, dashboardName);
             if (isPresent) {
                 if (overwrite) {
@@ -74,7 +73,7 @@ public class CustomDashboardUploader {
             return isPresent;
         } else {
             logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
-                    ,response.getStatus());
+                    , response.getStatus());
             logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
                     "The xml will be written to the logs folder. Please import it to controller manually");
             return false;
@@ -117,20 +116,26 @@ public class CustomDashboardUploader {
         request.writeBytes(lineEnd);
         request.write(xml.toString().getBytes());
         request.writeBytes(lineEnd + lineEnd);
-
         request.writeBytes(twoHyphens + boundary + lineEnd);
-        request.writeBytes("Content-Disposition: form-data; name=\"X-CSRF-TOKEN\"" + lineEnd);
-        request.writeBytes(lineEnd);
-        request.writeBytes(csrf);
-        request.writeBytes(lineEnd);
 
-        request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+        if (csrf != null) {
+            request.writeBytes("Content-Disposition: form-data; name=\"X-CSRF-TOKEN\"" + lineEnd);
+            request.writeBytes(lineEnd);
+            request.writeBytes(csrf);
+            request.writeBytes(lineEnd);
+            request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+        } else {
+            logger.warn("The CSRF is null, trying the dashboard upload without the CSRF token");
+        }
+
         request.flush();
         request.close();
         InputStream inputStream = connection.getInputStream();
         int status = connection.getResponseCode();
         if (status == 200) {
             logger.info("Successfully Imported the dashboard {}", fileName);
+        } else{
+            logger.error("The server responded with a status of {}", status);
         }
         inputStream.close();
     }
