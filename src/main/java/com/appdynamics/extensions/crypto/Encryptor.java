@@ -2,17 +2,14 @@ package com.appdynamics.extensions.crypto;
 
 import sun.misc.BASE64Encoder;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import java.io.UnsupportedEncodingException;
 
 
 public class Encryptor {
 
     private Cipher cipher;
 
-    public Encryptor(String encryptionKey){
+    public Encryptor(String encryptionKey) {
         try {
             cipher = CipherFactory.getInstance().createCipher(encryptionKey, Cipher.ENCRYPT_MODE);
         } catch (CipherInitException e) {
@@ -25,14 +22,9 @@ public class Encryptor {
             byte[] utf8 = plainText.getBytes("UTF-8");
             byte[] enc = cipher.doFinal(utf8);
             return new BASE64Encoder().encode(enc);
-        }  catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new EncryptionException(e);
         }
-        return "";
     }
 
 
@@ -45,6 +37,12 @@ public class Encryptor {
             System.out.println("**********************************************");
         } else {
             System.out.println("usage:  java -cp appd-exts-commons-1.1.0.jar com.appdynamics.extensions.encrypt.Encryptor <myKey> <myPassword>");
+        }
+    }
+
+    public static class EncryptionException extends RuntimeException {
+        public EncryptionException(Throwable cause) {
+            super(cause);
         }
     }
 }

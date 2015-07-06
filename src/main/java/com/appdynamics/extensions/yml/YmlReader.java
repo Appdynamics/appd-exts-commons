@@ -6,10 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -54,6 +52,15 @@ public class YmlReader {
             }
         } else {
             throw new InvalidYmlPathException("The Yml file argument is null");
+        }
+    }
+
+    public static Map<String, ?> readFromFile(File file) {
+        Yaml yaml = new Yaml();
+        try {
+            return (Map) yaml.load(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            throw new InvalidYmlPathException("The file " + file.getAbsolutePath() + " doesn't exit in the file system");
         }
     }
 

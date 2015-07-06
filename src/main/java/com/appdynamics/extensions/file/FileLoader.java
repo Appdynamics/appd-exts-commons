@@ -1,0 +1,64 @@
+package com.appdynamics.extensions.file;
+
+import com.appdynamics.extensions.PathResolver;
+import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+
+/**
+ * Created by abey.tom on 7/1/15.
+ */
+public class FileLoader {
+    public static final Logger logger = LoggerFactory.getLogger(FileLoader.class);
+
+    public static void load(final Listener listener, String... paths) {
+        FileAlterationMonitor monitor = new FileAlterationMonitor(30000);
+        for (String path : paths) {
+            File file = PathResolver.getFile(path, AManagedMonitor.class);
+            if (file != null && file.exists()) {
+                logger.info("Adding file watcher for {}", file.getAbsolutePath());
+                FileAlterationObserver observer = new FileAlterationObserver(file.getParentFile());
+                observer.addListener(new FileWatchListener(listener, file));
+                monitor.addObserver(observer);
+                listener.load(file);
+            } else {
+                String message = String.format("The file is not found.The file path %s is resolved to %s",
+                        path, file != null ? file.getAbsolutePath() : null);
+                logger.error(message);
+                throw new IllegalArgumentException(message);
+            }
+        }
+        try {
+            monitor.start();
+        } catch (Exception e) {
+            logger.error("Exception while starting the FileAlterationMonitor", e);
+        }
+    }
+
+    public interface Listener {
+        void load(File file);
+    }
+
+    public static class FileWatchListener extends FileAlterationListenerAdaptor {
+        private Listener listener;
+        private File monitoredFile;
+
+        public FileWatchListener(Listener listener, File monitoredFile) {
+            this.listener = listener;
+            this.monitoredFile = monitoredFile;
+        }
+
+        public void onFileChange(File file) {
+            if (monitoredFile.equals(file)) {
+                logger.info("The file [{}] has changed, reloading", file.getAbsolutePath());
+                listener.load(file);
+            }
+        }
+    }
+
+}

@@ -5,11 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import sun.misc.BASE64Decoder;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 public class Decryptor {
 
@@ -30,16 +26,15 @@ public class Decryptor {
             byte[] bytes = new BASE64Decoder().decodeBuffer(encryptedText);
             byte[] enc = cipher.doFinal(bytes);
             return new String(enc, "UTF-8");
-        } catch (BadPaddingException e) {
-            log.error(e);
-        } catch (UnsupportedEncodingException e) {
-            log.error(e);
-        } catch (IllegalBlockSizeException e) {
-            log.error(e);
-        } catch (IOException e) {
-            log.error(e);
+        } catch (Exception e) {
+            throw new DecryptionException("Error while decrypting the value ["+encryptedText+"]",e);
         }
-        return "";
+    }
+
+    public static class DecryptionException extends RuntimeException{
+        public DecryptionException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
 
