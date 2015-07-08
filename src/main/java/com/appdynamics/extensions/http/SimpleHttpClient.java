@@ -89,7 +89,7 @@ public class SimpleHttpClient {
                 String msg = "The value of the property proxy-uri is not valid " + proxyUri;
                 throw new IllegalArgumentException(msg, e);
             }
-            logger.info("The ssl proxy is initialized with the url " + proxyUri);
+            logger.debug("The ssl proxy is initialized with the url " + proxyUri);
         } else {
             String proxyHost = taskArgs.get(PROXY_HOST);
             if (!Strings.isNullOrEmpty(proxyHost)) {
@@ -97,7 +97,7 @@ public class SimpleHttpClient {
                 if (NumberUtils.isNumber(proxyPort)) {
                     conf.setProxy(proxyHost, Integer.parseInt(proxyPort));
                     setProxyCredentials(taskArgs);
-                    logger.info("Proxy is initialized with the host = {} and port = {}", proxyHost, proxyPort);
+                    logger.debug("Proxy is initialized with the host = {} and port = {}", proxyHost, proxyPort);
                 } else {
                     logger.warn("Cannot set the proxy, since the proxy port is not set. The proxy support is disabled");
                 }
@@ -155,7 +155,7 @@ public class SimpleHttpClient {
             UsernamePasswordCredentials creds = new UsernamePasswordCredentials(proxyUser, proxyPassword);
             httpClient.getState().setProxyCredentials(scope, creds);
         } else {
-            logger.info("Proxy Credentials are not set, skipping");
+            logger.debug("Proxy Credentials are not set, skipping");
         }
     }
 
@@ -204,7 +204,7 @@ public class SimpleHttpClient {
                 logger.info("SSL support is disabled since the host is not set");
             }
         } else {
-            logger.info("SSL support is is not enabled");
+            logger.debug("SSL support is is not enabled");
         }
     }
 
@@ -217,7 +217,12 @@ public class SimpleHttpClient {
     }
 
     private void setEasySSLProtocol(String host, int port) {
-        ProtocolSocketFactory factory = new EasySSLProtocolSocketFactory();
+        String sslProtocol = taskArgs.get("ssl-protocol");
+        if (Strings.isNullOrEmpty(sslProtocol)) {
+            sslProtocol = "SSL";
+        }
+        logger.debug("Initializing the SSL Socket Factory with protocol {}", sslProtocol);
+        ProtocolSocketFactory factory = new EasySSLProtocolSocketFactory(sslProtocol);
         Protocol protocol = new Protocol("https", factory, port);
         httpClient.getHostConfiguration().setHost(host, port, protocol);
     }

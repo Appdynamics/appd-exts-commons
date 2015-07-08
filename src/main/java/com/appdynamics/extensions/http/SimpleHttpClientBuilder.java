@@ -66,6 +66,14 @@ public class SimpleHttpClientBuilder {
         return this;
     }
 
+    public SimpleHttpClientBuilder taskArgs(Map<String, String> taskArgs){
+        this.taskArgs = taskArgs;
+        return this;
+    }
+
+
+
+
 
     public SimpleHttpClient build() {
         return new SimpleHttpClient(taskArgs, jaxbContext, params,multiThreaded);

@@ -39,11 +39,11 @@ public class AuthenticationConfig {
             String authType = taskArgs.get(AUTH_TYPE);
             if (Strings.isNullOrEmpty(authType)) {
                 authType = AuthenticationMode.BASIC.toString();
-                logger.info("The authentication type is not set, defaulting to BASIC");
+                logger.debug("The authentication type is not set, defaulting to BASIC");
             }
             AuthenticationConfig config = new AuthenticationConfig();
             AuthenticationMode authMode = config.getAuthenticationMode(authType);
-            logger.info("The authentication is set user =" + user + " Auth type " + authMode);
+            logger.debug("The authentication is set user= " + user + " Auth type " + authMode);
             config.buildAuthentication(user, password, authMode);
             return config;
         } else {

@@ -15,13 +15,13 @@ import java.net.*;
 
 /**
  * <p>
- * EasySSLProtocolSocketFactory can be used to creats SSL {@link Socket}s 
- * that accept self-signed certificates. 
+ * EasySSLProtocolSocketFactory can be used to creats SSL {@link Socket}s
+ * that accept self-signed certificates.
  * </p>
  * <p>
- * This socket factory SHOULD NOT be used for productive systems 
- * due to security reasons, unless it is a concious decision and 
- * you are perfectly aware of security implications of accepting 
+ * This socket factory SHOULD NOT be used for productive systems
+ * due to security reasons, unless it is a concious decision and
+ * you are perfectly aware of security implications of accepting
  * self-signed certificates
  * </p>
  *
@@ -50,9 +50,9 @@ import java.net.*;
  *     client.executeMethod(httpget);
  *     </pre>
  * </p>
- * 
+ *
  * @author <a href="mailto:oleg -at- ural.ru">Oleg Kalnichevski</a>
- * 
+ *
  * <p>
  * DISCLAIMER: HttpClient developers DO NOT actively support this component.
  * The component is provided as a reference material, which may be inappropriate
@@ -66,20 +66,23 @@ public class EasySSLProtocolSocketFactory implements SecureProtocolSocketFactory
     private static final Log LOG = LogFactory.getLog(EasySSLProtocolSocketFactory.class);
 
     private SSLContext sslcontext = null;
+    private String sslProtocol;
 
     /**
      * Constructor for EasySSLProtocolSocketFactory.
+     * @param sslProtocol
      */
-    public EasySSLProtocolSocketFactory() {
+    public EasySSLProtocolSocketFactory(String sslProtocol) {
         super();
+        this.sslProtocol = sslProtocol;
     }
 
-    private static SSLContext createEasySSLContext() {
+    private static SSLContext createEasySSLContext(String sslProtocol) {
         try {
-            SSLContext context = SSLContext.getInstance("SSL");
+            SSLContext context = SSLContext.getInstance(sslProtocol);
             context.init(
-              null, 
-              new TrustManager[] {new EasyX509TrustManager(null)}, 
+              null,
+              new TrustManager[] {new EasyX509TrustManager(null)},
               null);
             return context;
         } catch (Exception e) {
@@ -90,7 +93,7 @@ public class EasySSLProtocolSocketFactory implements SecureProtocolSocketFactory
 
     private SSLContext getSSLContext() {
         if (this.sslcontext == null) {
-            this.sslcontext = createEasySSLContext();
+            this.sslcontext = createEasySSLContext(sslProtocol);
         }
         return this.sslcontext;
     }
@@ -116,20 +119,20 @@ public class EasySSLProtocolSocketFactory implements SecureProtocolSocketFactory
     /**
      * Attempts to get a new socket connection to the given host within the given time limit.
      * <p>
-     * To circumvent the limitations of older JREs that do not support connect timeout a 
-     * controller thread is executed. The controller thread attempts to create a new socket 
-     * within the given limit of time. If socket constructor does not return until the 
+     * To circumvent the limitations of older JREs that do not support connect timeout a
+     * controller thread is executed. The controller thread attempts to create a new socket
+     * within the given limit of time. If socket constructor does not return until the
      * timeout expires, the controller terminates and throws an {@link ConnectTimeoutException}
      * </p>
-     *  
+     *
      * @param host the host name/IP
      * @param port the port on the host
      * @param clientHost the local host name/IP to bind the socket to
      * @param clientPort the port on the local machine
      * @param params {@link HttpConnectionParams Http connection parameters}
-     * 
+     *
      * @return Socket a new socket
-     * 
+     *
      * @throws IOException if an I/O error occurs while creating the socket
      * @throws UnknownHostException if the IP address of the host cannot be
      * determined
