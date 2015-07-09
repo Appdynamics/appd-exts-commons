@@ -88,7 +88,7 @@ public class CustomDashboardGenerator {
             String tierName = agentEnvResolver.getTierName();
             ctrlMetricPrefix.append("Application Infrastructure Performance|")
                     .append(tierName)
-                    .append("|").append(StringUtils.trim(metricPrefix,"|"));
+                    .append("|").append(StringUtils.trim(metricPrefix, "|"));
         }
         logger.info("The Controller Metric prefix is {}", ctrlMetricPrefix);
         return ctrlMetricPrefix;
@@ -190,6 +190,13 @@ public class CustomDashboardGenerator {
         argsMap.put(TaskInputArgs.USE_SSL, String.valueOf(agentEnvResolver.isControllerUseSSL()));
         argsMap.put(TaskInputArgs.USER, getUserName());
         argsMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getAccesskey());
+        argsMap.put(TaskInputArgs.SSL_PROTOCOL, "TLSv1.2");
+        Object sslCertCheckEnabled = dashboardConfig.get("sslCertCheckEnabled");
+        if (sslCertCheckEnabled != null) {
+            argsMap.put("sslCertCheckEnabled", sslCertCheckEnabled.toString());
+        } else {
+            argsMap.put("sslCertCheckEnabled", "true");
+        }
         return argsMap;
     }
 

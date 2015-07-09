@@ -34,6 +34,7 @@ public class TaskInputArgs {
     public static final String PROXY_USE_SSL = "proxy-use-ssl";
     public static final String PROXY_AUTH_TYPE = "proxy-auth-type";
     public static final String ENCRYPTION_KEY = "encryption-key";
+    public static final String SSL_PROTOCOL = "ssl-protocol";
 
     public static String getArg(Map<String, String> taskArgs, String key, String defaultValue) {
         if (taskArgs.containsKey(key)) {

@@ -11,11 +11,17 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
 /**
@@ -100,6 +106,11 @@ public class CustomDashboardUploader {
         HttpURLConnection connection = null;
         URL url = new URL(urlStr);
         connection = (HttpURLConnection) url.openConnection();
+        if (connection instanceof HttpsURLConnection) {
+            HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+            httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory());
+            httpsURLConnection.setHostnameVerifier(new CustomHostnameVerifier());
+        }
         connection.setUseCaches(false);
         connection.setDoOutput(true);
 
@@ -134,7 +145,7 @@ public class CustomDashboardUploader {
         int status = connection.getResponseCode();
         if (status == 200) {
             logger.info("Successfully Imported the dashboard {}", fileName);
-        } else{
+        } else {
             logger.error("The server responded with a status of {}", status);
         }
         inputStream.close();
@@ -145,5 +156,35 @@ public class CustomDashboardUploader {
             return node.getTextValue();
         }
         return null;
+    }
+
+    public static SSLSocketFactory createSSLSocketFactory() {
+        try {
+            SSLContext context = SSLContext.getInstance("TLSv1.2");
+            context.init(null, new TrustManager[]{new X509TrustManager() {
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String authType) throws CertificateException {
+                }
+
+                public void checkServerTrusted(X509Certificate[] x509Certificates, String authType) throws CertificateException {
+
+                }
+
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+            }
+            }, new SecureRandom());
+            return context.getSocketFactory();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (KeyManagementException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static class CustomHostnameVerifier implements HostnameVerifier {
+        public boolean verify(String s, SSLSession sslSession) {
+            return true;
+        }
     }
 }
