@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.appdynamics</groupId>
+  <artifactId>machineagent-repackaged</artifactId>
+  <versioning>
+    <release>@machineagent-repackaged-version@</release>
+    <versions>
+      <version>@machineagent-repackaged-version@</version>
+    </versions>
+    <lastUpdated>@machineagent-repackaged-timestamp@</lastUpdated>
+  </versioning>
+</metadata>

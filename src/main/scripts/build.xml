@@ -1,0 +1,51 @@
+<project name="machine-agent-repackage" default="repackage">
+    <property name="machineagent-jar" value="/Users/abey.tom/MachineAgents/4.0.5.1/machineagent.jar"/>
+    <property name="dest-dir" value="/Users/abey.tom/tmp/machine-agent-repackage"/>
+    <property name="version" value="4.0.5.1"/>
+    <property name="maven-repo-dir" value="../../../../maven-repo/releases/com/appdynamics/machineagent-repackaged/${version}"/>
+    <target name="repackage">
+        <delete dir="${dest-dir}" failonerror="false"/>
+        <mkdir dir="${dest-dir}/jarcontent"/>
+        <unzip src="${machineagent-jar}" dest="${dest-dir}/jarcontent"/>
+        <jar destfile="${dest-dir}/machine-agent-repackaged.jar">
+            <fileset dir="${dest-dir}/jarcontent">
+                <include name="com/singularity/ee/agent/configuration/identity/AgentResolverUtil$AgentResolverState.class"/>
+                <include name="com/singularity/ee/agent/configuration/identity/AgentResolverUtil.class"/>
+                <include name="com/singularity/ee/agent/resolver/AgentAccountInfo.class"/>
+                <include name="com/singularity/ee/agent/resolver/AgentRegistrationInfo.class"/>
+                <include name="com/singularity/ee/agent/resolver/AgentResolver.class"/>
+                <include name="com/singularity/ee/agent/resolver/ControllerInfo.class"/>
+                <include name="com/singularity/ee/agent/resolver/ResolverGroup.class"/>
+                <include name="com/singularity/ee/agent/systemagent/Agent.class"/>
+                <include name="com/singularity/ee/agent/systemagent/IMachineAgent.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/AManagedMonitor.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/AJavaTask.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/ITask.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/MetricWriter.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/TaskExecutionContext.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/TaskOutput.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/exception/TaskExecutionException.class"/>
+                <include name="com/singularity/ee/util/httpclient/TrustManagerShouldDoDefaultValidation.class"/>
+                <include name="com/singularity/ee/util/log4j/Log4JLogger.class"/>
+                <include name="com/singularity/ee/util/logging/ILogger.class"/>
+            </fileset>
+        </jar>
+        <mkdir dir="${maven-repo-dir}"/>
+        <copy file="${dest-dir}/machine-agent-repackaged.jar" tofile="${maven-repo-dir}/machineagent-repackaged-${version}.jar"/>
+        <copy file="machineagent-repackaged.pom" tofile="${maven-repo-dir}/machineagent-repackaged-${version}.pom">
+            <filterset>
+                <filter token="machineagent-repackaged-version" value="${version}"/>
+            </filterset>
+        </copy>
+        <script language="javascript">
+            project.setProperty('startTime', new Date().getTime());
+        </script>
+        <copy file="maven-metadata-local.xml" todir="${maven-repo-dir}/../">
+            <filterset>
+                <filter token="machineagent-repackaged-version" value="${version}"/>
+                <filter token="machineagent-repackaged-timestamp" value="${startTime}"/>
+            </filterset>
+        </copy>
+
+    </target>
+</project>
