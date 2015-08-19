@@ -60,17 +60,19 @@ public class SimpleHttpClientTest {
         server.stop();
     }
 
-//    @Test
+    //@Test
     //THis requires a fwd proxy to be running
     public void testProxy() {
         Map<String, String> taskArgs = new HashMap<String, String>();
         taskArgs.put(TaskInputArgs.URI, "http://www.google.com");
         taskArgs.put(TaskInputArgs.PROXY_HOST, "localhost");
-        taskArgs.put(TaskInputArgs.PROXY_PORT, "80");
-        taskArgs.put(TaskInputArgs.PROXY_USER, "username");
-        taskArgs.put(TaskInputArgs.PROXY_PASSWORD, "welcome");
+        taskArgs.put(TaskInputArgs.PROXY_PORT, "3128");
+        taskArgs.put(TaskInputArgs.PROXY_USER, "admin");
+        taskArgs.put(TaskInputArgs.PROXY_PASSWORD, "123");
+        taskArgs.put(TaskInputArgs.PROXY_AUTH_TYPE, "Basic");
         SimpleHttpClient client = SimpleHttpClient.builder(taskArgs).build();
-        String out = client.get().string();
+        Response response = client.get();
+        Assert.assertEquals(200, response.getStatus());
     }
 
     @Test

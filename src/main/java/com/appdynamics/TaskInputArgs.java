@@ -32,6 +32,7 @@ public class TaskInputArgs {
     public static final String PROXY_PASSWORD = "proxy-password";
     public static final String PROXY_PASSWORD_ENCRYPTED = "proxy-password-encrypted";
     public static final String PROXY_USE_SSL = "proxy-use-ssl";
+    public static final String PROXY_AUTH_TYPE = "proxy-auth-type";
     public static final String ENCRYPTION_KEY = "encryption-key";
 
     public static String getArg(Map<String, String> taskArgs, String key, String defaultValue) {

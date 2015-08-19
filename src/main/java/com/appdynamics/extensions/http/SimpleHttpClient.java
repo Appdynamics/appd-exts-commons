@@ -4,6 +4,7 @@ import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.NumberUtils;
 import com.google.common.base.Strings;
 import org.apache.commons.httpclient.*;
+import org.apache.commons.httpclient.auth.AuthPolicy;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
@@ -16,6 +17,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.appdynamics.TaskInputArgs.*;
@@ -145,12 +148,36 @@ public class SimpleHttpClient {
                 proxyPassword = "";
             }
             logger.debug("The credentials are set for the proxy with user = {}", proxyUser);
+
+            setPreferredAuthScheme(taskArgs);
+
             AuthScope scope = new AuthScope(AuthScope.ANY);
             UsernamePasswordCredentials creds = new UsernamePasswordCredentials(proxyUser, proxyPassword);
             httpClient.getState().setProxyCredentials(scope, creds);
         } else {
             logger.info("Proxy Credentials are not set, skipping");
         }
+    }
+
+    private void setPreferredAuthScheme(Map<String, String> taskArgs) {
+        List<String> authPref = new ArrayList<String>();
+        String proxyAuthScheme = taskArgs.get(PROXY_AUTH_TYPE);
+        if(Strings.isNullOrEmpty(proxyAuthScheme)) {
+            logger.debug(PROXY_AUTH_TYPE + " not specified, going with Basic scheme");
+            authPref.add(AuthPolicy.BASIC);
+        } else {
+            List<String> defaultAuthPrefs = AuthPolicy.getDefaultAuthPrefs();
+
+            if(!defaultAuthPrefs.contains(proxyAuthScheme.toLowerCase())) {
+                logger.debug("Invalid " + PROXY_AUTH_TYPE + " specified, going with Basic scheme");
+                authPref.add(AuthPolicy.BASIC);
+            } else {
+                authPref.add(proxyAuthScheme.toLowerCase());
+            }
+        }
+
+        //Setting the authentication schemes
+        httpClient.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPref);
     }
 
     private String getProxyPassword(Map<String, String> taskArgs) {
