@@ -8,6 +8,9 @@ public abstract class Event {
     private String severity;
     private String tag;
     private String deepLinkUrl;
+    private String accountName;
+    private String accountId;
+
 
     public String getAppName() {
         return appName;
@@ -55,5 +58,21 @@ public abstract class Event {
 
     public void setDeepLinkUrl(String deepLinkUrl) {
         this.deepLinkUrl = deepLinkUrl;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 }

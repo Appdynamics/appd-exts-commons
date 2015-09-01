@@ -51,6 +51,10 @@ public class EventBuilder {
         int currentArgPos = setOtherEventDetails(otherEvent, cleanedArgs);
         currentArgPos++;
         otherEvent.setDeepLinkUrl(cleanedArgs[currentArgPos]);
+        currentArgPos++;
+        otherEvent.setAccountName(cleanedArgs[currentArgPos]);
+        currentArgPos++;
+        otherEvent.setAccountId(cleanedArgs[currentArgPos]);
         return otherEvent;
     }
 
@@ -129,6 +133,10 @@ public class EventBuilder {
         currentArgPos++;
         event.setEventType(cleanedArgs[currentArgPos]);
         event.setIncidentUrl(event.getDeepLinkUrl()+event.getIncidentID());
+        currentArgPos++;
+        event.setAccountName(cleanedArgs[currentArgPos]);
+        currentArgPos++;
+        event.setAccountId(cleanedArgs[currentArgPos]);
         return event;
     }
 
