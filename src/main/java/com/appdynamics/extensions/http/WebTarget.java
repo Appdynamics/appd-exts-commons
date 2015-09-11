@@ -121,7 +121,7 @@ public class WebTarget {
     private void validateStatus(String url, int status, HttpMethodBase method) {
         if (status != 200) {
             logger.error("The url {} responded with a status code of {} and message '{}'", url, status
-                    ,method.getStatusLine().getReasonPhrase());
+                    , method.getStatusLine().getReasonPhrase());
             switch (status) {
                 case 407:
                     throw new RuntimeException("The url '" + url + "' responded with a status code of 407. " +
@@ -179,7 +179,7 @@ public class WebTarget {
         AuthenticationConfig authConfig = simpleHttpClient.getAuthConfig();
         if (authConfig != null) {
             get.addRequestHeader("Authorization", authConfig.getAuthHeader());
-            logger.debug("Added the auth header {}", authConfig.getAuthHeader());
+            logger.debug("Added the auth header ******");
         }
 
         if (accept != null) {

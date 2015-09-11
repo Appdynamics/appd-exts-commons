@@ -111,8 +111,8 @@ public class SimpleHttpClient {
     }
 
     public WebTarget target(String url) {
-        try {
-            if (!Strings.isNullOrEmpty(url)) {
+        if (!Strings.isNullOrEmpty(url)) {
+            try {
                 URI uri = new URI(url);
                 if (isSSLEnabled(uri)) {
                     String host = getHost(uri);
@@ -122,11 +122,12 @@ public class SimpleHttpClient {
                     }
                 }
                 return new WebTarget(this).uri(url);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException("The URI "+url+" appears to be invalid",e);
             }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+        } else{
+            return new WebTarget(this);
         }
-        return new WebTarget(this);
     }
 
 

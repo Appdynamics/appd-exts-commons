@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -105,12 +106,24 @@ public class Xml {
     }
 
     public String getText(String xpathStr) {
+        return (String) evaluate(xpathStr, XPathConstants.STRING);
+    }
+
+    public Xml getXmlFromXpath(String xpathStr) {
+        Node node = (Node) evaluate(xpathStr, XPathConstants.NODE);
+        if (node != null) {
+            return new Xml(node);
+        }
+        return null;
+    }
+
+    public Object evaluate(String xpathStr, QName qName) {
         if (xpathStr != null) {
             xpathStr = xpathStr.trim();
         }
         try {
             XPathExpression expression = getXpath().compile(xpathStr);
-            return expression.evaluate(getSource());
+            return expression.evaluate(getSource(), qName);
         } catch (XPathExpressionException e) {
             throw new XmlException("The xpath expression " + xpathStr + " doesn't seem to be valid", e);
         }
@@ -147,16 +160,16 @@ public class Xml {
     }
 
     public static Node getFirstDescendant(Node node, String nodeName) {
-        if(node!=null){
+        if (node != null) {
             NodeList childNodes = node.getChildNodes();
-            if(childNodes!=null){
+            if (childNodes != null) {
                 for (int i = 0; i < childNodes.getLength(); i++) {
                     Node child = childNodes.item(i);
-                    if(child.getNodeName().equals(nodeName)){
+                    if (child.getNodeName().equals(nodeName)) {
                         return child;
-                    } else{
+                    } else {
                         Node descendant = getFirstDescendant(child, nodeName);
-                        if(descendant!=null){
+                        if (descendant != null) {
                             return descendant;
                         }
                     }
@@ -167,9 +180,9 @@ public class Xml {
     }
 
     public static List<Node> getDescendants(Node node, String nodeName) {
-        if(node!=null){
+        if (node != null) {
             List<Node> nodes = new ArrayList<Node>();
-            getDescendants(node,nodeName,nodes);
+            getDescendants(node, nodeName, nodes);
             return nodes;
         }
         return null;
@@ -177,12 +190,12 @@ public class Xml {
 
     private static void getDescendants(Node node, String nodeName, List<Node> nodes) {
         NodeList childNodes = node.getChildNodes();
-        if(childNodes!=null){
+        if (childNodes != null) {
             for (int i = 0; i < childNodes.getLength(); i++) {
                 Node child = childNodes.item(i);
-                if(child.getNodeName().equals(nodeName)){
+                if (child.getNodeName().equals(nodeName)) {
                     nodes.add(child);
-                } else{
+                } else {
                     getDescendants(child, nodeName, nodes);
                 }
             }
@@ -190,18 +203,22 @@ public class Xml {
     }
 
     public static Node getFirstChild(Node node, String nodeName) {
-        if(node!=null){
+        if (node != null) {
             NodeList childNodes = node.getChildNodes();
-            if(childNodes!=null){
+            if (childNodes != null) {
                 for (int i = 0; i < childNodes.getLength(); i++) {
                     Node child = childNodes.item(i);
-                    if(child.getNodeName().equals(nodeName)){
+                    if (child.getNodeName().equals(nodeName)) {
                         return child;
                     }
                 }
             }
         }
         return null;
+    }
+
+    public Xml getParent() {
+        return new Xml(node.getParentNode());
     }
 
 
