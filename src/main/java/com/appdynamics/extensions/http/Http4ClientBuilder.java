@@ -151,7 +151,7 @@ public class Http4ClientBuilder {
         }
     }
 
-    protected static String getPassword(Map<String, ?> propMap, Map<String, ?> config) {
+    public static String getPassword(Map<String, ?> propMap, Map<String, ?> config) {
         String password = (String) propMap.get("password");
         if (!Strings.isNullOrEmpty(password)) {
             return password;

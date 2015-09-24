@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.TaskInputArgs;
 import com.singularity.ee.agent.resolver.AgentAccountInfo;
 import com.singularity.ee.agent.resolver.AgentRegistrationInfo;
 import com.singularity.ee.agent.resolver.AgentResolver;
@@ -23,8 +24,13 @@ public class AgentEnvironmentResolverTest {
         AgentEnvironmentResolver originalEnvResolver = new AgentEnvironmentResolver();
         AgentResolver agentResolver = Mockito.mock(AgentResolver.class);
         AgentEnvironmentResolver envResolver = setupMock(originalEnvResolver, agentResolver);
+        Map map = new HashMap();
+        map.put(TaskInputArgs.USER,"user1");
+        map.put(TaskInputArgs.PASSWORD,"welcome");
 
         envResolver.validateRequiredProperties(agentResolver);
+        envResolver.lookupCredentials(map);
+
 
         Assert.assertTrue(envResolver.isResolved());
 
@@ -33,7 +39,8 @@ public class AgentEnvironmentResolverTest {
         Assert.assertEquals(true, envResolver.isControllerUseSSL());
 
         Assert.assertEquals("account1",envResolver.getAccountName());
-        Assert.assertEquals("key1",envResolver.getAccesskey());
+        Assert.assertEquals("user1",envResolver.getUsername());
+        Assert.assertEquals("welcome",envResolver.getPassword());
 
         Assert.assertEquals("app1",envResolver.getApplicationName());
         Assert.assertEquals("tier1",envResolver.getTierName());

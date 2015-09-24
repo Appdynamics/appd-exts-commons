@@ -19,6 +19,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -47,6 +48,7 @@ public class MockJettyServer {
     public static Server startSSL(int port) {
         return startSSL(port, new HelloHandler());
     }
+
     public static Server startSSL(int port, Handler handler) {
         SslContextFactory factory = new SslContextFactory();
         factory.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
@@ -79,13 +81,46 @@ public class MockJettyServer {
         }
     }
 
+    public static class ProxyHandler extends AbstractHandler {
+        private boolean authenticate;
+
+        public ProxyHandler(boolean authenticate) {
+            this.authenticate = authenticate;
+        }
+
+        public void handle(String target, Request baseRequest, HttpServletRequest request
+                , HttpServletResponse response) throws IOException, ServletException {
+            PrintWriter writer = response.getWriter();
+            if(authenticate){
+                String header = request.getHeader("Proxy-Authorization");
+                if(Strings.isNullOrEmpty(header)){
+                    response.setStatus(407);
+                    response.setHeader("Proxy-Authenticate","Basic realm=\"proxy.com\"");
+                } else{
+                    String value = header.replace("Basic ", "");
+                    String s = new String(Base64.decodeBase64(value));
+                    if(s.equals("proxyuser:proxypassword")){
+                        writer.write("AuthSuccess");
+                    } else{
+                        response.setStatus(407);
+                        response.setHeader("Proxy-Authenticate","Basic realm=\"proxy.com\"");
+                    }
+                }
+            } else{
+                writer.write("NoAuth");
+            }
+            baseRequest.setHandled(true);
+            writer.close();
+        }
+    }
+
     public static class AuthenticatedHandler extends AbstractHandler {
 
         public void handle(String target, Request baseRequest, HttpServletRequest request,
                            HttpServletResponse response) throws IOException, ServletException {
             String authorization = request.getHeader("Authorization");
             if (!Strings.isNullOrEmpty(authorization)) {
-                logger.info("The Auth Header is {}",authorization);
+                logger.info("The Auth Header is {}", authorization);
                 String userPass = new String(Base64.decodeBase64(authorization.replace("Basic ", "")));
                 if ("user:welcome".equals(userPass)) {
                     response.setStatus(200);
@@ -95,7 +130,7 @@ public class MockJettyServer {
             } else {
                 response.setStatus(401);
                 logger.info("Auth not present, requesting authentication");
-                response.setHeader("WWW-Authenticate","Basic realm=\"Mock Test\"");
+                response.setHeader("WWW-Authenticate", "Basic realm=\"Mock Test\"");
             }
             ServletOutputStream out = response.getOutputStream();
             out.write("hello from server".getBytes());
@@ -105,6 +140,6 @@ public class MockJettyServer {
     }
 
     public static void main(String[] args) {
-        MockJettyServer.start(5550, new AuthenticatedHandler());
+        MockJettyServer.start(8585, new ProxyHandler(true));
     }
 }

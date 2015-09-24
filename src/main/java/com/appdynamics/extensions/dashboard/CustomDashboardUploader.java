@@ -32,33 +32,37 @@ public class CustomDashboardUploader {
 
     public void uploadDashboard(String dashboardName, Xml xml, Map<String, String> argsMap, boolean overwrite) {
         SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(2000).socketTimeout(2000).build();
-        Response response = client.target().path("controller/auth?action=login").get();
-        if (response.getStatus() == 200) {
-            Header[] headers = response.getHeaders();
-            StringBuilder cookies = new StringBuilder();
-            String csrf = null;
-            for (Header header : headers) {
-                if (header.getName().equalsIgnoreCase("set-cookie")) {
-                    String value = header.getValue();
-                    cookies.append(value).append(";");
-                    if (value.toLowerCase().contains("x-csrf-token")) {
-                        csrf = value.split("=")[1];
+        try {
+            Response response = client.target().path("controller/auth?action=login").get();
+            if (response.getStatus() == 200) {
+                Header[] headers = response.getHeaders();
+                StringBuilder cookies = new StringBuilder();
+                String csrf = null;
+                for (Header header : headers) {
+                    if (header.getName().equalsIgnoreCase("set-cookie")) {
+                        String value = header.getValue();
+                        cookies.append(value).append(";");
+                        if (value.toLowerCase().contains("x-csrf-token")) {
+                            csrf = value.split("=")[1];
+                        }
                     }
                 }
-            }
-            logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
-            boolean isPresent = isDashboardPresent(client, cookies, dashboardName);
-            if (isPresent) {
-                if (overwrite) {
-                    uploadFile(dashboardName, xml, argsMap, cookies, csrf);
+                logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
+                boolean isPresent = isDashboardPresent(client, cookies, dashboardName);
+                if (isPresent) {
+                    if (overwrite) {
+                        uploadFile(dashboardName, xml, argsMap, cookies, csrf);
+                    } else {
+                        logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
+                    }
                 } else {
-                    logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
+                    uploadFile(dashboardName, xml, argsMap, cookies, csrf);
                 }
             } else {
-                uploadFile(dashboardName, xml, argsMap, cookies, csrf);
+                logger.info("Custom Dashboard Upload Failed. The login to the controller is unsuccessful");
             }
-        } else {
-            logger.info("Custom Dashboard Upload Failed. The login to the controller is unsuccessful");
+        } finally {
+            client.close();
         }
     }
 

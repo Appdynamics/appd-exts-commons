@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class Http4ClientBuilderTest {
 
-    public static final String PROXY_URI = "http://192.168.1.134:8585";
+    public static final String PROXY_URI = "http://localhost:8585";
     public static final String PROXYUSER = "proxyuser";
     public static final String PROXYPASSWORD = "proxypassword";
 
@@ -56,6 +56,7 @@ public class Http4ClientBuilderTest {
 
     @Test
     public void testConfigureProxyWithOutCred() throws Exception {
+        Server server = MockJettyServer.start(8585, new MockJettyServer.ProxyHandler(true));
         Map map = new HashMap();
         HashMap<String, String> proxyProps = new HashMap<String, String>();
         map.put("proxy", proxyProps);
@@ -66,10 +67,12 @@ public class Http4ClientBuilderTest {
         CloseableHttpResponse response = client.execute(get);
         Assert.assertEquals(407, response.getStatusLine().getStatusCode());
         response.close();
+        server.stop();
     }
 
     @Test
     public void testConfigureProxyWithCred() throws Exception {
+        Server server = MockJettyServer.start(8585, new MockJettyServer.ProxyHandler(true));
         Map map = new HashMap();
         HashMap<String, String> proxyProps = new HashMap<String, String>();
         map.put("proxy", proxyProps);
@@ -78,14 +81,16 @@ public class Http4ClientBuilderTest {
         proxyProps.put("password", PROXYPASSWORD);
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         CloseableHttpClient client = builder.build();
-        HttpGet get = new HttpGet("https://www.google.com");
+        HttpGet get = new HttpGet("http://www.google.com");
         CloseableHttpResponse response = client.execute(get);
         Assert.assertEquals(200, response.getStatusLine().getStatusCode());
         response.close();
+        server.stop();
     }
 
     @Test
     public void testConfigureProxyWithWrongCred() throws Exception {
+        Server server = MockJettyServer.start(8585, new MockJettyServer.ProxyHandler(true));
         Map map = new HashMap();
         HashMap<String, String> proxyProps = new HashMap<String, String>();
         map.put("proxy", proxyProps);
@@ -98,6 +103,7 @@ public class Http4ClientBuilderTest {
         CloseableHttpResponse response = client.execute(get);
         Assert.assertEquals(407, response.getStatusLine().getStatusCode());
         response.close();
+        server.stop();
     }
 
     @Test

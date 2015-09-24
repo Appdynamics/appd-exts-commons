@@ -64,6 +64,15 @@ public class YmlReader {
         }
     }
 
+    public static Map<String, ?> readFromFileAsMap(File file) {
+        Yaml yaml = new Yaml();
+        try {
+            return (Map) yaml.load(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            throw new InvalidYmlPathException("The file " + file.getAbsolutePath() + " doesn't exit in the file system");
+        }
+    }
+
     public static class InvalidYmlPathException extends RuntimeException {
         public InvalidYmlPathException(String s) {
             super(s);

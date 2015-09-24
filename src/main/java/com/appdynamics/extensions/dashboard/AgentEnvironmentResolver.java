@@ -1,8 +1,10 @@
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.NumberUtils;
 import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.StringUtils;
+import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.singularity.ee.agent.configuration.identity.AgentResolverUtil;
 import com.singularity.ee.agent.resolver.AgentAccountInfo;
 import com.singularity.ee.agent.resolver.AgentRegistrationInfo;
@@ -28,6 +30,8 @@ public class AgentEnvironmentResolver {
     private boolean resolveTier;
     private String applicationName;
     private String tierName;
+    private String userName;
+    private String password;
 
     AgentEnvironmentResolver() {
 
@@ -42,6 +46,7 @@ public class AgentEnvironmentResolver {
             AgentResolver agentResolver = resolver.getAgentResolver();
             agentResolver.execute(5000, 1000);
             validateRequiredProperties(agentResolver);
+            lookupCredentials(dashboardConfig);
             this.agentResolver = agentResolver;
         } catch (InterruptedException e) {
             logger.error("Error while resolving the Agent Properties", e);
@@ -50,6 +55,23 @@ public class AgentEnvironmentResolver {
         } catch (Throwable e) {
             //Might throw no class def found error in unsupported Machine Agents.
             logger.error("Unknown exception while resolving the agent", e);
+        }
+    }
+
+    protected void lookupCredentials(Map dashboardConfig) {
+        String username = (String) dashboardConfig.get(TaskInputArgs.USER);
+        if (StringUtils.hasText(username)) {
+            this.userName = username;
+        } else {
+            logger.error("The username was not read from the config.yml");
+            resolved = false;
+        }
+        String password = Http4ClientBuilder.getPassword(dashboardConfig, dashboardConfig);
+        if (StringUtils.hasText(password)) {
+            this.password = password;
+        } else {
+            logger.error("The password was not read from the config.yml");
+            resolved = false;
         }
     }
 
@@ -87,6 +109,9 @@ public class AgentEnvironmentResolver {
         }
         logger.info("Final App [{}], Tier [{}], resolved [{}] after resolving from all sources"
                 , applicationName, tierName, resolved);
+        if (!resolved) {
+            logger.error("Cannot resolve the Application Name & Tier Name. Please add them to the config.yml");
+        }
     }
 
     protected void updateDashboardConfig(Map dashboardConfig) {
@@ -213,9 +238,16 @@ public class AgentEnvironmentResolver {
         return null;
     }
 
-    public String getAccesskey() {
+    public String getUsername() {
         if (resolved) {
-            return agentResolver.getAgentAccountInfo().getAccountAccessKey();
+            return userName;
+        }
+        return null;
+    }
+
+    public String getPassword() {
+        if (resolved) {
+            return password;
         }
         return null;
     }

@@ -55,7 +55,7 @@ public class CustomDashboardGenerator {
                 createDashboard(metrics, instanceName, ctrlMetricPrefix.toString());
             }
         } else {
-            logger.warn("Cannot create the Custom Dashboard, since the agent resolver failed earlier");
+            logger.warn("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
         }
     }
 
@@ -189,7 +189,7 @@ public class CustomDashboardGenerator {
         argsMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.getControllerPort()));
         argsMap.put(TaskInputArgs.USE_SSL, String.valueOf(agentEnvResolver.isControllerUseSSL()));
         argsMap.put(TaskInputArgs.USER, getUserName());
-        argsMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getAccesskey());
+        argsMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
         argsMap.put(TaskInputArgs.SSL_PROTOCOL, "TLSv1.2");
         Object sslCertCheckEnabled = dashboardConfig.get("sslCertCheckEnabled");
         if (sslCertCheckEnabled != null) {
@@ -202,8 +202,9 @@ public class CustomDashboardGenerator {
 
     private String getUserName() {
         String accountName = agentEnvResolver.getAccountName();
-        if (accountName != null) {
-            return "singularity-agent@" + accountName;
+        String username = agentEnvResolver.getUsername();
+        if (accountName != null && username != null) {
+            return username + "@" + accountName;
         }
         return "";
     }
