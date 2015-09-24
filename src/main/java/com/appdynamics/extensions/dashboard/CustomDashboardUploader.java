@@ -6,15 +6,14 @@ import com.appdynamics.extensions.http.SimpleHttpClientBuilder;
 import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -22,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -59,7 +59,9 @@ public class CustomDashboardUploader {
                     uploadFile(dashboardName, xml, argsMap, cookies, csrf);
                 }
             } else {
-                logger.info("Custom Dashboard Upload Failed. The login to the controller is unsuccessful");
+                logger.error("Custom Dashboard Upload Failed. The login to the controller is unsuccessful. The response code is {}"
+                        , response.getStatus());
+                logger.error("The response headers are {} and content is {}", Arrays.toString(response.getHeaders()), response.string());
             }
         } finally {
             client.close();
@@ -151,8 +153,16 @@ public class CustomDashboardUploader {
             logger.info("Successfully Imported the dashboard {}", fileName);
         } else {
             logger.error("The server responded with a status of {}", status);
+            String content = null;
+            if (inputStream != null) {
+                content = IOUtils.toString(inputStream);
+            }
+            logger.error("The response headers are {} and content is [{}]",
+                    connection.getHeaderFields(), content);
         }
-        inputStream.close();
+        if (inputStream != null) {
+            inputStream.close();
+        }
     }
 
     private String getTextValue(JsonNode node) {
