@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.StringUtils;
 import com.appdynamics.extensions.http.Response;
 import com.appdynamics.extensions.http.SimpleHttpClient;
 import com.appdynamics.extensions.http.SimpleHttpClientBuilder;
@@ -13,8 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +37,7 @@ public class CustomDashboardUploader {
     public static final Logger logger = LoggerFactory.getLogger(CustomDashboardUploader.class);
 
     public void uploadDashboard(String dashboardName, Xml xml, Map<String, String> argsMap, boolean overwrite) {
+        setProxyIfApplicable(argsMap);
         SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(2000).socketTimeout(2000).build();
         try {
             Response response = client.target().path("controller/auth?action=login").get();
@@ -65,6 +72,19 @@ public class CustomDashboardUploader {
             }
         } finally {
             client.close();
+        }
+    }
+
+    private void setProxyIfApplicable(Map<String, String> argsMap) {
+        String proxyHost = System.getProperty("appdynamics.http.proxyHost");
+        String proxyPort = System.getProperty("appdynamics.http.proxyPort");
+        if (StringUtils.hasText(proxyHost) && StringUtils.hasText(proxyPort)) {
+            argsMap.put(TaskInputArgs.PROXY_HOST, proxyHost);
+            argsMap.put(TaskInputArgs.PROXY_PORT, proxyPort);
+            logger.debug("Using the proxy {}:{} to upload the dashboard", proxyHost, proxyPort);
+        } else {
+            logger.debug("Not using proxy for dashboard upload appdynamics.http.proxyHost={} and appdynamics.http.proxyPort={}"
+                    , proxyHost, proxyPort);
         }
     }
 
@@ -111,7 +131,14 @@ public class CustomDashboardUploader {
 
         HttpURLConnection connection = null;
         URL url = new URL(urlStr);
-        connection = (HttpURLConnection) url.openConnection();
+        if (argsMap.containsKey(TaskInputArgs.PROXY_HOST)) {
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(argsMap.get(TaskInputArgs.PROXY_HOST)
+                    , Integer.parseInt(argsMap.get(TaskInputArgs.PROXY_PORT))));
+            connection = (HttpURLConnection) url.openConnection(proxy);
+            logger.debug("Created an HttpConnection for Fileupload with a proxy {}", proxy);
+        } else {
+            connection = (HttpURLConnection) url.openConnection();
+        }
         if (connection instanceof HttpsURLConnection) {
             HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
             httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory());
