@@ -51,6 +51,9 @@ public class CustomDashboardUploader {
                         cookies.append(value).append(";");
                         if (value.toLowerCase().contains("x-csrf-token")) {
                             csrf = value.split("=")[1];
+                            if(csrf.contains(";")){
+                                csrf = csrf.split(";")[0].trim();
+                            }
                         }
                     }
                 }
