@@ -31,7 +31,7 @@ public class JMXConnectionUtil {
      * @throws java.io.IOException
      */
     public JMXConnector connect() throws IOException {
-        JMXServiceURL url = new JMXServiceURL(getJMXServiceURL());
+        JMXServiceURL url = new JMXServiceURL(config.getJMXServiceURL());
         final Map<String, Object> env = new HashMap<String, Object>();
         if(!Strings.isNullOrEmpty(config.getUsername())){
             env.put(JMXConnector.CREDENTIALS,new String[]{config.getUsername(),config.getPassword()});
@@ -105,9 +105,7 @@ public class JMXConnectionUtil {
 
 
 
-    private String getJMXServiceURL() {
-        return "service:jmx:rmi:///jndi/rmi://" + config.getHost() + ":" + config.getPort() + "/jmxrmi";
-    }
+
 
     public void close() throws IOException {
         if(connector != null){
