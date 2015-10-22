@@ -2,6 +2,7 @@ package com.appdynamics.extensions.util.metrics;
 
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -12,7 +13,7 @@ import java.util.regex.Pattern;
 
 public class RegexMap<V>{
 
-    protected Map<Pattern,V> mapOfPatterns = new HashMap<Pattern, V>();
+    protected Map<Pattern,V> mapOfPatterns = new LinkedHashMap<Pattern, V>();
 
     private static final boolean DEFAULT_ESCAPE_KEY = true;
     boolean escapeKey = DEFAULT_ESCAPE_KEY;

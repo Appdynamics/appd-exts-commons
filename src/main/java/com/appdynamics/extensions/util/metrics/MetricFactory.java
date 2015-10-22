@@ -35,7 +35,7 @@ public class MetricFactory<T> {
                 if (metric != null && !metric.isDisabled()) {
                     allMetrics.add(metric);
                 } else {
-                    logger.warn("Ignoring metric with metricKey= " + metricKey + " ,metricValue= " + metricValue);
+                    logger.debug("Ignoring metric with metricKey= " + metricKey + " ,metricValue= " + metricValue);
                 }
             }
         }
@@ -68,7 +68,7 @@ public class MetricFactory<T> {
                 return true;
             }
             catch(NumberFormatException nfe){
-                logger.warn("Metric Value is invalid" + nfe);
+                logger.debug("Metric Value is invalid",nfe);
             }
         }
         else if(metricValue instanceof Number){

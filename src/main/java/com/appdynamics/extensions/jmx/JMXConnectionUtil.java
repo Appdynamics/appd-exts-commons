@@ -57,7 +57,7 @@ public class JMXConnectionUtil {
             Set<ObjectInstance> allMbeans = connection.queryMBeans(null, null);
             return allMbeans;
         } catch (IOException e) {
-            logger.error("Unable to fetch Mbeans." + e);
+            logger.error("Unable to fetch Mbeans." , e);
         }
         return null;
     }
@@ -73,13 +73,13 @@ public class JMXConnectionUtil {
             MBeanAttributeInfo[] attributes = connection.getMBeanInfo(objectName).getAttributes();
             return attributes;
         } catch (InstanceNotFoundException e) {
-            logger.error("Unable to fetch Attributes For " + objectName);
+            logger.error("Unable to fetch Attributes For " + objectName,e);
         } catch (IntrospectionException e) {
-            logger.error("Unable to fetch Attributes For " + objectName);
+            logger.error("Unable to fetch Attributes For " + objectName,e);
         } catch (ReflectionException e) {
-            logger.error("Unable to fetch Attributes For " + objectName);
+            logger.error("Unable to fetch Attributes For " + objectName,e);
         } catch (IOException e) {
-            logger.error("Unable to fetch Attributes For " + objectName);
+            logger.error("Unable to fetch Attributes For " + objectName,e);
         }
         return null;
     }
@@ -90,15 +90,15 @@ public class JMXConnectionUtil {
         try {
             return connection.getAttribute(objectName, name);
         } catch (MBeanException e) {
-            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name + e);
+            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name,e);
         } catch (AttributeNotFoundException e) {
-            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name + e);
+            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name,e);
         } catch (InstanceNotFoundException e) {
-            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name + e);
+            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name,e);
         } catch (ReflectionException e) {
-            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name + e);
+            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name,e);
         } catch (IOException e) {
-            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name + e);
+            logger.error("Unable to fetch Mbeans Info " + objectName + "attrName=" + name,e);
         }
         return null;
     }
