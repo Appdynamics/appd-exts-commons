@@ -43,7 +43,6 @@ public class RegexMap<V>{
         for(Pattern pattern : mapOfPatterns.keySet()){
             if(pattern.matcher(key.toString()).matches()){
                 matchedPattern = pattern;
-                break;
             }
         }
         if(matchedPattern != null){
