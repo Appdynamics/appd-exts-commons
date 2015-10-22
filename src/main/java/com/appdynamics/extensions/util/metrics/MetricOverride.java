@@ -12,7 +12,7 @@ public class MetricOverride {
     protected String aggregator;
     protected String timeRollup;
     protected String clusterRollup;
-    protected int multiplier;
+    protected double multiplier;
     protected boolean disabled;
 
 
@@ -73,11 +73,11 @@ public class MetricOverride {
         this.clusterRollup = clusterRollup;
     }
 
-    public int getMultiplier() {
+    public double getMultiplier() {
         return multiplier;
     }
 
-    public void setMultiplier(int multiplier) {
+    public void setMultiplier(double multiplier) {
         this.multiplier = multiplier;
     }
 }

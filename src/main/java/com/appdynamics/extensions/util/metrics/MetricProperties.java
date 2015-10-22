@@ -7,14 +7,14 @@ public class MetricProperties {
     public static final String METRIC_AGGREGATION_TYPE_AVERAGE = "AVERAGE";
     public static final String METRIC_TIME_ROLLUP_TYPE_AVERAGE = "AVERAGE";
     public static final String METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final int DEFAULT_MULTIPLIER = 1;
+    public static final double DEFAULT_MULTIPLIER = 1d;
 
     protected String metricPrefix;
     protected String metricPostfix;
     protected String aggregator;
     protected String timeRollup;
     protected String clusterRollup;
-    protected int multiplier;
+    protected double multiplier;
     protected boolean disabled;
 
     public String getMetricPrefix() {
@@ -72,14 +72,14 @@ public class MetricProperties {
         this.clusterRollup = clusterRollup;
     }
 
-    public int getMultiplier() {
+    public double getMultiplier() {
         if(multiplier <=0){
             return DEFAULT_MULTIPLIER;
         }
         return multiplier;
     }
 
-    public void setMultiplier(int multiplier) {
+    public void setMultiplier(double multiplier) {
         this.multiplier = multiplier;
     }
 
