@@ -14,6 +14,7 @@ public class MetricOverride {
     protected String clusterRollup;
     protected double multiplier;
     protected boolean disabled;
+    protected String alias;
 
 
     public String getMetricKey() {
@@ -79,5 +80,13 @@ public class MetricOverride {
 
     public void setMultiplier(double multiplier) {
         this.multiplier = multiplier;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }
