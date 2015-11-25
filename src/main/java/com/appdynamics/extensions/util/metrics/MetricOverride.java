@@ -1,6 +1,9 @@
 package com.appdynamics.extensions.util.metrics;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A POJO that can be used in config files for defining metric overrides.
  */
@@ -15,6 +18,7 @@ public class MetricOverride {
     protected double multiplier;
     protected boolean disabled;
     protected String alias;
+    protected Map<String,String> otherProps = new HashMap<String,String>();
 
 
     public String getMetricKey() {
@@ -89,4 +93,10 @@ public class MetricOverride {
     public void setAlias(String alias) {
         this.alias = alias;
     }
+
+    public Map<String, String> getOtherProps() {
+        return otherProps;
+    }
+
+   
 }
