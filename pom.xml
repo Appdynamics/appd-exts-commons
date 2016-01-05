@@ -4,7 +4,7 @@
 
     <groupId>com.appdynamics</groupId>
     <artifactId>appd-exts-commons</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
     <name>extension-utils</name>
     <properties>
@@ -14,7 +14,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
+            <version>1.7.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.5</version>
+            <version>1.9</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.3.3</version>
+            <version>4.3.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
