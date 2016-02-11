@@ -51,7 +51,7 @@ public class CustomDashboardUploader {
                         cookies.append(value).append(";");
                         if (value.toLowerCase().contains("x-csrf-token")) {
                             csrf = value.split("=")[1];
-                            if(csrf.contains(";")){
+                            if (csrf.contains(";")) {
                                 csrf = csrf.split(";")[0].trim();
                             }
                         }
@@ -177,21 +177,35 @@ public class CustomDashboardUploader {
 
         request.flush();
         request.close();
-        InputStream inputStream = connection.getInputStream();
-        int status = connection.getResponseCode();
-        if (status == 200) {
-            logger.info("Successfully Imported the dashboard {}", fileName);
-        } else {
-            logger.error("The server responded with a status of {}", status);
-            String content = null;
-            if (inputStream != null) {
-                content = IOUtils.toString(inputStream);
+        InputStream inputStream = null;
+        try {
+            inputStream = connection.getInputStream();
+            int status = connection.getResponseCode();
+            if (status == 200) {
+                logger.info("Successfully Imported the dashboard {}", fileName);
+            } else {
+                logger.error("The server responded with a status of {}", status);
+                String content = null;
+                if (inputStream != null) {
+                    content = IOUtils.toString(inputStream);
+                }
+                logger.error("The response headers are {} and content is [{}]",
+                        connection.getHeaderFields(), content);
             }
-            logger.error("The response headers are {} and content is [{}]",
+
+        } catch (IOException e) {
+            logger.error("Error while uploading the dashboard " + urlStr, e);
+            InputStream errorStream = connection.getErrorStream();
+            String content = null;
+            if (errorStream != null) {
+                content = IOUtils.toString(errorStream);
+            }
+            logger.error("The error response headers are {} and content is [{}]",
                     connection.getHeaderFields(), content);
-        }
-        if (inputStream != null) {
-            inputStream.close();
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
         }
     }
 
