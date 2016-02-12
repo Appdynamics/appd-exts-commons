@@ -1,0 +1,9 @@
+username: user
+passwordEncrypted: C043Fag+LKEZM0AQTWPy2g==
+encryptionKey: welcome
+applicationName: app
+tierName: tier
+account: account
+controllerHost: host
+controllerPort: 80
+controllerSslEnabled: true

@@ -28,6 +28,7 @@
                 <include name="com/singularity/ee/util/httpclient/TrustManagerShouldDoDefaultValidation.class"/>
                 <include name="com/singularity/ee/util/log4j/Log4JLogger.class"/>
                 <include name="com/singularity/ee/util/logging/ILogger.class"/>
+                <include name="com/singularity/ee/agent/systemagent/api/AJavaTask.class"/>
             </fileset>
         </jar>
         <mkdir dir="${maven-repo-dir}"/>

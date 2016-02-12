@@ -55,7 +55,7 @@ public class CustomDashboardGenerator {
                 createDashboard(metrics, instanceName, ctrlMetricPrefix.toString());
             }
         } else {
-            logger.warn("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
+            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
         }
     }
 

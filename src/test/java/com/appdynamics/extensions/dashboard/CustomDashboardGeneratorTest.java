@@ -158,7 +158,7 @@ public class CustomDashboardGeneratorTest {
 
         metricPrefix = "Custom Metrics|Docker|||";
         ctrlMetricPrefix = customDashboardGenerator.buildMetricPrefix(metricPrefix).toString();
-        Assert.assertEquals("Application Infrastructure Performance|null|Custom Metrics|Docker", ctrlMetricPrefix);
+        Assert.assertEquals("Application Infrastructure Performance|tier|Custom Metrics|Docker", ctrlMetricPrefix);
     }
 
     @Test

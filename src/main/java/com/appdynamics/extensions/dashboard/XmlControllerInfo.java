@@ -1,0 +1,126 @@
+package com.appdynamics.extensions.dashboard;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * Created by abey.tom on 2/11/16.
+ */
+@XmlRootElement(name = "controller-info")
+public class XmlControllerInfo extends ControllerInfo {
+    public static final Logger logger = LoggerFactory.getLogger(XmlControllerInfo.class);
+
+    @XmlElement(name = "account-access-key")
+    public String getPassword() {
+        return password;
+    }
+
+    @XmlElement(name = "account-name")
+    public String getAccount() {
+        return account;
+    }
+
+    @XmlElement(name = "controller-host")
+    public String getControllerHost() {
+        return controllerHost;
+    }
+
+    @XmlElement(name = "controller-port")
+    public Integer getControllerPort() {
+        return controllerPort;
+    }
+
+    @XmlElement(name = "controller-ssl-enabled")
+    public Boolean getControllerSslEnabled() {
+        return controllerSslEnabled;
+    }
+
+    @XmlElement(name = "enable-orchestration")
+    public Boolean getEnableOrchestration() {
+        return enableOrchestration;
+    }
+
+    @XmlElement(name = "machine-path")
+    public String getMachinePath() {
+        return machinePath;
+    }
+
+    @XmlElement(name = "unique-host-id")
+    public String getUniqueHostId() {
+        return uniqueHostId;
+    }
+
+    @XmlElement(name = "application-name")
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    @XmlElement(name = "sim-enabled")
+    public Boolean getSimEnabled() {
+        return simEnabled;
+    }
+
+    @XmlElement(name = "tier-name")
+    public String getTierName() {
+        return tierName;
+    }
+
+    @Override
+    public void setAccount(String account) {
+        super.setAccount(account);
+    }
+
+    @Override
+    public void setApplicationName(String applicationName) {
+        super.setApplicationName(applicationName);
+    }
+
+    @Override
+    public void setControllerHost(String controllerHost) {
+        super.setControllerHost(controllerHost);
+    }
+
+    @Override
+    public void setControllerPort(Integer controllerPort) {
+        super.setControllerPort(controllerPort);
+    }
+
+    @Override
+    public void setControllerSslEnabled(Boolean controllerSslEnabled) {
+        super.setControllerSslEnabled(controllerSslEnabled);
+    }
+
+    @Override
+    public void setEnableOrchestration(Boolean enableOrchestration) {
+        super.setEnableOrchestration(enableOrchestration);
+    }
+
+    @Override
+    public void setMachinePath(String machinePath) {
+        super.setMachinePath(machinePath);
+    }
+
+    @Override
+    public void setPassword(String password) {
+        super.setPassword(password);
+    }
+
+    @Override
+    public void setSimEnabled(Boolean simEnabled) {
+        super.setSimEnabled(simEnabled);
+    }
+
+    @Override
+    public void setTierName(String tierName) {
+        super.setTierName(tierName);
+    }
+
+    @Override
+    public void setUniqueHostId(String uniqueHostId) {
+        super.setUniqueHostId(uniqueHostId);
+    }
+}
