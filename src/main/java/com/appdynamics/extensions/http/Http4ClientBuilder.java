@@ -1,9 +1,11 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
 import com.google.common.base.Strings;
+import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -20,14 +22,16 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -36,9 +40,31 @@ import java.util.Map;
 
 /**
  * Created by abey.tom on 6/30/15.
+ * Builds the http client builder from the config.yml. A sample one is given at
+ * appd-exts-commons/src/test/resources/expected.config.yml
  */
 public class Http4ClientBuilder {
     public static final Logger logger = LoggerFactory.getLogger(Http4ClientBuilder.class);
+
+
+    public static HttpClientBuilder getBuilder(String configYmlPath) {
+        File file = PathResolver.getFile(configYmlPath, AManagedMonitor.class);
+        if (file != null) {
+            return getBuilder(file);
+        } else {
+            throw new RuntimeException("Cannot resolve the config path from" + configYmlPath);
+        }
+    }
+
+    public static HttpClientBuilder getBuilder(File file) {
+        Yaml yaml = new Yaml();
+        try {
+            Map<String, ?> propMap = (Map) yaml.load(new FileReader(file));
+            return getBuilder(propMap);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Error while reading the configuration from " + getPath(file), e);
+        }
+    }
 
     public static HttpClientBuilder getBuilder(Map<String, ?> propMap) {
         return configureBuilder(HttpClients.custom(), propMap);
@@ -58,12 +84,11 @@ public class Http4ClientBuilder {
     private static void configureConnectionProps(Map<String, ?> propMap, HttpClientBuilder builder) {
         Map connection = (Map) propMap.get("connection");
         if (connection != null) {
-
-            Integer socketTimeout = (Integer) connection.get("socketTimeout");
+            Integer socketTimeout = getInteger(connection.get("socketTimeout"));
             if (socketTimeout == null) {
                 socketTimeout = 5000;
             }
-            Integer connectTimeout = (Integer) connection.get("connectTimeout");
+            Integer connectTimeout = getInteger(connection.get("connectTimeout"));
             if (connectTimeout == null) {
                 connectTimeout = 5000;
             }
@@ -71,16 +96,15 @@ public class Http4ClientBuilder {
             RequestConfig.Builder configBuilder = RequestConfig.custom()
                     .setConnectTimeout(connectTimeout).setSocketTimeout(socketTimeout);
             builder.setDefaultRequestConfig(configBuilder.build());
-
         }
     }
 
     public static void configureAuthentication(Map<String, ?> config, HttpClientBuilder builder
             , CredentialsProvider credsProvider) {
-        List<Map<String, String>> servers = (List<Map<String, String>>) config.get("servers");
+        List<Map<String, ?>> servers = (List<Map<String, ?>>) config.get("servers");
         if (servers != null && !servers.isEmpty()) {
-            for (Map<String, String> server : servers) {
-                String username = server.get(TaskInputArgs.USER);
+            for (Map<String, ?> server : servers) {
+                String username = (String) server.get(TaskInputArgs.USER);
                 if (!Strings.isNullOrEmpty(username)) {
                     AuthScope authScope = createAuthScope(server);
                     if (authScope != null) {
@@ -94,8 +118,8 @@ public class Http4ClientBuilder {
         }
     }
 
-    private static AuthScope createAuthScope(Map<String, String> server) {
-        String uri = server.get("uri");
+    private static AuthScope createAuthScope(Map<String, ?> server) {
+        String uri = (String) server.get("uri");
         if (!Strings.isNullOrEmpty(uri)) {
             try {
                 URL url = new URL(uri);
@@ -106,15 +130,32 @@ public class Http4ClientBuilder {
                 return null;
             }
         } else {
-            String host = server.get("host");
-            String port = server.get("port");
-            if (!Strings.isNullOrEmpty(host) && !Strings.isNullOrEmpty(port)) {
+            String host = (String) server.get("host");
+            Integer port = getInteger(server.get("port"));
+            if (!Strings.isNullOrEmpty(host) && port != null) {
                 logger.info("Creating the auth scope for host [{}] and port [{}]", host, port);
-                return new AuthScope(host, Integer.parseInt(port));
+                return new AuthScope(host, port);
             } else {
                 return null;
             }
         }
+    }
+
+    protected static Integer getInteger(Object numObj) {
+        Integer in = null;
+        if (numObj instanceof String) {
+            String str = (String) numObj;
+            //We want to fail if it is an invalid number
+            if (!Strings.isNullOrEmpty(str)) {
+                in = Integer.parseInt(str);
+            }
+        } else if (numObj instanceof Number) {
+            in = ((Number) numObj).intValue();
+        }
+        if (numObj == null) {
+
+        }
+        return in;
     }
 
 
@@ -188,38 +229,19 @@ public class Http4ClientBuilder {
     protected static void configureSSL(Map<String, ?> propMap, HttpClientBuilder builder) {
         Map connection = (Map) propMap.get("connection");
         if (connection != null) {
-            String[] sslProtocols = asStringArray((String) connection.get("sslProtocols"));
+            String[] sslProtocols = asStringArray(connection.get("sslProtocols"));
             logger.info("The supported ssl protocols are {}", sslProtocols != null ? Arrays.toString(sslProtocols) : "default");
-            String[] sslCipherSuites = asStringArray((String) connection.get("sslCipherSuites"));
+            String[] sslCipherSuites = asStringArray(connection.get("sslCipherSuites"));
             logger.info("The supported ssl cipher suites are {}", sslCipherSuites != null ? Arrays.toString(sslCipherSuites) : "default");
-            Boolean sslCertCheckEnabled = (Boolean) connection.get("sslCertCheckEnabled");
+            Boolean sslCertCheckEnabled = getBoolean(connection.get("sslCertCheckEnabled"));
+            Boolean verifyHostName = (Boolean) connection.get("sslVerifyHostname");
             if (Boolean.FALSE.equals(sslCertCheckEnabled)) {
                 logger.warn("Disabling the ssl certificate checks");
                 try {
                     SSLContext sslContext = SSLContexts.custom()
-                            .loadTrustMaterial(null, new TrustStrategy() {
-                                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                                    return true;
-                                }
-                            }).build();
+                            .loadTrustMaterial(null, new TrustAllStrategy()).build();
                     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
-                            sslContext, sslProtocols, sslCipherSuites, new X509HostnameVerifier() {
-                        public void verify(String host, SSLSocket ssl)
-                                throws IOException {
-                        }
-
-                        public void verify(String host, X509Certificate cert)
-                                throws SSLException {
-                        }
-
-                        public void verify(String host, String[] cns,
-                                           String[] subjectAlts) throws SSLException {
-                        }
-
-                        public boolean verify(String s, SSLSession sslSession) {
-                            return true;
-                        }
-                    });
+                            sslContext, sslProtocols, sslCipherSuites, new AllHostnameVerifier());
                     Registry<ConnectionSocketFactory> socketFactoryRegistry =
                             RegistryBuilder.<ConnectionSocketFactory>create()
                                     .register("https", socketFactory)
@@ -230,14 +252,22 @@ public class Http4ClientBuilder {
                 } catch (Exception e) {
                     logger.error("Error while configuring the SSL", e);
                 }
-            } else if (sslCipherSuites != null || sslProtocols != null) {
-                logger.info("Adding support for SSL Cipher suites, with default SSL Configuration");
+            } else {
+                X509HostnameVerifier hostnameVerifier;
+                if (Boolean.FALSE.equals(verifyHostName)) {
+                    hostnameVerifier = new AllHostnameVerifier();
+                } else {
+                    hostnameVerifier = new BrowserCompatHostnameVerifier();
+                }
+                KeyStore keyStore = loadDefaultTrustStore(propMap);
                 try {
+                    SSLContext sslContext = SSLContexts.custom()
+                            .loadTrustMaterial(keyStore).build();
                     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
-                            SSLContext.getDefault(),
+                            sslContext,
                             sslProtocols,
                             sslCipherSuites,
-                            new BrowserCompatHostnameVerifier()
+                            hostnameVerifier
                     );
                     Registry<ConnectionSocketFactory> socketFactoryRegistry =
                             RegistryBuilder.<ConnectionSocketFactory>create()
@@ -250,14 +280,120 @@ public class Http4ClientBuilder {
                     logger.error("Error while configuring the SSL", e);
                 }
             }
+        } else {
+            logger.debug("The connection properties are not set in the config.yml");
         }
     }
 
-    private static String[] asStringArray(String str) {
-        if (!Strings.isNullOrEmpty(str)) {
-            return str.trim().split(",");
+    protected static Boolean getBoolean(Object bool) {
+        if (bool instanceof Boolean) {
+            return (Boolean) bool;
+        } else if (bool instanceof String) {
+            String boolStr = (String) bool;
+            if (!Strings.isNullOrEmpty(boolStr)) {
+                return Boolean.parseBoolean(boolStr);
+            }
+        }
+        return null;
+    }
+
+    protected static KeyStore loadDefaultTrustStore(Map<String, ?> propMap) {
+        Map<String, ?> connection = (Map<String, ?>) propMap.get("connection");
+        File file = resolveTrustStorePath(connection);
+        if (file != null && file.exists()) {
+            try {
+                logger.debug("Loading the keystore from [{}]", file.getAbsolutePath());
+                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+                char[] password = getTrustStorePassword(propMap, connection);
+                keystore.load(new FileInputStream(file), password);
+                return keystore;
+            } catch (Exception e) {
+                logger.error("Error while loading the truststore from " + file.getAbsolutePath(), e);
+            }
         } else {
-            return null;
+            logger.info("Couldn't resolve the truststore for extensions. The default jre truststore will be used");
+        }
+        return null;
+    }
+
+    protected static File resolveTrustStorePath(Map<String, ?> connection) {
+        String property = System.getProperty("appdynamics.extensions.truststore.path");
+        File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
+        File file = PathResolver.getFile(property, installDir);
+        logger.debug("The system property [appdynamics.extensions.truststore.path] with value [{}] is resolved to file [{}]"
+                , property, getPath(file));
+        if (file == null || !file.exists()) {
+            String sslTrustStore = (String) connection.get("sslTrustStorePath");
+            file = PathResolver.getFile(sslTrustStore, installDir);
+            logger.debug("The config property [sslTrustStorePath] with value [{}] is resolved to file [{}]"
+                    , sslTrustStore, getPath(file));
+        }
+        if (file == null || !file.exists()) {
+            file = PathResolver.getFile("conf/extensions-cacerts.jks", installDir);
+            if (file == null || !file.exists()) {
+                logger.debug("The sslTrustStorePath [{}] doesn't exist", getPath(file));
+            }
+        }
+        return file;
+    }
+
+    protected static char[] getTrustStorePassword(Map<String, ?> propMap, Map<String, ?> connection) {
+        String sslTrustStorePassword = (String) connection.get("sslTrustStorePassword");
+        if (!Strings.isNullOrEmpty(sslTrustStorePassword)) {
+            return sslTrustStorePassword.toCharArray();
+        } else {
+            String sslTrustStorePasswordEncrypted = (String) connection.get("sslTrustStorePasswordEncrypted");
+            String encryptionKey = getEncryptionKey(propMap);
+            if (!Strings.isNullOrEmpty(sslTrustStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
+                return new Decryptor(encryptionKey).decrypt(sslTrustStorePasswordEncrypted).toCharArray();
+            } else {
+                logger.warn("Returning null password for sslTrustStore. Please set the [connection.sslTrustStorePassword] or " +
+                        "[connection.sslTrustStorePasswordEncrypted + encryptionKey]");
+                return null;
+            }
+        }
+    }
+
+    private static Object getPath(File file) {
+        return file != null ? file.getAbsolutePath() : null;
+    }
+
+    protected static String[] asStringArray(Object value) {
+        if (value instanceof List) {
+            List<String> values = (List) value;
+            if (!values.isEmpty()) {
+                return values.toArray(new String[values.size()]);
+            }
+        } else if (value instanceof String) {
+            String val = (String) value;
+            if (!Strings.isNullOrEmpty(val)) {
+                return val.trim().split(",");
+            }
+        }
+        return null;
+    }
+
+    private static class TrustAllStrategy implements TrustStrategy {
+        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            return true;
+        }
+    }
+
+    private static class AllHostnameVerifier implements X509HostnameVerifier {
+        public void verify(String host, SSLSocket ssl)
+                throws IOException {
+        }
+
+        public void verify(String host, X509Certificate cert)
+                throws SSLException {
+        }
+
+        public void verify(String host, String[] cns,
+                           String[] subjectAlts) throws SSLException {
+        }
+
+        public boolean verify(String s, SSLSession sslSession) {
+            return true;
         }
     }
 }

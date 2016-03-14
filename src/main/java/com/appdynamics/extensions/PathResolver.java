@@ -74,4 +74,24 @@ public class PathResolver {
         }
         return null;
     }
+
+    public static File getFile(String path, File installDir) {
+        if (path == null) {
+            return null;
+        }
+
+        File file = new File(path);
+        if (file.exists()) {
+            return new File(path);
+        }
+
+        if (installDir != null) {
+            logger.debug("The install directory is resolved to {}", installDir.getAbsolutePath());
+            file = new File(installDir, path);
+            if (file.exists()) {
+                return file;
+            }
+        }
+        return null;
+    }
 }

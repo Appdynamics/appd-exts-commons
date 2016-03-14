@@ -1,0 +1,35 @@
+servers:
+  - uri: ""
+    host: ""
+    port: ""
+    username: ""
+    password: ""
+    passwordEncrypted: ""
+
+  - uri: ""
+    host: ""
+    port: ""
+    username: ""
+    password: ""
+    passwordEncrypted: ""
+
+connection:
+  socketTimeout: 2000
+  connectTimeout: 3000
+  sslProtocols: ["TLS"]
+  sslCertCheckEnabled: true
+  sslVerifyHostname: true
+
+  # This shouldnt be exposed to user. Should be used on a need basis
+  sslCipherSuites: []
+  sslTrustStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-cacerts.jks
+  sslTrustStorePassword: ""
+  sslTrustStorePasswordEncrypted: ""
+
+proxy:
+  uri: ""
+  username: ""
+  password: ""
+  passwordEncrypted: ""
+
+encryptionKey: ""

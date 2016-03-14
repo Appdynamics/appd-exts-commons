@@ -46,11 +46,17 @@ public class MockJettyServer {
     }
 
     public static Server startSSL(int port) {
-        return startSSL(port, new HelloHandler());
+        return startSSL(port,null);
+    }
+    public static Server startSSL(int port, String protocol) {
+        return startSSL(port, protocol,new HelloHandler());
     }
 
-    public static Server startSSL(int port, Handler handler) {
+    public static Server startSSL(int port, String protocol, Handler handler) {
         SslContextFactory factory = new SslContextFactory();
+        if(protocol!=null){
+            factory.setIncludeProtocols(protocol);
+        }
         factory.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
         factory.setKeyStorePassword("changeit");
         SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
@@ -140,6 +146,5 @@ public class MockJettyServer {
     }
 
     public static void main(String[] args) {
-        MockJettyServer.start(8585, new ProxyHandler(true));
     }
 }

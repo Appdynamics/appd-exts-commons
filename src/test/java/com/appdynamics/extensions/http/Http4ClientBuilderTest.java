@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.http;
 
+import com.appdynamics.extensions.crypto.Encryptor;
 import com.appdynamics.extensions.util.MockJettyServer;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -15,6 +16,8 @@ import org.eclipse.jetty.server.Server;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.net.ssl.SSLHandshakeException;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -179,5 +182,165 @@ public class Http4ClientBuilderTest {
         t1.start();
         t1.join();
         jetty.stop();
+    }
+
+    @Test(expected = SSLHandshakeException.class)
+    public void testWithIncorrectSslProtocol() throws Exception {
+        final int port = 8759;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        Server jetty = MockJettyServer.startSSL(port, "TLSv1.2");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
+
+    }
+
+    @Test
+    public void testWithCorrectSslProtocolWithoutHostNameVerify() throws Exception {
+        final int port = 8759;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        connection.put("sslVerifyHostname", false);
+        connection.put("sslTrustStorePath", "src/test/resources/keystore/keystore.jks");
+        Server jetty = MockJettyServer.startSSL(port, "TLSv1.1");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
+
+    }
+
+    @Test(expected = javax.net.ssl.SSLHandshakeException.class)
+    public void testWithCorrectSslProtocolWithoutHostNameVerifyWithWrongPassword() throws Exception {
+        final int port = 8759;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        connection.put("sslVerifyHostname", false);
+        connection.put("sslTrustStorePassword", "dontchangeit");
+        connection.put("sslTrustStorePath", "src/test/resources/keystore/keystore.jks");
+        Server jetty = MockJettyServer.startSSL(port, "TLSv1.1");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
+
+    }
+
+    @Test
+    public void resolveTrustStorePath() {
+        Map<String, String> connection = Collections.singletonMap("sslTrustStorePath", "src/test/resources/keystore/truststore.changethis.jks");
+        File file = Http4ClientBuilder.resolveTrustStorePath(connection);
+        Assert.assertEquals("truststore.changethis.jks", file.getName());
+
+        System.setProperty("appdynamics.extensions.truststore.path", "src/test/resources/keystore/keystore.jks");
+        file = Http4ClientBuilder.resolveTrustStorePath(connection);
+        Assert.assertEquals("keystore.jks", file.getName());
+    }
+
+    @Test
+    public void getTrustStorePassword() {
+        Map propMap = new HashMap();
+
+        Map connection = new HashMap();
+        propMap.put("connection", connection);
+        String encrypted = new Encryptor("welcome").encrypt("welcome");
+        //No Pass
+        char[] pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
+        Assert.assertNull(pwd);
+
+        // Enc Pass without password
+        connection.put("sslTrustStorePasswordEncrypted", encrypted);
+        pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
+        Assert.assertNull(pwd);
+
+        //With enc key
+        propMap.put("encryptionKey", "welcome");
+        pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
+        Assert.assertEquals("welcome", new String(pwd));
+
+        connection.put("sslTrustStorePassword", "welcome1");
+        pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
+        Assert.assertEquals("welcome1", new String(pwd));
+    }
+
+    @Test
+    public void testStringArray() {
+        String[] protocols = Http4ClientBuilder.asStringArray(Arrays.asList("TLS", "SSL"));
+        Assert.assertEquals("[TLS, SSL]", Arrays.toString(protocols));
+        protocols = Http4ClientBuilder.asStringArray("TLS,SSL");
+        Assert.assertEquals("[TLS, SSL]", Arrays.toString(protocols));
+        protocols = Http4ClientBuilder.asStringArray(Collections.emptyList());
+        Assert.assertNull(protocols);
+        protocols = Http4ClientBuilder.asStringArray("");
+        Assert.assertNull(protocols);
+        protocols = Http4ClientBuilder.asStringArray(null);
+        Assert.assertNull(protocols);
+
+
+    }
+
+    @Test
+    public void testGetInteger() {
+        Integer integer = Http4ClientBuilder.getInteger(10.01D);
+        Assert.assertEquals(10, (int) integer);
+        integer = Http4ClientBuilder.getInteger("10");
+        Assert.assertEquals(10, (int) integer);
+        integer = Http4ClientBuilder.getInteger("");
+        Assert.assertNull(integer);
+        integer = Http4ClientBuilder.getInteger(null);
+        Assert.assertNull(integer);
+
+    }
+
+    @Test(expected = NumberFormatException.class)
+    public void testGetIntegerInvalid() {
+        Integer integer = Http4ClientBuilder.getInteger("a");
+        Assert.assertNull(integer);
+    }
+
+    @Test
+    public void testGetBoolean() {
+        Boolean aBoolean = Http4ClientBuilder.getBoolean(Boolean.TRUE);
+        Assert.assertTrue(aBoolean);
+        aBoolean = Http4ClientBuilder.getBoolean("true");
+        Assert.assertTrue(aBoolean);
+        aBoolean = Http4ClientBuilder.getBoolean("false");
+        Assert.assertFalse(aBoolean);
+        aBoolean = Http4ClientBuilder.getBoolean("abcd");
+        Assert.assertFalse(aBoolean);
+        aBoolean = Http4ClientBuilder.getBoolean("");
+        Assert.assertNull(aBoolean);
+        aBoolean = Http4ClientBuilder.getBoolean(null);
+        Assert.assertNull(aBoolean);
     }
 }
