@@ -1,0 +1,55 @@
+package com.appdynamics.extensions.util;
+
+import com.google.common.base.Strings;
+
+import java.util.List;
+
+/**
+ * Created by abey.tom on 3/14/16.
+ */
+public class YmlUtils {
+
+    public static Integer getInteger(Object numObj) {
+        Integer in = null;
+        if (numObj instanceof String) {
+            String str = (String) numObj;
+            //We want to fail if it is an invalid number
+            if (!Strings.isNullOrEmpty(str)) {
+                in = Integer.parseInt(str);
+            }
+        } else if (numObj instanceof Number) {
+            in = ((Number) numObj).intValue();
+        }
+        if (numObj == null) {
+
+        }
+        return in;
+    }
+
+    public static Boolean getBoolean(Object bool) {
+        if (bool instanceof Boolean) {
+            return (Boolean) bool;
+        } else if (bool instanceof String) {
+            String boolStr = (String) bool;
+            if (!Strings.isNullOrEmpty(boolStr)) {
+                return Boolean.parseBoolean(boolStr);
+            }
+        }
+        return null;
+    }
+
+    public static String[] asStringArray(Object value) {
+        if (value instanceof List) {
+            List<String> values = (List) value;
+            if (!values.isEmpty()) {
+                return values.toArray(new String[values.size()]);
+            }
+        } else if (value instanceof String) {
+            String val = (String) value;
+            if (!Strings.isNullOrEmpty(val)) {
+                return val.trim().split(",");
+            }
+        }
+        return null;
+    }
+}

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,11 +33,15 @@ public class Aggregator<K> {
     }
 
     public void add(K key, String value) {
+        BigDecimal val = toBigDecimal(value);
+        add(key, val);
+    }
+
+    public void add(K key, BigDecimal val) {
         if (map == null) {
             map = Maps.newHashMap();
         }
         AggregatedValue aggVal = map.get(key);
-        BigDecimal val = toBigDecimal(value);
         if (aggVal == null) {
             aggVal = new AggregatedValue();
             map.put(key, aggVal);
@@ -47,6 +52,25 @@ public class Aggregator<K> {
     public AggregatedValue get(K key) {
         if (map != null) {
             return map.get(key);
+        }
+        return null;
+    }
+
+    public BigDecimal getAggregatedValue(K key) {
+        AggregatedValue aggVal = get(key);
+        if (aggVal != null) {
+            if(aggregationType.equals(AggregationType.SUM)){
+                return aggVal.getSum();
+            } else{
+                return aggVal.getAverage();
+            }
+        }
+        return null;
+    }
+
+    public Set<K> keys() {
+        if (map != null) {
+            return map.keySet();
         }
         return null;
     }

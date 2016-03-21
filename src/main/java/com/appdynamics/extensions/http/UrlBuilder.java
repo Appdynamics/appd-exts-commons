@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static com.appdynamics.TaskInputArgs.defaultIfEmpty;
+import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,6 +43,8 @@ public class UrlBuilder {
         return new UrlBuilder(taskArgs);
     }
 
+
+
     public UrlBuilder ssl(boolean useSSL){
         taskArgs.put(TaskInputArgs.USE_SSL,String.valueOf(useSSL));
         return this;
@@ -53,6 +57,11 @@ public class UrlBuilder {
 
     public UrlBuilder port(String port){
         taskArgs.put(TaskInputArgs.PORT,port);
+        return this;
+    }
+
+    public UrlBuilder port(int port){
+        taskArgs.put(TaskInputArgs.PORT,String.valueOf(port));
         return this;
     }
 
@@ -145,5 +154,30 @@ public class UrlBuilder {
             logger.debug("The url is initialized to {}",sb);
         }
         return sb.toString();
+    }
+
+    public static UrlBuilder fromYmlServerConfig(Map server) {
+        UrlBuilder builder = new UrlBuilder();
+        String uri = (String) server.get(TaskInputArgs.URI);
+        if (!Strings.isNullOrEmpty(uri)) {
+            builder.uri(uri);
+        } else {
+            String host = (String) server.get(TaskInputArgs.HOST);
+            assertNotNull(host, "Either [uri] or [host] should be set for each server");
+            Integer port = YmlUtils.getInteger(server.get(TaskInputArgs.PORT));
+            Boolean useSSL = YmlUtils.getBoolean(server.get("useSSL"));
+            if (useSSL == null) {
+                useSSL = false;
+            }
+            if (port == null) {
+                if (useSSL) {
+                    port = 443;
+                } else {
+                    port = 80;
+                }
+            }
+            builder.host(host).port(port).ssl(useSSL);
+        }
+        return builder;
     }
 }

@@ -2,6 +2,7 @@ package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.crypto.Encryptor;
 import com.appdynamics.extensions.util.MockJettyServer;
+import com.appdynamics.extensions.util.YmlUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -295,15 +296,15 @@ public class Http4ClientBuilderTest {
 
     @Test
     public void testStringArray() {
-        String[] protocols = Http4ClientBuilder.asStringArray(Arrays.asList("TLS", "SSL"));
+        String[] protocols = YmlUtils.asStringArray(Arrays.asList("TLS", "SSL"));
         Assert.assertEquals("[TLS, SSL]", Arrays.toString(protocols));
-        protocols = Http4ClientBuilder.asStringArray("TLS,SSL");
+        protocols = YmlUtils.asStringArray("TLS,SSL");
         Assert.assertEquals("[TLS, SSL]", Arrays.toString(protocols));
-        protocols = Http4ClientBuilder.asStringArray(Collections.emptyList());
+        protocols = YmlUtils.asStringArray(Collections.emptyList());
         Assert.assertNull(protocols);
-        protocols = Http4ClientBuilder.asStringArray("");
+        protocols = YmlUtils.asStringArray("");
         Assert.assertNull(protocols);
-        protocols = Http4ClientBuilder.asStringArray(null);
+        protocols = YmlUtils.asStringArray(null);
         Assert.assertNull(protocols);
 
 
@@ -311,36 +312,36 @@ public class Http4ClientBuilderTest {
 
     @Test
     public void testGetInteger() {
-        Integer integer = Http4ClientBuilder.getInteger(10.01D);
+        Integer integer = YmlUtils.getInteger(10.01D);
         Assert.assertEquals(10, (int) integer);
-        integer = Http4ClientBuilder.getInteger("10");
+        integer = YmlUtils.getInteger("10");
         Assert.assertEquals(10, (int) integer);
-        integer = Http4ClientBuilder.getInteger("");
+        integer = YmlUtils.getInteger("");
         Assert.assertNull(integer);
-        integer = Http4ClientBuilder.getInteger(null);
+        integer = YmlUtils.getInteger(null);
         Assert.assertNull(integer);
 
     }
 
     @Test(expected = NumberFormatException.class)
     public void testGetIntegerInvalid() {
-        Integer integer = Http4ClientBuilder.getInteger("a");
+        Integer integer = YmlUtils.getInteger("a");
         Assert.assertNull(integer);
     }
 
     @Test
     public void testGetBoolean() {
-        Boolean aBoolean = Http4ClientBuilder.getBoolean(Boolean.TRUE);
+        Boolean aBoolean = YmlUtils.getBoolean(Boolean.TRUE);
         Assert.assertTrue(aBoolean);
-        aBoolean = Http4ClientBuilder.getBoolean("true");
+        aBoolean = YmlUtils.getBoolean("true");
         Assert.assertTrue(aBoolean);
-        aBoolean = Http4ClientBuilder.getBoolean("false");
+        aBoolean = YmlUtils.getBoolean("false");
         Assert.assertFalse(aBoolean);
-        aBoolean = Http4ClientBuilder.getBoolean("abcd");
+        aBoolean = YmlUtils.getBoolean("abcd");
         Assert.assertFalse(aBoolean);
-        aBoolean = Http4ClientBuilder.getBoolean("");
+        aBoolean = YmlUtils.getBoolean("");
         Assert.assertNull(aBoolean);
-        aBoolean = Http4ClientBuilder.getBoolean(null);
+        aBoolean = YmlUtils.getBoolean(null);
         Assert.assertNull(aBoolean);
     }
 }

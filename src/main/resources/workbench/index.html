@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Extension Metrics Viewer</title>
+    <link rel="stylesheet" href="lib/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="lib/bootstrap-treeview/bootstrap-treeview.min.css">
+    <link rel="stylesheet" href="lib/nvd3/nv.d3.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="lib/jquery/jquery-2.2.1.min.js"></script>
+    <script src="lib/bootstrap/bootstrap.min.js"></script>
+    <script src="lib/bootstrap-treeview/bootstrap-treeview.min.js"></script>
+    <script src="lib/d3/d3.min.js"></script>
+    <script src="lib/nvd3/nv.d3.min.js"></script>
+    <script src="js/main.js"></script>
+</head>
+<body onload="initTree()">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12" style="background-color: steelblue; color: white">
+                <div style="height: 50px;display: table-cell; vertical-align: middle; font-size:30px;margin: 5px" >
+                    Extensions Workbench
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-md-6">
+                <div style="font-size: 18px; margin-bottom: 10px; display: inline-block">Metric Tree</div>
+                <div id="last-refreshed" style="display: none; margin-left: 10px; color: grey">
+                    The data has been updated. Please refresh the page
+                    <button class="btn btn-primary btn-xs" type="button" onclick="window.location.reload()">Refresh</button>
+                </div>
+                <div id="metric-count" style="margin-bottom: 10px"></div>
+            </div>
+            <div>
+                <h4>Metric Data</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div style="overflow-y: scroll">
+                    <div id="metric-tree"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="chart-parent">Please select a Metric</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Errors</h4>
+                        <div id="error-details"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

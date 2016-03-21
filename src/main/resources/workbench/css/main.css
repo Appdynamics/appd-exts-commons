@@ -1,0 +1,17 @@
+/*#metric-tree {*/
+    /*overflow-y: scroll;*/
+/*}*/
+
+#chart-parent{
+    margin-bottom: 20px;
+}
+
+#error-details{
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.list-group-item {
+    padding: 1px 5px;
+    word-wrap: break-word;
+}

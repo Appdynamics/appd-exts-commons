@@ -4,6 +4,7 @@ import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
+import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.http.HttpHost;
@@ -84,11 +85,11 @@ public class Http4ClientBuilder {
     private static void configureConnectionProps(Map<String, ?> propMap, HttpClientBuilder builder) {
         Map connection = (Map) propMap.get("connection");
         if (connection != null) {
-            Integer socketTimeout = getInteger(connection.get("socketTimeout"));
+            Integer socketTimeout = YmlUtils.getInteger(connection.get("socketTimeout"));
             if (socketTimeout == null) {
                 socketTimeout = 5000;
             }
-            Integer connectTimeout = getInteger(connection.get("connectTimeout"));
+            Integer connectTimeout = YmlUtils.getInteger(connection.get("connectTimeout"));
             if (connectTimeout == null) {
                 connectTimeout = 5000;
             }
@@ -131,7 +132,7 @@ public class Http4ClientBuilder {
             }
         } else {
             String host = (String) server.get("host");
-            Integer port = getInteger(server.get("port"));
+            Integer port = YmlUtils.getInteger(server.get("port"));
             if (!Strings.isNullOrEmpty(host) && port != null) {
                 logger.info("Creating the auth scope for host [{}] and port [{}]", host, port);
                 return new AuthScope(host, port);
@@ -139,23 +140,6 @@ public class Http4ClientBuilder {
                 return null;
             }
         }
-    }
-
-    protected static Integer getInteger(Object numObj) {
-        Integer in = null;
-        if (numObj instanceof String) {
-            String str = (String) numObj;
-            //We want to fail if it is an invalid number
-            if (!Strings.isNullOrEmpty(str)) {
-                in = Integer.parseInt(str);
-            }
-        } else if (numObj instanceof Number) {
-            in = ((Number) numObj).intValue();
-        }
-        if (numObj == null) {
-
-        }
-        return in;
     }
 
 
@@ -229,11 +213,11 @@ public class Http4ClientBuilder {
     protected static void configureSSL(Map<String, ?> propMap, HttpClientBuilder builder) {
         Map connection = (Map) propMap.get("connection");
         if (connection != null) {
-            String[] sslProtocols = asStringArray(connection.get("sslProtocols"));
+            String[] sslProtocols = YmlUtils.asStringArray(connection.get("sslProtocols"));
             logger.info("The supported ssl protocols are {}", sslProtocols != null ? Arrays.toString(sslProtocols) : "default");
-            String[] sslCipherSuites = asStringArray(connection.get("sslCipherSuites"));
+            String[] sslCipherSuites = YmlUtils.asStringArray(connection.get("sslCipherSuites"));
             logger.info("The supported ssl cipher suites are {}", sslCipherSuites != null ? Arrays.toString(sslCipherSuites) : "default");
-            Boolean sslCertCheckEnabled = getBoolean(connection.get("sslCertCheckEnabled"));
+            Boolean sslCertCheckEnabled = YmlUtils.getBoolean(connection.get("sslCertCheckEnabled"));
             Boolean verifyHostName = (Boolean) connection.get("sslVerifyHostname");
             if (Boolean.FALSE.equals(sslCertCheckEnabled)) {
                 logger.warn("Disabling the ssl certificate checks");
@@ -283,18 +267,6 @@ public class Http4ClientBuilder {
         } else {
             logger.debug("The connection properties are not set in the config.yml");
         }
-    }
-
-    protected static Boolean getBoolean(Object bool) {
-        if (bool instanceof Boolean) {
-            return (Boolean) bool;
-        } else if (bool instanceof String) {
-            String boolStr = (String) bool;
-            if (!Strings.isNullOrEmpty(boolStr)) {
-                return Boolean.parseBoolean(boolStr);
-            }
-        }
-        return null;
     }
 
     protected static KeyStore loadDefaultTrustStore(Map<String, ?> propMap) {
@@ -356,21 +328,6 @@ public class Http4ClientBuilder {
 
     private static Object getPath(File file) {
         return file != null ? file.getAbsolutePath() : null;
-    }
-
-    protected static String[] asStringArray(Object value) {
-        if (value instanceof List) {
-            List<String> values = (List) value;
-            if (!values.isEmpty()) {
-                return values.toArray(new String[values.size()]);
-            }
-        } else if (value instanceof String) {
-            String val = (String) value;
-            if (!Strings.isNullOrEmpty(val)) {
-                return val.trim().split(",");
-            }
-        }
-        return null;
     }
 
     private static class TrustAllStrategy implements TrustStrategy {
