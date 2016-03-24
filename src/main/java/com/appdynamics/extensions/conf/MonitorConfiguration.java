@@ -72,7 +72,7 @@ public class MonitorConfiguration {
         }
     }
 
-    public Map<String, ?> getConfig() {
+    public Map<String, ?> getConfigYml() {
         if (config != null) {
             return config;
         } else {
