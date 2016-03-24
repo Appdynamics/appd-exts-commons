@@ -29,6 +29,11 @@ public class MetricWriteHelper {
         writerCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
     }
 
+    public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
+        managedMonitor.getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup)
+                .printMetric(metricValue);
+    }
+
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
         if (!Strings.isNullOrEmpty(metricPath) && value != null && !Strings.isNullOrEmpty(metricType)) {
             MetricWriter metricWriter = getMetricWriter(metricPath, metricType);

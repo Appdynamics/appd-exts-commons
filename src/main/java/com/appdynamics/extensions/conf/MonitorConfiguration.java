@@ -111,13 +111,20 @@ public class MonitorConfiguration {
         }
     }
 
-    public void setConfigYml(String path) {
+    public void setConfigYml(String path, final FileWatchListener callback) {
         FileWatchListener fileWatchListener = new FileWatchListener() {
             public void onFileChange(File file) {
                 loadConfigYml(file);
+                if (callback != null) {
+                    callback.onFileChange(file);
+                }
             }
         };
         createListener(path, fileWatchListener);
+    }
+
+    public void setConfigYml(String path) {
+        setConfigYml(path, null);
     }
 
     private void createListener(String path, FileWatchListener fileWatchListener) {
@@ -140,7 +147,7 @@ public class MonitorConfiguration {
 
     private <T> void loadMetricsXml(File file, Class<T> clazz) {
         metricXml = reloadMetricXml(file, clazz);
-        logger.info("Reloaded the metrics xml [{}] successfully from {} {}", metricXml, file.getAbsolutePath());
+        logger.info("Reloaded the metrics xml [{}] successfully from {}", metricXml, file.getAbsolutePath());
     }
 
     private <T> T reloadMetricXml(File file, Class<T> clazz) {
@@ -297,7 +304,7 @@ public class MonitorConfiguration {
         } else {
             interval = 30000;
         }
-        logger.debug("Created a FileAlterationMonitor with an interval of {}",interval);
+        logger.debug("Created a FileAlterationMonitor with an interval of {}", interval);
         monitor = new FileAlterationMonitor(interval);
         try {
             monitor.start();

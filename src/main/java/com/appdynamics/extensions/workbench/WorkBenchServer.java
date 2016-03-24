@@ -57,8 +57,16 @@ public class WorkBenchServer extends NanoHTTPD {
         } else if (uri.startsWith("/api/metric-tree")) {
             return newFixedLengthResponse(Response.Status.OK, "application/json", treeBuilder.metricTreeAsJson());
         } else if (uri.startsWith("/api/metric-paths")) {
-            String paths = JsonUtils.asJson(metricStore.getMetricPaths());
-            return  newFixedLengthResponse(Response.Status.OK, "application/json", paths);
+            String paths;
+            String contentType;
+            if (isContentTypeJson(session)) {
+                paths = JsonUtils.asJson(metricStore.getMetricPaths());
+                contentType = "application/json";
+            } else {
+                paths = metricStore.getMetricPathsAsPlainStr();
+                contentType = "text/plain";
+            }
+            return newFixedLengthResponse(Response.Status.OK, contentType, paths);
         } else if (uri.startsWith("/api/metric-data")) {
             Map<String, String> parms = session.getParms();
             String metricPath = parms.get("metric-path");
@@ -70,9 +78,25 @@ public class WorkBenchServer extends NanoHTTPD {
             List<WorkbenchMetricStore.MetricData> metricData = metricStore.getMetricData(metricPath);
             return newFixedLengthResponse(Response.Status.OK, "application/json", JsonUtils.asJson(metricData));
         } else if (uri.startsWith("/api/stats")) {
-            return newFixedLengthResponse(Response.Status.OK, "application/json", JsonUtils.asJson(metricStore.getStats()));
+            String content;
+            String contentType;
+            if (isContentTypeJson(session)) {
+                content = JsonUtils.asJson(metricStore.getStats());
+                contentType = "application/json";
+            } else {
+                content = metricStore.getStatsAsStr();
+                contentType = "text/plain";
+            }
+            return newFixedLengthResponse(Response.Status.OK, contentType, content);
+        } else{
+            return newFixedLengthResponse(Response.Status.NOT_FOUND, "application/json", "");
         }
-        return newFixedLengthResponse(Response.Status.OK, "application/json", "[]");
+
+    }
+
+    private boolean isContentTypeJson(IHTTPSession session) {
+        String accept = session.getHeaders().get("accept");
+        return accept != null && accept.contains("json");
     }
 
     protected InputStream getResourceAsStream(String uri) {

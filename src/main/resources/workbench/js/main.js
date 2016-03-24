@@ -19,15 +19,17 @@ function initTree() {
     scheduleTasks();
 }
 
-var lastRefreshed = new Date().getTime();
+var lastRefreshed = -1;
 
 function scheduleTasks() {
     $.ajax({
         url: '../api/stats',
         dataType: 'json'
     }).done(function (data) {
-        if (data.lastRefreshed > lastRefreshed) {
-           $('#last-refreshed').css('display','inline-block');
+        if (lastRefreshed == -1) {
+            lastRefreshed = data.lastRefreshed;
+        } else if (data.lastRefreshed > lastRefreshed) {
+            $('#last-refreshed').css('display', 'inline-block');
         }
         $('#metric-count').text('Total Registered Metrics = ' + data.metricCount);
         showErrors(data);

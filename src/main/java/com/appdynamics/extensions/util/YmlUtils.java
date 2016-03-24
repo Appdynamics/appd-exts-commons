@@ -3,6 +3,7 @@ package com.appdynamics.extensions.util;
 import com.google.common.base.Strings;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by abey.tom on 3/14/16.
@@ -49,6 +50,26 @@ public class YmlUtils {
             if (!Strings.isNullOrEmpty(val)) {
                 return val.trim().split(",");
             }
+        }
+        return null;
+    }
+
+    //iteratively get a nested object from the YML Map
+    public static Object getNestedObject(Map map, String... keys) {
+        if (map != null && keys != null) {
+            Map parent = map;
+            for (int i = 0; i < keys.length; i++) {
+                String key = keys[i];
+                Object o = parent.get(key);
+                if (o instanceof Map) {
+                    parent = (Map) o;
+                } else if (i == keys.length - 1) {
+                    return o;
+                } else {
+                    return null;
+                }
+            }
+            return parent;
         }
         return null;
     }

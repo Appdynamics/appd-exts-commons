@@ -1,9 +1,14 @@
 package com.appdynamics.extensions.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -16,9 +21,74 @@ public class JsonUtils {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 return mapper.writeValueAsString(object);
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 logger.error("Error while converting the Object to Json " + object, e);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the nested JSON object based on a path. The wildcards are also supported
+     *
+     * @param entry
+     * @param nested
+     * @return
+     */
+    public static JsonNode getNestedObject(JsonNode entry, String... nested) {
+        if (entry != null && nested != null) {
+            JsonNode parent = entry;
+            for (int i = 0; i < nested.length; i++) {
+                String key = nested[i];
+                // * is used in hostInfo
+                if ("*".equals(key)) {
+                    ArrayNode children = getChildren(parent);
+                    // If the wildcard comes in the last, then return the child nodes
+                    if (nested.length == i + 1) {
+                        return children;
+                    } else {
+                        //Iterate thru the children, and get the matching nodes.
+                        //Split the nested and take the remaining part of it.
+                        String[] arr = new String[nested.length - i - 1];
+                        System.arraycopy(nested, i + 1, arr, 0, arr.length);
+                        ArrayNode arrayNodes = JsonNodeFactory.instance.arrayNode();
+                        for (JsonNode jsonNode : children) {
+                            //Using the remaining part of nested, get the nested objects
+                            JsonNode jsonObject = getNestedObject(jsonNode, arr);
+                            if (jsonObject instanceof ArrayNode) {
+                                //If multiple nodes are matched, add it to an array
+                                ArrayNode nodes = (ArrayNode) jsonObject;
+                                for (JsonNode node : nodes) {
+                                    arrayNodes.add(node);
+                                }
+                            } else if (jsonObject != null) {
+                                arrayNodes.add(jsonObject);
+                            }
+                        }
+                        return arrayNodes;
+                    }
+                } else {
+                    parent = parent.get(key);
+                    if (parent == null) {
+                        return null;
+                    }
+                }
+            }
+            return parent;
+        } else {
+            return null;
+        }
+    }
+
+    private static ArrayNode getChildren(JsonNode node) {
+        if (node != null) {
+            ArrayNode nodes = JsonNodeFactory.instance.arrayNode();
+            Iterator<JsonNode> elements = node.getElements();
+            while (elements.hasNext()) {
+                JsonNode jsonNode = elements.next();
+                nodes.add(jsonNode);
+            }
+            return nodes;
         }
         return null;
     }

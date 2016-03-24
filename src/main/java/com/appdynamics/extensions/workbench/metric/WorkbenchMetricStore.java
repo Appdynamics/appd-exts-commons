@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.workbench.metric;
 
+import com.appdynamics.extensions.StringUtils;
 import com.appdynamics.extensions.util.MetricWriteHelper;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
 import org.slf4j.Logger;
@@ -34,7 +35,20 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         return _instance;
     }
 
+    @Override
+    public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
+        if(StringUtils.hasText(metricValue)){
+            addMetric(metricPath,new BigDecimal(metricValue));
+        }else{
+            logger.error("The value of [{}] is {}", metricPath, metricValue);
+        }
+    }
+
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
+        addMetric(metricPath, value);
+    }
+
+    private void addMetric(String metricPath, BigDecimal value) {
         logger.debug("Adding the metric [{}] with value [{}]", metricPath, value);
         Queue<MetricValue> values = metricMap.get(metricPath);
         if (values == null) {
@@ -58,6 +72,21 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         return metricMap.keySet();
     }
 
+    public String getMetricPathsAsPlainStr() {
+        Set<String> metricPaths = getMetricPaths();
+        if (metricPaths != null) {
+            ArrayList<String> strings = new ArrayList<String>(metricPaths);
+            Collections.sort(strings);
+            StringBuilder sb = new StringBuilder();
+            for (String string : strings) {
+                sb.append(string).append("\n");
+            }
+            return sb.toString();
+        } else {
+            return "";
+        }
+    }
+
     public List<MetricData> getMetricData(String metricPath) {
         Queue<MetricValue> values = metricMap.get(metricPath);
         if (values != null) {
@@ -66,6 +95,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         }
         return null;
     }
+
 
     public static class MetricData {
         private String metricPath;
@@ -139,6 +169,14 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         stats.setMetricCount(metricMap.keySet().size());
         stats.setErrors(errors);
         return stats;
+    }
+
+    public String getStatsAsStr() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Last Refreshed: ").append(new Date(lastMetricRefresh)).append("\n");
+        sb.append("  Metric Count: ").append(metricMap.keySet().size()).append("\n");
+        sb.append("   Error Count: ").append(errors != null ? errors.size() : "0").append("\n");
+        return sb.toString();
     }
 
     @Override

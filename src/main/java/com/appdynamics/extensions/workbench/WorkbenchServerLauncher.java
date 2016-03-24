@@ -16,11 +16,11 @@ import java.util.List;
 /**
  * Created by abey.tom on 3/16/16.
  */
-public class WebServerLauncher {
+public class WorkbenchServerLauncher {
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        File installDir = PathResolver.resolveDirectory(WebServerLauncher.class);
+        File installDir = PathResolver.resolveDirectory(WorkbenchServerLauncher.class);
         if (installDir != null && installDir.exists()) {
             Monitor monitor = Monitor.from(installDir);
             List<File> files = loadAllJars(installDir, monitor);
