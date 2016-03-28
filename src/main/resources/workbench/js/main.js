@@ -41,10 +41,13 @@ function scheduleTasks() {
 var showErrors = function (data) {
     if (data.errors != undefined && data.errors.length > 0) {
         var html = '<ol>';
-        for (var i = 0; i < data.errors.length; i++) {
+        for (var i = data.errors.length -1; i >= 0; i--) {
             var err = data.errors[i];
-            html += '<li><div><b>' + err.message + "</b></div>";
-            html += '<div>' + err.stackTrace + "</div></li>";
+            html += '<li> <b>'+new Date(err.date)+': ';
+            var msgSpan = $('<p/>').text(err.message);
+            html += msgSpan.html()+'</b>';
+            var stackTraceDiv = $('<p/>').text(err.stackTrace);
+            html += '<div>'+stackTraceDiv.html()+ "</div></li>";
         }
         html+= '</ol>'
         $('#error-details').html(html);

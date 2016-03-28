@@ -31,9 +31,8 @@ public class WorkbenchServerLauncher {
                 if (java.exists()) {
                     ProcessBuilder builder = new ProcessBuilder();
                     builder.inheritIO();
-                    File log4j = new File(installDir.getParentFile().getParentFile(), "conf/logging/log4j.xml");
                     String[] command = {java.getAbsolutePath(),
-                            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+//                            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
                             "-cp",
                             cp,
                             WorkBenchServer.class.getName()};

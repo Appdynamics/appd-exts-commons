@@ -107,7 +107,7 @@ public class MonitorConfiguration {
         if (!Strings.isNullOrEmpty(metricPrefix)) {
             return metricPrefix;
         } else {
-            throw new RuntimeException("The metricPrefix is not resolved. Please make sure that the metricPrefix is set in the configuration");
+            return defaultMetricPrefix;
         }
     }
 

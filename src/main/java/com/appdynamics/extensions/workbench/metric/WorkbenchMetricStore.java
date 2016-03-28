@@ -218,10 +218,12 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
     public static class ErrorDetail {
         private String message;
         private String stackTrace;
+        private Date date;
 
         public ErrorDetail(String message, String stackTrace) {
             this.message = message;
             this.stackTrace = stackTrace;
+            this.date = new Date();
         }
 
         public String getMessage() {
@@ -230,6 +232,10 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
 
         public String getStackTrace() {
             return stackTrace;
+        }
+
+        public Date getDate() {
+            return date;
         }
     }
 }
