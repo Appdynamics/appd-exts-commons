@@ -4,7 +4,7 @@
 
     <groupId>com.appdynamics</groupId>
     <artifactId>appd-exts-commons</artifactId>
-    <version>1.5.5</version>
+    <version>1.5.6</version>
     <packaging>jar</packaging>
     <name>extension-utils</name>
     <properties>
@@ -98,6 +98,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>

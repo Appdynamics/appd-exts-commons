@@ -2,6 +2,7 @@ package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.PathResolver;
+import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.LoggerFactory;
@@ -146,7 +147,7 @@ public class AgentEnvironmentResolver {
 
     public String getPassword() {
         if (resolved) {
-            return cInfo.getPassword();
+            return CryptoUtil.encode(cInfo.getPassword());
         }
         return null;
     }

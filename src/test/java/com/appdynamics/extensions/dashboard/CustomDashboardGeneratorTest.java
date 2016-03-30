@@ -183,4 +183,16 @@ public class CustomDashboardGeneratorTest {
         Assert.assertEquals("Application Infrastructure Performance|Tier1|Container", prefix);
     }
 
+//    @Test
+//    public void loginTest(){
+//        Map<String, ?> config = YmlReader.readFromFile(new File("/Users/abey.tom/cstools/loganalyzer/zendesk/58694/March-29-2016_12.26.19/config.yml"));
+//        Map dashboard = (Map) config.get("customDashboard");
+//        String metricPrefix = "Application Infrastructure Performance|Tier1";
+//        HashSet<String> names = new HashSet<String>();
+//        names.add("server");
+//        CustomDashboardGenerator docker = new CustomDashboardGenerator(names, "Docker", dashboard);
+//        docker.persistDashboard("Test",new Xml("<xml/>"));
+//
+//    }
+
 }

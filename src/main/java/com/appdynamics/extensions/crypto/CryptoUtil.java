@@ -1,6 +1,8 @@
 package com.appdynamics.extensions.crypto;
 
 import com.google.common.base.Strings;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,8 +11,9 @@ import java.util.Map;
 import static com.appdynamics.TaskInputArgs.*;
 
 public class CryptoUtil {
-
     public static final Logger logger = LoggerFactory.getLogger(CryptoUtil.class);
+    private static URLCodec codec = new URLCodec("UTF-8");
+
     public static final String SYSTEM_ARG_KEY = "appdynamics.extensions.key";
 
     public static String getPassword(Map<String,String> taskArgs){
@@ -31,6 +34,17 @@ public class CryptoUtil {
             }
         }
         return "";
+    }
+
+    public static String encode(String val) {
+        if (!Strings.isNullOrEmpty(val)) {
+            try {
+                return codec.encode(val);
+            } catch (EncoderException e) {
+                logger.error("Error while encoding the value [cant log might be a password]", e);
+            }
+        }
+        return val;
     }
 
 }

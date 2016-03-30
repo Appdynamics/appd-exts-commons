@@ -2,6 +2,8 @@ package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.NumberUtils;
+import com.appdynamics.extensions.crypto.CryptoUtil;
+import com.appdynamics.extensions.crypto.Decryptor;
 import com.google.common.base.Strings;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthPolicy;
@@ -32,6 +34,7 @@ import static com.appdynamics.TaskInputArgs.*;
  */
 public class SimpleHttpClient {
     public static final Logger logger = LoggerFactory.getLogger(SimpleHttpClient.class);
+
     private final HttpConnectionManager httpConnectionManager;
     private HttpClient httpClient;
     private Map<String, String> taskArgs;
@@ -186,9 +189,16 @@ public class SimpleHttpClient {
         if (taskArgs.containsKey(PROXY_PASSWORD)) {
             return taskArgs.get(PROXY_PASSWORD);
         } else if (taskArgs.containsKey(PROXY_PASSWORD_ENCRYPTED)) {
-            String encrypted = taskArgs.get(PROXY_PASSWORD_ENCRYPTED);
-            return encrypted;
-            // return Encryptor.getInstance().decrypt(encrypted);
+            String encPwd = taskArgs.get(PROXY_PASSWORD_ENCRYPTED);
+            String encryptionKey = taskArgs.get(ENCRYPTION_KEY);
+            if(Strings.isNullOrEmpty(encryptionKey)){
+                encryptionKey = System.getProperty(CryptoUtil.SYSTEM_ARG_KEY);
+            }
+            if(!Strings.isNullOrEmpty(encryptionKey)){
+                return new Decryptor(encryptionKey).decrypt(encPwd);
+            } else{
+                logger.error("The encryption key is null, cannot decrypt the proxy password");
+            }
         }
         return null;
     }
