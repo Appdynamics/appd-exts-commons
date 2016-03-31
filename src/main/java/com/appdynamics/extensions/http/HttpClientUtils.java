@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.http;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -11,17 +12,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by abey.tom on 3/15/16.
+ * Utility methods to invoke the http end point using the given http client.
+ * All these methods are silent methods, it will not throw errors. It will return null response on error.
+ * It will take care of logging the error and will log the response content if debug logging is enabled.
  */
 public class HttpClientUtils {
 
     public static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
 
     public static <T> T getResponseAsJson(CloseableHttpClient httpClient, final String url, final Class<T> clazz) {
-        Callback<T> callback = new Callback<T>() {
-            public T getResponse(HttpEntity entity) {
+        ResponseConverter<T> responseConverter = new ResponseConverter<T>() {
+            public T convert(HttpEntity entity) {
                 ObjectMapper mapper = new ObjectMapper();
                 try {
                     //If the debug is enabled, then print the response.
@@ -39,10 +44,44 @@ public class HttpClientUtils {
                 }
             }
         };
-        return getResponse(httpClient, url, callback);
+        return getResponse(httpClient, url, responseConverter);
     }
 
-    private static <T> T getResponse(CloseableHttpClient httpClient, String url, Callback<T> callback) {
+    public static String getResponseAsStr(CloseableHttpClient httpClient, final String url) {
+        return getResponse(httpClient, url, new ResponseConverter<String>() {
+            public String convert(HttpEntity entity) {
+                try {
+                    String response = EntityUtils.toString(entity);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("The response of the url [{}]  is [{}]", url, response);
+                    }
+                    return response;
+                } catch (IOException e) {
+                    logger.error("Error while converting response of url [" + url + "] to string " + entity, e);
+                    return null;
+                }
+            }
+        });
+    }
+
+    public static List<String> getResponseAsLines(CloseableHttpClient httpClient, final String url) {
+        return getResponse(httpClient, url, new ResponseConverter<List<String>>() {
+            public List<String> convert(HttpEntity entity) {
+                try {
+                    List<String> lines = IOUtils.readLines(entity.getContent());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("The response of the url [{}]  is [{}]", url, lines);
+                    }
+                    return lines;
+                } catch (IOException e) {
+                    logger.error("Error while converting response of url [" + url + "] to lines " + entity, e);
+                    return null;
+                }
+            }
+        });
+    }
+
+    public static <T> T getResponse(CloseableHttpClient httpClient, String url, ResponseConverter<T> converter) {
         logger.debug("Invoking the URL [{}]", url);
         HttpGet get = new HttpGet(url);
         CloseableHttpResponse response = null;
@@ -55,7 +94,7 @@ public class HttpClientUtils {
                 logger.trace("The response headers are {}", response.getAllHeaders());
                 HttpEntity entity = response.getEntity();
                 if (entity != null && entity.getContent() != null) {
-                    return callback.getResponse(entity);
+                    return converter.convert(entity);
                 } else {
                     logger.error("The entity content is null. Entity = {} and Content = {}", entity, entity.getContent());
                 }
@@ -65,6 +104,13 @@ public class HttpClientUtils {
         } catch (Exception e) {
             printError(response, url);
             logger.error("Exception while executing the request [" + url + "]", e);
+        } finally {
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                }
+            }
         }
         return null;
     }
@@ -89,7 +135,12 @@ public class HttpClientUtils {
         }
     }
 
-    public interface Callback<T> {
-        T getResponse(HttpEntity entity);
+    /**
+     * This class will be invoked to convert the response to a suitable format.
+     *
+     * @param <T>
+     */
+    public interface ResponseConverter<T> {
+        T convert(HttpEntity entity);
     }
 }
