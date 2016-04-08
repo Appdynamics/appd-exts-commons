@@ -7,20 +7,31 @@ import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.*;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -35,9 +46,7 @@ import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -82,22 +91,45 @@ public class Http4ClientBuilder {
         return builder;
     }
 
+    private static void configureCookieStore(Map<String, ?> connection, HttpClientBuilder builder) {
+        Boolean enableCookiesFlag = YmlUtils.getBoolean(connection.get("enableCookies"));
+        // Default is false; unless explicitly enabled
+        if (!Boolean.TRUE.equals(enableCookiesFlag)) {
+            logger.debug("Setting the cookie store to no operation cookie store");
+            builder.setDefaultCookieStore(new NoOpCookieStore());
+        }
+    }
+
     private static void configureConnectionProps(Map<String, ?> propMap, HttpClientBuilder builder) {
         Map connection = (Map) propMap.get("connection");
         if (connection != null) {
-            Integer socketTimeout = YmlUtils.getInteger(connection.get("socketTimeout"));
-            if (socketTimeout == null) {
-                socketTimeout = 5000;
-            }
-            Integer connectTimeout = YmlUtils.getInteger(connection.get("connectTimeout"));
-            if (connectTimeout == null) {
-                connectTimeout = 5000;
-            }
-            logger.info("Setting the connect timeout to {} and socket timeout to {}", connectTimeout, socketTimeout);
-            RequestConfig.Builder configBuilder = RequestConfig.custom()
-                    .setConnectTimeout(connectTimeout).setSocketTimeout(socketTimeout);
-            builder.setDefaultRequestConfig(configBuilder.build());
+            configureTimeouts(builder, connection);
+            configureCookieStore(propMap, builder);
+            configurePreemptiveAuthentication(connection, builder);
         }
+    }
+
+    private static void configurePreemptiveAuthentication(Map connection, HttpClientBuilder builder) {
+        Boolean enablePreemptiveAuth = YmlUtils.getBoolean(connection.get("enablePreemptiveAuth"));
+        //Default is true
+        if (!Boolean.FALSE.equals(enablePreemptiveAuth)) {
+            builder.addInterceptorLast(new PreemptiveAuthenticationInterceptor());
+        }
+    }
+
+    private static void configureTimeouts(HttpClientBuilder builder, Map connection) {
+        Integer socketTimeout = YmlUtils.getInteger(connection.get("socketTimeout"));
+        if (socketTimeout == null) {
+            socketTimeout = 5000;
+        }
+        Integer connectTimeout = YmlUtils.getInteger(connection.get("connectTimeout"));
+        if (connectTimeout == null) {
+            connectTimeout = 5000;
+        }
+        logger.info("Setting the connect timeout to {} and socket timeout to {}", connectTimeout, socketTimeout);
+        RequestConfig.Builder configBuilder = RequestConfig.custom()
+                .setConnectTimeout(connectTimeout).setSocketTimeout(socketTimeout);
+        builder.setDefaultRequestConfig(configBuilder.build());
     }
 
     public static void configureAuthentication(Map<String, ?> config, HttpClientBuilder builder
@@ -106,14 +138,16 @@ public class Http4ClientBuilder {
         if (servers != null && !servers.isEmpty()) {
             for (Map<String, ?> server : servers) {
                 String username = (String) server.get(TaskInputArgs.USER);
+                AuthScope authScope = createAuthScope(server);
                 if (!Strings.isNullOrEmpty(username)) {
-                    AuthScope authScope = createAuthScope(server);
                     if (authScope != null) {
                         credsProvider.setCredentials(
                                 authScope,
                                 new UsernamePasswordCredentials(username, getPassword(server, config)));
                         logger.info("Created credentials for auth scope {}", authScope);
                     }
+                } else {
+                    logger.info("Credentials are not set for {}",authScope);
                 }
             }
         }
@@ -351,6 +385,57 @@ public class Http4ClientBuilder {
 
         public boolean verify(String s, SSLSession sslSession) {
             return true;
+        }
+    }
+
+    private static class NoOpCookieStore implements CookieStore {
+        private static final List<Cookie> cookies = Collections.emptyList();
+        public void addCookie(Cookie cookie) {
+        }
+
+        public List<Cookie> getCookies() {
+            return cookies;
+        }
+
+        public boolean clearExpired(Date date) {
+            return true;
+        }
+
+        public void clear() {
+        }
+    }
+
+    private static class PreemptiveAuthenticationInterceptor implements HttpRequestInterceptor {
+        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+            AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+            if (authState != null && authState.getAuthScheme() == null) {
+                BasicScheme authScheme = new BasicScheme();
+                CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(HttpClientContext.CREDS_PROVIDER);
+                HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
+                if (credsProvider != null && targetHost != null) {
+                    Credentials creds = credsProvider.getCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()));
+                    if (creds != null) {
+                        authState.update(authScheme, creds);
+                        logger.debug("Added the BasicScheme to uri [{}]", targetHost);
+                    } else {
+                        logger.debug("Cannot add PreemptiveAuth; No credentials exist for host {} and port {}"
+                                , targetHost.getHostName(), targetHost.getPort());
+                    }
+                } else {
+                    if (targetHost == null) {
+                        logger.debug("Cannot add PreemptiveAuth; The context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST) is null");
+                    }
+                    if (credsProvider == null) {
+                        logger.debug("Cannot add PreemptiveAuth; The context.getAttribute(HttpClientContext.CREDS_PROVIDER)");
+                    }
+                }
+            } else {
+                if (authState != null && authState.getAuthScheme() != null) {
+                    logger.debug("Cannot add PreemptiveAuth; AuthScheme already exists for url {}", request.getRequestLine());
+                } else {
+                    logger.debug("Cannot add PreemptiveAuth; The context.getAttribute(HttpClientContext.TARGET_AUTH_STATE) is null");
+                }
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
 
     <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{ABSOLUTE} %5p [%t] %c{1} - %m%n"/>
+            <param name="ConversionPattern" value="[%t] %d{DATE} %5p %c{1} - %m%n"/>
         </layout>
     </appender>
 
@@ -20,7 +20,7 @@
     </logger>
 
     <root>
-        <priority value="error"/>
+        <priority value="debug"/>
         <appender-ref ref="ConsoleAppender"/>
     </root>
 </log4j:configuration>

@@ -153,6 +153,12 @@ public class WorkBenchServer extends NanoHTTPD {
         appDlogger.setAdditivity(false);
         appDlogger.addAppender(fileAppender);
 
+//        org.apache.log4j.Logger extLogger = org.apache.log4j.Logger.getLogger("org.apache.http");
+//        extLogger.addAppender(consoleAppender);
+//        extLogger.setLevel(Level.DEBUG);
+//        extLogger.setAdditivity(false);
+//        extLogger.addAppender(fileAppender);
+
     }
 
     public static void bootstrap(String[] args, File extensionDir) throws IOException {
