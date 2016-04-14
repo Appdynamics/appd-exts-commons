@@ -207,6 +207,11 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         }
     }
 
+    @Override
+    public boolean isScheduledMode() {
+        return false;
+    }
+
     public void setResetListener(ResetListener listener) {
         this.listener = listener;
     }

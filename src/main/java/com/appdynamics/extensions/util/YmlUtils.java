@@ -73,4 +73,19 @@ public class YmlUtils {
         }
         return null;
     }
+
+    public static int getInt(Object value, int defaultVal) {
+        if (value instanceof Integer) {
+            return (Integer) value;
+        } else{
+            return defaultVal;
+        }
+    }
+    public static long getLong(Object value, long defaultVal) {
+        if (value instanceof Long) {
+            return (Long) value;
+        } else{
+            return defaultVal;
+        }
+    }
 }

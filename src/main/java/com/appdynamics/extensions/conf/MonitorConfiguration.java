@@ -4,8 +4,8 @@ import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.StringUtils;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.util.AssertUtils;
-import com.appdynamics.extensions.util.PerMinValueCalculator;
 import com.appdynamics.extensions.util.MetricWriteHelper;
+import com.appdynamics.extensions.util.PerMinValueCalculator;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
@@ -23,18 +23,21 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 /**
  * Created by abey.tom on 3/14/16.
  * <p/>
  * A file which loads all the configuration
+ * <p/>
+ * TODO checkIfInitialized should be called after each reload of configuration
+ * TODO have the default-yml in the codebase and merge it with the other YML
  */
 public class MonitorConfiguration {
     public static final Logger logger = LoggerFactory.getLogger(MonitorConfiguration.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
+    private ScheduledExecutorService scheduler;
+    private Runnable taskRunner;
 
     public enum ConfItem {
         CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE, METRIC_WRITE_HELPER
@@ -55,12 +58,24 @@ public class MonitorConfiguration {
     private PerMinValueCalculator perMinValueCalculator;
     private MetricWriteHelper metricWriter;
 
-    public MonitorConfiguration(String defaultMetricPrefix) {
+    public MonitorConfiguration(String defaultMetricPrefix, Runnable taskRunner, MetricWriteHelper metricWriter) {
         AssertUtils.assertNotNull(defaultMetricPrefix, "The Defaut Metric Prefix cannot be empty");
+        AssertUtils.assertNotNull(taskRunner, "The Runnable[taskRunner] cannot be null");
+        AssertUtils.assertNotNull(metricWriter, "The MetricWriteHelper cannot be null");
         this.defaultMetricPrefix = StringUtils.trim(defaultMetricPrefix.trim(), "|");
+        this.taskRunner = taskRunner;
+        this.metricWriter = metricWriter;
         installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         if (installDir == null) {
             throw new RuntimeException("The install directory cannot be located.");
+        }
+    }
+
+    public void executeTask() {
+        if (scheduler == null) {
+            taskRunner.run();
+        } else {
+            metricWriter.printAllFromCache();
         }
     }
 
@@ -175,7 +190,41 @@ public class MonitorConfiguration {
             metricPrefix = getMetricPrefix((String) config.get("metricPrefix"), defaultMetricPrefix);
             initExecutorService(config);
             initHttpClient(config);
+            initScheduledTask(config);
+            metricWriter.setScheduledMode(scheduler != null);
         }
+    }
+
+    private void initScheduledTask(Map<String, ?> config) {
+        Map<String, ?> taskSchedule = (Map<String, ?>) config.get("taskSchedule");
+        if (taskSchedule != null) {
+            createTaskSchedule(taskSchedule);
+        } else {
+            if (scheduler != null) {
+                scheduler.shutdown();
+                scheduler = null;
+            }
+        }
+    }
+
+    public void createTaskSchedule(Map<String, ?> taskSchedule) {
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
+        int numberOfThreads = YmlUtils.getInt(taskSchedule.get("numberOfThreads"), 1);
+        int taskDelaySeconds = YmlUtils.getInt(taskSchedule.get("taskDelaySeconds"), 300);
+        int initialDelaySeconds = YmlUtils.getInt(taskSchedule.get("initialDelaySeconds"), 10);
+        scheduler = Executors.newScheduledThreadPool(numberOfThreads);
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+                try {
+                    taskRunner.run();
+                } catch (Exception e) {
+                    logger.error("Error while running the Task " + taskRunner, e);
+                }
+            }
+        }, initialDelaySeconds, taskDelaySeconds, TimeUnit.SECONDS);
+        logger.info("Created a Task Scheduler for {} with a delay of {} seconds", taskRunner, taskDelaySeconds);
     }
 
     private void initHttpClient(Map<String, ?> config) {

@@ -13,7 +13,6 @@ public class Metric {
     private Object metricValue;
     private MetricProperties metricProperties;
 
-
     public Metric(String metricKey, Object metricValue,MetricProperties metricProperties) {
         this.metricKey = metricKey;
         this.metricValue = metricValue;
