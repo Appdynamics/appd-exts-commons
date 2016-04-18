@@ -20,10 +20,9 @@ public class AgentEnvironmentResolver {
     private ControllerInfo cInfo;
     private boolean resolved;
     private Map dashboardConfig;
-    private boolean resolveTier;
     private List<String> unresolvedProps;
 
-    public AgentEnvironmentResolver(Map dashboardConfig, boolean resolveTier) {
+    public AgentEnvironmentResolver(Map dashboardConfig) {
         ControllerInfo cInfoYml = ControllerInfo.fromYml(dashboardConfig);
         logger.debug("The resolved properties from yml are {}", cInfoYml);
         ControllerInfo cInfoSysProp = ControllerInfo.fromSystemProperties();
@@ -31,7 +30,7 @@ public class AgentEnvironmentResolver {
         ControllerInfo cInfoXml = getControllerInfoFromXml();
         logger.debug("The resolved properties from Xml are {}", cInfoXml);
         cInfoXml.merge(cInfoSysProp).merge(cInfoYml);
-        validateRequiredInfo(cInfoXml, resolveTier);
+        validateRequiredInfo(cInfoXml);
         if (unresolvedProps != null) {
             logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
             resolved = false;
@@ -39,12 +38,11 @@ public class AgentEnvironmentResolver {
             resolved = true;
         }
         this.dashboardConfig = dashboardConfig;
-        this.resolveTier = resolveTier;
         this.cInfo = cInfoXml;
         logger.debug("The final resolved properties are {}", cInfo);
     }
 
-    private void validateRequiredInfo(ControllerInfo cInfo, boolean resolveTier) {
+    private void validateRequiredInfo(ControllerInfo cInfo) {
         check(TaskInputArgs.USER, cInfo.getUsername());
         check(TaskInputArgs.PASSWORD, cInfo.getPassword());
         check("account", cInfo.getAccount());
@@ -52,9 +50,7 @@ public class AgentEnvironmentResolver {
         check("controllerHost", cInfo.getControllerHost());
         check("controllerPort", cInfo.getControllerPort());
         check("controllerSslEnabled", cInfo.getControllerSslEnabled());
-        if (resolveTier) {
-            check("tierName", cInfo.getTierName());
-        }
+        check("tierName", cInfo.getTierName());
     }
 
     protected ControllerInfo getControllerInfoFromXml() {

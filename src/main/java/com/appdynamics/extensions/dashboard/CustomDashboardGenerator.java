@@ -40,7 +40,7 @@ public class CustomDashboardGenerator {
         this.instanceNames = instanceNames;
         this.metricPrefix = StringUtils.trim(metricPrefix, "|");
         this.dashboardConfig = dashboardConfig;
-        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig, !metricPrefix.startsWith(TIER_METRIC_PREFIX));
+        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig);
         this.dashboardUploader = new CustomDashboardUploader();
     }
 
@@ -73,19 +73,18 @@ public class CustomDashboardGenerator {
 
     protected StringBuilder buildMetricPrefix(String metricPrefix) {
         StringBuilder ctrlMetricPrefix = new StringBuilder();
+        String tierName = agentEnvResolver.getTierName();
         if (metricPrefix.startsWith(TIER_METRIC_PREFIX)) {
             int endIndex = metricPrefix.indexOf("|", 17);
             if (endIndex == -1) {
                 endIndex = metricPrefix.length();
             }
-            String tierName = metricPrefix.substring(17, endIndex);
             ctrlMetricPrefix.append("Application Infrastructure Performance|").append(tierName);
             if (metricPrefix.length() - 1 > endIndex) {
                 ctrlMetricPrefix.append("|")
                         .append(StringUtils.trim(metricPrefix.substring(endIndex), "|"));
             }
         } else {
-            String tierName = agentEnvResolver.getTierName();
             ctrlMetricPrefix.append("Application Infrastructure Performance|")
                     .append(tierName)
                     .append("|").append(StringUtils.trim(metricPrefix, "|"));
@@ -177,9 +176,8 @@ public class CustomDashboardGenerator {
             Map<String, String> argsMap = getArgsMap();
             dashboardUploader.uploadDashboard(dashboardName, xml, argsMap,
                     getBoolean(dashboardConfig, "overwriteDashboard"));
-        } else {
-            writeDashboardToFile(dashboardName, xml);
         }
+        writeDashboardToFile(dashboardName, xml);
     }
 
 
@@ -212,6 +210,9 @@ public class CustomDashboardGenerator {
     private void writeDashboardToFile(String dashboardName, Xml xml) {
         File file = PathResolver.resolveDirectory(AManagedMonitor.class);
         File dir = new File(file, "logs");
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
         try {
             FileWriter writer = new FileWriter(new File(dir, dashboardName + ".xml"));
             writer.write(xml.toString());
@@ -318,5 +319,9 @@ public class CustomDashboardGenerator {
             return metric.substring(itemStart, endIndex);
         }
         return null;
+    }
+
+    protected void setAgentEnvResolver(AgentEnvironmentResolver agentEnvResolver) {
+        this.agentEnvResolver = agentEnvResolver;
     }
 }

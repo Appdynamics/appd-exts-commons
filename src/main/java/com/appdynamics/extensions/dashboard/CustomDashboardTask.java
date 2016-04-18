@@ -33,7 +33,7 @@ public class CustomDashboardTask {
         if (dashboardGenerator != null) {
             long current = System.currentTimeMillis();
             //if it is a 2 second diff, then also run it.
-            if (current + 2 * 60 * 10000 > nextRunTime) {
+            if (current + 3 * 1000 > nextRunTime) {
                 try {
                     dashboardGenerator.createDashboards(metrics);
                 } catch (Exception e) {

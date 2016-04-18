@@ -140,6 +140,10 @@ public class CustomDashboardGeneratorTest {
 
     @Test
     public void buildMetricPrefix() {
+        AgentEnvironmentResolver resolver = Mockito.mock(AgentEnvironmentResolver.class);
+        customDashboardGenerator.setAgentEnvResolver(resolver);
+        Mockito.doReturn("Tier1").when(resolver).getTierName();
+
         String metricPrefix = "Server|Component:Tier1|Custom Metrics|Docker";
         String ctrlMetricPrefix = customDashboardGenerator.buildMetricPrefix(metricPrefix).toString();
         Assert.assertEquals("Application Infrastructure Performance|Tier1|Custom Metrics|Docker", ctrlMetricPrefix);
@@ -158,7 +162,7 @@ public class CustomDashboardGeneratorTest {
 
         metricPrefix = "Custom Metrics|Docker|||";
         ctrlMetricPrefix = customDashboardGenerator.buildMetricPrefix(metricPrefix).toString();
-        Assert.assertEquals("Application Infrastructure Performance|tier|Custom Metrics|Docker", ctrlMetricPrefix);
+        Assert.assertEquals("Application Infrastructure Performance|Tier1|Custom Metrics|Docker", ctrlMetricPrefix);
     }
 
     @Test
