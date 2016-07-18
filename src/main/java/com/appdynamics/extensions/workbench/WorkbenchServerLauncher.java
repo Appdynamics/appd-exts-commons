@@ -26,7 +26,7 @@ public class WorkbenchServerLauncher {
             List<File> files = loadAllJars(installDir, monitor);
             if (files != null && !files.isEmpty()) {
                 String property = System.getProperty("java.home");
-                File java = new File(property, "bin/java");
+                File java = new File(property, "bin" + File.separator + "java");
                 String cp = asClassPath(files);
                 if (java.exists()) {
                     ProcessBuilder builder = new ProcessBuilder();
