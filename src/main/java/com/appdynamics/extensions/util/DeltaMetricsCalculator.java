@@ -15,7 +15,7 @@ public class DeltaMetricsCalculator {
         this.deltaCache = CacheBuilder.newBuilder().expireAfterWrite(durationInSeconds, TimeUnit.MINUTES).build();
     }
 
-    BigDecimal calculateDelta(String metricPath, BigDecimal currentValue){
+    public BigDecimal calculateDelta(String metricPath, BigDecimal currentValue){
         if(currentValue != null) {
             BigDecimal prev = (BigDecimal)this.deltaCache.getIfPresent(metricPath);
             this.deltaCache.put(metricPath, currentValue);
