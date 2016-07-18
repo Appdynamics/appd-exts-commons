@@ -26,7 +26,7 @@ public class WorkbenchServerLauncher {
             List<File> files = loadAllJars(installDir, monitor);
             if (files != null && !files.isEmpty()) {
                 String property = System.getProperty("java.home");
-                File java = new File(property, "bin" + File.separator + "java");
+                File java = new File(property, "bin" + File.separator + getJavaExecutable());
                 String cp = asClassPath(files);
                 if (java.exists()) {
                     ProcessBuilder builder = new ProcessBuilder();
@@ -52,6 +52,13 @@ public class WorkbenchServerLauncher {
         } else {
             error("Cannot locate the install directory");
         }
+    }
+
+    private static String getJavaExecutable() {
+        if(isWin()){
+            return "java.exe";
+        }
+        return "java";
     }
 
     private static String asClassPath(List<File> files) {
