@@ -38,7 +38,7 @@ public class CustomDashboardUploader {
 
     public void uploadDashboard(String dashboardName, Xml xml, Map<String, String> argsMap, boolean overwrite) {
         setProxyIfApplicable(argsMap);
-        SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(2000).socketTimeout(2000).build();
+        SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(10000).socketTimeout(15000).build();
         try {
             Response response = client.target().path("controller/auth?action=login").get();
             if (response.getStatus() == 200) {

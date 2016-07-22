@@ -35,16 +35,23 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (isScheduledMode()) {
-            Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
-            metricCache.put(metricPath, metric);
-            logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
-        } else {
-            MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
-            metricWriter.printMetric(metricValue);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollup, clusterRollup, metricPath, metricValue);
+        if (!Strings.isNullOrEmpty(metricPath) && !Strings.isNullOrEmpty(metricValue)
+                && !Strings.isNullOrEmpty(timeRollup) && !Strings.isNullOrEmpty(metricPath)
+                && !Strings.isNullOrEmpty(clusterRollup)) {
+            if (isScheduledMode()) {
+                Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
+                metricCache.put(metricPath, metric);
+                logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
+            } else {
+                MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
+                metricWriter.printMetric(metricValue);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollup, clusterRollup, metricPath, metricValue);
+                }
             }
+        } else {
+            Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
+            logger.error("The metric is not valid {}", arg);
         }
     }
 

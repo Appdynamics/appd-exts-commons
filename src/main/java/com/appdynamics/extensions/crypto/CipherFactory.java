@@ -12,7 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
-class CipherFactory {
+class   CipherFactory {
 
     private static final CipherFactory _instance = new CipherFactory();
 
