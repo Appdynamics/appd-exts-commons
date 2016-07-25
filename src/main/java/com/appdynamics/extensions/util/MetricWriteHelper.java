@@ -23,6 +23,8 @@ public class MetricWriteHelper {
 
     private AManagedMonitor managedMonitor;
     private boolean scheduledMode;
+    //Used for Dashboard. Cache the current list of metrics.
+    private boolean cacheMetrics;
 
     protected MetricWriteHelper() {
     }
@@ -47,6 +49,10 @@ public class MetricWriteHelper {
                 metricWriter.printMetric(metricValue);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollup, clusterRollup, metricPath, metricValue);
+                }
+                if(cacheMetrics){
+                    Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
+                    metricCache.put(metricPath, metric);
                 }
             }
         } else {
@@ -149,8 +155,23 @@ public class MetricWriteHelper {
         }
     }
 
+    public Set<String> getMetricPaths() {
+        if (metricCache != null) {
+            return metricCache.asMap().keySet();
+        }
+        return null;
+    }
+
     public void reset() {
 
+    }
+
+    public boolean isCacheMetrics() {
+        return cacheMetrics;
+    }
+
+    public void setCacheMetrics(boolean cacheMetrics) {
+        this.cacheMetrics = cacheMetrics;
     }
 
     public boolean isScheduledMode() {
@@ -228,6 +249,8 @@ public class MetricWriteHelper {
         public String getTimeRollup() {
             return timeRollup;
         }
+
+
 
         @Override
         public String toString() {
