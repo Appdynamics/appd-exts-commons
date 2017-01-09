@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by abey.tom on 3/15/16.
@@ -25,6 +27,10 @@ public class HttpClientUtils {
     public static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
 
     public static <T> T getResponseAsJson(CloseableHttpClient httpClient, final String url, final Class<T> clazz) {
+        return getResponseAsJson(httpClient, url, clazz, Collections.<String, String>emptyMap());
+    }
+
+    public static <T> T getResponseAsJson(CloseableHttpClient httpClient, final String url, final Class<T> clazz, Map<String, String> headers) {
         ResponseConverter<T> responseConverter = new ResponseConverter<T>() {
             public T convert(HttpEntity entity) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -44,7 +50,7 @@ public class HttpClientUtils {
                 }
             }
         };
-        return getResponse(httpClient, url, responseConverter);
+        return getResponse(httpClient, url, responseConverter, headers);
     }
 
     public static String getResponseAsStr(CloseableHttpClient httpClient, final String url) {
@@ -82,8 +88,17 @@ public class HttpClientUtils {
     }
 
     public static <T> T getResponse(CloseableHttpClient httpClient, String url, ResponseConverter<T> converter) {
+        return getResponse(httpClient, url, converter, Collections.<String, String>emptyMap());
+    }
+
+    public static <T> T getResponse(CloseableHttpClient httpClient, String url, ResponseConverter<T> converter, Map<String, String> headers) {
         logger.debug("Invoking the URL [{}]", url);
         HttpGet get = new HttpGet(url);
+        if (headers != null && !headers.isEmpty()) {
+            for (String name : headers.keySet()) {
+                get.addHeader(name, headers.get(name));
+            }
+        }
         CloseableHttpResponse response = null;
         try {
             response = httpClient.execute(get);

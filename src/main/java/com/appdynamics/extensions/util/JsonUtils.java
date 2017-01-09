@@ -68,7 +68,19 @@ public class JsonUtils {
                         return arrayNodes;
                     }
                 } else {
-                    parent = parent.get(key);
+                    if (parent instanceof ArrayNode) {
+                        ArrayNode parentNodes = (ArrayNode) parent;
+                        ArrayNode arrayNodes = JsonNodeFactory.instance.arrayNode();
+                        for (JsonNode parentNode : parentNodes) {
+                            JsonNode jsonNode = parentNode.get(key);
+                            if (jsonNode != null) {
+                                arrayNodes.add(jsonNode);
+                            }
+                        }
+                        parent = arrayNodes.size() > 0 ? arrayNodes : null;
+                    } else {
+                        parent = parent.get(key);
+                    }
                     if (parent == null) {
                         return null;
                     }
@@ -89,6 +101,20 @@ public class JsonUtils {
                 nodes.add(jsonNode);
             }
             return nodes;
+        }
+        return null;
+    }
+
+    public static String getTextValue(JsonNode node, String... nested) {
+        JsonNode jsonObject = getNestedObject(node, nested);
+        if (jsonObject != null) {
+            if (jsonObject.isValueNode()) {
+                if (jsonObject.isTextual()) {
+                    return jsonObject.asText();
+                } else {
+                    return jsonObject.toString();
+                }
+            }
         }
         return null;
     }

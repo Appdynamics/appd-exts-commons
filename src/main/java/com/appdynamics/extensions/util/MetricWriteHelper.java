@@ -50,7 +50,7 @@ public class MetricWriteHelper {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollup, clusterRollup, metricPath, metricValue);
                 }
-                if(cacheMetrics){
+                if (cacheMetrics) {
                     Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
                     metricCache.put(metricPath, metric);
                 }
@@ -62,18 +62,22 @@ public class MetricWriteHelper {
     }
 
     public void printAllFromCache() {
-        ConcurrentMap<String, Metric> map = metricCache.asMap();
-        Set<String> keys;
-        if (map != null && (keys = map.keySet()) != null) {
-            for (String key : keys) {
-                Metric metric = map.get(key);
-                MetricType metricType = metric.getMetricType();
-                MetricWriter writer = getMetricWriter(metric.getPath(), metricType.aggregationType, metricType.timeRollup, metricType.clusterRollup);
-                logger.debug("Printing Metric {}", metric);
-                writer.printMetric(metric.getValue());
+        if (metricCache != null) {
+            ConcurrentMap<String, Metric> map = metricCache.asMap();
+            Set<String> keys;
+            if (map != null && (keys = map.keySet()) != null) {
+                for (String key : keys) {
+                    Metric metric = map.get(key);
+                    MetricType metricType = metric.getMetricType();
+                    MetricWriter writer = getMetricWriter(metric.getPath(), metricType.aggregationType, metricType.timeRollup, metricType.clusterRollup);
+                    logger.debug("Printing Metric {}", metric);
+                    writer.printMetric(metric.getValue());
+                }
+            } else {
+                logger.info("The Metric Cache is empty, no values are present");
             }
         } else {
-            logger.info("The Metric Cache is empty, no values are present");
+            logger.info("The metric cache is not yet initialized");
         }
     }
 
@@ -249,7 +253,6 @@ public class MetricWriteHelper {
         public String getTimeRollup() {
             return timeRollup;
         }
-
 
 
         @Override

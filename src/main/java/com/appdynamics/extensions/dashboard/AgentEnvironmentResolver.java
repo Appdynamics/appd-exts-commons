@@ -43,6 +43,9 @@ public class AgentEnvironmentResolver {
     }
 
     private void validateRequiredInfo(ControllerInfo cInfo) {
+        if (cInfo.getAccount() == null) {
+            cInfo.setAccount("customer1");
+        }
         check(TaskInputArgs.USER, cInfo.getUsername());
         check(TaskInputArgs.PASSWORD, cInfo.getPassword());
         check("account", cInfo.getAccount());

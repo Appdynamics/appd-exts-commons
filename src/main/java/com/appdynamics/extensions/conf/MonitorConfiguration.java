@@ -57,9 +57,10 @@ public class MonitorConfiguration {
     private Object metricXml;
     private PerMinValueCalculator perMinValueCalculator;
     private MetricWriteHelper metricWriter;
+    private boolean enabled;
 
     public MonitorConfiguration(String defaultMetricPrefix, Runnable taskRunner, MetricWriteHelper metricWriter) {
-        AssertUtils.assertNotNull(defaultMetricPrefix, "The Defaut Metric Prefix cannot be empty");
+        AssertUtils.assertNotNull(defaultMetricPrefix, "The Default Metric Prefix cannot be empty");
         AssertUtils.assertNotNull(taskRunner, "The Runnable[taskRunner] cannot be null");
         AssertUtils.assertNotNull(metricWriter, "The MetricWriteHelper cannot be null");
         this.defaultMetricPrefix = StringUtils.trim(defaultMetricPrefix.trim(), "|");
@@ -72,10 +73,15 @@ public class MonitorConfiguration {
     }
 
     public void executeTask() {
-        if (scheduler == null) {
-            taskRunner.run();
-        } else {
-            metricWriter.printAllFromCache();
+        if(isEnabled()){
+            if (scheduler == null) {
+                taskRunner.run();
+            } else {
+                logger.debug("Task scheduler is enabled, printing the metrics from the cache");
+                metricWriter.printAllFromCache();
+            }
+        } else{
+            logger.debug("The monitor [{}] is not enabled.", getMetricPrefix());
         }
     }
 
@@ -127,9 +133,13 @@ public class MonitorConfiguration {
     }
 
     public void setConfigYml(String path, final FileWatchListener callback) {
+        setConfigYml(path, callback, null);
+    }
+
+    public void setConfigYml(String path, final FileWatchListener callback, final String rootElement) {
         FileWatchListener fileWatchListener = new FileWatchListener() {
             public void onFileChange(File file) {
-                loadConfigYml(file);
+                loadConfigYml(file, rootElement);
                 if (callback != null) {
                     callback.onFileChange(file);
                 }
@@ -139,7 +149,11 @@ public class MonitorConfiguration {
     }
 
     public void setConfigYml(String path) {
-        setConfigYml(path, null);
+        setConfigYml(path, null, null);
+    }
+
+    public void setConfigYml(String path, String rootElement) {
+        setConfigYml(path, null, rootElement);
     }
 
     private void createListener(String path, FileWatchListener fileWatchListener) {
@@ -152,9 +166,16 @@ public class MonitorConfiguration {
     }
 
     public <T> void setMetricsXml(String path, final Class<T> clazz) {
+        setMetricsXml(path, clazz, null);
+    }
+
+    public <T> void setMetricsXml(String path, final Class<T> clazz, final FileWatchListener callback) {
         FileWatchListener fileWatchListener = new FileWatchListener() {
             public void onFileChange(File file) {
                 loadMetricsXml(file, clazz);
+                if (callback != null) {
+                    callback.onFileChange(file);
+                }
             }
         };
         createListener(path, fileWatchListener);
@@ -183,15 +204,31 @@ public class MonitorConfiguration {
         }
     }
 
-    private void loadConfigYml(File file) {
+    protected void loadConfigYml(File file, String rootName) {
         logger.info("Loading the configuration from {}", file.getAbsolutePath());
-        config = YmlReader.readFromFileAsMap(file);
-        if (config != null) {
-            metricPrefix = getMetricPrefix((String) config.get("metricPrefix"), defaultMetricPrefix);
-            initExecutorService(config);
-            initHttpClient(config);
-            initScheduledTask(config);
-            metricWriter.setScheduledMode(scheduler != null);
+        Map<String, ?> rootElem = YmlReader.readFromFileAsMap(file);
+        if (rootElem != null) {
+            if (rootName != null) {
+                config = (Map<String, ?>) rootElem.get(rootName);
+                if (config == null) {
+                    logger.error("The element [{}] was not found in the config file", rootName);
+                    return;
+                }
+            } else {
+                config = rootElem;
+            }
+            Boolean enabled = (Boolean) config.get("enabled");
+            if(!Boolean.FALSE.equals(enabled)){
+                this.enabled = true;
+                metricPrefix = getMetricPrefix((String) config.get("metricPrefix"), defaultMetricPrefix);
+                initExecutorService(config);
+                initHttpClient(config);
+                initScheduledTask(config);
+                metricWriter.setScheduledMode(scheduler != null);
+            } else{
+                this.enabled = false;
+                logger.error("The configuration is not enabled {}", config);
+            }
         }
     }
 
@@ -362,7 +399,7 @@ public class MonitorConfiguration {
         }
     }
 
-    private File resolvePath(String path) {
+    public File resolvePath(String path) {
         File file = PathResolver.getFile(path, installDir);
         if (file != null && file.exists()) {
             return file;
@@ -370,6 +407,8 @@ public class MonitorConfiguration {
             throw new IllegalArgumentException("The path [" + path + "] cannot be resolved to a file");
         }
     }
+
+
 
     public interface FileWatchListener {
         void onFileChange(File file);
@@ -416,4 +455,7 @@ public class MonitorConfiguration {
         return "true".equals(System.getProperty(MonitorConfiguration.EXTENSION_WORKBENCH_MODE));
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

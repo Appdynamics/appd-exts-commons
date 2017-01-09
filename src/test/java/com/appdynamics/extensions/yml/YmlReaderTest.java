@@ -3,6 +3,9 @@ package com.appdynamics.extensions.yml;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: abey.tom
@@ -83,6 +86,11 @@ public class YmlReaderTest {
         public void setLong2(long long2) {
             this.long2 = long2;
         }
+    }
+
+    public static void main(String[] args) {
+        Map<String, ?> stringMap = YmlReader.readFromFile(new File("/Users/abey.tom/tmp/Junk/farhan/config.yaml"));
+        System.out.println(stringMap);
     }
 }
 

@@ -102,11 +102,13 @@ public class Http4ClientBuilder {
 
     private static void configureConnectionProps(Map<String, ?> propMap, HttpClientBuilder builder) {
         Map connection = (Map) propMap.get("connection");
-        if (connection != null) {
-            configureTimeouts(builder, connection);
-            configureCookieStore(propMap, builder);
-            configurePreemptiveAuthentication(connection, builder);
+        //Make sure that the configs are initialized with default values
+        if (connection == null) {
+            connection = Collections.emptyMap();
         }
+        configureTimeouts(builder, connection);
+        configureCookieStore(propMap, builder);
+        configurePreemptiveAuthentication(connection, builder);
     }
 
     private static void configurePreemptiveAuthentication(Map connection, HttpClientBuilder builder) {
@@ -147,7 +149,7 @@ public class Http4ClientBuilder {
                         logger.info("Created credentials for auth scope {}", authScope);
                     }
                 } else {
-                    logger.info("Credentials are not set for {}",authScope);
+                    logger.info("Credentials are not set for {}", authScope);
                 }
             }
         }
@@ -390,6 +392,7 @@ public class Http4ClientBuilder {
 
     private static class NoOpCookieStore implements CookieStore {
         private static final List<Cookie> cookies = Collections.emptyList();
+
         public void addCookie(Cookie cookie) {
         }
 

@@ -87,7 +87,7 @@ public class StringUtils {
         return count;
     }
 
-    public static List<Integer> indicesOf(String str, String sub){
+    public static List<Integer> indicesOf(String str, String sub) {
         if (!hasText(str) || !hasText(sub)) {
             return Collections.emptyList();
         }
@@ -106,5 +106,21 @@ public class StringUtils {
             return str.replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&apos;", "'").replaceAll("&quot;", "\"");
         }
         return str;
+    }
+
+    public static String concatMetricPath(String... paths) {
+        StringBuilder sb = new StringBuilder();
+        for (String path : paths) {
+            if (StringUtils.hasText(path)) {
+                String trimmed = trim(path.trim(), "|").trim();
+                if (trimmed.length() > 0) {
+                    sb.append(trimmed).append("|");
+                }
+            }
+        }
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
     }
 }
