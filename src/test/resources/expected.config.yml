@@ -1,30 +1,32 @@
 servers:
   - uri: ""
-    host: ""
-    port: ""
     username: ""
     password: ""
     passwordEncrypted: ""
 
-  - uri: ""
-    host: ""
-    port: ""
+    # Uri is preferred instead of host-port-useSsl combo.
+  - host: "" # Avoid this, use uri instead
+    port: "" # Avoid this, use uri instead
+    useSsl: false # Avoid this, use uri instead.
     username: ""
     password: ""
     passwordEncrypted: ""
 
 connection:
-  socketTimeout: 2000
-  connectTimeout: 3000
-  sslProtocols: ["TLS"]
+  socketTimeout: 3000 # Read Timeout
+  connectTimeout: 1000
+  sslProtocols: ["TLSV1.2"] # Defaults to "default"
   sslCertCheckEnabled: true
   sslVerifyHostname: true
 
-  # This shouldnt be exposed to user. Should be used on a need basis
-  sslCipherSuites: []
+  # This need not be exposed to user. Should be used on a need basis
+  sslCipherSuites: [] # Defaults to "default"
   sslTrustStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-cacerts.jks
+                        # The prop "-Dappdynamics.extensions.truststore.path=/path/cacerts" takes precedence if set
   sslTrustStorePassword: ""
   sslTrustStorePasswordEncrypted: ""
+  enableCookies: false #Defaults to false
+  enablePreemptiveAuth: true
 
 proxy:
   uri: ""
@@ -32,4 +34,16 @@ proxy:
   password: ""
   passwordEncrypted: ""
 
+# Common for all the encrypted passwords in this file.
 encryptionKey: ""
+
+# A thread pool will be automatically created. If this property is omitted,
+# the thread pool will not be created. (for synchronous execution)
+numberOfThreads: 1
+
+# This is to run this in scheduled mode. In this case, the extension will fetch the data every 300 seconds
+# and caches the data. The cached data will be reported to controller every min. This way there is no metric drop.
+# Can be used when the data rarely changes or to reduce the load while fetching metrics every minute.
+taskSchedule:
+  numberOfThreads: 1
+  taskDelaySeconds: 300
