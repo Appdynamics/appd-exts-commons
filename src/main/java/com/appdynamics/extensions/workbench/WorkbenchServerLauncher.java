@@ -12,6 +12,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -29,13 +30,17 @@ public class WorkbenchServerLauncher {
                 File java = new File(property, "bin" + File.separator + getJavaExecutable());
                 String cp = asClassPath(files);
                 if (java.exists()) {
+                    List<String> workbenchSysProps = getWorkbenchSysProps();
                     ProcessBuilder builder = new ProcessBuilder();
                     builder.inheritIO();
-                    String[] command = {java.getAbsolutePath(),
-//                            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
-                            "-cp",
-                            cp,
-                            WorkBenchServer.class.getName()};
+                    List<String> commands = new ArrayList<>();
+                    commands.add(java.getAbsolutePath());
+                    commands.addAll(workbenchSysProps);
+                    commands.add("-cp");
+                    commands.add(cp);
+                    commands.add(WorkBenchServer.class.getName());
+                    String[] command = commands.toArray(new String[commands.size()]);
+
                     String[] merged = new String[command.length + args.length];
                     System.arraycopy(command, 0, merged, 0, command.length);
                     System.arraycopy(args, 0, merged, command.length, args.length);
@@ -54,8 +59,21 @@ public class WorkbenchServerLauncher {
         }
     }
 
+    private static List<String> getWorkbenchSysProps() {
+        Properties properties = System.getProperties();
+        List<String> sysProps = new ArrayList<>();
+        for (Object o : properties.keySet()) {
+            String key = (String) o;
+            if (key.startsWith("workbench.")) {
+                String value = (String) properties.get(o);
+                sysProps.add("-D" + key + "=" + value);
+            }
+        }
+        return sysProps;
+    }
+
     private static String getJavaExecutable() {
-        if(isWin()){
+        if (isWin()) {
             return "java.exe";
         }
         return "java";

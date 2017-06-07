@@ -27,6 +27,7 @@ import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -119,7 +120,7 @@ public class WorkBenchServer extends NanoHTTPD {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         File extensionDir = resolveDirectory(WorkBenchServer.class);
         if (extensionDir != null) {
-            configureLogging(extensionDir);
+            configureLogging(extensionDir,args);
             logger = LoggerFactory.getLogger(WorkBenchServer.class);
             bootstrap(args, extensionDir);
         } else {
@@ -127,7 +128,7 @@ public class WorkBenchServer extends NanoHTTPD {
         }
     }
 
-    private static void configureLogging(File extensionDir) throws IOException {
+    private static void configureLogging(File extensionDir, String[] args) throws IOException {
         org.apache.log4j.Logger root = org.apache.log4j.Logger.getRootLogger();
         PatternLayout layout = new PatternLayout("%d{ABSOLUTE} %5p [%t] %c{1} - %m%n");
         ConsoleAppender consoleAppender = new ConsoleAppender(layout);
@@ -147,13 +148,43 @@ public class WorkBenchServer extends NanoHTTPD {
         root.addAppender(consoleAppender);
         root.addAppender(fileAppender);
         root.setLevel(Level.INFO);
+
         org.apache.log4j.Logger appDlogger = org.apache.log4j.Logger.getLogger("com.appdynamics");
         appDlogger.addAppender(consoleAppender);
         appDlogger.setLevel(Level.DEBUG);
         appDlogger.setAdditivity(false);
         appDlogger.addAppender(fileAppender);
 
-//        org.apache.log4j.Logger extLogger = org.apache.log4j.Logger.getLogger("org.apache.http");
+
+        Properties properties = System.getProperties();
+        for (Object o : properties.keySet()) {
+            String name = (String) o;
+            if(name.startsWith("workbench.logger.")){
+                String value = (String) properties.get(o);
+                String logger = name.substring(17);
+                System.out.println(logger);
+                org.apache.log4j.Logger extLogger = org.apache.log4j.Logger.getLogger(logger);
+                extLogger.addAppender(consoleAppender);
+                if("trace".equalsIgnoreCase(value)){
+                    extLogger.setLevel(Level.TRACE);
+                } else if("debug".equalsIgnoreCase(value)){
+                    extLogger.setLevel(Level.DEBUG);
+                } else if("info".equalsIgnoreCase(value)){
+                    extLogger.setLevel(Level.INFO);
+                } else if("warn".equalsIgnoreCase(value)){
+                    extLogger.setLevel(Level.WARN);
+                } else if("error".equalsIgnoreCase(value)){
+                    extLogger.setLevel(Level.ERROR);
+                } else if("fatal".equalsIgnoreCase(value)){
+                    extLogger.setLevel(Level.FATAL);
+                } else if("off".equalsIgnoreCase(value)){
+                    extLogger.setLevel(Level.OFF);
+                }
+                extLogger.setAdditivity(false);
+                extLogger.addAppender(fileAppender);
+            }
+        }
+//        org.apache.log4j.Logger extLogger = org.apache.log4j.Logger.getLogger("org.apache.http.headers");
 //        extLogger.addAppender(consoleAppender);
 //        extLogger.setLevel(Level.DEBUG);
 //        extLogger.setAdditivity(false);

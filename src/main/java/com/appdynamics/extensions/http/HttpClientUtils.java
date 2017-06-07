@@ -131,7 +131,7 @@ public class HttpClientUtils {
     }
 
 
-    private static void printError(CloseableHttpResponse response, String url) {
+    public static void printError(CloseableHttpResponse response, String url) {
         if (response != null) {
             logger.error("The status line for the url [{}] is [{}] and the headers are [{}]"
                     , url, response.getStatusLine(), response.getAllHeaders());

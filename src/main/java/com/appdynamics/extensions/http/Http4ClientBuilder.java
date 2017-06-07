@@ -2,6 +2,7 @@ package com.appdynamics.extensions.http;
 
 import com.appdynamics.TaskInputArgs;
 import com.appdynamics.extensions.PathResolver;
+import com.appdynamics.extensions.StringUtils;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.util.YmlUtils;
@@ -139,17 +140,22 @@ public class Http4ClientBuilder {
         List<Map<String, ?>> servers = (List<Map<String, ?>>) config.get("servers");
         if (servers != null && !servers.isEmpty()) {
             for (Map<String, ?> server : servers) {
-                String username = (String) server.get(TaskInputArgs.USER);
-                AuthScope authScope = createAuthScope(server);
-                if (!Strings.isNullOrEmpty(username)) {
-                    if (authScope != null) {
-                        credsProvider.setCredentials(
-                                authScope,
-                                new UsernamePasswordCredentials(username, getPassword(server, config)));
-                        logger.info("Created credentials for auth scope {}", authScope);
+                String authType = (String) server.get("authType");
+                if (!StringUtils.hasText(authType) || "BASIC".equals(authType)) {
+                    String username = (String) server.get(TaskInputArgs.USER);
+                    AuthScope authScope = createAuthScope(server);
+                    if (!Strings.isNullOrEmpty(username)) {
+                        if (authScope != null) {
+                            credsProvider.setCredentials(
+                                    authScope,
+                                    new UsernamePasswordCredentials(username, getPassword(server, config)));
+                            logger.info("Created credentials for auth scope {}", authScope);
+                        }
+                    } else {
+                        logger.info("Credentials are not set for {}", authScope);
                     }
                 } else {
-                    logger.info("Credentials are not set for {}", authScope);
+                    logger.info("Not setting up authentication for server {} since the authType is not set to BASIC", server.get("uri"));
                 }
             }
         }
