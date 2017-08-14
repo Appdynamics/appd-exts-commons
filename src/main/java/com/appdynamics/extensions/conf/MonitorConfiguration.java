@@ -3,13 +3,11 @@ package com.appdynamics.extensions.conf;
 import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.StringUtils;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
-import com.appdynamics.extensions.util.AssertUtils;
-import com.appdynamics.extensions.util.MetricWriteHelper;
-import com.appdynamics.extensions.util.PerMinValueCalculator;
-import com.appdynamics.extensions.util.YmlUtils;
+import com.appdynamics.extensions.util.*;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -57,6 +55,7 @@ public class MonitorConfiguration {
     private Object metricXml;
     private PerMinValueCalculator perMinValueCalculator;
     private MetricWriteHelper metricWriter;
+    private DerivedMetricsCalculator derivedMetricsCalculator;
     private boolean enabled;
 
     public MonitorConfiguration(String defaultMetricPrefix, Runnable taskRunner, MetricWriteHelper metricWriter) {
@@ -224,6 +223,7 @@ public class MonitorConfiguration {
                 initExecutorService(config);
                 initHttpClient(config);
                 initScheduledTask(config);
+                initDerivedMetricsCalculator();
                 metricWriter.setScheduledMode(scheduler != null);
             } else{
                 this.enabled = false;
@@ -457,5 +457,11 @@ public class MonitorConfiguration {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    private void initDerivedMetricsCalculator(){
+        List<Map<String, ?>> derivedMetricsList = (List) config.get("derived");
+        derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList);
+        metricWriter.setDerivedMetricsCalculator(derivedMetricsCalculator);
     }
 }

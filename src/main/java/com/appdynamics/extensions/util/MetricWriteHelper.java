@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ public class MetricWriteHelper {
     private boolean scheduledMode;
     //Used for Dashboard. Cache the current list of metrics.
     private boolean cacheMetrics;
-
+    private DerivedMetricsCalculator derivedMetricsCalculator;
     protected MetricWriteHelper() {
     }
 
@@ -55,9 +56,35 @@ public class MetricWriteHelper {
                     metricCache.put(metricPath, metric);
                 }
             }
+            derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
+
         } else {
             Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
             logger.error("The metric is not valid {}", arg);
+        }
+    }
+
+    public DerivedMetricsCalculator getDerivedMetricsCalculator(){
+        return derivedMetricsCalculator;
+    }
+
+    public void setDerivedMetricsCalculator(DerivedMetricsCalculator derivedMetricsCalculator){
+        this.derivedMetricsCalculator = derivedMetricsCalculator;
+    }
+
+    public void onTaskComplete(){
+        Map<String, MetricProperties> derivedMetricsMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+
+        if(derivedMetricsMap != null){
+            for(Map.Entry<String, MetricProperties> derivedMetricEntry : derivedMetricsMap.entrySet()){
+                MetricProperties metricProperties = derivedMetricEntry.getValue();
+                String metricPath = metricPrefix + "|" + "derived" + "|" + metricProperties.getAlias();
+                String metricValue = metricProperties.getMetricValue().toString();
+                String aggregationType = metricProperties.getAggregation();
+                String timeRollUp = metricProperties.getTime();
+                String clusterRollUp = metricProperties.getCluster();
+                metricWriter.printMetric(metricPath, metricValue, aggregationType, timeRollUp, clusterRollUp);
+            }
         }
     }
 
