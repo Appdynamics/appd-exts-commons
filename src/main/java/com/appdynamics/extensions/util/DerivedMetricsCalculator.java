@@ -23,7 +23,6 @@ public class DerivedMetricsCalculator {
     public void addToBaseMetricsMap(String metricPath, String metricValue){
         baseMetricsMap.put(metricPath, new BigDecimal(metricValue));
     }
-
     //#TODO get the metric name from metric path.
     private String getMetricName(String metricPath){
         return "";
