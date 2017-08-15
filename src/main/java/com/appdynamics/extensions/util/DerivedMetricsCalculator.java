@@ -27,17 +27,6 @@ public class DerivedMetricsCalculator {
     public void addToBaseMetricsMap(String metricPath, String metricValue){
         baseMetricsMap.put(metricPath, new BigDecimal(metricValue));
     }
-    //#TODO get the metric name from metric path.
-    private String getMetricName(String metricPath){
-        Splitter pipeSplitter = Splitter.on('|')
-                                        .omitEmptyStrings()
-                                        .trimResults();
-        List<String> metric = pipeSplitter.splitToList(metricPath);
-        if(!metric.isEmpty()){
-         return metric.get(metric.size() - 1);
-        }
-        return "";
-    }
 
     public Map<String, MetricProperties> calculateAndReturnDerivedMetrics(){
         Map<String, Map<String, BigDecimal>> organisedMetricsMap = buildOrganisedBaseMetricsMap();
@@ -87,18 +76,20 @@ public class DerivedMetricsCalculator {
         return organisedMetricsMap;
     }
 
+    private String retrieveServerName(String metricPath){
+        return "";
+    }
 
-
-    /*public Set<String> getBaseMetricsFromExpression(String expression){
-        Set<String> baseMetricsSet = new HashSet<String>();
-        Splitter splitter = Splitter.on(CharMatcher.anyOf("(+-*//*%^) "))
-                .trimResults()
-                .omitEmptyStrings();
-        List<String> baseMetricsList = splitter.splitToList(expression);
-        for(String baseMetric: baseMetricsList){
-            baseMetricsSet.add(baseMetric);
+    //#TODO get the metric name from metric path.
+    private String retrieveMetricName(String metricPath){
+        Splitter pipeSplitter = Splitter.on('|')
+                .omitEmptyStrings()
+                .trimResults();
+        List<String> metric = pipeSplitter.splitToList(metricPath);
+        if(!metric.isEmpty()){
+            return metric.get(metric.size() - 1);
         }
-        return baseMetricsSet;
-    }*/
+        return "";
+    }
 }
 

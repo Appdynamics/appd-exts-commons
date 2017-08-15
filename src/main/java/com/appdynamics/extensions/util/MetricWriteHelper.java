@@ -79,6 +79,7 @@ public class MetricWriteHelper {
             for(Map.Entry<String, MetricProperties> derivedMetricEntry : derivedMetricsMap.entrySet()){
                 String metricName = derivedMetricEntry.getKey();
                 MetricProperties metricProperties = derivedMetricEntry.getValue();
+
                 String metricPath = metricPrefix + "|" + server.get("name") + "|" + "derived" + "|" + metricProperties.getAlias();
                 String metricValue = metricProperties.getMetricValue().toString();
                 String aggregationType = metricProperties.getAggregationType();

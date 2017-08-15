@@ -8,11 +8,6 @@ import org.junit.Before;
 public class DerivedMetricsCalculatorTest {
     private DerivedMetricsCalculator derivedMetricsCalculator;
 
-    @Before
-    public void init(){
-        derivedMetricsCalculator = new DerivedMetricsCalculator();
-        derivedMetricsCalculator.addToBaseMetricsMap();
-    }
 
 
 }
