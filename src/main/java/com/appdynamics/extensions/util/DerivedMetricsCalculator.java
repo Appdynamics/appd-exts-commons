@@ -1,14 +1,10 @@
 package com.appdynamics.extensions.util;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 /**
  * Created by venkata.konala on 8/10/17.
  * This class takes the list of derived metrics(with metric properties) from the "derived" section
@@ -58,7 +54,7 @@ public class DerivedMetricsCalculator {
         return derivedMetricsMap;
     }
 
-    private Map<String, Map<String, BigDecimal>> buildOrganisedBaseMetricsMap(){
+    public Map<String, Map<String, BigDecimal>> buildOrganisedBaseMetricsMap(){
         Map<String, Map<String, BigDecimal>> organisedMetricsMap = Maps.newHashMap();
         for(Map.Entry<String, BigDecimal> baseMetric : baseMetricsMap.entrySet()){
             String metricPath = baseMetric.getKey();
@@ -78,12 +74,21 @@ public class DerivedMetricsCalculator {
         return organisedMetricsMap;
     }
 
-    private String retrieveServerName(String metricPath){
+    public String retrieveServerName(String metricPath){
+        String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis|";
+        String modifiedPath = metricPath.replace(metricPrefix, "");
+        Splitter pipeSplitter = Splitter.on('|')
+                .omitEmptyStrings()
+                .trimResults();
+        List<String> metric = pipeSplitter.splitToList(modifiedPath);
+        if(!metric.isEmpty()){
+            return metric.get(0);
+        }
         return "";
     }
 
     //#TODO get the metric name from metric path.
-    private String retrieveMetricName(String metricPath){
+    public String retrieveMetricName(String metricPath){
         Splitter pipeSplitter = Splitter.on('|')
                 .omitEmptyStrings()
                 .trimResults();
