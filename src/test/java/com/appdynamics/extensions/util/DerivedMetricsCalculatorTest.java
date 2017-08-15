@@ -55,7 +55,7 @@ public class DerivedMetricsCalculatorTest {
     public void buildOrganisedBaseMetricsMapTest(){
         Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap = derivedMetricsCalculator.buildOrganisedBaseMetricsMap();
         Assert.assertTrue(organisedBaseMetricsMap.size() == 2);
-        System.out.println("Server1 base metrics map ----------------> " + organisedBaseMetricsMap.get("Server1").toString());
+        //System.out.println("Server1 base metrics map ----------------> " + organisedBaseMetricsMap.get("Server1").toString());
 
     }
 
@@ -64,8 +64,8 @@ public class DerivedMetricsCalculatorTest {
         Map<String, MetricProperties> derivedMetricsMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
         System.out.println(derivedMetricsMap.toString());
         MetricProperties server1Ratio = derivedMetricsMap.get("Server|Component:AppLevels|Custom Metrics|Redis|derived|Server1|ratio");
-        System.out.println("Alias ---------> " + server1Ratio.getAlias());
-        System.out.println("Metric value --------> " + server1Ratio.getMetricValue());
+        //System.out.println("Alias ---------> " + server1Ratio.getAlias());
+        //System.out.println("Metric value --------> " + server1Ratio.getMetricValue());
         //Assert.assertTrue();
     }
 

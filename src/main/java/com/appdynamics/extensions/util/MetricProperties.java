@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 
 public class MetricProperties {
-    private String metricPath;
     private String metricName;
     private BigDecimal metricValue;
     private String alias;
@@ -18,24 +17,21 @@ public class MetricProperties {
     private String aggregationType;
     private String timeRollUp;
     private String clusterRollUp;
-    private String delta;
+    private boolean delta;
     private Map<Object, Object> conversionValues;
     private boolean aggragateAtCluster;
-
-    public String getMetricPath(){
-        return metricPath;
-    }
-
-    public void setMetricPath(String metricPath){
-        this.metricPath = metricPath;
-    }
 
     public String getMetricName(){
         return metricName;
     }
 
     public void setMetricName(String metricName){
-        this.metricName = metricName;
+        if(Strings.isNullOrEmpty(metricName)){
+            this.metricName = null;
+        }
+        else{
+            this.metricName = metricName;
+        }
     }
 
     public BigDecimal getMetricValue(){
@@ -112,16 +108,16 @@ public class MetricProperties {
         }
     }
 
-    public String getDelta() {
+    public boolean getDelta() {
         return delta;
     }
 
     public void setDelta(String delta){
         if(Strings.isNullOrEmpty(delta) || !delta.equalsIgnoreCase("true")){
-            this.delta = "false";
+            this.delta = false;
         }
         else{
-            this.delta = "true";
+            this.delta = true;
         }
     }
 
@@ -130,7 +126,12 @@ public class MetricProperties {
     }
 
     public void setConversionValues(Map<Object, Object> conversionValues){
-        this.conversionValues = conversionValues;
+        if(conversionValues == null){
+            this.conversionValues = null;
+        }
+        else{
+            this.conversionValues = conversionValues;
+        }
     }
 
     public boolean getAggregateAtCluster(){

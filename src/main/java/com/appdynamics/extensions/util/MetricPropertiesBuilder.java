@@ -21,11 +21,11 @@ public class MetricPropertiesBuilder {
         metricProperties.setMetricValue(metricValue);
         metricProperties.setAlias(this.metricProperties.get("alias") == null ? null : this.metricProperties.get("alias").toString(), metricName);
         metricProperties.setMultiplier(this.metricProperties.get("multiplier") == null ? null : this.metricProperties.get("multiplier").toString());
-        metricProperties.setAggregationType(this.metricProperties.get("aggregation") == null ? null : this.metricProperties.get("aggregation").toString());
+        metricProperties.setAggregationType(this.metricProperties.get("aggregationType") == null ? null : this.metricProperties.get("aggregationType").toString());
         metricProperties.setTimeRollUp(this.metricProperties.get("timeRollUp") == null ? null : this.metricProperties.get("timeRollUp").toString());
         metricProperties.setClusterRollUp(this.metricProperties.get("clusterRollUp") == null ? null : this.metricProperties.get("clusterRollUp").toString());
         metricProperties.setDelta(this.metricProperties.get("delta") == null ? null : this.metricProperties.get("delta").toString());
-        metricProperties.setConversionValues((Map<Object, Object>)this.metricProperties.get("cluster"));
+        metricProperties.setConversionValues((Map<Object, Object>)this.metricProperties.get("convert"));
         metricProperties.setAggregateAtCluster(this.metricProperties.get("aggregateAtCluster") == null ? null : this.metricProperties.get("aggregateAtCluster").toString());
         return metricProperties;
     }
