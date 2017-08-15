@@ -72,16 +72,15 @@ public class MetricWriteHelper {
         this.derivedMetricsCalculator = derivedMetricsCalculator;
     }
 
-    public void onTaskComplete(Map<String, String> server, String metricPrefix){
+    public void onTaskComplete(){
         Map<String, MetricProperties> derivedMetricsMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
 
         if(derivedMetricsMap != null){
             for(Map.Entry<String, MetricProperties> derivedMetricEntry : derivedMetricsMap.entrySet()){
-                String metricName = derivedMetricEntry.getKey();
+                String metricPath =  derivedMetricEntry.getKey();
                 MetricProperties metricProperties = derivedMetricEntry.getValue();
-
-                String metricPath = metricPrefix + "|" + server.get("name") + "|" + "derived" + "|" + metricProperties.getAlias();
                 String metricValue = metricProperties.getMetricValue().toString();
+                //metricValue = calculate
                 String aggregationType = metricProperties.getAggregationType();
                 String timeRollUp = metricProperties.getTimeRollUp();
                 String clusterRollUp = metricProperties.getClusterRollUp();

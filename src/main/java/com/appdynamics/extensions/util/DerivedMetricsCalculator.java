@@ -19,9 +19,11 @@ import java.util.Set;
 public class DerivedMetricsCalculator {
     List<Map<String, ?>> derivedMetricsList;
     Map<String, BigDecimal> baseMetricsMap = Maps.newConcurrentMap();
+    String metricPrefix;
 
-    public DerivedMetricsCalculator(List<Map<String, ?>> derivedMetricsList){
+    public DerivedMetricsCalculator(List<Map<String, ?>> derivedMetricsList, String metricPrefix){
         this.derivedMetricsList = derivedMetricsList;
+        this.metricPrefix = metricPrefix;
     }
 
     public void addToBaseMetricsMap(String metricPath, String metricValue){
@@ -36,7 +38,6 @@ public class DerivedMetricsCalculator {
                 String derivedMetricName = derivedMetricMapFromConfig.entrySet().iterator().next().getKey();
                 Map<String, ?> derivedMetricPropertyMap = (Map<String, ?>)derivedMetricMapFromConfig.entrySet().iterator().next().getValue();
                 String formula = derivedMetricPropertyMap.get("formula").toString();
-                //Set<String> baseMetrics = getBaseMetricsFromExpression(formula);
                 for(Map.Entry<String, Map<String, BigDecimal>> serverMetrics : organisedMetricsMap.entrySet()){
                     String serverName = serverMetrics.getKey();
                     Map<String, BigDecimal> serverMetricsMap = serverMetrics.getValue();
@@ -48,7 +49,8 @@ public class DerivedMetricsCalculator {
                     if(derivedMetricValue != null){
                         MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(derivedMetricPropertyMap,derivedMetricName, derivedMetricValue.toString());
                         MetricProperties derivedMetricProperties = metricPropertiesBuilder.buildMetricProperties();
-                        derivedMetricsMap.put(serverName + "|" + derivedMetricName, derivedMetricProperties);
+                        String derivedMetricPath = metricPrefix + "|" + "derived" + "|" + serverName + "|" + derivedMetricName;
+                        derivedMetricsMap.put(derivedMetricPath, derivedMetricProperties);
                     }
                 }
             }

@@ -461,7 +461,7 @@ public class MonitorConfiguration {
 
     private void initDerivedMetricsCalculator(){
         List<Map<String, ?>> derivedMetricsList = (List) config.get("derived");
-        derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList);
+        derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, getMetricPrefix());
         metricWriter.setDerivedMetricsCalculator(derivedMetricsCalculator);
     }
 }
