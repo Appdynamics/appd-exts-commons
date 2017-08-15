@@ -6,20 +6,20 @@ import java.util.Map;
 
 public class MetricPropertiesBuilder {
     private Map<String, ?> metricProperties;
-    private String metricPath;
+    //private String metricPath;
     private String metricName;
     private String metricValue;
 
-    public MetricPropertiesBuilder(Map<String, ?> metricProperties, String metricPath,String metricName, String metricValue){
+    public MetricPropertiesBuilder(Map<String, ?> metricProperties,String metricName, String metricValue){
         this.metricProperties = metricProperties;
-        this.metricPath = metricPath;
+        //this.metricPath = metricPath;
         this.metricName = metricName;
         this.metricValue = metricValue;
     }
 
     public MetricProperties buildMetricProperties(){
         MetricProperties metricProperties = new MetricProperties();
-        metricProperties.setMetricPath(metricPath);
+        //metricProperties.setMetricPath(metricPath);
         metricProperties.setMetricName(metricName);
         metricProperties.setMetricValue(metricValue);
         metricProperties.setAlias(this.metricProperties.get("alias").toString(), metricName);
