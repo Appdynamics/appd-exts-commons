@@ -15,25 +15,29 @@ import java.util.*;
  */
 public class IndividualDerivedMetricProcessor {
     private Map<String, BigDecimal> baseMetricsMap;
-    private String formula;
     private String metricPrefix;
+    String metricName;
+    String metricPath;
+    private String formula;
     private SetMultimap<String, String> globalMultiMap = HashMultimap.create();
     private Splitter pipeSplitter = Splitter.on('|')
             .omitEmptyStrings()
             .trimResults();
 
-    public IndividualDerivedMetricProcessor(Map<String, BigDecimal> baseMetricsMap, String formula, String metricPrefix){
+    public IndividualDerivedMetricProcessor(Map<String, BigDecimal> baseMetricsMap, String metricPrefix, String metricName, String metricPath, String formula){
         this.baseMetricsMap = baseMetricsMap;
-        this.formula = formula;
         this.metricPrefix = metricPrefix;
+        this.metricName = metricName;
+        this.metricPath = metricPath;
+        this.formula = formula;
     }
 
-    public Multimap<String, MetricProperties> processDerivedMetric(){
+    public Multimap<String, BigDecimal> processDerivedMetric(){
         Set<String> baseMetrics = getBaseMetricsFromFormula(formula);
         for(String baseMetric : baseMetrics){
             populateGlobalMultiMap(baseMetric);
         }
-        IndividualDerivedMetricCalculator individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator();
+        IndividualDerivedMetricCalculator individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(baseMetricsMap, metricPrefix, metricName, metricPath, formula, baseMetrics, globalMultiMap);
         return individualDerivedMetricCalculator.calculateDerivedMetric();
     }
 

@@ -38,10 +38,8 @@ public class DerivedMetricsCalculator {
             Map<String, ?> derivedMetricProperties = (Map<String, ?>)derivedMetric.entrySet().iterator().next().getValue();
             String metricPath = derivedMetricProperties.get("metricPath").toString();
             String formula = derivedMetricProperties.get("formula").toString();
-            IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, formula, metricPrefix);
-            SetMultimap<String, String> dynamicPathsMap = individualDerivedMetricProcessor.processDerivedMetric();
-
-
+            IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, metricName, metricPath, formula);
+            Multimap<String, BigDecimal> individualDerivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
         }
         return derivedMetricsMap;
     }

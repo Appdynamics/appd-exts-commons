@@ -25,7 +25,7 @@ public class ExpressionEvaluator {
         this.expression = expression;
     }
 
-    public BigDecimal expressionEval(){
+    public BigDecimal eval(){
         Set<String> baseMetricsSet = getBaseMetricsFromExpression(expression);
         Map<String,Double> baseMetricsValueMap = Maps.newHashMap();
         Iterator<String> baseMetricSetIterator = baseMetricsSet.iterator();
