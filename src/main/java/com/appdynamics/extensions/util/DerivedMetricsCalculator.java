@@ -1,10 +1,12 @@
 package com.appdynamics.extensions.util;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Maps;
+import com.google.common.base.Strings;
+import com.google.common.collect.*;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 /**
  * Created by venkata.konala on 8/10/17.
  * This class takes the list of derived metrics(with metric properties) from the "derived" section
@@ -13,9 +15,9 @@ import java.util.Map;
  * return a map (with derived metricNames and their metricvalues in BigDecimal).
  */
 public class DerivedMetricsCalculator {
-    List<Map<String, ?>> derivedMetricsList;
-    Map<String, BigDecimal> baseMetricsMap = Maps.newConcurrentMap();
-    String metricPrefix;
+    public Map<String, BigDecimal> baseMetricsMap = Maps.newConcurrentMap();
+    private List<Map<String, ?>> derivedMetricsList;
+    private String metricPrefix;
 
     public DerivedMetricsCalculator(List<Map<String, ?>> derivedMetricsList, String metricPrefix){
         this.derivedMetricsList = derivedMetricsList;
@@ -27,76 +29,23 @@ public class DerivedMetricsCalculator {
     }
 
     public Map<String, MetricProperties> calculateAndReturnDerivedMetrics(){
-        Map<String, Map<String, BigDecimal>> organisedMetricsMap = buildOrganisedBaseMetricsMap();
         Map<String, MetricProperties> derivedMetricsMap = Maps.newHashMap();
-        for(Map<String, ?> derivedMetricMapFromConfig: derivedMetricsList){
-            if(derivedMetricMapFromConfig != null) {
-                String derivedMetricName = derivedMetricMapFromConfig.entrySet().iterator().next().getKey();
-                Map<String, ?> derivedMetricPropertyMap = (Map<String, ?>)derivedMetricMapFromConfig.entrySet().iterator().next().getValue();
-                String formula = derivedMetricPropertyMap.get("formula").toString();
-                for(Map.Entry<String, Map<String, BigDecimal>> serverMetrics : organisedMetricsMap.entrySet()){
-                    String serverName = serverMetrics.getKey();
-                    Map<String, BigDecimal> serverMetricsMap = serverMetrics.getValue();
-                    BigDecimal derivedMetricValue = null;
-                    if(formula != null){
-                        ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(serverMetricsMap, formula);
-                        derivedMetricValue = expressionEvaluator.expressionEval();
-                    }
-                    if(derivedMetricValue != null){
-                        MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(derivedMetricPropertyMap,derivedMetricName, derivedMetricValue.toString());
-                        MetricProperties derivedMetricProperties = metricPropertiesBuilder.buildMetricProperties();
-                        String derivedMetricPath = metricPrefix + "|" + "derived" + "|" + serverName + "|" + derivedMetricName;
-                        derivedMetricsMap.put(derivedMetricPath, derivedMetricProperties);
-                    }
-                }
-            }
+        for(Map<String, ?> derivedMetric : derivedMetricsList){
+            String metricName = derivedMetric.entrySet()
+                    .iterator()
+                    .next()
+                    .getKey();
+            Map<String, ?> derivedMetricProperties = (Map<String, ?>)derivedMetric.entrySet().iterator().next().getValue();
+            String metricPath = derivedMetricProperties.get("metricPath").toString();
+            String formula = derivedMetricProperties.get("formula").toString();
+            IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, formula, metricPrefix);
+            SetMultimap<String, String> dynamicPathsMap = individualDerivedMetricProcessor.processDerivedMetric();
+
+
         }
         return derivedMetricsMap;
     }
 
-    public Map<String, Map<String, BigDecimal>> buildOrganisedBaseMetricsMap(){
-        Map<String, Map<String, BigDecimal>> organisedMetricsMap = Maps.newHashMap();
-        for(Map.Entry<String, BigDecimal> baseMetric : baseMetricsMap.entrySet()){
-            String metricPath = baseMetric.getKey();
-            BigDecimal metricValue = baseMetric.getValue();
-            String serverName = retrieveServerName(metricPath);
-            String metricName = retrieveMetricName(metricPath);
-            if(organisedMetricsMap.containsKey(serverName)){
-                Map<String, BigDecimal> individualServerMetricMap = organisedMetricsMap.get(serverName);
-                individualServerMetricMap.put(metricName, metricValue);
-            }
-            else{
-                Map<String, BigDecimal> individualServerMetricMap = Maps.newHashMap();
-                individualServerMetricMap.put(metricName, metricValue);
-                organisedMetricsMap.put(serverName, individualServerMetricMap);
-            }
-        }
-        return organisedMetricsMap;
-    }
 
-    public String retrieveServerName(String metricPath){
-        String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis|";
-        String modifiedPath = metricPath.replace(metricPrefix, "");
-        Splitter pipeSplitter = Splitter.on('|')
-                .omitEmptyStrings()
-                .trimResults();
-        List<String> metric = pipeSplitter.splitToList(modifiedPath);
-        if(!metric.isEmpty()){
-            return metric.get(0);
-        }
-        return "";
-    }
-
-    //#TODO get the metric name from metric path.
-    public String retrieveMetricName(String metricPath){
-        Splitter pipeSplitter = Splitter.on('|')
-                .omitEmptyStrings()
-                .trimResults();
-        List<String> metric = pipeSplitter.splitToList(metricPath);
-        if(!metric.isEmpty()){
-            return metric.get(metric.size() - 1);
-        }
-        return "";
-    }
 }
 
