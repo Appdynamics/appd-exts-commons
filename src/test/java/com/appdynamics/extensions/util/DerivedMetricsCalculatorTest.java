@@ -18,7 +18,7 @@ public class DerivedMetricsCalculatorTest {
     private List<Map<String, ?>> derivedMetricsList = Lists.newArrayList();
     private String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis|";
 
-    @Before
+   /* @Before
     public void init(){
         derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, metricPrefix);
         derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|hits", "1");
@@ -68,5 +68,5 @@ public class DerivedMetricsCalculatorTest {
         derivedMetricsCalculator.populateGlobalMultiMap("{x}|CPU|{z}|misses");
         System.out.println("Global multi map =======" + derivedMetricsCalculator.getGlobalMultiMap());
 
-    }
+    }*/
 }
