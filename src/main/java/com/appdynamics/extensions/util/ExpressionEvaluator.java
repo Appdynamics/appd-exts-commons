@@ -11,27 +11,37 @@ import java.util.*;
 
 /**
  * Created by venkata.konala on 8/9/17.
- * This class takes the metricsMap (with metricNames and metricValues(BigDecimal))
- * and the expression which contains variables that are present in the metricsMap.
+ * This class takes the baseMetricsMap (with metricNames and metricValues(BigDecimal))
+ * and the expression which contains variables that are present in the baseMetricsMap.
  * The expressionEval() method calculates the values of the expression by substituting
- * values for variables, retrieved from the metricsMap.
+ * values for variables, retrieved from the baseMetricsMap.
  */
 public class ExpressionEvaluator {
-    private Map<String, BigDecimal> metricsMap;
+    String metricPrefix;
+    private Map<String, BigDecimal> baseMetricsMap;
+    Set<String> operands;
+    Set<String> modifiedOperands;
     private String expression;
+    private Splitter pipeSplitter = Splitter.on('|')
+            .omitEmptyStrings()
+            .trimResults();
 
-    public ExpressionEvaluator(Map<String, BigDecimal> metricsMap, String expression){
-        this.metricsMap = metricsMap;
+    public ExpressionEvaluator(String metricPrefix, Map<String, BigDecimal> baseMetricsMap, Set<String> operands, Set<String> modifiedOperands,String expression){
+        this.metricPrefix = metricPrefix;
+        this.baseMetricsMap = baseMetricsMap;
+        this.operands = operands;
+        this.modifiedOperands = modifiedOperands;
         this.expression = expression;
     }
 
     public BigDecimal eval(){
-        Set<String> baseMetricsSet = getBaseMetricsFromExpression(expression);
+        //Set<String> baseMetricsSet = getBaseMetricsFromExpression(expression);
+        String modifiedExpression = getModifiedExpression(operands, modifiedOperands, expression);
         Map<String,Double> baseMetricsValueMap = Maps.newHashMap();
-        Iterator<String> baseMetricSetIterator = baseMetricsSet.iterator();
-        while(baseMetricSetIterator.hasNext()){
-            String baseMetric = baseMetricSetIterator.next();
-            BigDecimal baseMetricValue = metricsMap.get(baseMetric);
+        Iterator<String> modifiedOperandsIterator = modifiedOperands.iterator();
+        while(modifiedOperandsIterator.hasNext()){
+            String baseMetric = modifiedOperandsIterator.next();
+            BigDecimal baseMetricValue = baseMetricsMap.get(metricPrefix + baseMetric);
             if(baseMetricValue != null) {
                 baseMetricsValueMap.put(baseMetric, baseMetricValue.doubleValue());
             }
@@ -39,21 +49,43 @@ public class ExpressionEvaluator {
                 return null;
             }
         }
-        Expression e = new ExpressionBuilder(expression).variables(baseMetricsSet).build().setVariables(baseMetricsValueMap);
+        Expression e = new ExpressionBuilder(modifiedExpression).variables(modifiedOperands).build().setVariables(baseMetricsValueMap);
         Double result = e.evaluate();
         return new BigDecimal(result);
     }
 
-    public Set<String> getBaseMetricsFromExpression(String expression){
-        Set<String> baseMetricsSet = new HashSet<String>();
-        Splitter splitter = Splitter.on(CharMatcher.anyOf("(+-*/%^) "))
-                .trimResults()
-                .omitEmptyStrings();
-        List<String> baseMetricsList = splitter.splitToList(expression);
-        for(String baseMetric: baseMetricsList){
-            baseMetricsSet.add(baseMetric);
+    public String getModifiedExpression(Set<String> operands, Set<String> modifiedOperands, String formula){
+        for(String operand : operands){
+            for(String modifiedOperand : modifiedOperands){
+                if(match(operand, modifiedOperand)){
+                    formula = formula.replace(operand, modifiedOperand);
+                    break;
+                }
+            }
         }
-        return baseMetricsSet;
+        return formula;
+    }
+
+    public boolean match(String operand, String modifiedOperand){
+        List<String> operandList = pipeSplitter.splitToList(operand);
+        List<String> modifiedOperandList = pipeSplitter.splitToList(modifiedOperand);
+        if(operandList.size() == modifiedOperandList.size()){
+            Iterator operandListIterator = operandList.iterator();
+            Iterator modifiedOperandListIterator = modifiedOperandList.iterator();
+            while(operandListIterator.hasNext() && modifiedOperandListIterator.hasNext()){
+                String operandSplit = operandListIterator.next().toString();
+                String modifiedOperandSplit = modifiedOperandListIterator.next().toString();
+                if(operandSplit.startsWith("{") && operandSplit.endsWith("}")){
+                    continue;
+                }
+                else if(!operandSplit.equals(modifiedOperandSplit)){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+
     }
 }
 

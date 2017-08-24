@@ -47,7 +47,7 @@ public class IndividualDerivedMetricCalculator {
         if(variable == null){
             //#TODO -> base case
 
-            ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(baseMetricsMap, baseMetrics, operands, formula);
+            ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(metricPrefix, baseMetricsMap, baseMetrics, operands, formula);
             BigDecimal value = expressionEvaluator.eval();
             String key = formKey(path);
             derivedMetricMap.put(key, value);
