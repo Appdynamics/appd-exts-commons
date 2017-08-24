@@ -35,16 +35,13 @@ public class ExpressionEvaluator {
     }
 
     public BigDecimal eval(){
-        //Set<String> baseMetricsSet = getBaseMetricsFromExpression(expression);
         String modifiedExpression = getModifiedExpression(operands, modifiedOperands, expression);
-        //Map<String,Double> baseMetricsValueMap = Maps.newHashMap();
         Iterator<String> modifiedOperandsIterator = modifiedOperands.iterator();
         while(modifiedOperandsIterator.hasNext()){
             String baseMetric = modifiedOperandsIterator.next();
             BigDecimal baseMetricValue = baseMetricsMap.get(metricPrefix + baseMetric);
             if(baseMetricValue != null) {
                 modifiedExpression = modifiedExpression.replace(baseMetric, String.valueOf(baseMetricValue.doubleValue()));
-                //baseMetricsValueMap.put(baseMetric, baseMetricValue.doubleValue());
             }
             else if(!NumberUtils.isNumber(baseMetric)){//The baseMetric is either not present in the the metricMap or its value is null
                 return null;

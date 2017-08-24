@@ -55,7 +55,7 @@ public class IndividualDerivedMetricCalculator {
         }
         Set<String> variableValues = multiMap.get(variable);
         for(String variableValue : variableValues){
-            Set<String> modifiedOperands = replace(operands, variable, variableValue);
+            Set<String> modifiedOperands = replaceOperands(operands, variable, variableValue);
             String modifiedPath = replacePath(path, variable, variableValue);
             substitute(modifiedPath, modifiedOperands, multiMap);
         }
@@ -74,7 +74,7 @@ public class IndividualDerivedMetricCalculator {
         return null;
     }
 
-    public Set<String> replace(Set<String> operands, String variable, String variableValue){
+    public Set<String> replaceOperands(Set<String> operands, String variable, String variableValue){
         Set<String> modifiedOperands = Sets.newHashSet();
         for(String operand : operands){
             if(operand.contains(variable)){
