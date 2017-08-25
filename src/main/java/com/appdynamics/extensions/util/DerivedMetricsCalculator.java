@@ -39,19 +39,23 @@ public class DerivedMetricsCalculator {
         for(Map<String, ?> derivedMetric : derivedMetricsList){
             String derivedMetricNameRaw = derivedMetric.entrySet().iterator().next().getKey();
             Map<String, ?> derivedMetricPropertiesFromConfig = (Map<String, ?>)derivedMetric.entrySet().iterator().next().getValue();
-            String derivedMetricPathRaw = derivedMetricPropertiesFromConfig.get("derivedMetricPath") == null ? null : derivedMetricPropertiesFromConfig.get("derivedMetricPath").toString();
-            String formula = derivedMetricPropertiesFromConfig.get("formula") == null ? null : derivedMetricPropertiesFromConfig.get("formula").toString();
-            IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, derivedMetricNameRaw, derivedMetricPathRaw, formula);
-            Multimap<String, BigDecimal> individualDerivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
-            for(Map.Entry<String, BigDecimal> entry : individualDerivedMetricMap.entries()){
-                String derivedMetricPath = entry.getKey();
-                BigDecimal derivedMetricValueBigD = entry.getValue();
-                if(derivedMetricPath != null && derivedMetricValueBigD != null){
-                    String derivedMetricName = getMetricName(derivedMetricPath);
-                    String derivedMetricValue = derivedMetricValueBigD.toString();
-                    MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(derivedMetricPropertiesFromConfig, derivedMetricName, derivedMetricValue);
-                    MetricProperties metricProperties = metricPropertiesBuilder.buildMetricProperties();
-                    derivedMetricsMap.put(derivedMetricPath, metricProperties);
+            if(derivedMetricPropertiesFromConfig != null) {
+                String derivedMetricPathRaw = derivedMetricPropertiesFromConfig.get("derivedMetricPath") == null ? null : derivedMetricPropertiesFromConfig.get("derivedMetricPath").toString();
+                String formula = derivedMetricPropertiesFromConfig.get("formula") == null ? null : derivedMetricPropertiesFromConfig.get("formula").toString();
+                if (derivedMetricPathRaw != null && formula != null) {
+                    IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, derivedMetricNameRaw, derivedMetricPathRaw, formula);
+                    Multimap<String, BigDecimal> individualDerivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
+                    for (Map.Entry<String, BigDecimal> entry : individualDerivedMetricMap.entries()) {
+                        String derivedMetricPath = entry.getKey();
+                        BigDecimal derivedMetricValueBigD = entry.getValue();
+                        if (derivedMetricPath != null && derivedMetricValueBigD != null) {
+                            String derivedMetricName = getMetricName(derivedMetricPath);
+                            String derivedMetricValue = derivedMetricValueBigD.toString();
+                            MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(derivedMetricPropertiesFromConfig, derivedMetricName, derivedMetricValue);
+                            MetricProperties metricProperties = metricPropertiesBuilder.buildMetricProperties();
+                            derivedMetricsMap.put(derivedMetricPath, metricProperties);
+                        }
+                    }
                 }
             }
         }

@@ -14,17 +14,18 @@ import java.util.Set;
  * Created by venkata.konala on 8/23/17.
  */
 public class IndividualDerivedMetricCalculator {
-    Map<String, BigDecimal> baseMetricsMap;
-    String metricPrefix;
-    String metricName;
-    String metricPath;
-    String formula;
-    Set<String> baseMetrics;
-    SetMultimap<String, String> globalMultiMap;
+    private Map<String, BigDecimal> baseMetricsMap;
+    private String metricPrefix;
+    private String metricName;
+    private String metricPath;
+    private  String formula;
+    private Set<String> baseMetrics;
+    private SetMultimap<String, String> globalMultiMap;
     private Splitter pipeSplitter = Splitter.on('|')
             .omitEmptyStrings()
             .trimResults();
-    Multimap<String, BigDecimal> derivedMetricMap = ArrayListMultimap.create();
+    private Multimap<String, BigDecimal> derivedMetricMap = ArrayListMultimap.create();
+
     public IndividualDerivedMetricCalculator(Map<String, BigDecimal> baseMetricsMap, String metricPrefix, String metricName, String metricPath, String formula, Set<String> baseMetrics, SetMultimap<String, String> globalMultiMap){
         this.baseMetricsMap = baseMetricsMap;
         this.metricPrefix = metricPrefix;
@@ -36,16 +37,13 @@ public class IndividualDerivedMetricCalculator {
     }
 
     public Multimap<String, BigDecimal> calculateDerivedMetric(){
-
         substitute(metricPath, baseMetrics, globalMultiMap);
         return derivedMetricMap;
-
     }
 
-    public void substitute(String path, Set<String> operands, SetMultimap<String, String> multiMap){
+    public void substitute(String path, Set<String> operands, SetMultimap<String, String> globalMultiMap){
         String variable = checkForFirstVariable(operands);
         if(variable == null){
-            //#TODO -> base case
             ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(metricPrefix, baseMetricsMap, baseMetrics, operands, formula);
             BigDecimal value = expressionEvaluator.eval();
             String key = formKey(path);
@@ -54,11 +52,11 @@ public class IndividualDerivedMetricCalculator {
             }
             return;
         }
-        Set<String> variableValues = multiMap.get(variable);
+        Set<String> variableValues = globalMultiMap.get(variable);
         for(String variableValue : variableValues){
             Set<String> modifiedOperands = replaceOperands(operands, variable, variableValue);
             String modifiedPath = replacePath(path, variable, variableValue);
-            substitute(modifiedPath, modifiedOperands, multiMap);
+            substitute(modifiedPath, modifiedOperands, globalMultiMap);
         }
 
     }
