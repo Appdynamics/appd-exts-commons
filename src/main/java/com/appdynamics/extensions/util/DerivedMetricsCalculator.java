@@ -1,8 +1,6 @@
 package com.appdynamics.extensions.util;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import java.math.BigDecimal;
 import java.util.*;
@@ -10,9 +8,10 @@ import java.util.*;
 /**
  * Created by venkata.konala on 8/10/17.
  * This class takes the list of derived metrics(with metric properties) from the "derived" section
- * in config.yml and also baseMetricsMap(with metricNames and metricValues in BigDecimal).
- * The calculateDerivedMetrics() method will calculate the derived metrics values and
- * return a map (with derived metricNames and their metricvalues in BigDecimal).
+ * in config.yml. It gets the baseMetricsMap(with metricNames and metricValues in BigDecimal) from
+ * printMetric() methods in MetricWriteHelper.java
+ * The calculateAndReturnDerivedMetrics() method will calculate the derived metrics values and
+ * return a Multimap (with derived metricPaths and their MetricProperties).
  */
 public class DerivedMetricsCalculator {
     public Map<String, BigDecimal> baseMetricsMap = Maps.newConcurrentMap();
@@ -35,16 +34,14 @@ public class DerivedMetricsCalculator {
         if(!metricPrefix.endsWith("|")){
             metricPrefix = metricPrefix + "|";
         }
+        //This map has to be ArrayList Multimap so that all values of a particular key are retained. If HashSet Multimap is used, duplicate values are removed.
         Multimap<String, MetricProperties> derivedMetricsMap = ArrayListMultimap.create();
         for(Map<String, ?> derivedMetric : derivedMetricsList){
-            String metricName = derivedMetric.entrySet()
-                    .iterator()
-                    .next()
-                    .getKey();
-            Map<String, ?> derivedMetricProperties = (Map<String, ?>)derivedMetric.entrySet().iterator().next().getValue();
-            String metricPath = derivedMetricProperties.get("metricPath").toString();
-            String formula = derivedMetricProperties.get("formula").toString();
-            IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, metricName, metricPath, formula);
+            String derivedMetricNameRaw = derivedMetric.entrySet().iterator().next().getKey();
+            Map<String, ?> derivedMetricPropertiesFromConfig = (Map<String, ?>)derivedMetric.entrySet().iterator().next().getValue();
+            String derivedMetricPathRaw = derivedMetricPropertiesFromConfig.get("derivedMetricPath") == null ? null : derivedMetricPropertiesFromConfig.get("derivedMetricPath").toString();
+            String formula = derivedMetricPropertiesFromConfig.get("formula") == null ? null : derivedMetricPropertiesFromConfig.get("formula").toString();
+            IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, derivedMetricNameRaw, derivedMetricPathRaw, formula);
             Multimap<String, BigDecimal> individualDerivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
             for(Map.Entry<String, BigDecimal> entry : individualDerivedMetricMap.entries()){
                 String derivedMetricPath = entry.getKey();
@@ -52,7 +49,7 @@ public class DerivedMetricsCalculator {
                 if(derivedMetricPath != null && derivedMetricValueBigD != null){
                     String derivedMetricName = getMetricName(derivedMetricPath);
                     String derivedMetricValue = derivedMetricValueBigD.toString();
-                    MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(derivedMetricProperties, derivedMetricName, derivedMetricValue);
+                    MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(derivedMetricPropertiesFromConfig, derivedMetricName, derivedMetricValue);
                     MetricProperties metricProperties = metricPropertiesBuilder.buildMetricProperties();
                     derivedMetricsMap.put(derivedMetricPath, metricProperties);
                 }
@@ -70,7 +67,5 @@ public class DerivedMetricsCalculator {
             return null;
         }
     }
-
-
 }
 

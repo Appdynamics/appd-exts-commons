@@ -41,6 +41,12 @@ public class IndividualDerivedMetricProcessor {
         return individualDerivedMetricCalculator.calculateDerivedMetric();
     }
 
+    /* The getBaseMetricsfromFormula(String formula) method takes an expression and
+     * returns the set of operands. The operators allowed are +,-,*,/,%,^.
+     * To apply precedence, "()" can be used. Spaces can be used in the expression
+     * to separate operators and operands. Please note that the operands do not
+     * have to be only baseMetrics, they can be numbers also.
+     */
     public Set<String> getBaseMetricsFromFormula(String formula){
         Set<String> baseMetricsSet = new HashSet<String>();
         Splitter splitter = Splitter.on(CharMatcher.anyOf("(+-*/%^) "))
@@ -55,28 +61,28 @@ public class IndividualDerivedMetricProcessor {
 
     public void populateGlobalMultiMap(String baseMetricExpression){
         for(Map.Entry<String, BigDecimal> baseMetric: baseMetricsMap.entrySet()){
-            String baseMetricName = baseMetric.getKey();
-            baseMetricName = baseMetricName.replace(metricPrefix,"");
-            if(!Strings.isNullOrEmpty(baseMetricName) && !Strings.isNullOrEmpty(baseMetricExpression)) {
+            String baseMetricPath = baseMetric.getKey();
+            baseMetricPath = baseMetricPath.replace(metricPrefix,"");
+            if(!Strings.isNullOrEmpty(baseMetricPath) && !Strings.isNullOrEmpty(baseMetricExpression)) {
                 List<String> baseMetricExpressionList = pipeSplitter.splitToList(baseMetricExpression);
-                List<String> baseMetricNameList = pipeSplitter.splitToList(baseMetricName);
-                if (baseMetricExpressionList.size() == baseMetricNameList.size()) {
-                    Multimap<String, String> localMap = splitAndPopulateLocalMap(baseMetricExpressionList, baseMetricNameList);
-                    if (localMap != null) {
-                        globalMultiMap.putAll(localMap);
+                List<String> baseMetricPathList = pipeSplitter.splitToList(baseMetricPath);
+                if (baseMetricExpressionList.size() == baseMetricPathList.size()) {
+                    SetMultimap<String, String> localMultiMap = splitAndPopulateLocalMap(baseMetricExpressionList, baseMetricPathList);
+                    if (localMultiMap != null) {
+                        globalMultiMap.putAll(localMultiMap);
                     }
                 }
             }
         }
     }
 
-    public SetMultimap<String, String> splitAndPopulateLocalMap(List<String> baseMetricExpressionList, List<String> baseMetricNameList){
+    public SetMultimap<String, String> splitAndPopulateLocalMap(List<String> baseMetricExpressionList, List<String> baseMetricPathList){
         SetMultimap<String, String> localMultiMap = HashMultimap.create();
         Iterator expressionIterator = baseMetricExpressionList.iterator();
-        Iterator nameIterator = baseMetricNameList.iterator();
-        while(expressionIterator.hasNext() && nameIterator.hasNext()){
+        Iterator pathIterator = baseMetricPathList.iterator();
+        while(expressionIterator.hasNext() && pathIterator.hasNext()){
             String expressionValue = expressionIterator.next().toString();
-            String nameValue = nameIterator.next().toString();
+            String nameValue = pathIterator.next().toString();
             if(expressionValue.startsWith("{") && expressionValue.endsWith("}")){
                 localMultiMap.put(expressionValue, nameValue);
             }

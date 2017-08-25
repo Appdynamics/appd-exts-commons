@@ -38,6 +38,14 @@ public class MetricWriteHelper {
         metricCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
     }
 
+    public DerivedMetricsCalculator getDerivedMetricsCalculator(){
+        return derivedMetricsCalculator;
+    }
+
+    public void setDerivedMetricsCalculator(DerivedMetricsCalculator derivedMetricsCalculator){
+        this.derivedMetricsCalculator = derivedMetricsCalculator;
+    }
+
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
         if (!Strings.isNullOrEmpty(metricPath) && !Strings.isNullOrEmpty(metricValue)
                 && !Strings.isNullOrEmpty(timeRollup) && !Strings.isNullOrEmpty(metricPath)
@@ -58,19 +66,10 @@ public class MetricWriteHelper {
                 }
             }
             derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
-
         } else {
             Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
             logger.error("The metric is not valid {}", arg);
         }
-    }
-
-    public DerivedMetricsCalculator getDerivedMetricsCalculator(){
-        return derivedMetricsCalculator;
-    }
-
-    public void setDerivedMetricsCalculator(DerivedMetricsCalculator derivedMetricsCalculator){
-        this.derivedMetricsCalculator = derivedMetricsCalculator;
     }
 
     public void onTaskComplete(){
@@ -79,11 +78,13 @@ public class MetricWriteHelper {
             for(Map.Entry<String, MetricProperties> derivedMetricEntry : derivedMetricsMultiMap.entries()){
                 String metricPath =  derivedMetricEntry.getKey();
                 MetricProperties metricProperties = derivedMetricEntry.getValue();
-                String metricValue = metricProperties.getMetricValue().toString();
-                String aggregationType = metricProperties.getAggregationType();
-                String timeRollUp = metricProperties.getTimeRollUp();
-                String clusterRollUp = metricProperties.getClusterRollUp();
-                printMetric(metricPath, metricValue, aggregationType, timeRollUp, clusterRollUp);
+                if(metricPath != null && metricProperties != null) {
+                    String metricValue = metricProperties.getMetricValue().toString();
+                    String aggregationType = metricProperties.getAggregationType();
+                    String timeRollUp = metricProperties.getTimeRollUp();
+                    String clusterRollUp = metricProperties.getClusterRollUp();
+                    printMetric(metricPath, metricValue, aggregationType, timeRollUp, clusterRollUp);
+                }
             }
         }
     }
@@ -120,6 +121,7 @@ public class MetricWriteHelper {
                 MetricWriter metricWriter = getMetricWriter(metricPath, metricType);
                 metricWriter.printMetric(valStr);
             }
+            derivedMetricsCalculator.addToBaseMetricsMap(metricPath, value.toString());
         } else {
             logger.error("Cannot send the metric [{}], value=[{}] and metricType=[{}]", metricPath, value, metricType);
         }
