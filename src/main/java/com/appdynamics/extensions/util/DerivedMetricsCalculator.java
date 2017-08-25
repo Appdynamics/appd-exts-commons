@@ -18,6 +18,9 @@ public class DerivedMetricsCalculator {
     public Map<String, BigDecimal> baseMetricsMap = Maps.newConcurrentMap();
     private List<Map<String, ?>> derivedMetricsList;
     private String metricPrefix;
+    private Splitter pipeSplitter = Splitter.on('|')
+            .omitEmptyStrings()
+            .trimResults();
 
     public DerivedMetricsCalculator(List<Map<String, ?>> derivedMetricsList, String metricPrefix){
         this.derivedMetricsList = derivedMetricsList;
@@ -28,8 +31,11 @@ public class DerivedMetricsCalculator {
         baseMetricsMap.put(metricPath, new BigDecimal(metricValue));
     }
 
-    public Map<String, MetricProperties> calculateAndReturnDerivedMetrics(){
-        Map<String, MetricProperties> derivedMetricsMap = Maps.newHashMap();
+    public Multimap<String, MetricProperties> calculateAndReturnDerivedMetrics(){
+        if(!metricPrefix.endsWith("|")){
+            metricPrefix = metricPrefix + "|";
+        }
+        Multimap<String, MetricProperties> derivedMetricsMap = ArrayListMultimap.create();
         for(Map<String, ?> derivedMetric : derivedMetricsList){
             String metricName = derivedMetric.entrySet()
                     .iterator()
@@ -40,8 +46,29 @@ public class DerivedMetricsCalculator {
             String formula = derivedMetricProperties.get("formula").toString();
             IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, metricName, metricPath, formula);
             Multimap<String, BigDecimal> individualDerivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
+            for(Map.Entry<String, BigDecimal> entry : individualDerivedMetricMap.entries()){
+                String derivedMetricPath = entry.getKey();
+                BigDecimal derivedMetricValueBigD = entry.getValue();
+                if(derivedMetricPath != null && derivedMetricValueBigD != null){
+                    String derivedMetricName = getMetricName(derivedMetricPath);
+                    String derivedMetricValue = derivedMetricValueBigD.toString();
+                    MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(derivedMetricProperties, derivedMetricName, derivedMetricValue);
+                    MetricProperties metricProperties = metricPropertiesBuilder.buildMetricProperties();
+                    derivedMetricsMap.put(derivedMetricPath, metricProperties);
+                }
+            }
         }
         return derivedMetricsMap;
+    }
+
+    public String getMetricName(String derivedMetricPath){
+        List<String> splitList = pipeSplitter.splitToList(derivedMetricPath);
+        if(splitList.size() > 0){
+            return splitList.get(splitList.size() - 1);
+        }
+        else{
+            return null;
+        }
     }
 
 

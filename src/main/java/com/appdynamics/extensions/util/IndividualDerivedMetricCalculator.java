@@ -46,11 +46,12 @@ public class IndividualDerivedMetricCalculator {
         String variable = checkForFirstVariable(operands);
         if(variable == null){
             //#TODO -> base case
-
             ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(metricPrefix, baseMetricsMap, baseMetrics, operands, formula);
             BigDecimal value = expressionEvaluator.eval();
             String key = formKey(path);
-            derivedMetricMap.put(key, value);
+            if(value != null){
+                derivedMetricMap.put(key, value);
+            }
             return;
         }
         Set<String> variableValues = multiMap.get(variable);

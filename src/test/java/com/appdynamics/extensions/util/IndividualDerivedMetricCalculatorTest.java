@@ -40,7 +40,7 @@ public class IndividualDerivedMetricCalculatorTest {
     @Test
     public void calculateDerivedMetricWithNoLevelDifference(){
         Multimap<String, BigDecimal> derivedMap = individualDerivedMetricCalculator.calculateDerivedMetric();
-        System.out.println("Derived metric map ======= " + derivedMap);
+        //System.out.println("Derived metric map ======= " + derivedMap);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class IndividualDerivedMetricCalculatorTest {
         globalMultiMap.put("{z}", "CPU2");
         individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(baseMetricsMap, metricPrefix, metricName, metricPath, formula, baseMetrics, globalMultiMap);
         Multimap<String, BigDecimal> derivedMap = individualDerivedMetricCalculator.calculateDerivedMetric();
-        System.out.println("Derived metric with hierarchy level difference 1 ======= " + derivedMap);
+        //System.out.println("Derived metric with hierarchy level difference 1 ======= " + derivedMap);
 
     }
 
@@ -77,7 +77,7 @@ public class IndividualDerivedMetricCalculatorTest {
         baseMetrics.add("Server1|Queue|Q1|{a}|misses");
         baseMetrics.add("Server1|Queue|Q1|{z}|sitsess");
         String firstVariable = individualDerivedMetricCalculator.checkForFirstVariable(baseMetrics);
-        System.out.println("First Variable =========" + firstVariable);
+        //System.out.println("First Variable =========" + firstVariable);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class IndividualDerivedMetricCalculatorTest {
         operands.add("{x}|Queue|{y}|hits");
         operands.add("{x}|Queue|{y}|misses");
         Set<String> modifiedOperands = individualDerivedMetricCalculator.replaceOperands(operands, "{x}", "Server1");
-        System.out.println("Modified Operands ======== " + modifiedOperands);
+        //System.out.println("Modified Operands ======== " + modifiedOperands);
 
     }
 

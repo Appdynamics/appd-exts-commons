@@ -86,4 +86,8 @@ public class IndividualDerivedMetricProcessor {
         }
         return localMultiMap;
     }
+
+    public SetMultimap<String, String> getGlobalMultiMap(){
+        return globalMultiMap;
+    }
 }

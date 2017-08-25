@@ -16,22 +16,23 @@ import java.util.Map;
 public class DerivedMetricsCalculatorTest {
     private DerivedMetricsCalculator derivedMetricsCalculator;
     private List<Map<String, ?>> derivedMetricsList = Lists.newArrayList();
-    private String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis|";
+    private String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis";
 
-   /* @Before
+
+   @Before
     public void init(){
-        derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, metricPrefix);
-        derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|hits", "1");
-        derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|misses", "2");
-        derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Queue|Q2|hits", "1");
-        derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server2|CPU|CPU2|misses", "2");
-
-        Map<String, Map<String, String>> nameAndProperty = Maps.newHashMap();
-        Map<String, String> derivedMetricProperties = Maps.newHashMap();
-        derivedMetricProperties.put("alias","ratio");
-        derivedMetricProperties.put("formula", "(hits + misses) / 2");
-        nameAndProperty.put("ratio", derivedMetricProperties);
-        derivedMetricsList.add(nameAndProperty);
+       Map<String, Map<String, String>> nameAndProperty = Maps.newHashMap();
+       Map<String, String> derivedMetricProperties = Maps.newHashMap();
+       derivedMetricProperties.put("alias","ratio");
+       derivedMetricProperties.put("metricPath", "{x}|{z}|ratio");
+       derivedMetricProperties.put("formula", "({x}|Queue|{y}|hits + {x}|CPU|{z}|misses) / 2");
+       nameAndProperty.put("ratio", derivedMetricProperties);
+       derivedMetricsList.add(nameAndProperty);
+       derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, metricPrefix);
+       derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|hits", "1");
+       derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|misses", "2");
+       derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Queue|Q2|hits", "1");
+       derivedMetricsCalculator.addToBaseMetricsMap("Server|Component:AppLevels|Custom Metrics|Redis|Server2|CPU|CPU2|misses", "2");
     }
 
     @Test
@@ -40,33 +41,12 @@ public class DerivedMetricsCalculatorTest {
         Assert.assertTrue(derivedMetricsCalculator.baseMetricsMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|hits") == null);
     }
 
-
     @Test
-    public void localMapTest(){
-        List<String> expressionList = Lists.newArrayList();
-        expressionList.add("{x}");
-        expressionList.add("Queue");
-        expressionList.add("{y}");
-        expressionList.add("CPU");
-        expressionList.add("hits");
-        List<String> nameList = Lists.newArrayList();
-        nameList.add("Server1");
-        nameList.add("Queue");
-        nameList.add("Q1");
-        nameList.add("CPU");
-        nameList.add("hits");
-        Multimap<String,String> localMap = derivedMetricsCalculator.splitAndPopulateLocalMap(expressionList, nameList);
-        Assert.assertTrue(localMap.size() == 2);
-        System.out.println("Multimap size ========" + localMap.size());
-        System.out.println("Multimap ---->" + localMap);
-
+    public void calculateAndReturnDerivedMetricsTest(){
+        Multimap<String, MetricProperties> derivedMetricsMultiMap= derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+        for(Map.Entry<String, MetricProperties> entry : derivedMetricsMultiMap.entries()){
+            System.out.println("DerivedMetricsMultiMap entry ====== Key is : " + entry.getKey() + " Value is :" + entry.getValue().getMetricValue());
+        }
     }
 
-    @Test
-    public void populateGlobalMapTest(){
-        derivedMetricsCalculator.populateGlobalMultiMap("{x}|Queue|{y}|hits");
-        derivedMetricsCalculator.populateGlobalMultiMap("{x}|CPU|{z}|misses");
-        System.out.println("Global multi map =======" + derivedMetricsCalculator.getGlobalMultiMap());
-
-    }*/
 }
