@@ -24,7 +24,7 @@ public class DerivedMetricsCalculatorTest {
        Map<String, Map<String, String>> nameAndProperty = Maps.newHashMap();
        Map<String, String> derivedMetricProperties = Maps.newHashMap();
        derivedMetricProperties.put("alias","ratio");
-       derivedMetricProperties.put("metricPath", "{x}|{z}|ratio");
+       derivedMetricProperties.put("derivedMetricPath", "{x}|CPU|{z}|ratio");
        derivedMetricProperties.put("formula", "({x}|Queue|{y}|hits + {x}|CPU|{z}|misses) / 2");
        nameAndProperty.put("ratio", derivedMetricProperties);
        derivedMetricsList.add(nameAndProperty);
@@ -44,9 +44,17 @@ public class DerivedMetricsCalculatorTest {
     @Test
     public void calculateAndReturnDerivedMetricsTest(){
         Multimap<String, MetricProperties> derivedMetricsMultiMap= derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
-        for(Map.Entry<String, MetricProperties> entry : derivedMetricsMultiMap.entries()){
-            System.out.println("DerivedMetricsMultiMap entry ====== Key is : " + entry.getKey() + " Value is :" + entry.getValue().getMetricValue());
-        }
+        Assert.assertTrue(derivedMetricsMultiMap.size() == 2);
+        Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").size() == 1);
+        Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").iterator().next().getMetricValue().equals(new BigDecimal("1.5")));
+    }
+
+    @Test
+    public void getMetricNameTest(){
+        String metricName1 = derivedMetricsCalculator.getMetricName("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|hits");
+        Assert.assertTrue(metricName1.equals("hits"));
+        String metricName2 = derivedMetricsCalculator.getMetricName("");
+        Assert.assertTrue(metricName2 == null);
     }
 
 }
