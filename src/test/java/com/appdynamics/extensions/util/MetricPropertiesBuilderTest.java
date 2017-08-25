@@ -37,6 +37,7 @@ public class MetricPropertiesBuilderTest {
         Assert.assertTrue(metricProperties.getAggregateAtCluster() == true);
     }
 
+    @Test
     public void nullValuesTest(){
         metricPropertiesMap.put("alias", null);
         metricPropertiesMap.put("multiplier", null);
@@ -46,17 +47,16 @@ public class MetricPropertiesBuilderTest {
         metricPropertiesMap.put("delta", null);
         metricPropertiesMap.put("cluster", null);
         metricPropertiesMap.put("aggregateAtCluster", null);
-
         metricPropertiesBuilder = new MetricPropertiesBuilder(metricPropertiesMap, "nullMetric",null);
         MetricProperties nullMetricProperties = metricPropertiesBuilder.buildMetricProperties();
-        Assert.assertTrue(nullMetricProperties.getMetricValue().equals(null));
-        Assert.assertTrue(nullMetricProperties.getMultiplier().equals(null));
-        Assert.assertTrue(nullMetricProperties.getAlias().equals(null));
-        Assert.assertTrue(nullMetricProperties.getAggregationType().equals(null));
-        Assert.assertTrue(nullMetricProperties.getClusterRollUp().equals(null));
-        Assert.assertTrue(nullMetricProperties.getTimeRollUp().equals(null));
+        Assert.assertTrue(nullMetricProperties.getMetricValue() == null);
+        Assert.assertTrue(nullMetricProperties.getMultiplier().equals(BigDecimal.ONE));
+        Assert.assertTrue(nullMetricProperties.getAlias().equals("nullMetric"));
+        Assert.assertTrue(nullMetricProperties.getAggregationType().equals("AVERAGE"));
+        Assert.assertTrue(nullMetricProperties.getClusterRollUp().equals("INDIVIDUAL"));
+        Assert.assertTrue(nullMetricProperties.getTimeRollUp().equals("AVERAGE"));
         Assert.assertTrue(nullMetricProperties.getDelta() == false);
-        Assert.assertTrue(nullMetricProperties.getConversionValues().equals(null));
+        Assert.assertTrue(nullMetricProperties.getConversionValues() == null);
         Assert.assertTrue(nullMetricProperties.getAggregateAtCluster() == false);
     }
 
