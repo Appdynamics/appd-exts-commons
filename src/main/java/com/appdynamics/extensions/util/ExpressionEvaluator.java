@@ -1,9 +1,7 @@
 package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.NumberUtils;
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Maps;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import java.math.BigDecimal;
