@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
@@ -18,7 +18,7 @@ public class IndividualDerivedMetricProcessor {
     String metricName;
     String metricPath;
     private String formula;
-    private SetMultimap<String, String> globalMultiMap = HashMultimap.create();
+    private SetMultimap<String, String> variablesMultiMap = HashMultimap.create();
     private Splitter pipeSplitter = Splitter.on('|')
             .omitEmptyStrings()
             .trimResults();
@@ -32,11 +32,15 @@ public class IndividualDerivedMetricProcessor {
     }
 
     public Multimap<String, BigDecimal> processDerivedMetric(){
-        Set<String> baseMetrics = getBaseMetricsFromFormula(formula);
+        Set<String> baseMetrics = getOperandsFromFormula(formula);
+        //venkata.konala ..Can you optimize this? Imagine you have 10k base metrics being reported and 2 operands from derived metrics formulae.
+        //You will be unnecessarily looping through the 10k metrics twice. You already know that no.of base metrics >> no. of operands.
+        //Can you interchange the for loops? Will this not optimize the time taken to execute?
         for(String baseMetric : baseMetrics){
-            populateGlobalMultiMap(baseMetric);
+            populateVariablesMultiMap(baseMetric);
         }
-        IndividualDerivedMetricCalculator individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(baseMetricsMap, metricPrefix, metricName, metricPath, formula, baseMetrics, globalMultiMap);
+        //venkata.konala This is so ugly
+        IndividualDerivedMetricCalculator individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(baseMetricsMap, metricPrefix, metricName, metricPath, formula, baseMetrics, variablesMultiMap);
         return individualDerivedMetricCalculator.calculateDerivedMetric();
     }
 
@@ -46,19 +50,19 @@ public class IndividualDerivedMetricProcessor {
      * to separate operators and operands. Please note that the operands do not
      * have to be only baseMetrics, they can be numbers also.
      */
-    public Set<String> getBaseMetricsFromFormula(String formula){
-        Set<String> baseMetricsSet = new HashSet<String>();
+    public Set<String> getOperandsFromFormula(String formula){
+        Set<String> operands = new HashSet<String>();
         Splitter splitter = Splitter.on(CharMatcher.anyOf("(+-*/%^) "))
                 .trimResults()
                 .omitEmptyStrings();
         List<String> baseMetricsList = splitter.splitToList(formula);
         for(String baseMetric: baseMetricsList){
-            baseMetricsSet.add(baseMetric);
+            operands.add(baseMetric);
         }
-        return baseMetricsSet;
+        return operands;
     }
 
-    public void populateGlobalMultiMap(String baseMetricExpression){
+    public void populateVariablesMultiMap(String baseMetricExpression){
         for(Map.Entry<String, BigDecimal> baseMetric: baseMetricsMap.entrySet()){
             String baseMetricPath = baseMetric.getKey();
             baseMetricPath = baseMetricPath.replace(metricPrefix,"");
@@ -66,16 +70,16 @@ public class IndividualDerivedMetricProcessor {
                 List<String> baseMetricExpressionList = pipeSplitter.splitToList(baseMetricExpression);
                 List<String> baseMetricPathList = pipeSplitter.splitToList(baseMetricPath);
                 if (baseMetricExpressionList.size() == baseMetricPathList.size()) {
-                    SetMultimap<String, String> localMultiMap = splitAndPopulateLocalMap(baseMetricExpressionList, baseMetricPathList);
+                    SetMultimap<String, String> localMultiMap = splitAndPopulateVariablesMap(baseMetricExpressionList, baseMetricPathList);
                     if (localMultiMap != null) {
-                        globalMultiMap.putAll(localMultiMap);
+                        variablesMultiMap.putAll(localMultiMap);
                     }
                 }
             }
         }
     }
 
-    public SetMultimap<String, String> splitAndPopulateLocalMap(List<String> baseMetricExpressionList, List<String> baseMetricPathList){
+    public SetMultimap<String, String> splitAndPopulateVariablesMap(List<String> baseMetricExpressionList, List<String> baseMetricPathList){
         SetMultimap<String, String> localMultiMap = HashMultimap.create();
         Iterator expressionIterator = baseMetricExpressionList.iterator();
         Iterator pathIterator = baseMetricPathList.iterator();
@@ -92,7 +96,7 @@ public class IndividualDerivedMetricProcessor {
         return localMultiMap;
     }
 
-    public SetMultimap<String, String> getGlobalMultiMap(){
-        return globalMultiMap;
+    public SetMultimap<String, String> getVariablesMultiMap(){
+        return variablesMultiMap;
     }
 }

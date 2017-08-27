@@ -4,10 +4,10 @@ import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.StringUtils;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.util.*;
+import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -461,6 +461,7 @@ public class MonitorConfiguration {
 
     private void initDerivedMetricsCalculator(){
         List<Map<String, ?>> derivedMetricsList = (List) config.get("derived");
+        //@venkata.konala Shouldn't you initialize it only when derived metrics are configured in config.yaml.
         derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, getMetricPrefix());
         metricWriter.setDerivedMetricsCalculator(derivedMetricsCalculator);
     }

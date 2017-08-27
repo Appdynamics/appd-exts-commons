@@ -1,5 +1,6 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
+import com.appdynamics.extensions.util.derived.IndividualDerivedMetricProcessor;
 import com.google.common.collect.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -80,9 +81,9 @@ public class IndividualDerivedMetricProcessorTest {
     @Test
     public void populateGlobalMapTest(){
         SetMultimap<String, String> globalMultiMap= HashMultimap.create();
-        individualDerivedMetricProcessor.populateGlobalMultiMap("{x}|Queue|{y}|hits");
-        individualDerivedMetricProcessor.populateGlobalMultiMap("{x}|Queue|{y}|misses");
-        globalMultiMap = individualDerivedMetricProcessor.getGlobalMultiMap();
+        individualDerivedMetricProcessor.populateVariablesMultiMap("{x}|Queue|{y}|hits");
+        individualDerivedMetricProcessor.populateVariablesMultiMap("{x}|Queue|{y}|misses");
+        globalMultiMap = individualDerivedMetricProcessor.getVariablesMultiMap();
         Assert.assertTrue(globalMultiMap.size() == 3);
         Assert.assertTrue(globalMultiMap.get("{x}").iterator().next().equals("Server1"));
     }
@@ -101,7 +102,7 @@ public class IndividualDerivedMetricProcessorTest {
         nameList.add("Q1");
         nameList.add("CPU");
         nameList.add("hits");
-        Multimap<String,String> localMap = individualDerivedMetricProcessor.splitAndPopulateLocalMap(expressionList, nameList);
+        Multimap<String,String> localMap = individualDerivedMetricProcessor.splitAndPopulateVariablesMap(expressionList, nameList);
         Assert.assertTrue(localMap.size() == 2);
         Assert.assertTrue(localMap.get("{x}").size() == 1);
         Assert.assertTrue(localMap.get("{y}").iterator().next().equals("Q1"));

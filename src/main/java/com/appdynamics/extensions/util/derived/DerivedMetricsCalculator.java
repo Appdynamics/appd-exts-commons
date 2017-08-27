@@ -1,5 +1,7 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
+import com.appdynamics.extensions.util.MetricProperties;
+import com.appdynamics.extensions.util.MetricPropertiesBuilder;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import java.math.BigDecimal;
@@ -37,13 +39,14 @@ public class DerivedMetricsCalculator {
         //This map has to be ArrayList Multimap so that all values of a particular key are retained. If HashSet Multimap is used, duplicate values are removed.
         Multimap<String, MetricProperties> derivedMetricsMap = ArrayListMultimap.create();
         for(Map<String, ?> derivedMetric : derivedMetricsList){
-            String derivedMetricNameRaw = derivedMetric.entrySet().iterator().next().getKey();
+            //venkata.konala what is this rawDerivedMetricName? Why is there no sample config.yaml against which you have performed your test?
+            String rawDerivedMetricName = derivedMetric.entrySet().iterator().next().getKey();
             Map<String, ?> derivedMetricPropertiesFromConfig = (Map<String, ?>)derivedMetric.entrySet().iterator().next().getValue();
             if(derivedMetricPropertiesFromConfig != null) {
-                String derivedMetricPathRaw = derivedMetricPropertiesFromConfig.get("derivedMetricPath") == null ? null : derivedMetricPropertiesFromConfig.get("derivedMetricPath").toString();
+                String rawDerivedMetricPath = derivedMetricPropertiesFromConfig.get("derivedMetricPath") == null ? null : derivedMetricPropertiesFromConfig.get("derivedMetricPath").toString();
                 String formula = derivedMetricPropertiesFromConfig.get("formula") == null ? null : derivedMetricPropertiesFromConfig.get("formula").toString();
-                if (derivedMetricPathRaw != null && formula != null) {
-                    IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, derivedMetricNameRaw, derivedMetricPathRaw, formula);
+                if (rawDerivedMetricPath != null && formula != null) {
+                    IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, rawDerivedMetricName, rawDerivedMetricPath, formula);
                     Multimap<String, BigDecimal> individualDerivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
                     for (Map.Entry<String, BigDecimal> entry : individualDerivedMetricMap.entries()) {
                         String derivedMetricPath = entry.getKey();
@@ -57,6 +60,7 @@ public class DerivedMetricsCalculator {
                         }
                     }
                 }
+                //@venkata.konala else log a warn
             }
         }
         return derivedMetricsMap;

@@ -1,5 +1,6 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
+import com.appdynamics.extensions.util.derived.ExpressionEvaluator;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.junit.Assert;
@@ -7,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 

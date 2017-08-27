@@ -1,5 +1,7 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
+import com.appdynamics.extensions.util.MetricProperties;
+import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;

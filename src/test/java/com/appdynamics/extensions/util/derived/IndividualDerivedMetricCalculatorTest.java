@@ -1,5 +1,6 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
+import com.appdynamics.extensions.util.derived.IndividualDerivedMetricCalculator;
 import com.google.common.collect.*;
 import org.junit.Assert;
 import org.junit.Before;

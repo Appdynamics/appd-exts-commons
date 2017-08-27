@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
@@ -20,28 +20,28 @@ public class IndividualDerivedMetricCalculator {
     private String metricPath;
     private  String formula;
     private Set<String> baseMetrics;
-    private SetMultimap<String, String> globalMultiMap;
+    private SetMultimap<String, String> variablesMultiMap;
     private Splitter pipeSplitter = Splitter.on('|')
             .omitEmptyStrings()
             .trimResults();
     private Multimap<String, BigDecimal> derivedMetricMap = ArrayListMultimap.create();
 
-    public IndividualDerivedMetricCalculator(Map<String, BigDecimal> baseMetricsMap, String metricPrefix, String metricName, String metricPath, String formula, Set<String> baseMetrics, SetMultimap<String, String> globalMultiMap){
+    public IndividualDerivedMetricCalculator(Map<String, BigDecimal> baseMetricsMap, String metricPrefix, String metricName, String metricPath, String formula, Set<String> baseMetrics, SetMultimap<String, String> variablesMultiMap){
         this.baseMetricsMap = baseMetricsMap;
         this.metricPrefix = metricPrefix;
         this.metricName = metricName;
         this.metricPath = metricPath;
         this.formula = formula;
         this.baseMetrics = baseMetrics;
-        this.globalMultiMap = globalMultiMap;
+        this.variablesMultiMap = variablesMultiMap;
     }
 
     public Multimap<String, BigDecimal> calculateDerivedMetric(){
-        substitute(metricPath, baseMetrics, globalMultiMap);
+        substitute(metricPath, baseMetrics, variablesMultiMap);
         return derivedMetricMap;
     }
 
-    public void substitute(String path, Set<String> operands, SetMultimap<String, String> globalMultiMap){
+    public void substitute(String path, Set<String> operands, SetMultimap<String, String> variableMultiMap){
         String variable = checkForFirstVariable(operands);
         if(variable == null){
             ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(metricPrefix, baseMetricsMap, baseMetrics, operands, formula);
@@ -52,11 +52,12 @@ public class IndividualDerivedMetricCalculator {
             }
             return;
         }
-        Set<String> variableValues = globalMultiMap.get(variable);
+        Set<String> variableValues = variableMultiMap.get(variable);
         for(String variableValue : variableValues){
+            //venkata.konala this method name doesn't make sense
             Set<String> modifiedOperands = replaceOperands(operands, variable, variableValue);
             String modifiedPath = replacePath(path, variable, variableValue);
-            substitute(modifiedPath, modifiedOperands, globalMultiMap);
+            substitute(modifiedPath, modifiedOperands, variableMultiMap);
         }
 
     }

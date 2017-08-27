@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.util;
+package com.appdynamics.extensions.util.derived;
 
 import com.appdynamics.extensions.NumberUtils;
 import com.google.common.base.Splitter;

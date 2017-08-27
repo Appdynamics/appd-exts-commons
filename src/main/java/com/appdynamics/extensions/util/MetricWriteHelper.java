@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -38,6 +39,7 @@ public class MetricWriteHelper {
         metricCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
     }
 
+    //@venkata.konala Don't think we need to expose this
     public DerivedMetricsCalculator getDerivedMetricsCalculator(){
         return derivedMetricsCalculator;
     }
@@ -65,6 +67,7 @@ public class MetricWriteHelper {
                     metricCache.put(metricPath, metric);
                 }
             }
+
             derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
         } else {
             Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
