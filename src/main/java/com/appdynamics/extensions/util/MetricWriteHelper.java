@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -39,13 +40,13 @@ public class MetricWriteHelper {
         metricCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
     }
 
-    //@venkata.konala Don't think we need to expose this
-    public DerivedMetricsCalculator getDerivedMetricsCalculator(){
-        return derivedMetricsCalculator;
-    }
-
     public void setDerivedMetricsCalculator(DerivedMetricsCalculator derivedMetricsCalculator){
         this.derivedMetricsCalculator = derivedMetricsCalculator;
+    }
+
+    @VisibleForTesting
+    public DerivedMetricsCalculator getDerivedMetricsCalculator(){
+        return derivedMetricsCalculator;
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
@@ -67,8 +68,9 @@ public class MetricWriteHelper {
                     metricCache.put(metricPath, metric);
                 }
             }
-
-            derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
+            if(derivedMetricsCalculator != null){
+                derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
+            }
         } else {
             Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
             logger.error("The metric is not valid {}", arg);
@@ -76,17 +78,19 @@ public class MetricWriteHelper {
     }
 
     public void onTaskComplete(){
-        Multimap<String, MetricProperties> derivedMetricsMultiMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
-        if(derivedMetricsMultiMap != null){
-            for(Map.Entry<String, MetricProperties> derivedMetricEntry : derivedMetricsMultiMap.entries()){
-                String metricPath =  derivedMetricEntry.getKey();
-                MetricProperties metricProperties = derivedMetricEntry.getValue();
-                if(metricPath != null && metricProperties != null) {
-                    String metricValue = metricProperties.getMetricValue().toString();
-                    String aggregationType = metricProperties.getAggregationType();
-                    String timeRollUp = metricProperties.getTimeRollUp();
-                    String clusterRollUp = metricProperties.getClusterRollUp();
-                    printMetric(metricPath, metricValue, aggregationType, timeRollUp, clusterRollUp);
+        if(derivedMetricsCalculator != null){
+            Multimap<String, MetricProperties> derivedMetricsMultiMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+            if(derivedMetricsMultiMap != null){
+                for(Map.Entry<String, MetricProperties> derivedMetricEntry : derivedMetricsMultiMap.entries()){
+                    String metricPath =  derivedMetricEntry.getKey();
+                    MetricProperties metricProperties = derivedMetricEntry.getValue();
+                    if(metricPath != null && metricProperties != null) {
+                        String metricValue = metricProperties.getMetricValue().toString();
+                        String aggregationType = metricProperties.getAggregationType();
+                        String timeRollUp = metricProperties.getTimeRollUp();
+                        String clusterRollUp = metricProperties.getClusterRollUp();
+                        printMetric(metricPath, metricValue, aggregationType, timeRollUp, clusterRollUp);
+                    }
                 }
             }
         }
@@ -124,7 +128,9 @@ public class MetricWriteHelper {
                 MetricWriter metricWriter = getMetricWriter(metricPath, metricType);
                 metricWriter.printMetric(valStr);
             }
-            derivedMetricsCalculator.addToBaseMetricsMap(metricPath, value.toString());
+            if(derivedMetricsCalculator != null) {
+                derivedMetricsCalculator.addToBaseMetricsMap(metricPath, value.toString());
+            }
         } else {
             logger.error("Cannot send the metric [{}], value=[{}] and metricType=[{}]", metricPath, value, metricType);
         }

@@ -14,86 +14,44 @@ import java.util.Set;
  * Created by venkata.konala on 8/23/17.
  */
 public class IndividualDerivedMetricCalculator {
-    private Map<String, BigDecimal> baseMetricsMap;
-    private String metricPrefix;
-    private String metricName;
+    private Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap;
+    private Set<String> operands;
+    private SetMultimap<String, String> dynamicVariables;
     private String metricPath;
     private  String formula;
-    private Set<String> baseMetrics;
-    private SetMultimap<String, String> variablesMultiMap;
-    private Splitter pipeSplitter = Splitter.on('|')
-            .omitEmptyStrings()
-            .trimResults();
     private Multimap<String, BigDecimal> derivedMetricMap = ArrayListMultimap.create();
+    private OperandsFetcher operandsFetcher = new OperandsFetcher();
 
-    public IndividualDerivedMetricCalculator(Map<String, BigDecimal> baseMetricsMap, String metricPrefix, String metricName, String metricPath, String formula, Set<String> baseMetrics, SetMultimap<String, String> variablesMultiMap){
-        this.baseMetricsMap = baseMetricsMap;
-        this.metricPrefix = metricPrefix;
-        this.metricName = metricName;
+    public IndividualDerivedMetricCalculator(Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap, SetMultimap<String, String> dynamicVariables, String metricPath, String formula){
+        this.organisedBaseMetricsMap = organisedBaseMetricsMap;
+        this.dynamicVariables = dynamicVariables;
         this.metricPath = metricPath;
         this.formula = formula;
-        this.baseMetrics = baseMetrics;
-        this.variablesMultiMap = variablesMultiMap;
+        this.operands = operandsFetcher.getOperandsFromFormula(formula);
     }
 
     public Multimap<String, BigDecimal> calculateDerivedMetric(){
-        substitute(metricPath, baseMetrics, variablesMultiMap);
+        substitute(metricPath, operands, dynamicVariables);
         return derivedMetricMap;
     }
 
-    public void substitute(String path, Set<String> operands, SetMultimap<String, String> variableMultiMap){
-        String variable = checkForFirstVariable(operands);
+    public void substitute(String path, Set<String> localOperands, SetMultimap<String, String> dynamicvariables){
+        OperandsProcessor operandsProcessor = new OperandsProcessor(localOperands);
+        String variable = operandsProcessor.checkForFirstVariable();
         if(variable == null){
-            ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(metricPrefix, baseMetricsMap, baseMetrics, operands, formula);
+            ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(organisedBaseMetricsMap, operands, localOperands, formula);
             BigDecimal value = expressionEvaluator.eval();
-            String key = formKey(path);
             if(value != null){
-                derivedMetricMap.put(key, value);
+                derivedMetricMap.put(path, value);
             }
             return;
         }
-        Set<String> variableValues = variableMultiMap.get(variable);
+        Set<String> variableValues = dynamicvariables.get(variable);
         for(String variableValue : variableValues){
-            //venkata.konala this method name doesn't make sense
-            Set<String> modifiedOperands = replaceOperands(operands, variable, variableValue);
-            String modifiedPath = replacePath(path, variable, variableValue);
-            substitute(modifiedPath, modifiedOperands, variableMultiMap);
+            Set<String> modifiedOperands = operandsProcessor.getModifiedOperands(variable, variableValue);
+            String modifiedPath = operandsProcessor.getModifiedPath(path, variable, variableValue);
+            substitute(modifiedPath, modifiedOperands, dynamicvariables);
         }
 
-    }
-
-    public String checkForFirstVariable(Set<String> operands){
-        for(String operand : operands){
-            List<String> metricHierarchyList = pipeSplitter.splitToList(operand);
-            for(String metricHierarchy : metricHierarchyList){
-                if(metricHierarchy.startsWith("{") && metricHierarchy.endsWith("}")){
-                    return metricHierarchy;
-                }
-            }
-        }
-        return null;
-    }
-
-    public Set<String> replaceOperands(Set<String> operands, String variable, String variableValue){
-        Set<String> modifiedOperands = Sets.newHashSet();
-        for(String operand : operands){
-            if(operand.contains(variable)){
-                operand = operand.replace(variable, variableValue);
-            }
-            modifiedOperands.add(operand);
-        }
-        return modifiedOperands;
-    }
-
-    public String replacePath(String path, String variable, String variableValue){
-        if(path.contains(variable)){
-            path = path.replace(variable, variableValue);
-        }
-        return path;
-    }
-
-    public String formKey(String path){
-        String finalMetricPath = metricPrefix + path;
-        return  finalMetricPath;
     }
 }

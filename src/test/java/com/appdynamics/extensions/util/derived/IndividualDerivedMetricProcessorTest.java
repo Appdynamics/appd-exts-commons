@@ -1,6 +1,5 @@
 package com.appdynamics.extensions.util.derived;
 
-import com.appdynamics.extensions.util.derived.IndividualDerivedMetricProcessor;
 import com.google.common.collect.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +8,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by venkata.konala on 8/24/17.
@@ -16,18 +16,22 @@ import java.util.Map;
 public class IndividualDerivedMetricProcessorTest {
     IndividualDerivedMetricProcessor individualDerivedMetricProcessor;
 
-    @Before
+   @Before
     public void init(){
-        Map<String, BigDecimal> baseMetricsMap = Maps.newHashMap();
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|hits", BigDecimal.ONE );
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|misses", BigDecimal.ONE );
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q2|hits", BigDecimal.ONE );
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q2|misses", BigDecimal.ONE );
-        String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis|";
-        String metricName = "ratio";
-        String metricPath = "{x}|Queue|{y}|ratio";
-        String formula = "({x}|Queue|{y}|hits / ({x}|Queue|{y}|hits + {x}|Queue|{y}|misses)) * 4";
-        individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, metricName, metricPath, formula);
+       Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap = Maps.newHashMap();
+       Map<String, BigDecimal> hitsMap = Maps.newHashMap();
+       hitsMap.put("Server1|Q1|hits", BigDecimal.ONE);
+       hitsMap.put("Server2|Q2|hits", BigDecimal.ONE);
+       organisedBaseMetricsMap.put("hits", hitsMap);
+       Map<String, BigDecimal> missesMap = Maps.newHashMap();
+       missesMap.put("Server1|Q1|misses", BigDecimal.ONE);
+       missesMap.put("Server2|Q2|misses", BigDecimal.ONE);
+       organisedBaseMetricsMap.put("misses", missesMap);
+
+       String metricPath = "{x}|{y}|ratio";
+       String formula = "({x}|{y}|hits / ({x}|{y}|hits + {x}|{y}|misses)) * 4";
+
+       individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedBaseMetricsMap, metricPath, formula);
     }
 
     @Test
@@ -35,76 +39,45 @@ public class IndividualDerivedMetricProcessorTest {
         Multimap<String, BigDecimal> derivedMetricMap;
         derivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
         Assert.assertTrue(derivedMetricMap.size() == 2);
-        Assert.assertTrue(derivedMetricMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q2|ratio").iterator().next().equals(new BigDecimal("2")));
+        Assert.assertTrue(derivedMetricMap.get("Server1|Q1|ratio").contains(new BigDecimal("2")));
     }
 
     @Test
     public void processDerivedMetricWithHierarchyLevelOneDifferenceTest(){
-        Map<String, BigDecimal> baseMetricsMap = Maps.newHashMap();
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|hits", BigDecimal.ONE );
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|CPU|CPU1|misses", BigDecimal.ONE);
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|CPU|CPU2|misses", BigDecimal.ONE);
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q2|hits", BigDecimal.ONE );
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q2|CPU|CPU1|misses", BigDecimal.ONE);
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q2|CPU|CPU2|misses", BigDecimal.ONE);
-        String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis|";
-        String metricName = "ratio";
-        String metricPath = "{x}|Queue|{y}|CPU|ratio";
-        String formula = "{x}|Queue|{y}|hits / ({x}|Queue|{y}|hits + {x}|Queue|{y}|CPU|{z}|misses)";
-        individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, metricName, metricPath, formula);
-        Multimap<String, BigDecimal> derivedMetricMap;
-        derivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
-        Assert.assertTrue(derivedMetricMap.size() == 4);
-        Assert.assertTrue(derivedMetricMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|CPU|ratio").size() == 2);
+        Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap = Maps.newHashMap();
+        Map<String, BigDecimal> hitsMap = Maps.newHashMap();
+        hitsMap.put("Server1|hits", BigDecimal.ONE);
+        hitsMap.put("Server2|hits", BigDecimal.ONE);
+        organisedBaseMetricsMap.put("hits", hitsMap);
+        Map<String, BigDecimal> missesMap = Maps.newHashMap();
+        missesMap.put("Server1|Q1|misses", BigDecimal.ONE);
+        missesMap.put("Server2|Q2|misses", BigDecimal.ONE);
+        organisedBaseMetricsMap.put("misses", missesMap);
+        String metricPath = "{x}|{y}|ratio";
+        String formula = "({x}|hits / ({x}|hits + {x}|{y}|misses)) * 4";
+        individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedBaseMetricsMap, metricPath, formula);
+        Multimap<String, BigDecimal> derivedMap = individualDerivedMetricProcessor.processDerivedMetric();
+        Assert.assertTrue(derivedMap.size() == 2);
+        Assert.assertTrue(derivedMap.get("Server1|Q1|ratio").contains(new BigDecimal("2")));
     }
 
-    @Test
+    /*@Test
     public void processDerivedMetricWithDifferentVariableInSameLevelTest(){
-        Map<String, BigDecimal> baseMetricsMap = Maps.newHashMap();
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|hits", new BigDecimal("1"));
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|misses", new BigDecimal("2"));
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Queue|Q2|hits", new BigDecimal("1"));
-        baseMetricsMap.put("Server|Component:AppLevels|Custom Metrics|Redis|Server2|CPU|CPU2|misses", new BigDecimal("2"));
-        String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis|";
-        String metricName = "ratio";
-        String metricPath = "{x}|Queue|{y}|ratio";
-        String formula = "{x}|Queue|{y}|hits / ({x}|Queue|{y}|hits + {x}|CPU|{z}|misses)";
-        individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(baseMetricsMap, metricPrefix, metricName, metricPath, formula);
-        Multimap<String, BigDecimal> derivedMetricMap;
-        derivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
-        Assert.assertTrue(derivedMetricMap.size() == 2);
-        Assert.assertTrue(derivedMetricMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Queue|Q1|ratio").size() == 1);
-        Assert.assertTrue(derivedMetricMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Queue|Q2|ratio").size() == 1);
-    }
+        Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap = Maps.newHashMap();
+        Map<String, BigDecimal> hitsMap = Maps.newHashMap();
+        hitsMap.put("Server1|Q1|hits", BigDecimal.ONE);
+        hitsMap.put("Server2|Q2|hits", BigDecimal.ONE);
+        organisedBaseMetricsMap.put("hits", hitsMap);
+        Map<String, BigDecimal> missesMap = Maps.newHashMap();
+        missesMap.put("Server1|A1|misses", BigDecimal.ONE);
+        missesMap.put("Server2|A2|misses", BigDecimal.ONE);
+        organisedBaseMetricsMap.put("misses", missesMap);
 
-
-    @Test
-    public void populateGlobalMapTest(){
-        SetMultimap<String, String> globalMultiMap= HashMultimap.create();
-        individualDerivedMetricProcessor.populateVariablesMultiMap("{x}|Queue|{y}|hits");
-        individualDerivedMetricProcessor.populateVariablesMultiMap("{x}|Queue|{y}|misses");
-        globalMultiMap = individualDerivedMetricProcessor.getVariablesMultiMap();
-        Assert.assertTrue(globalMultiMap.size() == 3);
-        Assert.assertTrue(globalMultiMap.get("{x}").iterator().next().equals("Server1"));
-    }
-
-    @Test
-    public void splitAndPopulateLocalMapTest(){
-        List<String> expressionList = Lists.newArrayList();
-        expressionList.add("{x}");
-        expressionList.add("Queue");
-        expressionList.add("{y}");
-        expressionList.add("CPU");
-        expressionList.add("hits");
-        List<String> nameList = Lists.newArrayList();
-        nameList.add("Server1");
-        nameList.add("Queue");
-        nameList.add("Q1");
-        nameList.add("CPU");
-        nameList.add("hits");
-        Multimap<String,String> localMap = individualDerivedMetricProcessor.splitAndPopulateVariablesMap(expressionList, nameList);
-        Assert.assertTrue(localMap.size() == 2);
-        Assert.assertTrue(localMap.get("{x}").size() == 1);
-        Assert.assertTrue(localMap.get("{y}").iterator().next().equals("Q1"));
-    }
+        String metricPath = "{x}|ratio";
+        String formula = "({x}|{y}|hits / ({x}|{y}|hits + {x}|{z}|misses)) * 4";
+        individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedBaseMetricsMap, metricPath, formula);
+        Multimap<String, BigDecimal> derivedMap = individualDerivedMetricProcessor.processDerivedMetric();
+        Assert.assertTrue(derivedMap.size() == 2);
+        Assert.assertTrue(derivedMap.get("Server1|ratio").contains(new BigDecimal("2")));
+    }*/
 }

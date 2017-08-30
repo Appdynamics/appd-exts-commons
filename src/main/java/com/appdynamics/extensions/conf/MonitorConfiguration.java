@@ -460,9 +460,14 @@ public class MonitorConfiguration {
     }
 
     private void initDerivedMetricsCalculator(){
-        List<Map<String, ?>> derivedMetricsList = (List) config.get("derived");
-        //@venkata.konala Shouldn't you initialize it only when derived metrics are configured in config.yaml.
-        derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, getMetricPrefix());
-        metricWriter.setDerivedMetricsCalculator(derivedMetricsCalculator);
+        List<Map<String, ?>> derivedMetricsList = (List) config.get("derivedMetrics");
+        if(derivedMetricsList !=  null){
+            derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, getMetricPrefix());
+            metricWriter.setDerivedMetricsCalculator(derivedMetricsCalculator);
+            logger.info("The DerivedMetricsCalculator is initialised");
+        }
+        else{
+            logger.info("The DerivedMetricsCalculator is not initialised as the derivedMetrics section doesn't exist in the config.yml");
+        }
     }
 }
