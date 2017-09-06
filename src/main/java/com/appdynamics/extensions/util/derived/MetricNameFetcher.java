@@ -1,16 +1,16 @@
 package com.appdynamics.extensions.util.derived;
 
 import java.util.List;
+import static com.appdynamics.extensions.util.derived.Constants.pipeSplitter;
 
 /**
  * Created by venkata.konala on 8/28/17.
  */
-public class MetricNameFetcher {
-    private Splitters splitters = new Splitters();
+class MetricNameFetcher {
 
-    public String getMetricName(String metricPath){
+     String getMetricName(String metricPath){
         if(metricPath != null) {
-            List<String> splitList = splitters.getPipeSplitter().splitToList(metricPath);
+            List<String> splitList = pipeSplitter.splitToList(metricPath);
             if (splitList.size() > 0) {
                 return splitList.get(splitList.size() - 1);
             }

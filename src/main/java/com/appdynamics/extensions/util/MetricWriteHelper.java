@@ -79,16 +79,17 @@ public class MetricWriteHelper {
 
     public void onTaskComplete(){
         if(derivedMetricsCalculator != null){
-            Multimap<String, MetricProperties> derivedMetricsMultiMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+            Multimap<String, com.appdynamics.extensions.util.Metric> derivedMetricsMultiMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
             if(derivedMetricsMultiMap != null){
-                for(Map.Entry<String, MetricProperties> derivedMetricEntry : derivedMetricsMultiMap.entries()){
+                for(Map.Entry<String, com.appdynamics.extensions.util.Metric> derivedMetricEntry : derivedMetricsMultiMap.entries()){
                     String metricPath =  derivedMetricEntry.getKey();
-                    MetricProperties metricProperties = derivedMetricEntry.getValue();
+                    com.appdynamics.extensions.util.Metric metric = derivedMetricEntry.getValue();
+                    MetricProperties metricProperties = metric.getMetricProperties();
                     if(metricPath != null && metricProperties != null) {
-                        String metricValue = metricProperties.getMetricValue().toString();
+                        String metricValue = metric.getMetricValue().toString();
                         String aggregationType = metricProperties.getAggregationType();
-                        String timeRollUp = metricProperties.getTimeRollUp();
-                        String clusterRollUp = metricProperties.getClusterRollUp();
+                        String timeRollUp = metricProperties.getTimeRollUpType();
+                        String clusterRollUp = metricProperties.getClusterRollUpType();
                         printMetric(metricPath, metricValue, aggregationType, timeRollUp, clusterRollUp);
                     }
                 }
@@ -234,7 +235,7 @@ public class MetricWriteHelper {
 
     }
 
-    public static class Metric {
+    private static class Metric {
         private final String path;
         private final String value;
         private final MetricType metricType;

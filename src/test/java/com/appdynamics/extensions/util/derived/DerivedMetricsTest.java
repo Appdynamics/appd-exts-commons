@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.*;
+
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -126,6 +128,28 @@ public class DerivedMetricsTest {
         Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgWrite"));
         Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|avgWrite"));
         Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|avgWrite"));
+    }
+
+    @Test
+    public void clusterMetricsTest(){
+        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
+        metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
+        monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
+        monitorConfiguration.setConfigYml("src/test/resources/derived/config_WithClusterMetrics.yml");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|hits","2","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q1|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q1|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q2|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q2|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
+        metricWriteHelper.onTaskComplete();
+        verify(metricWriteHelper, times(16)).printMetric(pathCaptor.capture(), anyString(), anyString(), anyString(), anyString());
+        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Server1|ratio") == 2);
+        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Server2|ratio") == 2);
+        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Cluster|Q1|ratio") == 2);
+        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Cluster|Q2|ratio") == 2);
     }
 
 }

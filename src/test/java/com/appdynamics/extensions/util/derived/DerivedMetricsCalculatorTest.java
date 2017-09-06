@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.util.derived;
 
+import com.appdynamics.extensions.util.Metric;
 import com.appdynamics.extensions.util.MetricProperties;
 import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
 import com.google.common.collect.Lists;
@@ -37,10 +38,11 @@ public class DerivedMetricsCalculatorTest {
 
     @Test
     public void calculateAndReturnDerivedMetricsTest(){
-        Multimap<String, MetricProperties> derivedMetricsMultiMap= derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+        Multimap<String, Metric> derivedMetricsMultiMap= derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
         Assert.assertTrue(derivedMetricsMultiMap.size() == 2);
         Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").size() == 1);
-        Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").iterator().next().getMetricValue().equals(new BigDecimal("1.5")));
+        System.out.println(derivedMetricsMultiMap);
+        Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").iterator().next().getMetricValue().equals("1.5"));
     }
 
 

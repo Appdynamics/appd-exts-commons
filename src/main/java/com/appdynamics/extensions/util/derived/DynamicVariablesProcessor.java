@@ -6,46 +6,41 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import static com.appdynamics.extensions.util.derived.Constants.metricNameFetcher;
+import static com.appdynamics.extensions.util.derived.Constants.pipeSplitter;
 
 /**
  * Created by venkata.konala on 8/28/17.
  */
-public class DynamicVariablesFetcher {
-    private static final Logger logger = LoggerFactory.getLogger(DynamicVariablesFetcher.class);
+class DynamicVariablesProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(DynamicVariablesProcessor.class);
     private Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap;
     private Set<String> operands;
-    private Splitters splitters = new Splitters();
 
-    public DynamicVariablesFetcher(Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap, Set<String> operands){
+     DynamicVariablesProcessor(Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap, Set<String> operands){
         this.organisedBaseMetricsMap = organisedBaseMetricsMap;
         this.operands = operands;
     }
 
-    public SetMultimap<String, String> getDynamicVariables(){
+     SetMultimap<String, String> getDynamicVariables() throws MetricNotFoundException{
         SetMultimap<String, String> dynamicVariables = HashMultimap.create();
         for(String operand : operands){
             if(!NumberUtils.isNumber(operand)) {
                 SetMultimap<String, String> dynamicVariablesFromOperand = getDynamicVariablesFromOperand(operand);
-                if (dynamicVariablesFromOperand != null) {
+                if (dynamicVariablesFromOperand.size() != 0) {
                     dynamicVariables.putAll(getDynamicVariablesFromOperand(operand));
-                }
-                else{
-                    logger.debug("The base metric {} does not exist in the base metrics", operand);
-                    return null;
                 }
             }
         }
         return dynamicVariables;
     }
 
-    private SetMultimap<String, String> getDynamicVariablesFromOperand(String baseMetricExpression){
-        MetricNameFetcher metricNameFetcher = new MetricNameFetcher();
+    private SetMultimap<String, String> getDynamicVariablesFromOperand(String baseMetricExpression) throws MetricNotFoundException{
         String baseMetricname = metricNameFetcher.getMetricName(baseMetricExpression);
         Map<String, BigDecimal> matchingBaseMetricMap = organisedBaseMetricsMap.get(baseMetricname);
         if(matchingBaseMetricMap != null) {
@@ -53,8 +48,8 @@ public class DynamicVariablesFetcher {
             for (Map.Entry<String, BigDecimal> baseMetric : matchingBaseMetricMap.entrySet()) {
                 String baseMetricPath = baseMetric.getKey();
                 if (!Strings.isNullOrEmpty(baseMetricPath) && !Strings.isNullOrEmpty(baseMetricExpression)) {
-                    List<String> baseMetricExpressionList = splitters.getPipeSplitter().splitToList(baseMetricExpression);
-                    List<String> baseMetricPathList = splitters.getPipeSplitter().splitToList(baseMetricPath);
+                    List<String> baseMetricExpressionList = pipeSplitter.splitToList(baseMetricExpression);
+                    List<String> baseMetricPathList = pipeSplitter.splitToList(baseMetricPath);
                     if (baseMetricExpressionList.size() == baseMetricPathList.size()) {
                         SetMultimap<String, String> localMultiMap = splitAndPopulateVariablesMap(baseMetricExpressionList, baseMetricPathList);
                         if (localMultiMap != null) {
@@ -66,7 +61,7 @@ public class DynamicVariablesFetcher {
             return globalMultiMap;
         }
         else{
-            return null;
+            throw new  MetricNotFoundException("The base metric" + metricNameFetcher.getMetricName(baseMetricExpression) + "does not exist in the baseMetricsMap");
         }
     }
 

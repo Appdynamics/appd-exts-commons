@@ -35,7 +35,7 @@ public class IndividualDerivedMetricProcessorTest {
     }
 
     @Test
-    public void processDerivedMetricWithNoLevelDifferenceTest(){
+    public void processDerivedMetricWithNoLevelDifferenceTest() throws MetricNotFoundException{
         Multimap<String, BigDecimal> derivedMetricMap;
         derivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
         Assert.assertTrue(derivedMetricMap.size() == 2);
@@ -43,7 +43,7 @@ public class IndividualDerivedMetricProcessorTest {
     }
 
     @Test
-    public void processDerivedMetricWithHierarchyLevelOneDifferenceTest(){
+    public void processDerivedMetricWithHierarchyLevelOneDifferenceTest() throws MetricNotFoundException{
         Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap = Maps.newHashMap();
         Map<String, BigDecimal> hitsMap = Maps.newHashMap();
         hitsMap.put("Server1|hits", BigDecimal.ONE);

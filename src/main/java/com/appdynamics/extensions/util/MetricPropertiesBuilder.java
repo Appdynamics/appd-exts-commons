@@ -5,28 +5,24 @@ package com.appdynamics.extensions.util;
 import java.util.Map;
 
 public class MetricPropertiesBuilder {
-    private Map<String, ?> metricProperties;
+    private Map<String, ?> metricPropertiesFromConfig;
     private String metricName;
-    private String metricValue;
 
-    public MetricPropertiesBuilder(Map<String, ?> metricProperties,String metricName, String metricValue){
-        this.metricProperties = metricProperties;
+    public MetricPropertiesBuilder(Map<String, ?> metricPropertiesFromConfig,String metricName){
+        this.metricPropertiesFromConfig = metricPropertiesFromConfig;
         this.metricName = metricName;
-        this.metricValue = metricValue;
     }
 
     public MetricProperties buildMetricProperties(){
         MetricProperties metricProperties = new MetricProperties();
-        metricProperties.setMetricName(metricName);
-        metricProperties.setMetricValue(metricValue);
-        metricProperties.setAlias(this.metricProperties.get("alias") == null ? null : this.metricProperties.get("alias").toString(), metricName);
-        metricProperties.setMultiplier(this.metricProperties.get("multiplier") == null ? null : this.metricProperties.get("multiplier").toString());
-        metricProperties.setAggregationType(this.metricProperties.get("aggregationType") == null ? null : this.metricProperties.get("aggregationType").toString());
-        metricProperties.setTimeRollUp(this.metricProperties.get("timeRollUp") == null ? null : this.metricProperties.get("timeRollUp").toString());
-        metricProperties.setClusterRollUp(this.metricProperties.get("clusterRollUp") == null ? null : this.metricProperties.get("clusterRollUp").toString());
-        metricProperties.setDelta(this.metricProperties.get("delta") == null ? null : this.metricProperties.get("delta").toString());
-        metricProperties.setConversionValues((Map<Object, Object>)this.metricProperties.get("convert"));
-        metricProperties.setAggregateAtCluster(this.metricProperties.get("aggregateAtCluster") == null ? null : this.metricProperties.get("aggregateAtCluster").toString());
+        metricProperties.setAlias(this.metricPropertiesFromConfig.get("alias") == null ? null : this.metricPropertiesFromConfig.get("alias").toString(), metricName);
+        metricProperties.setMultiplier(this.metricPropertiesFromConfig.get("multiplier") == null ? null : this.metricPropertiesFromConfig.get("multiplier").toString());
+        metricProperties.setAggregationType(this.metricPropertiesFromConfig.get("aggregationType") == null ? null : this.metricPropertiesFromConfig.get("aggregationType").toString());
+        metricProperties.setTimeRollUpType(this.metricPropertiesFromConfig.get("timeRollUpType") == null ? null : this.metricPropertiesFromConfig.get("timeRollUpType").toString());
+        metricProperties.setClusterRollUpType(this.metricPropertiesFromConfig.get("clusterRollUpType") == null ? null : this.metricPropertiesFromConfig.get("clusterRollUpType").toString());
+        metricProperties.setDelta(this.metricPropertiesFromConfig.get("delta") == null ? null : this.metricPropertiesFromConfig.get("delta").toString());
+        metricProperties.setConversionValues((Map<Object, Object>)this.metricPropertiesFromConfig.get("convert"));
+        //metricProperties.setAggregateAtCluster(this.metricPropertiesFromConfig.get("aggregateAtCluster") == null ? null : this.metricPropertiesFromConfig.get("aggregateAtCluster").toString());
         return metricProperties;
     }
 }

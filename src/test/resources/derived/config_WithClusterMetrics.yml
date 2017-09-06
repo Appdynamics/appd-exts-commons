@@ -119,10 +119,16 @@ metrics:
 
 
 derivedMetrics:
-    - derivedMetricPath: "{x}|{y}|ratio"
-      formula: "{x}|{y}|hits / ({x}|{y}|hits + {x}|misses)"
-    - derivedMetricPath: "{x}|avgRequests"
-      formula: "{x}|{y}|cpuRequests + {x}|{z}|memoryRequests"
+    - derivedMetricPath: "{x}|ratio"
+      formula: "{x}|{y}|hits / ({x}|{y}|hits + {x}|{y}|misses)"
+      aggregationType: "SUM"
+      timeRollUpType: "SUM"
+      clusterRollUpType: "COLLECTIVE"
+    - derivedMetricPath: "Cluster|{y}|ratio"
+      formula: "{x}|{y}|hits / ({x}|{y}|hits + {x}|{y}|misses)"
+      aggregationType: "SUM"
+      timeRollUpType: "SUM"
+      clusterRollUpType: "COLLECTIVE"
 
 
 

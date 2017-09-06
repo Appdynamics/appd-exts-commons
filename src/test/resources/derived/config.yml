@@ -23,11 +23,11 @@ numberOfThreads: 20
 #   alias                                                                                                                                                                        }
 #   aggregationType                                                                                                                                                              }
 #   aggregateAtCluster --> not for derived metrics                                                                                                                                                           }
-#   clusterRollUp                                                                                                                                                                      }
+#   clusterRollUpType                                                                                                                                                                      }
 #   convert --> not for derived metrics                                                                                                                                                                      }
 #   delta --> not for derived metrics                                                                                                                                                                       }                                                                                                                                                                    }
 #   multiplier -->not for derived metrics                                                                                                                                                                  }
-#   timeRollUp                                                                                                                                                                         }
+#   timeRollUpType                                                                                                                                                                         }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 metrics:
     Slowlog:

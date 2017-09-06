@@ -10,42 +10,13 @@ import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 
 public class MetricProperties {
-    private String metricName;
-    private BigDecimal metricValue;
     private String alias;
     private BigDecimal multiplier;
     private String aggregationType;
-    private String timeRollUp;
-    private String clusterRollUp;
+    private String timeRollUpType;
+    private String clusterRollUpType;
     private boolean delta;
     private Map<Object, Object> conversionValues;
-    private boolean aggragateAtCluster;
-
-    public String getMetricName(){
-        return metricName;
-    }
-
-    public void setMetricName(String metricName){
-        if(Strings.isNullOrEmpty(metricName)){
-            this.metricName = null;
-        }
-        else{
-            this.metricName = metricName;
-        }
-    }
-
-    public BigDecimal getMetricValue(){
-        return metricValue;
-    }
-
-    public void setMetricValue(String metricValue){
-        if(Strings.isNullOrEmpty(metricValue)){
-            this.metricValue = null;
-        }
-        else{
-            this.metricValue = new BigDecimal(metricValue);
-        }
-    }
 
     public String getAlias(){
         return alias;
@@ -82,29 +53,29 @@ public class MetricProperties {
         }
     }
 
-    public String getTimeRollUp(){
-        return timeRollUp;
+    public String getTimeRollUpType(){
+        return timeRollUpType;
     }
 
-    public void setTimeRollUp(String timeRollUp){
-        if(timeRollUp != null  && (timeRollUp.equals("AVERAGE") || timeRollUp.equals("SUM") || timeRollUp.equals("CURRENT"))){
-            this.timeRollUp = timeRollUp;
+    public void setTimeRollUpType(String timeRollUpType){
+        if(timeRollUpType != null  && (timeRollUpType.equals("AVERAGE") || timeRollUpType.equals("SUM") || timeRollUpType.equals("CURRENT"))){
+            this.timeRollUpType = timeRollUpType;
         }
         else{
-            this.timeRollUp = MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE;
+            this.timeRollUpType = MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE;
         }
     }
 
-    public String getClusterRollUp(){
-        return clusterRollUp;
+    public String getClusterRollUpType(){
+        return clusterRollUpType;
     }
 
-    public void setClusterRollUp(String clusterRollUp){
-        if(clusterRollUp != null  && (clusterRollUp.equals("INDIVIDUAL") || clusterRollUp.equals("COLLECTIVE"))){
-            this.clusterRollUp = clusterRollUp;
+    public void setClusterRollUpType(String clusterRollUpType){
+        if(clusterRollUpType != null  && (clusterRollUpType.equals("INDIVIDUAL") || clusterRollUpType.equals("COLLECTIVE"))){
+            this.clusterRollUpType = clusterRollUpType;
         }
         else{
-            this.clusterRollUp = MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL;
+            this.clusterRollUpType = MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL;
         }
     }
 
@@ -131,19 +102,6 @@ public class MetricProperties {
         }
         else{
             this.conversionValues = conversionValues;
-        }
-    }
-
-    public boolean getAggregateAtCluster(){
-        return this.aggragateAtCluster;
-    }
-
-    public void setAggregateAtCluster(String aggregateAtCluster){
-        if(Strings.isNullOrEmpty(aggregateAtCluster) || !aggregateAtCluster.equalsIgnoreCase("true")){
-            this.aggragateAtCluster = false;
-        }
-        else{
-            this.aggragateAtCluster = true;
         }
     }
 }
