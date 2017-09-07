@@ -1,6 +1,5 @@
 package com.appdynamics.extensions.util.derived;
 
-import com.appdynamics.extensions.util.Metric;
 import com.google.common.collect.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,6 +15,7 @@ import java.util.Set;
 public class IndividualDerivedMetricCalculatorTest {
     private IndividualDerivedMetricCalculator individualDerivedMetricCalculator;
     private DynamicVariablesProcessor dynamicVariablesProcessor;
+    private DerivedMetricsPathHandler pathHandler;
 
     @Before
     public void init() throws MetricNotFoundException{
@@ -32,15 +32,16 @@ public class IndividualDerivedMetricCalculatorTest {
         Set<String> operands = Sets.newHashSet();
         operands.add("{x}|{y}|hits");
         operands.add("{x}|{y}|misses");
-        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands);
+        pathHandler = new DerivedMetricsPathHandler();
+        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,pathHandler);
 
         SetMultimap<String, String> dynamicVariables = HashMultimap.create();
         dynamicVariables = dynamicVariablesProcessor.getDynamicVariables();
 
         String metricPath = "{x}|{y}|ratio";
         String formula = "({x}|{y}|hits / ({x}|{y}|hits + {x}|{y}|misses)) * 4";
-        Operand operand = new Operand(formula);
-        individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(organisedBaseMetricsMap, dynamicVariables, metricPath, operand);
+        OperandsHandler operand = new OperandsHandler(formula, pathHandler);
+        individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(organisedBaseMetricsMap, dynamicVariables, metricPath, operand,pathHandler);
     }
 
     @Test
@@ -65,15 +66,15 @@ public class IndividualDerivedMetricCalculatorTest {
         Set<String> operands = Sets.newHashSet();
         operands.add("{x}|hits");
         operands.add("{x}|{y}|misses");
-        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands);
+        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,pathHandler);
 
         SetMultimap<String, String> dynamicVariables = HashMultimap.create();
         dynamicVariables = dynamicVariablesProcessor.getDynamicVariables();
 
         String metricPath = "{x}|{y}|ratio";
         String formula = "({x}|hits / ({x}|hits + {x}|{y}|misses)) * 4";
-        Operand operand = new Operand(formula);
-        individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(organisedBaseMetricsMap, dynamicVariables, metricPath, operand);
+        OperandsHandler operand = new OperandsHandler(formula, pathHandler);
+        individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(organisedBaseMetricsMap, dynamicVariables, metricPath, operand,pathHandler);
         Multimap<String, BigDecimal> derivedMap = individualDerivedMetricCalculator.calculateDerivedMetric();
         Assert.assertTrue(derivedMap.size() == 2);
         Assert.assertTrue(derivedMap.get("Server1|Q1|ratio").contains(new BigDecimal("2")));
@@ -94,15 +95,15 @@ public class IndividualDerivedMetricCalculatorTest {
         Set<String> operands = Sets.newHashSet();
         operands.add("{x}|{y}|hits");
         operands.add("{x}|{z}|misses");
-        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands);
+        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,pathHandler);
 
         SetMultimap<String, String> dynamicVariables = HashMultimap.create();
         dynamicVariables = dynamicVariablesProcessor.getDynamicVariables();
 
         String metricPath = "{x}|ratio";
         String formula = "({x}|{y}|hits / ({x}|{y}|hits + {x}|{z}|misses)) * 4";
-        Operand operand = new Operand(formula);
-        individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(organisedBaseMetricsMap, dynamicVariables, metricPath, operand);
+        OperandsHandler operand = new OperandsHandler(formula, pathHandler);
+        individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(organisedBaseMetricsMap, dynamicVariables, metricPath, operand,pathHandler);
         Multimap<String, BigDecimal> derivedMap = individualDerivedMetricCalculator.calculateDerivedMetric();
         Assert.assertTrue(derivedMap.size() == 2);
         Assert.assertTrue(derivedMap.get("Server1|ratio").contains(new BigDecimal("2")));

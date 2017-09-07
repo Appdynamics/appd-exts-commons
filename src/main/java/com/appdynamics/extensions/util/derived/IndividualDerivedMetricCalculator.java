@@ -6,12 +6,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import static com.appdynamics.extensions.util.derived.Constants.metricNameFetcher;
 
 /**
  * Created by venkata.konala on 8/23/17.
@@ -20,27 +20,27 @@ public class IndividualDerivedMetricCalculator {
 
     private static final  Logger logger = LoggerFactory.getLogger(IndividualDerivedMetricCalculator.class);
     private Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap;
-    private Operand operand;
+    private OperandsHandler operandsHandler;
     private String metricPath;
-    private Set<String> operands;
     private SetMultimap<String, String> dynamicVariables;
+    private DerivedMetricsPathHandler pathHandler;
     private Multimap<String, BigDecimal> derivedMetricMap = ArrayListMultimap.create();
 
-     IndividualDerivedMetricCalculator(Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap, SetMultimap<String, String> dynamicVariables, String metricPath, Operand operand){
+     IndividualDerivedMetricCalculator(Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap, SetMultimap<String, String> dynamicVariables, String metricPath, OperandsHandler operandsHandler,DerivedMetricsPathHandler pathHandler){
         this.organisedBaseMetricsMap = organisedBaseMetricsMap;
         this.dynamicVariables = dynamicVariables;
         this.metricPath = metricPath;
-        this.operand = operand;
-        this.operands = operand.getBaseOperands();
+        this.operandsHandler = operandsHandler;
+        this.pathHandler = pathHandler;
     }
 
      Multimap<String, BigDecimal> calculateDerivedMetric(){
-        substitute(metricPath, operands, dynamicVariables);
+        substitute(metricPath, operandsHandler.getBaseOperands(), dynamicVariables);
         return derivedMetricMap;
     }
 
      void substitute(String path, Set<String> localOperands, SetMultimap<String, String> dynamicvariables){
-        String variable = operand.checkForFirstVariable(localOperands);
+        String variable = operandsHandler.checkForFirstVariable(localOperands);
         if(variable == null){
             String substitutedFormula =  getValueSubstitutedFormula(localOperands);
             if(substitutedFormula != null) {
@@ -57,15 +57,15 @@ public class IndividualDerivedMetricCalculator {
         }
         Set<String> variableValues = dynamicvariables.get(variable);
         for(String variableValue : variableValues){
-            Set<String> modifiedOperands = operand.getSubstitutedOperands(localOperands, variable, variableValue);
-            String modifiedPath = operand.getSubstitutedPath(path, variable, variableValue);
+            Set<String> modifiedOperands = operandsHandler.getSubstitutedOperands(localOperands, variable, variableValue);
+            String modifiedPath = pathHandler.getSubstitutedPath(path, variable, variableValue);
             substitute(modifiedPath, modifiedOperands, dynamicvariables);
         }
 
     }
 
     private String getValueSubstitutedFormula(Set<String> modifiedOperands){
-        String modifiedExpressionWithoutValues = operand.getSubstitutedExpression(modifiedOperands);
+        String modifiedExpressionWithoutValues = operandsHandler.getSubstitutedExpression(modifiedOperands);
         String modifiedExpressionWithValues = modifiedExpressionWithoutValues;
         Iterator<String> modifiedOperandsIterator = modifiedOperands.iterator();
         while(modifiedOperandsIterator.hasNext()){
@@ -73,7 +73,7 @@ public class IndividualDerivedMetricCalculator {
             if(NumberUtils.isNumber(baseMetric)){
                 continue;
             }
-            String baseMetricName = metricNameFetcher.getMetricName(baseMetric);
+            String baseMetricName = pathHandler.getMetricName(baseMetric);
             Map<String, BigDecimal> baseMetricMap = organisedBaseMetricsMap.get(baseMetricName);
             BigDecimal baseMetricValue = baseMetricMap.get(baseMetric);
             if(baseMetricValue != null) {

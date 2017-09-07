@@ -2,7 +2,6 @@ package com.appdynamics.extensions.util.transformers;
 
 import com.appdynamics.extensions.util.Metric;
 
-import java.util.Collection;
 import java.util.List;
 
 /**

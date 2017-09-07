@@ -1,6 +1,5 @@
 package com.appdynamics.extensions.util.derived;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,13 +10,15 @@ import java.util.Set;
 /**
  * Created by venkata.konala on 8/29/17.
  */
-public class OperandTest {
-    private Operand operand;
+public class OperandsHandlerTest {
+    private OperandsHandler operand;
+    private DerivedMetricsPathHandler pathHandler;
 
     @Before
     public void init(){
         String formula = "{x}|Queue|{y}|hits / ({x}|Queue|{y}|hits + {x}|Queue|{y}|misses)";
-        operand = new Operand(formula);
+        pathHandler = new DerivedMetricsPathHandler();
+        operand = new OperandsHandler(formula, pathHandler);
     }
 
     @Test
@@ -28,7 +29,7 @@ public class OperandTest {
         Assert.assertTrue(operands.contains("{x}|Queue|{y}|misses"));
         //Assert.assertTrue(operands.contains("4"));
         String formula = null;
-        operand = new Operand(formula);
+        operand = new OperandsHandler(formula, pathHandler);
         Set<String> nullOperands = operand.getBaseOperands();
         Assert.assertTrue(nullOperands == null);
     }
@@ -56,7 +57,7 @@ public class OperandTest {
 
     @Test
     public void replacePathTest(){
-        String path = operand.getSubstitutedPath("{x}|Queue|{y}|hits","{x}", "Server1");
+        String path = pathHandler.getSubstitutedPath("{x}|Queue|{y}|hits","{x}", "Server1");
         Assert.assertTrue(path.equals("Server1|Queue|{y}|hits"));
     }
 

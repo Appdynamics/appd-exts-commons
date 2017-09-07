@@ -22,7 +22,6 @@ public class MetricPropertiesBuilder {
         metricProperties.setClusterRollUpType(this.metricPropertiesFromConfig.get("clusterRollUpType") == null ? null : this.metricPropertiesFromConfig.get("clusterRollUpType").toString());
         metricProperties.setDelta(this.metricPropertiesFromConfig.get("delta") == null ? null : this.metricPropertiesFromConfig.get("delta").toString());
         metricProperties.setConversionValues((Map<Object, Object>)this.metricPropertiesFromConfig.get("convert"));
-        //metricProperties.setAggregateAtCluster(this.metricPropertiesFromConfig.get("aggregateAtCluster") == null ? null : this.metricPropertiesFromConfig.get("aggregateAtCluster").toString());
         return metricProperties;
     }
 }

@@ -1,24 +1,28 @@
 package com.appdynamics.extensions.util.derived;
 
 import com.google.common.collect.Sets;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import static com.appdynamics.extensions.util.derived.Constants.formulaSplitter;
-import static com.appdynamics.extensions.util.derived.Constants.pipeSplitter;
+
+import static com.appdynamics.extensions.util.derived.Splitters.FORMULA_SPLITTER;
+import static com.appdynamics.extensions.util.derived.Splitters.PIPE_SPLITTER;
 
 /**
  * Created by venkata.konala on 8/28/17.
  */
-class Operand {
+class OperandsHandler {
 
     private String formula;
     private Set<String> baseOperands;
+    private DerivedMetricsPathHandler pathHandler;
 
-    public Operand(String formula){
+    OperandsHandler(String formula, DerivedMetricsPathHandler pathHandler){
         this.formula = formula;
         baseOperands = getOperandsFromFormula();
+        this.pathHandler = pathHandler;
     }
 
     /* The getBaseMetricsfromFormula(String formula) method takes an expression and
@@ -30,7 +34,7 @@ class Operand {
     private Set<String> getOperandsFromFormula(){
         Set<String> operands = new HashSet<String>();
         if(formula != null){
-            List<String> baseMetricsList = formulaSplitter.splitToList(formula);
+            List<String> baseMetricsList = FORMULA_SPLITTER.splitToList(formula);
             for (String baseMetric : baseMetricsList) {
                 operands.add(baseMetric);
             }
@@ -46,7 +50,7 @@ class Operand {
      String checkForFirstVariable(Set<String> substitutedOperands){
         for(String operand : substitutedOperands){
             if(operand != null) {
-                List<String> metricHierarchyList = pipeSplitter.splitToList(operand);
+                List<String> metricHierarchyList = PIPE_SPLITTER.splitToList(operand);
                 for (String metricHierarchy : metricHierarchyList) {
                     if (metricHierarchy.startsWith("{") && metricHierarchy.endsWith("}")) {
                         return metricHierarchy;
@@ -60,17 +64,12 @@ class Operand {
      Set<String> getSubstitutedOperands(Set<String> baseOperands, String variable, String variableValue){
         Set<String> modifiedOperands = Sets.newHashSet();
         for(String operand : baseOperands){
-            modifiedOperands.add(getSubstitutedPath(operand, variable, variableValue));
+            modifiedOperands.add(pathHandler.getSubstitutedPath(operand, variable, variableValue));
         }
         return modifiedOperands;
     }
 
-     String getSubstitutedPath(String path, String variable, String variableValue){
-        if(path.contains(variable)){
-            path = path.replace(variable, variableValue);
-        }
-        return path;
-    }
+
 
      String getSubstitutedExpression(Set<String> substitutedOperands){
          String modifiedExpression = formula;
@@ -86,8 +85,8 @@ class Operand {
     }
 
     private boolean match(String operand, String modifiedOperand){
-        List<String> operandList = pipeSplitter.splitToList(operand);
-        List<String> modifiedOperandList = pipeSplitter.splitToList(modifiedOperand);
+        List<String> operandList = PIPE_SPLITTER.splitToList(operand);
+        List<String> modifiedOperandList = PIPE_SPLITTER.splitToList(modifiedOperand);
         if(operandList.size() == modifiedOperandList.size()){
             Iterator operandListIterator = operandList.iterator();
             Iterator modifiedOperandListIterator = modifiedOperandList.iterator();

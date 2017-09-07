@@ -6,8 +6,8 @@ import org.junit.Test;
 /**
  * Created by venkata.konala on 8/29/17.
  */
-public class MetricNameFetcherTest {
-    private MetricNameFetcher metricNameFetcher = new MetricNameFetcher();
+public class DerivedMetricPathHandlerTest {
+    private DerivedMetricsPathHandler metricNameFetcher = new DerivedMetricsPathHandler();
     private String metricPath = "Server|Server1|Queue|Q1|hits";
     @Test
     public void getMetricNameTest(){

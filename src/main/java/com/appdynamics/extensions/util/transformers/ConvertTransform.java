@@ -3,7 +3,6 @@ package com.appdynamics.extensions.util.transformers;
 import com.appdynamics.extensions.util.Metric;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 /**

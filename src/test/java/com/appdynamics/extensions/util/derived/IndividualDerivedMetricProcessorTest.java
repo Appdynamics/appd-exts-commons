@@ -15,6 +15,7 @@ import java.util.Set;
  */
 public class IndividualDerivedMetricProcessorTest {
     IndividualDerivedMetricProcessor individualDerivedMetricProcessor;
+    DerivedMetricsPathHandler derivedMetricsPathHandler;
 
    @Before
     public void init(){
@@ -30,8 +31,8 @@ public class IndividualDerivedMetricProcessorTest {
 
        String metricPath = "{x}|{y}|ratio";
        String formula = "({x}|{y}|hits / ({x}|{y}|hits + {x}|{y}|misses)) * 4";
-
-       individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedBaseMetricsMap, metricPath, formula);
+       derivedMetricsPathHandler = new DerivedMetricsPathHandler();
+       individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedBaseMetricsMap, metricPath, formula,derivedMetricsPathHandler);
     }
 
     @Test
@@ -55,7 +56,7 @@ public class IndividualDerivedMetricProcessorTest {
         organisedBaseMetricsMap.put("misses", missesMap);
         String metricPath = "{x}|{y}|ratio";
         String formula = "({x}|hits / ({x}|hits + {x}|{y}|misses)) * 4";
-        individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedBaseMetricsMap, metricPath, formula);
+        individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedBaseMetricsMap, metricPath, formula,derivedMetricsPathHandler);
         Multimap<String, BigDecimal> derivedMap = individualDerivedMetricProcessor.processDerivedMetric();
         Assert.assertTrue(derivedMap.size() == 2);
         Assert.assertTrue(derivedMap.get("Server1|Q1|ratio").contains(new BigDecimal("2")));

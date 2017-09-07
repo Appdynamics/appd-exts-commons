@@ -31,7 +31,7 @@ public class DynamicVariablesProcessorTest {
         Set<String> operands = Sets.newHashSet();
         operands.add("{x}|{y}|hits");
         operands.add("{x}|misses");
-        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands);
+        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,new DerivedMetricsPathHandler());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class DynamicVariablesProcessorTest {
         operands.add("{x}|{y}|hits");
         operands.add("{x}|misses");
         operands.add("{x}|calls");
-        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands);
+        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,new DerivedMetricsPathHandler());
         SetMultimap<String, String> dynamicVariables = dynamicVariablesProcessor.getDynamicVariables();
     }
 }

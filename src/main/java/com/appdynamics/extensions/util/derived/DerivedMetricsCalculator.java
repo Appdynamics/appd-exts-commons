@@ -3,12 +3,15 @@ package com.appdynamics.extensions.util.derived;
 import com.appdynamics.extensions.util.Metric;
 import com.appdynamics.extensions.util.MetricProperties;
 import com.google.common.base.Strings;
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
-import java.util.*;
-import static com.appdynamics.extensions.util.derived.Constants.metricNameFetcher;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by venkata.konala on 8/10/17.
@@ -22,6 +25,7 @@ public class DerivedMetricsCalculator {
     private static final Logger logger = LoggerFactory.getLogger(DerivedMetricsCalculator.class);
     private Map<String, BigDecimal> baseMetricsMap = Maps.newConcurrentMap();
     private List<Map<String, ?>> derivedMetricsList;
+    private DerivedMetricsPathHandler pathHandler = new DerivedMetricsPathHandler();
     private String metricPrefix;
 
     public DerivedMetricsCalculator(List<Map<String, ?>> derivedMetricsList, String metricPrefix){
@@ -50,16 +54,16 @@ public class DerivedMetricsCalculator {
                 String derivedMetricPathFromConfig =  derivedMetric.get("derivedMetricPath") == null ? null : derivedMetric.get("derivedMetricPath").toString();
                 String formula = derivedMetric.get("formula") == null ? null : derivedMetric.get("formula").toString();
                 if (!Strings.isNullOrEmpty(derivedMetricPathFromConfig) && !Strings.isNullOrEmpty(formula)) {
-                    IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedMap, derivedMetricPathFromConfig, formula);
+                    IndividualDerivedMetricProcessor individualDerivedMetricProcessor = new IndividualDerivedMetricProcessor(organisedMap, derivedMetricPathFromConfig, formula, pathHandler);
                     try {
                         Multimap<String, BigDecimal> individualDerivedMetricMap = individualDerivedMetricProcessor.processDerivedMetric();
                         for (Map.Entry<String, BigDecimal> entry : individualDerivedMetricMap.entries()) {
-                            StringBuilder derivedMetricPath = getMetricPathWithMetricPrefix(entry.getKey());
-                            String derivedMetricName = metricNameFetcher.getMetricName(derivedMetricPath.toString());
+                            StringBuilder derivedMetricPath = pathHandler.getMetricPathWithMetricPrefix(entry.getKey(),metricPrefix);
+                            String derivedMetricName = pathHandler.getMetricName(derivedMetricPath.toString());
                             BigDecimal derivedMetricValue = entry.getValue();
                             Metric metric = new Metric(derivedMetricName, derivedMetricValue.toString(), derivedMetricPath.toString(), derivedMetric);
                             MetricProperties metricProperties = metric.getMetricProperties();
-                            derivedMetricPath = applyAlias(derivedMetricPath.toString(), derivedMetricName, metricProperties.getAlias());
+                            derivedMetricPath = pathHandler.applyAlias(derivedMetricPath.toString(), derivedMetricName, metricProperties.getAlias());
                             derivedMetricsMap.put(derivedMetricPath.toString(), metric);
                             logger.debug("Adding {} with value {} to the multimap", derivedMetricPath, metric.getMetricValue());
                         }
@@ -89,7 +93,7 @@ public class DerivedMetricsCalculator {
             String pathWithoutPrefix = key.replace(metricPrefix, "");
             BigDecimal value = baseMetric.getValue();
             if(key != null && value != null){
-                String metricName = metricNameFetcher.getMetricName(key);
+                String metricName = pathHandler.getMetricName(key);
                 if(organisedMap.containsKey(metricName)){
                     Map<String, BigDecimal> organisedMapValue = organisedMap.get(metricName);
                     organisedMapValue.put(pathWithoutPrefix, value);
@@ -108,15 +112,5 @@ public class DerivedMetricsCalculator {
         baseMetricsMap.clear();
     }
 
-    private StringBuilder getMetricPathWithMetricPrefix(String metricPath){
-        StringBuilder derivedMetricPath = new StringBuilder(metricPrefix);
-        derivedMetricPath.append(metricPath);
-        return derivedMetricPath;
-    }
-
-    private StringBuilder applyAlias(String derivedMetricPath, String derivedMetricName, String alias){
-        return new StringBuilder(derivedMetricPath
-                .replace(derivedMetricName, alias));
-    }
 }
 

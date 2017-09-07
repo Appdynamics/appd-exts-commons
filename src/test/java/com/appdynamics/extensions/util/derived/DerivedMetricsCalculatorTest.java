@@ -41,7 +41,6 @@ public class DerivedMetricsCalculatorTest {
         Multimap<String, Metric> derivedMetricsMultiMap= derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
         Assert.assertTrue(derivedMetricsMultiMap.size() == 2);
         Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").size() == 1);
-        System.out.println(derivedMetricsMultiMap);
         Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").iterator().next().getMetricValue().equals("1.5"));
     }
 

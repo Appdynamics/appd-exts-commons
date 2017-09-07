@@ -2,7 +2,6 @@ package com.appdynamics.extensions.util.transformers;
 
 import com.appdynamics.extensions.NumberUtils;
 import com.appdynamics.extensions.util.Metric;
-import com.appdynamics.extensions.util.MetricProperties;
 
 import java.math.BigDecimal;
 
