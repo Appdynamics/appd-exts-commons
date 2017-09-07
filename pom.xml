@@ -89,11 +89,6 @@
             <version>1.13</version>
         </dependency>
         <dependency>
-            <groupId>com.ning</groupId>
-            <artifactId>async-http-client</artifactId>
-            <version>1.9.33</version>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
             <version>8.1.10.v20130312</version>
