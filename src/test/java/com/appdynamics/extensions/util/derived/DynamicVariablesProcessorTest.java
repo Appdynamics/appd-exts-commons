@@ -1,12 +1,11 @@
 package com.appdynamics.extensions.util.derived;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
@@ -15,10 +14,8 @@ import java.util.Set;
  * Created by venkata.konala on 8/29/17.
  */
 public class DynamicVariablesProcessorTest {
-    private DynamicVariablesProcessor dynamicVariablesProcessor;
-
-    @Before
-    public void init(){
+    @Test
+    public void getDynamicVariablesTest() throws MetricNotFoundException{
         Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap = Maps.newHashMap();
         Map<String, BigDecimal> hitsMap = Maps.newHashMap();
         hitsMap.put("Server1|Q1|hits", BigDecimal.ONE);
@@ -31,11 +28,7 @@ public class DynamicVariablesProcessorTest {
         Set<String> operands = Sets.newHashSet();
         operands.add("{x}|{y}|hits");
         operands.add("{x}|misses");
-        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,new DerivedMetricsPathHandler());
-    }
-
-    @Test
-    public void getDynamicVariablesTest() throws MetricNotFoundException{
+        DynamicVariablesProcessor  dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,new DerivedMetricsPathHandler());
         SetMultimap<String, String> dynamicVariables = dynamicVariablesProcessor.getDynamicVariables();
         Assert.assertTrue(dynamicVariables.get("{x}").size() == 2);
         Assert.assertTrue(dynamicVariables.get("{y}").size() == 2);
@@ -58,7 +51,7 @@ public class DynamicVariablesProcessorTest {
         operands.add("{x}|{y}|hits");
         operands.add("{x}|misses");
         operands.add("{x}|calls");
-        dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,new DerivedMetricsPathHandler());
+        DynamicVariablesProcessor dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operands,new DerivedMetricsPathHandler());
         SetMultimap<String, String> dynamicVariables = dynamicVariablesProcessor.getDynamicVariables();
     }
 }

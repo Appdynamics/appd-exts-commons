@@ -29,8 +29,8 @@ public class OperandsHandlerTest {
         Assert.assertTrue(operands.contains("{x}|Queue|{y}|misses"));
         //Assert.assertTrue(operands.contains("4"));
         String formula = null;
-        operand = new OperandsHandler(formula, pathHandler);
-        Set<String> nullOperands = operand.getBaseOperands();
+        OperandsHandler operand1 = new OperandsHandler(formula, pathHandler);
+        Set<String> nullOperands = operand1.getBaseOperands();
         Assert.assertTrue(nullOperands == null);
     }
 

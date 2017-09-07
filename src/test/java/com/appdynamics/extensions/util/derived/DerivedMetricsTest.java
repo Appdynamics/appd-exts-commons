@@ -1,8 +1,10 @@
 package com.appdynamics.extensions.util.derived;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.util.Metric;
 import com.appdynamics.extensions.util.MetricWriteHelper;
 import com.appdynamics.extensions.util.MetricWriteHelperFactory;
+import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
@@ -11,22 +13,23 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.*;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Created by venkata.konala on 8/29/17.
  */
 public class DerivedMetricsTest {
-    private MonitorConfiguration monitorConfiguration;
     private class TaskRunner implements Runnable{
         public void run(){
 
         }
     }
-    private MetricWriteHelper metricWriteHelper;
+
     AManagedMonitor aManagedMonitor = new AManagedMonitor() {
             @Override
             public TaskOutput execute(Map<String, String> map, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
@@ -36,36 +39,38 @@ public class DerivedMetricsTest {
 
     @Test
     public void noDerivedMetricsSectionTest(){
-        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
-        metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
-        monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
+        ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
+        MetricWriteHelper metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
+        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
         monitorConfiguration.setConfigYml("src/test/resources/derived/config_NoDerivedSection.yml");
         metricWriteHelper.onTaskComplete();
-        verify(metricWriteHelper, times(0)).printMetric(pathCaptor.capture(), anyString(), anyString(), anyString(), anyString());
+        verify(metricWriteHelper, times(0)).printMetric(pathCaptor.capture());
         Assert.assertTrue(pathCaptor.getAllValues().size() == 0);
     }
 
     @Test
     public void derivedMetricsTest(){
-        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
-        metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
-        monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
+        ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
+        MetricWriteHelper metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
+        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
         monitorConfiguration.setConfigYml("src/test/resources/derived/config.yml");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.onTaskComplete();
-        verify(metricWriteHelper, times(6)).printMetric(pathCaptor.capture(), anyString(), anyString(), anyString(), anyString());
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|ratio"));
+        verify(metricWriteHelper, times(1)).printMetric(pathCaptor.capture());
+        Assert.assertTrue(pathCaptor.getValue().size() == 2);
+        for(Metric metric : (List<Metric>)pathCaptor.getValue()){
+            Assert.assertTrue(metric.getMetricPath().equals("Server|Component:AppLevels|Custom Metrics|Redis|Server1|ratio") || metric.getMetricPath().equals("Server|Component:AppLevels|Custom Metrics|Redis|Server2|ratio"));
+        }
     }
 
     @Test
     public void derivedMetricsTestWithLevelDifferences(){
-        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
-        metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
-        monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
+        ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
+        MetricWriteHelper metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
+        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
         monitorConfiguration.setConfigYml("src/test/resources/derived/config_WithLevelVariants.yml");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
@@ -78,20 +83,23 @@ public class DerivedMetricsTest {
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Memory1|memoryRequests","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Memory2|memoryRequests","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.onTaskComplete();
-        verify(metricWriteHelper, times(18)).printMetric(pathCaptor.capture(), anyString(), anyString(), anyString(), anyString());
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q3|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q4|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q4|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgRequests"));
+        verify(metricWriteHelper, times(1)).printMetric(pathCaptor.capture());
+        List<String> derivedList = Lists.newArrayList();
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q3|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q4|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgRequests");
+        for(Metric metric : (List<Metric>)pathCaptor.getValue()){
+            Assert.assertTrue(derivedList.contains(metric.getMetricPath()));
+        }
     }
 
     @Test
     public void derivedMetricsTestWithMultipleMetrics(){
-        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
-        metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
-        monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
+        ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
+        MetricWriteHelper metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
+        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
         monitorConfiguration.setConfigYml("src/test/resources/derived/config_MultipleDerivedMetrics.yml");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
@@ -114,27 +122,29 @@ public class DerivedMetricsTest {
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q1|memoryWrite","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q2|memoryWrite","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.onTaskComplete();
-        verify(metricWriteHelper, times(33)).printMetric(pathCaptor.capture(), anyString(), anyString(), anyString(), anyString());
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q3|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q4|ratio"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgCalls"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|avgRead"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|avgRead"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q1|avgRead"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q2|avgRead"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgWrite"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgWrite"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|avgWrite"));
-        Assert.assertTrue(pathCaptor.getAllValues().contains("Server|Component:AppLevels|Custom Metrics|Redis|Server2|avgWrite"));
+        verify(metricWriteHelper, times(1)).printMetric(pathCaptor.capture());
+        List<String> derivedList = Lists.newArrayList();
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q3|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q4|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgCalls");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|avgRead");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q2|avgRead");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q1|avgRead");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q2|avgRead");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|avgWrite");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|avgWrite");
+        for(Metric metric : (List<Metric>)pathCaptor.getValue()){
+            Assert.assertTrue(derivedList.contains(metric.getMetricPath()));
+        }
     }
 
     @Test
     public void clusterMetricsTest(){
-        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
-        metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
-        monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
+        ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
+        MetricWriteHelper metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
+        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new TaskRunner(), metricWriteHelper);
         monitorConfiguration.setConfigYml("src/test/resources/derived/config_WithClusterMetrics.yml");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|hits","2","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server1|Q1|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
@@ -145,11 +155,16 @@ public class DerivedMetricsTest {
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q2|hits","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.printMetric("Server|Component:AppLevels|Custom Metrics|Redis|Server2|Q2|misses","1","AVERAGE","AVERAGE", "INDIVIDUAL");
         metricWriteHelper.onTaskComplete();
-        verify(metricWriteHelper, times(16)).printMetric(pathCaptor.capture(), anyString(), anyString(), anyString(), anyString());
-        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Server1|ratio") == 2);
-        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Server2|ratio") == 2);
-        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Cluster|Q1|ratio") == 2);
-        Assert.assertTrue(Collections.frequency(pathCaptor.getAllValues(), "Server|Component:AppLevels|Custom Metrics|Redis|Cluster|Q2|ratio") == 2);
+        verify(metricWriteHelper, times(1)).printMetric(pathCaptor.capture());
+        List<String> derivedList = Lists.newArrayList();
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server2|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Cluster|Q1|ratio");
+        derivedList.add("Server|Component:AppLevels|Custom Metrics|Redis|Cluster|Q2|ratio");
+        for(Metric metric : (List<Metric>)pathCaptor.getValue()){
+            Assert.assertTrue(derivedList.contains(metric.getMetricPath()));
+        }
+
     }
 
 }

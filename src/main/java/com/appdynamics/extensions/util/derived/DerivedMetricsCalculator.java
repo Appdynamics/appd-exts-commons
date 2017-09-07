@@ -1,25 +1,24 @@
 package com.appdynamics.extensions.util.derived;
 
 import com.appdynamics.extensions.util.Metric;
-import com.appdynamics.extensions.util.MetricProperties;
+import com.appdynamics.extensions.util.transformers.Transformer;
 import com.google.common.base.Strings;
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by venkata.konala on 8/10/17.
- * This class takes the list of derived metrics(with metric properties) from the "derived" section
- * in config.yml. It gets the baseMetricsMap(with metricNames and metricValues in BigDecimal) from
+ * This class takes the list of derived metrics(with metric properties) from the "derivedMetrics" section
+ * in config.yml. It gets the baseMetricsMap(with metricPath and metricValues) from
  * printMetric() methods in MetricWriteHelper.java
  * The calculateAndReturnDerivedMetrics() method will calculate the derived metrics values and
- * return a Multimap (with derived metricPaths and their MetricProperties).
+ * return a List<Metric>.
  */
 public class DerivedMetricsCalculator {
     private static final Logger logger = LoggerFactory.getLogger(DerivedMetricsCalculator.class);
@@ -44,13 +43,16 @@ public class DerivedMetricsCalculator {
         baseMetricsMap.put(metricPath, new BigDecimal(metricValue));
     }
 
-    public Multimap<String, Metric> calculateAndReturnDerivedMetrics(){
+    public void clearBaseMetricsMap(){
+        baseMetricsMap.clear();
+    }
+
+    public List<Metric> calculateAndReturnDerivedMetrics(){
         long startTime = System.currentTimeMillis();
-        Multimap<String, Metric> derivedMetricsMap = ArrayListMultimap.create();
+        List<Metric> metricList = Lists.newArrayList();
         if(baseMetricsMap.size() != 0) {
             Map<String, Map<String, BigDecimal>> organisedMap = buildDataStructure(baseMetricsMap);
-            clearBaseMetricsMap();
-            for (Map<String, ?> derivedMetric : derivedMetricsList) {
+            for (Map<String, ?> derivedMetric : this.derivedMetricsList) {
                 String derivedMetricPathFromConfig =  derivedMetric.get("derivedMetricPath") == null ? null : derivedMetric.get("derivedMetricPath").toString();
                 String formula = derivedMetric.get("formula") == null ? null : derivedMetric.get("formula").toString();
                 if (!Strings.isNullOrEmpty(derivedMetricPathFromConfig) && !Strings.isNullOrEmpty(formula)) {
@@ -62,10 +64,8 @@ public class DerivedMetricsCalculator {
                             String derivedMetricName = pathHandler.getMetricName(derivedMetricPath.toString());
                             BigDecimal derivedMetricValue = entry.getValue();
                             Metric metric = new Metric(derivedMetricName, derivedMetricValue.toString(), derivedMetricPath.toString(), derivedMetric);
-                            MetricProperties metricProperties = metric.getMetricProperties();
-                            derivedMetricPath = pathHandler.applyAlias(derivedMetricPath.toString(), derivedMetricName, metricProperties.getAlias());
-                            derivedMetricsMap.put(derivedMetricPath.toString(), metric);
-                            logger.debug("Adding {} with value {} to the multimap", derivedMetricPath, metric.getMetricValue());
+                            metricList.add(metric);
+                            logger.debug("Adding {} with value {} to the list of Metric", derivedMetricPath, metric.getMetricValue());
                         }
                     }
                     catch(MetricNotFoundException e){
@@ -78,11 +78,13 @@ public class DerivedMetricsCalculator {
             }
             long endTime = System.currentTimeMillis();
             logger.debug("Total time taken to calculate and return derived metrics is {} ms",endTime - startTime);
-            return derivedMetricsMap;
+            Transformer transformer = new Transformer(metricList);
+            transformer.transform();
+            return metricList;
         }
         else{
             logger.debug("There are no base metrics to calculate derived metrics");
-            return derivedMetricsMap;
+            return metricList;
         }
     }
 
@@ -107,10 +109,5 @@ public class DerivedMetricsCalculator {
         }
         return organisedMap;
     }
-
-    private void clearBaseMetricsMap(){
-        baseMetricsMap.clear();
-    }
-
 }
 

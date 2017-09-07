@@ -1,7 +1,6 @@
 package com.appdynamics.extensions.util.derived;
 
 import java.util.List;
-
 import static com.appdynamics.extensions.util.derived.Splitters.PIPE_SPLITTER;
 
 /**
@@ -9,7 +8,7 @@ import static com.appdynamics.extensions.util.derived.Splitters.PIPE_SPLITTER;
  */
 class DerivedMetricsPathHandler {
 
-     String getMetricName(String metricPath){
+    String getMetricName(String metricPath){
         if(metricPath != null) {
             List<String> splitList = PIPE_SPLITTER.splitToList(metricPath);
             if (splitList.size() > 0) {
@@ -23,11 +22,6 @@ class DerivedMetricsPathHandler {
         StringBuilder derivedMetricPath = new StringBuilder(metricPrefix);
         derivedMetricPath.append(metricPath);
         return derivedMetricPath;
-    }
-
-    StringBuilder applyAlias(String derivedMetricPath, String derivedMetricName, String alias){
-        return new StringBuilder(derivedMetricPath
-                .replace(derivedMetricName, alias));
     }
 
     String getSubstitutedPath(String path, String variable, String variableValue){

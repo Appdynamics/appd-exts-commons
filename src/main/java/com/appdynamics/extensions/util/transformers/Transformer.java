@@ -1,7 +1,6 @@
 package com.appdynamics.extensions.util.transformers;
 
 import com.appdynamics.extensions.util.Metric;
-
 import java.util.List;
 
 /**
@@ -12,6 +11,7 @@ public class Transformer {
     private DeltaTranform deltaTranform = new DeltaTranform();
     private MultiplierTransform multiplierTransform = new MultiplierTransform();
     private ConvertTransform convertTransform = new ConvertTransform();
+    private MetricPathTransform metricPathTransform = new MetricPathTransform();
 
     public Transformer(List<Metric> metricList){
         this.metricList = metricList;
@@ -27,6 +27,7 @@ public class Transformer {
     }
 
     private void applyTransforms(Metric metric){
+        metricPathTransform.applyAlias(metric);
         if(metric.getMetricValue() != null) {
             deltaTranform.applyDelta(metric);
         }

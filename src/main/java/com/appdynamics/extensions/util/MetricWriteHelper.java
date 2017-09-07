@@ -5,14 +5,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Multimap;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -77,23 +76,54 @@ public class MetricWriteHelper {
         }
     }
 
-    public void onTaskComplete(){
-        if(derivedMetricsCalculator != null){
-            Multimap<String, com.appdynamics.extensions.util.Metric> derivedMetricsMultiMap = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
-            if(derivedMetricsMultiMap != null){
-                for(Map.Entry<String, com.appdynamics.extensions.util.Metric> derivedMetricEntry : derivedMetricsMultiMap.entries()){
-                    String metricPath =  derivedMetricEntry.getKey();
-                    com.appdynamics.extensions.util.Metric metric = derivedMetricEntry.getValue();
-                    MetricProperties metricProperties = metric.getMetricProperties();
-                    if(metricPath != null && metricProperties != null) {
-                        String metricValue = metric.getMetricValue().toString();
-                        String aggregationType = metricProperties.getAggregationType();
-                        String timeRollUp = metricProperties.getTimeRollUpType();
-                        String clusterRollUp = metricProperties.getClusterRollUpType();
-                        printMetric(metricPath, metricValue, aggregationType, timeRollUp, clusterRollUp);
+    public void printMetric(List<com.appdynamics.extensions.util.Metric> metrics) {
+        if(metrics != null){
+            for(com.appdynamics.extensions.util.Metric derivedMetric : metrics) {
+                String metricPath = derivedMetric.getMetricPath();
+                String metricValue = derivedMetric.getMetricValue();
+                MetricProperties metricProperties = derivedMetric.getMetricProperties();
+                String aggregationType = metricProperties.getAggregationType();
+                String timeRollUpType = metricProperties.getTimeRollUpType();
+                String clusterRollUpType = metricProperties.getClusterRollUpType();
+                if (!Strings.isNullOrEmpty(metricPath) && !Strings.isNullOrEmpty(metricValue)
+                        && !Strings.isNullOrEmpty(aggregationType) && !Strings.isNullOrEmpty(timeRollUpType)
+                        && !Strings.isNullOrEmpty(clusterRollUpType)) {
+                    if (isScheduledMode()) {
+                        Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
+                        metricCache.put(metricPath, metric);
+                        logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
+                    }
+                    else {
+                        MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollUpType, clusterRollUpType);
+                        metricWriter.printMetric(metricValue);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollUpType, clusterRollUpType, metricPath, metricValue);
+                        }
+                        if (cacheMetrics) {
+                            Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
+                            metricCache.put(metricPath, metric);
+                        }
+                    }
+                    if(derivedMetricsCalculator != null){
+                        derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
                     }
                 }
+                else{
+                    Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
+                    logger.error("The metric is not valid {}", arg);
+                }
             }
+        }
+        else{
+             logger.error("The metric list is null");
+        }
+    }
+
+    public void onTaskComplete(){
+        if(derivedMetricsCalculator != null){
+            List<com.appdynamics.extensions.util.Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+            printMetric(metricList);
+            derivedMetricsCalculator.clearBaseMetricsMap();
         }
     }
 

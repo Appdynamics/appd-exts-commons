@@ -2,7 +2,6 @@ package com.appdynamics.extensions.util;
 
 import com.google.common.collect.Maps;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -12,20 +11,16 @@ import java.util.Map;
  * Created by venkata.konala on 8/15/17.
  */
 public class MetricPropertiesBuilderTest {
-    Map<String, ? super Object> metricPropertiesMap = Maps.newHashMap();
-    MetricPropertiesBuilder metricPropertiesBuilder;
-    @Before
-    public void init(){
+    @Test
+    public void buildMetricPropertiesTest(){
+        Map<String, ? super Object> metricPropertiesMap = Maps.newHashMap();
+        MetricPropertiesBuilder metricPropertiesBuilder;
         metricPropertiesMap.put("alias", "ratio_alias");
         metricPropertiesMap.put("multiplier", 4);
         metricPropertiesMap.put("aggregationType", "4");
         metricPropertiesMap.put("clusterRollUpType", "COLLECTIVE");
         metricPropertiesBuilder = new MetricPropertiesBuilder(metricPropertiesMap, "ratio_original");
         metricPropertiesMap.put("delta", true);
-    }
-
-    @Test
-    public void buildMetricPropertiesTest(){
         MetricProperties metricProperties = metricPropertiesBuilder.buildMetricProperties();
         Assert.assertTrue(metricProperties.getAlias().equals("ratio_alias"));
         Assert.assertTrue(metricProperties.getMultiplier().equals(new BigDecimal("4")));
@@ -36,6 +31,8 @@ public class MetricPropertiesBuilderTest {
 
     @Test
     public void nullValuesTest(){
+        Map<String, ? super Object> metricPropertiesMap = Maps.newHashMap();
+        MetricPropertiesBuilder metricPropertiesBuilder;
         metricPropertiesMap.put("alias", null);
         metricPropertiesMap.put("multiplier", null);
         metricPropertiesMap.put("aggregationType", null);

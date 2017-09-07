@@ -25,7 +25,7 @@ class OperandsHandler {
         this.pathHandler = pathHandler;
     }
 
-    /* The getBaseMetricsfromFormula(String formula) method takes an expression and
+    /* This method takes an expression and
     * returns the set of baseOperands. The operators allowed are +,-,*,/,%,^.
     * To apply precedence, "()" can be used. Spaces can be used in the expression
     * to separate operators and baseOperands. Please note that the baseOperands do not
@@ -59,7 +59,7 @@ class OperandsHandler {
             }
         }
         return null;
-    }
+     }
 
      Set<String> getSubstitutedOperands(Set<String> baseOperands, String variable, String variableValue){
         Set<String> modifiedOperands = Sets.newHashSet();
@@ -67,7 +67,7 @@ class OperandsHandler {
             modifiedOperands.add(pathHandler.getSubstitutedPath(operand, variable, variableValue));
         }
         return modifiedOperands;
-    }
+     }
 
 
 
@@ -82,7 +82,7 @@ class OperandsHandler {
             }
          }
          return modifiedExpression;
-    }
+     }
 
     private boolean match(String operand, String modifiedOperand){
         List<String> operandList = PIPE_SPLITTER.splitToList(operand);

@@ -1,15 +1,12 @@
 package com.appdynamics.extensions.util.derived;
 
 import com.appdynamics.extensions.util.Metric;
-import com.appdynamics.extensions.util.MetricProperties;
-import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import java.math.BigDecimal;
+
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +17,6 @@ public class DerivedMetricsCalculatorTest {
     private DerivedMetricsCalculator derivedMetricsCalculator;
     private List<Map<String, ?>> derivedMetricsList = Lists.newArrayList();
     private String metricPrefix = "Server|Component:AppLevels|Custom Metrics|Redis";
-
 
    @Before
     public void init(){
@@ -38,10 +34,13 @@ public class DerivedMetricsCalculatorTest {
 
     @Test
     public void calculateAndReturnDerivedMetricsTest(){
-        Multimap<String, Metric> derivedMetricsMultiMap= derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
-        Assert.assertTrue(derivedMetricsMultiMap.size() == 2);
-        Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").size() == 1);
-        Assert.assertTrue(derivedMetricsMultiMap.get("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio").iterator().next().getMetricValue().equals("1.5"));
+        List<Metric> derivedMetricList= derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+        Assert.assertTrue(derivedMetricList.size() == 2);
+        for(Metric metric : derivedMetricList){
+            if(metric.getMetricPath().equals("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|CPU1|ratio")){
+                Assert.assertTrue(metric.getMetricValue().equals("1.5"));
+            }
+        }
     }
 
 

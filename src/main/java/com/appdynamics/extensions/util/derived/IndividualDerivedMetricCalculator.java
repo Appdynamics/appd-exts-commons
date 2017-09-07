@@ -6,7 +6,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,7 +15,7 @@ import java.util.Set;
 /**
  * Created by venkata.konala on 8/23/17.
  */
-public class IndividualDerivedMetricCalculator {
+class IndividualDerivedMetricCalculator {
 
     private static final  Logger logger = LoggerFactory.getLogger(IndividualDerivedMetricCalculator.class);
     private Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap;
@@ -26,7 +25,7 @@ public class IndividualDerivedMetricCalculator {
     private DerivedMetricsPathHandler pathHandler;
     private Multimap<String, BigDecimal> derivedMetricMap = ArrayListMultimap.create();
 
-     IndividualDerivedMetricCalculator(Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap, SetMultimap<String, String> dynamicVariables, String metricPath, OperandsHandler operandsHandler,DerivedMetricsPathHandler pathHandler){
+    IndividualDerivedMetricCalculator(Map<String, Map<String, BigDecimal>> organisedBaseMetricsMap, SetMultimap<String, String> dynamicVariables, String metricPath, OperandsHandler operandsHandler,DerivedMetricsPathHandler pathHandler){
         this.organisedBaseMetricsMap = organisedBaseMetricsMap;
         this.dynamicVariables = dynamicVariables;
         this.metricPath = metricPath;
@@ -37,7 +36,7 @@ public class IndividualDerivedMetricCalculator {
      Multimap<String, BigDecimal> calculateDerivedMetric(){
         substitute(metricPath, operandsHandler.getBaseOperands(), dynamicVariables);
         return derivedMetricMap;
-    }
+     }
 
      void substitute(String path, Set<String> localOperands, SetMultimap<String, String> dynamicvariables){
         String variable = operandsHandler.checkForFirstVariable(localOperands);
@@ -62,7 +61,7 @@ public class IndividualDerivedMetricCalculator {
             substitute(modifiedPath, modifiedOperands, dynamicvariables);
         }
 
-    }
+     }
 
     private String getValueSubstitutedFormula(Set<String> modifiedOperands){
         String modifiedExpressionWithoutValues = operandsHandler.getSubstitutedExpression(modifiedOperands);

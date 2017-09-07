@@ -2,7 +2,6 @@ package com.appdynamics.extensions.util.transformers;
 
 import com.appdynamics.extensions.util.Metric;
 import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 
 /**
@@ -10,6 +9,7 @@ import java.util.Map;
  */
 class ConvertTransform {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ConvertTransform.class);
+
     void convert(Metric metric){
         Map<Object, Object> convertMap = metric.getMetricProperties().getConversionValues();
         String metricValue = metric.getMetricValue();

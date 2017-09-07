@@ -12,6 +12,9 @@ public class Metric {
     private MetricProperties metricProperties;
 
     public Metric(String metricName,String metricValue,String metricPath){
+        AssertUtils.assertNotNull(metricName, "Metric name cannot be null");
+        AssertUtils.assertNotNull(metricValue, "Metric value cannot be null");
+        AssertUtils.assertNotNull(metricPath, "Metric path cannot be null");
         this.metricName = metricName;
         this.metricValue = metricValue;
         this.metricPath = metricPath;
@@ -43,6 +46,10 @@ public class Metric {
 
     public String getMetricPath(){
         return metricPath;
+    }
+
+    public void setMetricPath(String metricPath){
+        this.metricPath = metricPath;
     }
 
     public MetricProperties getMetricProperties(){

@@ -4,7 +4,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -28,7 +27,7 @@ class IndividualDerivedMetricProcessor {
         this.operandsHandler = new OperandsHandler(formula,pathHandler);
     }
 
-     Multimap<String, BigDecimal> processDerivedMetric() throws MetricNotFoundException{
+    Multimap<String, BigDecimal> processDerivedMetric() throws MetricNotFoundException{
         long startTime = System.currentTimeMillis();
         dynamicVariablesProcessor = new DynamicVariablesProcessor(organisedBaseMetricsMap, operandsHandler.getBaseOperands(),pathHandler);
         dynamicvariables = dynamicVariablesProcessor.getDynamicVariables();

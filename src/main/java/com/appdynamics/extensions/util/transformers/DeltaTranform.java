@@ -4,7 +4,6 @@ import com.appdynamics.extensions.NumberUtils;
 import com.appdynamics.extensions.util.DeltaMetricsCalculator;
 import com.appdynamics.extensions.util.Metric;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 
 /**
@@ -15,7 +14,6 @@ class DeltaTranform {
     private static DeltaMetricsCalculator deltaCalculator = new DeltaMetricsCalculator(10);
 
     void applyDelta(Metric metric){
-
         String metricValue = metric.getMetricValue();
         if(NumberUtils.isNumber(metricValue) && metric.getMetricProperties().getDelta() == true){
             BigDecimal deltaValue = deltaCalculator.calculateDelta(metric.getMetricPath(), new BigDecimal(metricValue));
