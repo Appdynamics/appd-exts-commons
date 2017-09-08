@@ -77,46 +77,17 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(List<com.appdynamics.extensions.util.Metric> metrics) {
-        if(metrics != null){
-            for(com.appdynamics.extensions.util.Metric derivedMetric : metrics) {
-                String metricPath = derivedMetric.getMetricPath();
-                String metricValue = derivedMetric.getMetricValue();
-                MetricProperties metricProperties = derivedMetric.getMetricProperties();
-                String aggregationType = metricProperties.getAggregationType();
-                String timeRollUpType = metricProperties.getTimeRollUpType();
-                String clusterRollUpType = metricProperties.getClusterRollUpType();
-                if (!Strings.isNullOrEmpty(metricPath) && !Strings.isNullOrEmpty(metricValue)
-                        && !Strings.isNullOrEmpty(aggregationType) && !Strings.isNullOrEmpty(timeRollUpType)
-                        && !Strings.isNullOrEmpty(clusterRollUpType)) {
-                    if (isScheduledMode()) {
-                        Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
-                        metricCache.put(metricPath, metric);
-                        logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
-                    }
-                    else {
-                        MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollUpType, clusterRollUpType);
-                        metricWriter.printMetric(metricValue);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollUpType, clusterRollUpType, metricPath, metricValue);
-                        }
-                        if (cacheMetrics) {
-                            Metric metric = new Metric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
-                            metricCache.put(metricPath, metric);
-                        }
-                    }
-                    if(derivedMetricsCalculator != null){
-                        derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
-                    }
-                }
-                else{
-                    Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
-                    logger.error("The metric is not valid {}", arg);
-                }
-            }
+        AssertUtils.assertNotNull(metrics,"The metrics cannot be null");
+        for(com.appdynamics.extensions.util.Metric derivedMetric : metrics) {
+            String metricPath = derivedMetric.getMetricPath();
+            String metricValue = derivedMetric.getMetricValue();
+            MetricProperties metricProperties = derivedMetric.getMetricProperties();
+            String aggregationType = metricProperties.getAggregationType();
+            String timeRollUpType = metricProperties.getTimeRollUpType();
+            String clusterRollUpType = metricProperties.getClusterRollUpType();
+            printMetric(metricPath,metricValue,aggregationType,timeRollUpType,clusterRollUpType);
         }
-        else{
-             logger.error("The metric list is null");
-        }
+
     }
 
     public void onTaskComplete(){

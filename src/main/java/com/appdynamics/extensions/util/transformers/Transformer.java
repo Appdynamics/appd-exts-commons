@@ -11,7 +11,7 @@ public class Transformer {
     private DeltaTranform deltaTranform = new DeltaTranform();
     private MultiplierTransform multiplierTransform = new MultiplierTransform();
     private ConvertTransform convertTransform = new ConvertTransform();
-    private MetricPathTransform metricPathTransform = new MetricPathTransform();
+    private AliasTransform aliasTransform = new AliasTransform();
 
     public Transformer(List<Metric> metricList){
         this.metricList = metricList;
@@ -21,13 +21,13 @@ public class Transformer {
     public void transform(){
         if(metricList != null){
             for(Metric metric : metricList){
-                    applyTransforms(metric);
+                applyTransforms(metric);
             }
         }
     }
 
     private void applyTransforms(Metric metric){
-        metricPathTransform.applyAlias(metric);
+        aliasTransform.applyAlias(metric);
         if(metric.getMetricValue() != null) {
             deltaTranform.applyDelta(metric);
         }
