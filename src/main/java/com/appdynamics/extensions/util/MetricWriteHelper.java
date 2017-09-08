@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -9,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +28,7 @@ public class MetricWriteHelper {
     private boolean scheduledMode;
     //Used for Dashboard. Cache the current list of metrics.
     private boolean cacheMetrics;
-
+    private DerivedMetricsCalculator derivedMetricsCalculator;
     protected MetricWriteHelper() {
     }
 
@@ -34,6 +37,15 @@ public class MetricWriteHelper {
         this.managedMonitor = managedMonitor;
         writerCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
         metricCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
+    }
+
+    public void setDerivedMetricsCalculator(DerivedMetricsCalculator derivedMetricsCalculator){
+        this.derivedMetricsCalculator = derivedMetricsCalculator;
+    }
+
+    @VisibleForTesting
+    public DerivedMetricsCalculator getDerivedMetricsCalculator(){
+        return derivedMetricsCalculator;
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
@@ -55,9 +67,34 @@ public class MetricWriteHelper {
                     metricCache.put(metricPath, metric);
                 }
             }
+            if(derivedMetricsCalculator != null){
+                derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
+            }
         } else {
             Metric arg = new Metric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup);
             logger.error("The metric is not valid {}", arg);
+        }
+    }
+
+    public void printMetric(List<com.appdynamics.extensions.util.Metric> metrics) {
+        AssertUtils.assertNotNull(metrics,"The metrics cannot be null");
+        for(com.appdynamics.extensions.util.Metric derivedMetric : metrics) {
+            String metricPath = derivedMetric.getMetricPath();
+            String metricValue = derivedMetric.getMetricValue();
+            MetricProperties metricProperties = derivedMetric.getMetricProperties();
+            String aggregationType = metricProperties.getAggregationType();
+            String timeRollUpType = metricProperties.getTimeRollUpType();
+            String clusterRollUpType = metricProperties.getClusterRollUpType();
+            printMetric(metricPath,metricValue,aggregationType,timeRollUpType,clusterRollUpType);
+        }
+
+    }
+
+    public void onTaskComplete(){
+        if(derivedMetricsCalculator != null){
+            List<com.appdynamics.extensions.util.Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+            printMetric(metricList);
+            derivedMetricsCalculator.clearBaseMetricsMap();
         }
     }
 
@@ -92,6 +129,9 @@ public class MetricWriteHelper {
             } else {
                 MetricWriter metricWriter = getMetricWriter(metricPath, metricType);
                 metricWriter.printMetric(valStr);
+            }
+            if(derivedMetricsCalculator != null) {
+                derivedMetricsCalculator.addToBaseMetricsMap(metricPath, value.toString());
             }
         } else {
             logger.error("Cannot send the metric [{}], value=[{}] and metricType=[{}]", metricPath, value, metricType);
@@ -196,7 +236,7 @@ public class MetricWriteHelper {
 
     }
 
-    public static class Metric {
+    private static class Metric {
         private final String path;
         private final String value;
         private final MetricType metricType;

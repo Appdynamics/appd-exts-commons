@@ -7,6 +7,7 @@ import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.MetricWriteHelper;
 import com.appdynamics.extensions.util.PerMinValueCalculator;
 import com.appdynamics.extensions.util.YmlUtils;
+import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -57,6 +58,7 @@ public class MonitorConfiguration {
     private Object metricXml;
     private PerMinValueCalculator perMinValueCalculator;
     private MetricWriteHelper metricWriter;
+    private DerivedMetricsCalculator derivedMetricsCalculator;
     private boolean enabled;
 
     public MonitorConfiguration(String defaultMetricPrefix, Runnable taskRunner, MetricWriteHelper metricWriter) {
@@ -224,6 +226,7 @@ public class MonitorConfiguration {
                 initExecutorService(config);
                 initHttpClient(config);
                 initScheduledTask(config);
+                initDerivedMetricsCalculator();
                 metricWriter.setScheduledMode(scheduler != null);
             } else{
                 this.enabled = false;
@@ -457,5 +460,17 @@ public class MonitorConfiguration {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    private void initDerivedMetricsCalculator(){
+        List<Map<String, ?>> derivedMetricsList = (List) config.get("derivedMetrics");
+        if(derivedMetricsList !=  null){
+            derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, getMetricPrefix());
+            metricWriter.setDerivedMetricsCalculator(derivedMetricsCalculator);
+            logger.info("The DerivedMetricsCalculator is initialised");
+        }
+        else{
+            logger.info("The DerivedMetricsCalculator is not initialised as the derivedMetrics section doesn't exist in the config.yml");
+        }
     }
 }
