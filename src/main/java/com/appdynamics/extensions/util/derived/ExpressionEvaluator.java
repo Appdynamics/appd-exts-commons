@@ -15,10 +15,15 @@ public class  ExpressionEvaluator {
         this.expression = expression;
     }
 
-    public BigDecimal eval(){
-        Expression e = new ExpressionBuilder(expression).build();
-        Double result = e.evaluate();
-        return new BigDecimal(result);
+    public BigDecimal eval() throws IllegalExpressionException{
+        try {
+            Expression e = new ExpressionBuilder(expression).build();
+            Double result = e.evaluate();
+            return new BigDecimal(result);
+        }
+        catch(Exception exception){
+            throw new IllegalExpressionException("The expression " + expression + " is illegal" + exception);
+        }
     }
 }
 

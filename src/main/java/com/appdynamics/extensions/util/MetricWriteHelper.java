@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
+import com.appdynamics.extensions.util.transformers.Transformer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
@@ -90,10 +91,16 @@ public class MetricWriteHelper {
 
     }
 
+    public void transformAndPrintNodeLevelMetrics(List<com.appdynamics.extensions.util.Metric> metrics){
+        Transformer transformer = new Transformer(metrics);
+        transformer.transform();
+        printMetric(metrics);
+    }
+
     public void onTaskComplete(){
         if(derivedMetricsCalculator != null){
             List<com.appdynamics.extensions.util.Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
-            printMetric(metricList);
+            transformAndPrintNodeLevelMetrics(metricList);
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
     }

@@ -34,7 +34,7 @@ public class TransformerTest {
         transformer.transform();
         Assert.assertTrue(metric1.getMetricProperties().getMultiplier().equals(new BigDecimal("1")));
         Assert.assertTrue(metric2.getMetricProperties().getAlias().equals("calls"));
-        Assert.assertTrue(metric2.getMetricValue().equals("2.0"));
+        Assert.assertTrue(metric2.getMetricValue().equals("2"));
         Assert.assertTrue(metric3.getMetricProperties().getAlias().equals("ratio_alias"));
         Assert.assertTrue(metric3.getMetricValue() == null);
     }
@@ -63,7 +63,7 @@ public class TransformerTest {
 
         Transformer transformer2 = new Transformer(metricList);
         transformer2.transform();
-        Assert.assertTrue(metric4.getMetricValue().equals("20.0"));
+        Assert.assertTrue(metric4.getMetricValue().equals("20"));
     }
 
     @Test
@@ -95,6 +95,54 @@ public class TransformerTest {
         transformer.transform();
         Assert.assertFalse(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio"));
         Assert.assertTrue(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio_alias"));
+
+    }
+
+    @Test
+    public void valueRoundUpTestWithDecimalLessThanFive(){
+        List<Metric> metricList = Lists.newArrayList();
+        Map<String, ? super Object> metricPopertiesMap = Maps.newHashMap();
+        metricPopertiesMap.put("alias", "ratio_alias");
+        metricPopertiesMap.put("multiplier", "10.0");
+        Metric metric1 = new Metric("ratio", "10.549", "Server|Redis|Custom Metric|Redis|Server2|ratio", metricPopertiesMap);
+        metricList.add(metric1);
+        Transformer transformer = new Transformer(metricList);
+        transformer.transform();
+        Assert.assertFalse(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio"));
+        Assert.assertTrue(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio_alias"));
+        Assert.assertTrue(metric1.getMetricValue().equals("105"));
+
+    }
+
+    @Test
+    public void valueRoundUpTestWithDecimalGreaterThanFive(){
+        List<Metric> metricList = Lists.newArrayList();
+        Map<String, ? super Object> metricPopertiesMap = Maps.newHashMap();
+        metricPopertiesMap.put("alias", "ratio_alias");
+        metricPopertiesMap.put("multiplier", "10.0");
+        Metric metric1 = new Metric("ratio", "10.551", "Server|Redis|Custom Metric|Redis|Server2|ratio", metricPopertiesMap);
+        metricList.add(metric1);
+        Transformer transformer = new Transformer(metricList);
+        transformer.transform();
+        Assert.assertFalse(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio"));
+        Assert.assertTrue(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio_alias"));
+        Assert.assertTrue(metric1.getMetricValue().equals("106"));
+
+    }
+
+    @Test
+    public void valueRoundUpTestWithDecimalEqualToFive(){
+        List<Metric> metricList = Lists.newArrayList();
+        Map<String, ? super Object> metricPopertiesMap = Maps.newHashMap();
+        metricPopertiesMap.put("alias", "ratio_alias");
+        metricPopertiesMap.put("multiplier", "10.0");
+        Metric metric1 = new Metric("ratio", "10.550", "Server|Redis|Custom Metric|Redis|Server2|ratio", metricPopertiesMap);
+        metricList.add(metric1);
+        Transformer transformer = new Transformer(metricList);
+        transformer.transform();
+        Assert.assertFalse(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio"));
+        Assert.assertTrue(metric1.getMetricPath().equals("Server|Redis|Custom Metric|Redis|Server2|ratio_alias"));
+        Assert.assertTrue(metric1.getMetricValue().equals("106"));
 
     }
 }

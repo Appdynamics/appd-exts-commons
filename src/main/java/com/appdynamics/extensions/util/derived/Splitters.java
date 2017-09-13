@@ -9,7 +9,7 @@ class Splitters {
          static final Splitter PIPE_SPLITTER = Splitter.on('|')
                 .omitEmptyStrings()
                 .trimResults();
-         static final Splitter FORMULA_SPLITTER = Splitter.on(CharMatcher.anyOf("(+-*/%^) "))
+         static final Splitter FORMULA_SPLITTER = Splitter.on(CharMatcher.anyOf("(+-*/%^)"))
                 .trimResults()
                 .omitEmptyStrings();
 }

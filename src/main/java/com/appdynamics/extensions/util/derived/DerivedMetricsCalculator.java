@@ -1,13 +1,13 @@
 package com.appdynamics.extensions.util.derived;
 
 import com.appdynamics.extensions.util.Metric;
-import com.appdynamics.extensions.util.transformers.Transformer;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -73,13 +73,11 @@ public class DerivedMetricsCalculator {
                     }
                 }
                 else {
-                    logger.debug("The derived metric {} does not have derivedMetricPath and formula fields specified in the config.yml", derivedMetric);
+                    logger.debug("The derived metric {} does not have some or all of these fields {derivedMetricPath, formula} specified in the config.yml", derivedMetric);
                 }
             }
             long endTime = System.currentTimeMillis();
             logger.debug("Total time taken to calculate and return derived metrics is {} ms",endTime - startTime);
-            Transformer transformer = new Transformer(metricList);
-            transformer.transform();
             return metricList;
         }
         else{

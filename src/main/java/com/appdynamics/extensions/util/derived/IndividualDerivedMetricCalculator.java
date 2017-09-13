@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
@@ -43,13 +44,18 @@ class IndividualDerivedMetricCalculator {
         if(variable == null){
             String substitutedFormula =  getValueSubstitutedFormula(localOperands);
             if(substitutedFormula != null) {
-                long startTime = System.currentTimeMillis();
-                ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(substitutedFormula);
-                BigDecimal value = expressionEvaluator.eval();
-                long endTime = System.currentTimeMillis();
-                logger.debug("The time taken to calculate the formula {} : {} ms", substitutedFormula, endTime - startTime);
-                if (value != null) {
-                    derivedMetricMap.put(path, value);
+                try {
+                    long startTime = System.currentTimeMillis();
+                    ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(substitutedFormula);
+                    BigDecimal value = expressionEvaluator.eval();
+                    long endTime = System.currentTimeMillis();
+                    logger.debug("The time taken to calculate the formula {} : {} ms", substitutedFormula, endTime - startTime);
+                    if (value != null) {
+                        derivedMetricMap.put(path, value);
+                    }
+                }
+                catch(IllegalExpressionException e){
+                    logger.debug(e.toString());
                 }
             }
             return;
