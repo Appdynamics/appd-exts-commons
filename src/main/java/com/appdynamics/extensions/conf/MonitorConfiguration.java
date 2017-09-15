@@ -295,13 +295,14 @@ public class MonitorConfiguration {
 
     private void initExecutorService(Map<String, ?> config) {
         Integer numberOfThreads = YmlUtils.getInteger(config.get("numberOfThreads"));
+        Integer queueCapacityGrowthFactor = YmlUtils.getInt(config.get("queueCapacityGrowthFactor"),10);
         if (numberOfThreads != null) {
             if (executorService == null) {
-                executorService = createThreadPool(numberOfThreads);
+                executorService = createThreadPool(numberOfThreads,numberOfThreads * queueCapacityGrowthFactor);
             } else if (numberOfThreads != executorServiceSize) {
                 logger.info("The ThreadPool size has been updated from {} -> {}", executorServiceSize, numberOfThreads);
                 executorService.shutdown();
-                executorService = createThreadPool(numberOfThreads);
+                executorService = createThreadPool(numberOfThreads,numberOfThreads * queueCapacityGrowthFactor);
             }
             executorServiceSize = numberOfThreads;
         } else {
@@ -313,18 +314,28 @@ public class MonitorConfiguration {
         }
     }
 
-    private ExecutorService createThreadPool(Integer numberOfThreads) {
+    private ExecutorService createThreadPool(Integer numberOfThreads, Integer queueCapacity) {
         if (numberOfThreads != null && numberOfThreads > 0) {
             logger.info("Initializing the ThreadPool with size {}", numberOfThreads);
-            return Executors.newFixedThreadPool(numberOfThreads.intValue(), new ThreadFactory() {
-                private int count;
+            return new ThreadPoolExecutor(numberOfThreads, numberOfThreads,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>(queueCapacity),
+                    new ThreadFactory() {
+                        private int count;
 
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r, "Monitor-Task-Thread" + (++count));
-                    thread.setContextClassLoader(AManagedMonitor.class.getClassLoader());
-                    return thread;
-                }
-            });
+                        public Thread newThread(Runnable r) {
+                            Thread thread = new Thread(r, "Monitor-Task-Thread" + (++count));
+                            thread.setContextClassLoader(AManagedMonitor.class.getClassLoader());
+                            return thread;
+                        }
+                    },
+                    new ThreadPoolExecutor.DiscardPolicy(){
+                        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+                            logger.error("Queue Capacity reached!! Rejecting runnable tasks..");
+                        }
+                    }
+            );
+
         } else {
             return null;
         }
