@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.TaskInputArgs;
-import com.appdynamics.extensions.PathResolver;
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;

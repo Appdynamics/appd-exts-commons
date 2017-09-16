@@ -1,13 +1,14 @@
 package com.appdynamics.extensions.conf;
 
-import com.appdynamics.extensions.PathResolver;
-import com.appdynamics.extensions.StringUtils;
+import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.metrics.PerMinValueCalculator;
+import com.appdynamics.extensions.util.PathResolver;
+import com.appdynamics.extensions.util.StringUtils;
+import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
-import com.appdynamics.extensions.util.AssertUtils;
-import com.appdynamics.extensions.util.MetricWriteHelper;
-import com.appdynamics.extensions.util.PerMinValueCalculator;
-import com.appdynamics.extensions.util.YmlUtils;
-import com.appdynamics.extensions.util.derived.DerivedMetricsCalculator;
+import com.appdynamics.extensions.util.*;
+import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -51,7 +52,7 @@ public class MonitorConfiguration {
     private FileAlterationMonitor monitor;
     private Map<String, ?> config;
     private String metricPrefix;
-    private ExecutorService executorService;
+    private MonitorExecutorService executorService;
     private int executorServiceSize;
     private CloseableHttpClient httpClient;
     private JAXBContext jaxbContext;
@@ -103,7 +104,7 @@ public class MonitorConfiguration {
         }
     }
 
-    public ExecutorService getExecutorService() {
+    public MonitorExecutorService getExecutorService() {
         if (executorService != null) {
             return executorService;
         } else {
@@ -314,10 +315,10 @@ public class MonitorConfiguration {
         }
     }
 
-    private ExecutorService createThreadPool(Integer numberOfThreads, Integer queueCapacity) {
+    private MonitorExecutorService createThreadPool(Integer numberOfThreads, Integer queueCapacity) {
         if (numberOfThreads != null && numberOfThreads > 0) {
             logger.info("Initializing the ThreadPool with size {}", numberOfThreads);
-            return new ThreadPoolExecutor(numberOfThreads, numberOfThreads,
+            ThreadPoolExecutor executor = new ThreadPoolExecutor(numberOfThreads, numberOfThreads,
                     0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>(queueCapacity),
                     new ThreadFactory() {
@@ -335,6 +336,7 @@ public class MonitorConfiguration {
                         }
                     }
             );
+            return new MonitorThreadPoolExecutor(executor);
 
         } else {
             return null;

@@ -1,6 +1,6 @@
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.TaskInputArgs;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;

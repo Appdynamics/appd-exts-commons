@@ -1,6 +1,6 @@
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;

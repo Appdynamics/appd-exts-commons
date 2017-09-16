@@ -1,6 +1,6 @@
 package com.appdynamics.extensions.file;
 
-import com.appdynamics.extensions.PathResolver;
+import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;

@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.alerts.customevents;
 
 
-import com.appdynamics.extensions.StringUtils;
+import com.appdynamics.extensions.util.StringUtils;
 import org.apache.log4j.Logger;
 
 /**

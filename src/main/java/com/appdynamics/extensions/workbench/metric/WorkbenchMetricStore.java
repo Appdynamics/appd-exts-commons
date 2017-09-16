@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.workbench.metric;
 
-import com.appdynamics.extensions.StringUtils;
-import com.appdynamics.extensions.util.MetricWriteHelper;
+import com.appdynamics.extensions.util.StringUtils;
+import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

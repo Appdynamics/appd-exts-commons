@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.TaskInputArgs;
-import com.appdynamics.extensions.NumberUtils;
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.util.NumberUtils;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
 import com.google.common.base.Strings;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.appdynamics.TaskInputArgs.*;
+import static com.appdynamics.extensions.TaskInputArgs.*;
 
 /**
  * Created with IntelliJ IDEA.

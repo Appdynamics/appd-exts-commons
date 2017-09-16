@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.metrics.MetricProperties;
+import com.appdynamics.extensions.metrics.MetricPropertiesBuilder;
 import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Test;

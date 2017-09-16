@@ -1,6 +1,6 @@
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static com.appdynamics.TaskInputArgs.defaultIfEmpty;
+import static com.appdynamics.extensions.TaskInputArgs.defaultIfEmpty;
 import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
 
 /**

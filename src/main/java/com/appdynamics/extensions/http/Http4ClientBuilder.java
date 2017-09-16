@@ -1,8 +1,8 @@
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.TaskInputArgs;
-import com.appdynamics.extensions.PathResolver;
-import com.appdynamics.extensions.StringUtils;
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.util.PathResolver;
+import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.util.YmlUtils;
