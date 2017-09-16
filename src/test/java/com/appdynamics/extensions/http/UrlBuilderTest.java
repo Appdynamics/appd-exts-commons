@@ -1,6 +1,6 @@
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.TaskInputArgs;
+import com.appdynamics.extensions.TaskInputArgs;
 import org.junit.Assert;
 import org.junit.Test;
 

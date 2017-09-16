@@ -1,8 +1,8 @@
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.TaskInputArgs;
-import com.appdynamics.extensions.PathResolver;
-import com.appdynamics.extensions.StringUtils;
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.util.PathResolver;
+import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.xml.Xml;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;

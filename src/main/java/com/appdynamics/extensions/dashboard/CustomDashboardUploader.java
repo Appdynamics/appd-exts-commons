@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.TaskInputArgs;
-import com.appdynamics.extensions.StringUtils;
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.http.Response;
 import com.appdynamics.extensions.http.SimpleHttpClient;
 import com.appdynamics.extensions.http.SimpleHttpClientBuilder;

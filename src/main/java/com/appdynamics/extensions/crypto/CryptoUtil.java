@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static com.appdynamics.TaskInputArgs.*;
+import static com.appdynamics.extensions.TaskInputArgs.*;
 
 public class CryptoUtil {
     public static final Logger logger = LoggerFactory.getLogger(CryptoUtil.class);

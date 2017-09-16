@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import org.junit.Test;
 
 import java.math.BigDecimal;

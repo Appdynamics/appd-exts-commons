@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.TaskInputArgs;
-import com.appdynamics.extensions.NumberUtils;
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.util.NumberUtils;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.google.common.base.Strings;
 
