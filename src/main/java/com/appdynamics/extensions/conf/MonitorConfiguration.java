@@ -1,17 +1,24 @@
 package com.appdynamics.extensions.conf;
 
+import com.appdynamics.extensions.AMonitorTaskRunner;
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.metrics.PerMinValueCalculator;
-import com.appdynamics.extensions.util.PathResolver;
-import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
-import com.appdynamics.extensions.util.*;
+import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
+import com.appdynamics.extensions.util.AssertUtils;
+import com.appdynamics.extensions.util.PathResolver;
+import com.appdynamics.extensions.util.StringUtils;
+import com.appdynamics.extensions.util.YmlUtils;
+import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -38,11 +45,11 @@ import java.util.concurrent.*;
 public class MonitorConfiguration {
     public static final Logger logger = LoggerFactory.getLogger(MonitorConfiguration.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
-    private ScheduledExecutorService scheduler;
-    private Runnable taskRunner;
+    private MonitorExecutorService scheduler;
+    private AMonitorTaskRunner taskRunner;
 
     public enum ConfItem {
-        CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE, METRIC_WRITE_HELPER
+        CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE
     }
 
     public Set<File> monitoredDirs;
@@ -58,33 +65,23 @@ public class MonitorConfiguration {
     private JAXBContext jaxbContext;
     private Object metricXml;
     private PerMinValueCalculator perMinValueCalculator;
-    private MetricWriteHelper metricWriter;
-    private DerivedMetricsCalculator derivedMetricsCalculator;
     private boolean enabled;
+    private Cache<String, MetricWriter> writerCache;
+    private Cache<String, Metric> metricCache;
+    private String monitorName;
+    private static MetricWriteHelper workbenchStore;
 
-    public MonitorConfiguration(String defaultMetricPrefix, Runnable taskRunner, MetricWriteHelper metricWriter) {
+
+    public MonitorConfiguration(String monitorName, String defaultMetricPrefix, AMonitorTaskRunner taskRunner) {
+        AssertUtils.assertNotNull(monitorName,"The monitor name cannot be empty");
         AssertUtils.assertNotNull(defaultMetricPrefix, "The Default Metric Prefix cannot be empty");
         AssertUtils.assertNotNull(taskRunner, "The Runnable[taskRunner] cannot be null");
-        AssertUtils.assertNotNull(metricWriter, "The MetricWriteHelper cannot be null");
+        this.monitorName = monitorName;
         this.defaultMetricPrefix = StringUtils.trim(defaultMetricPrefix.trim(), "|");
         this.taskRunner = taskRunner;
-        this.metricWriter = metricWriter;
         installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         if (installDir == null) {
             throw new RuntimeException("The install directory cannot be located.");
-        }
-    }
-
-    public void executeTask() {
-        if(isEnabled()){
-            if (scheduler == null) {
-                taskRunner.run();
-            } else {
-                logger.debug("Task scheduler is enabled, printing the metrics from the cache");
-                metricWriter.printAllFromCache();
-            }
-        } else{
-            logger.debug("The monitor [{}] is not enabled.", getMetricPrefix());
         }
     }
 
@@ -224,16 +221,28 @@ public class MonitorConfiguration {
             if(!Boolean.FALSE.equals(enabled)){
                 this.enabled = true;
                 metricPrefix = getMetricPrefix((String) config.get("metricPrefix"), defaultMetricPrefix);
+                initWorkBenchStore();
                 initExecutorService(config);
                 initHttpClient(config);
                 initScheduledTask(config);
-                initDerivedMetricsCalculator();
-                metricWriter.setScheduledMode(scheduler != null);
+                initCache(config);
             } else{
                 this.enabled = false;
                 logger.error("The configuration is not enabled {}", config);
             }
         }
+    }
+
+    private void initWorkBenchStore() {
+        if(isWorkbenchMode()){
+            WorkbenchMetricStore.initialize(createDerivedMetricsCalculator());
+            workbenchStore = WorkbenchMetricStore.getInstance();
+        }
+    }
+
+    private void initCache(Map<String, ?> config) {
+        writerCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
+        metricCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
     }
 
     private void initScheduledTask(Map<String, ?> config) {
@@ -255,17 +264,13 @@ public class MonitorConfiguration {
         int numberOfThreads = YmlUtils.getInt(taskSchedule.get("numberOfThreads"), 1);
         int taskDelaySeconds = YmlUtils.getInt(taskSchedule.get("taskDelaySeconds"), 300);
         int initialDelaySeconds = YmlUtils.getInt(taskSchedule.get("initialDelaySeconds"), 10);
-        scheduler = Executors.newScheduledThreadPool(numberOfThreads);
-        scheduler.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                try {
-                    taskRunner.run();
-                } catch (Exception e) {
-                    logger.error("Error while running the Task " + taskRunner, e);
-                }
-            }
-        }, initialDelaySeconds, taskDelaySeconds, TimeUnit.SECONDS);
+        scheduler = new MonitorThreadPoolExecutor(createScheduledThreadPool(numberOfThreads));
+        scheduler.scheduleAtFixedRate("" + monitorName + " ScheduledTaskRunner",taskRunner, initialDelaySeconds, taskDelaySeconds, TimeUnit.SECONDS);
         logger.info("Created a Task Scheduler for {} with a delay of {} seconds", taskRunner, taskDelaySeconds);
+    }
+
+    private ScheduledThreadPoolExecutor createScheduledThreadPool(int numberOfThreads) {
+        return new ScheduledThreadPoolExecutor(numberOfThreads);
     }
 
     private void initHttpClient(Map<String, ?> config) {
@@ -385,8 +390,8 @@ public class MonitorConfiguration {
                     } catch (Exception e) {
                         logger.error("Error while invoking the file watch listener", e);
                     } finally {
-                        if (metricWriter != null) {
-                            metricWriter.reset();
+                        if (workbenchStore != null) {
+                            workbenchStore.reset();
                         }
                     }
                 }
@@ -449,23 +454,12 @@ public class MonitorConfiguration {
                     case METRICS_XML:
                         AssertUtils.assertNotNull(metricXml, "The metrics path is incorect or it contains errors. Please check the logs");
                         break;
-                    case METRIC_WRITE_HELPER:
-                        AssertUtils.assertNotNull(metricWriter, "The metric write helper is not set.");
-                        break;
-
                 }
 
             }
         }
     }
 
-    public MetricWriteHelper getMetricWriter() {
-        return metricWriter;
-    }
-
-    public void setMetricWriter(MetricWriteHelper metricWriter) {
-        this.metricWriter = metricWriter;
-    }
 
     public static boolean isWorkbenchMode() {
         return "true".equals(System.getProperty(MonitorConfiguration.EXTENSION_WORKBENCH_MODE));
@@ -475,15 +469,36 @@ public class MonitorConfiguration {
         return enabled;
     }
 
-    private void initDerivedMetricsCalculator(){
+    public boolean isScheduledModeEnabled(){
+        return scheduler != null;
+    }
+
+    public DerivedMetricsCalculator createDerivedMetricsCalculator() {
         List<Map<String, ?>> derivedMetricsList = (List) config.get("derivedMetrics");
         if(derivedMetricsList !=  null){
-            derivedMetricsCalculator = new DerivedMetricsCalculator(derivedMetricsList, getMetricPrefix());
-            metricWriter.setDerivedMetricsCalculator(derivedMetricsCalculator);
-            logger.info("The DerivedMetricsCalculator is initialised");
+            logger.info("The DerivedMetricsCalculator is initialized");
+            return new DerivedMetricsCalculator(derivedMetricsList, getMetricPrefix());
         }
         else{
-            logger.info("The DerivedMetricsCalculator is not initialised as the derivedMetrics section doesn't exist in the config.yml");
+            logger.info("The DerivedMetricsCalculator is not initialized.");
         }
+        return null;
     }
+
+    public ConcurrentMap<String,Metric> getCachedMetrics(){
+        return metricCache.asMap();
+    }
+
+    public void putInMetricCache(String metricPath, Metric metric){
+        metricCache.put(metricPath,metric);
+    }
+
+    public MetricWriter getFromWriterCache(String metricPath) {
+        return writerCache.getIfPresent(metricPath);
+    }
+
+    public void putInWriterCache(String metricPath, MetricWriter writer) {
+        writerCache.put(metricPath,writer);
+    }
+
 }

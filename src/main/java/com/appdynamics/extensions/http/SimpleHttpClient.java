@@ -1,9 +1,9 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.TaskInputArgs;
-import com.appdynamics.extensions.util.NumberUtils;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
+import com.appdynamics.extensions.util.NumberUtils;
 import com.google.common.base.Strings;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthPolicy;

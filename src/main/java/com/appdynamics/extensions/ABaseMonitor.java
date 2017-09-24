@@ -11,13 +11,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * This is a base class that each monitor can extend from. It removes all the boiler plate code from all the extension.
+ * This is a base class that each monitor can extend from.
  */
 public abstract class ABaseMonitor extends AManagedMonitor{
 
     private static final Logger logger = LoggerFactory.getLogger(ABaseMonitor.class);
     protected String monitorName;
     protected MonitorConfiguration configuration;
+    protected AMonitorTaskRunner monitorTaskRunner;
 
     public ABaseMonitor(){
         this.monitorName = getMonitorName();
@@ -26,50 +27,62 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     protected void initialize(Map<String, String> args) {
         if(configuration == null){
-            MetricWriteHelper metricWriteHelper = MetricWriteHelperFactory.create(this);
-            MonitorConfiguration conf = new MonitorConfiguration(getDefaultMetricPrefix(), createTaskRunner(), metricWriteHelper);
+            monitorTaskRunner = createMonitorTask();
+            MonitorConfiguration conf = new MonitorConfiguration(monitorName,getDefaultMetricPrefix(),monitorTaskRunner);
             conf.setConfigYml(args.get("config-file"));
             initializeMoreStuff(conf);
             this.configuration = conf;
         }
     }
 
+    protected AMonitorTaskRunner createMonitorTask() {
+        return new AMonitorTaskRunner(this);
+    }
+
+    /**
+     * Should be overridden to initialize more stuff.
+     * @param conf
+     */
     protected void initializeMoreStuff(MonitorConfiguration conf) {
         ;
     }
 
     @Override
     public TaskOutput execute(Map<String, String> args, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-        logger.debug("The raw arguments are {}" + args);
+        logger.debug("Monitor {} is invoked.",monitorName);
+        logger.debug("The raw arguments are {}",args);
         initialize(args);
-        configuration.executeTask();
-        return new TaskOutput(String.format("A run of %s completed.",monitorName));
+        executeMonitor();
+        return new TaskOutput(String.format("Monitor {} completes.",monitorName));
     }
 
-    protected abstract String getDefaultMetricPrefix();
-
-    protected abstract String getMonitorName();
-
-    protected abstract void doRun(ATaskExecutor taskCounter);
-
-    protected abstract int getTaskCount();
-
-    protected Runnable createTaskRunner() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                ATaskExecutor obj = new ATaskExecutor(ABaseMonitor.this);
-                doRun(obj);
+    protected void executeMonitor() {
+        if(configuration.isEnabled()){
+            if(configuration.isScheduledModeEnabled()){ //scheduled mode
+                logger.debug("Task scheduler is enabled, printing the metrics from the cache");
+                monitorTaskRunner.printAllFromCache();
             }
-        };
-    }
-
-    protected void onComplete(){
-        configuration.getMetricWriter().onTaskComplete();
+            else{   // normal mode
+                monitorTaskRunner.run();
+            }
+        } else{
+            logger.debug("The monitor [{}] is not enabled.", getMonitorName());
+        }
     }
 
     protected static String getImplementationVersion() {
         return ABaseMonitor.class.getPackage().getImplementationTitle();
     }
 
+    protected abstract String getDefaultMetricPrefix();
+
+    public abstract String getMonitorName();
+
+    protected abstract void doRun(AMonitorRunContext taskCounter);
+
+    protected abstract int getTaskCount();
+
+    protected void onComplete() {
+        logger.info("Finished processing all tasks for {}",getMonitorName());
+    }
 }

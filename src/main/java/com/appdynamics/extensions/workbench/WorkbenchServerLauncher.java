@@ -1,8 +1,8 @@
 package com.appdynamics.extensions.workbench;
 
 
-import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.conf.monitorxml.Monitor;
+import com.appdynamics.extensions.util.PathResolver;
 
 import java.io.File;
 import java.io.IOException;

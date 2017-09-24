@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.metrics.transformers;
 
-import com.appdynamics.extensions.util.NumberUtils;
 import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.util.NumberUtils;
 
 import java.math.BigDecimal;
 

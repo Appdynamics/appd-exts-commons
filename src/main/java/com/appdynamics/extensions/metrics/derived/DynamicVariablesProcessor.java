@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.metrics.derived;
 
+import com.appdynamics.extensions.util.MetricPathUtils;
 import com.appdynamics.extensions.util.NumberUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.appdynamics.extensions.metrics.derived.Splitters.PIPE_SPLITTER;
+import static com.appdynamics.extensions.util.MetricPathUtils.PIPE_SPLITTER;
 
 /**
  * Created by venkata.konala on 8/28/17.
@@ -44,7 +45,7 @@ class DynamicVariablesProcessor {
     }
 
     private SetMultimap<String, String> getDynamicVariablesFromOperand(String baseMetricExpression) throws MetricNotFoundException{
-        String baseMetricname = pathHandler.getMetricName(baseMetricExpression);
+        String baseMetricname = MetricPathUtils.getMetricName(baseMetricExpression);
         Map<String, BigDecimal> matchingBaseMetricMap = organisedBaseMetricsMap.get(baseMetricname);
         if(matchingBaseMetricMap != null) {
             SetMultimap<String, String> globalMultiMap = HashMultimap.create();
@@ -64,7 +65,7 @@ class DynamicVariablesProcessor {
             return globalMultiMap;
         }
         else{
-            throw new  MetricNotFoundException("The base metric" + pathHandler.getMetricName(baseMetricExpression) + "does not exist in the baseMetricsMap");
+            throw new  MetricNotFoundException("The base metric" + MetricPathUtils.getMetricName(baseMetricExpression) + "does not exist in the baseMetricsMap");
         }
     }
 

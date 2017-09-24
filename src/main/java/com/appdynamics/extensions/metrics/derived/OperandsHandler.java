@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.metrics.derived;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 import java.util.HashSet;
@@ -7,8 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.appdynamics.extensions.metrics.derived.Splitters.FORMULA_SPLITTER;
-import static com.appdynamics.extensions.metrics.derived.Splitters.PIPE_SPLITTER;
+import static com.appdynamics.extensions.util.MetricPathUtils.PIPE_SPLITTER;
 
 /**
  * Created by venkata.konala on 8/28/17.
@@ -18,6 +19,9 @@ class OperandsHandler {
     private String formula;
     private Set<String> baseOperands;
     private DerivedMetricsPathHandler pathHandler;
+    static final Splitter FORMULA_SPLITTER = Splitter.on(CharMatcher.anyOf("(+-*/%^)"))
+            .trimResults()
+            .omitEmptyStrings();
 
     OperandsHandler(String formula, DerivedMetricsPathHandler pathHandler){
         this.formula = formula;

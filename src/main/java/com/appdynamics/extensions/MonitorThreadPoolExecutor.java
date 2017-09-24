@@ -1,6 +1,7 @@
 package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.util.AssertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ public class MonitorThreadPoolExecutor implements MonitorExecutorService {
     private ThreadPoolExecutor executor;
 
     public MonitorThreadPoolExecutor(ThreadPoolExecutor executor) {
+        AssertUtils.assertNotNull(executor,"Threadpool executor cannot be null.");
         this.executor = executor;
     }
 
@@ -27,13 +29,19 @@ public class MonitorThreadPoolExecutor implements MonitorExecutorService {
     }
 
     @Override
-    public void execute(String name, Runnable command) {
-        executor.execute(wrapWithRunnable(name,command));
+    public void execute(String name, Runnable task) {
+        executor.execute(wrapWithRunnable(name,task));
     }
 
     @Override
     public <T> Future<T> submit(String name,Callable<T> task) {
         return executor.submit(wrapWithCallable(name,task));
+    }
+
+    @Override
+    public void scheduleAtFixedRate(String name,Runnable task, int initialDelaySeconds, int taskDelaySeconds, TimeUnit seconds) {
+        ScheduledThreadPoolExecutor scheduledExecutor = (ScheduledThreadPoolExecutor)executor;
+        scheduledExecutor.scheduleAtFixedRate(wrapWithRunnable(name,task),initialDelaySeconds,taskDelaySeconds,seconds);
     }
 
     @Override
@@ -70,11 +78,16 @@ public class MonitorThreadPoolExecutor implements MonitorExecutorService {
         return new Runnable() {
             @Override
             public void run() {
-                long startTime = System.currentTimeMillis();
-                task.run();
-                long diffTime = System.currentTimeMillis() - startTime;
-                if(diffTime > TASK_TIME_THRESHOLD_IN_MS){  //time limit for each server task to finish
-                    logger.warn("{} Task took {} ms to complete",name,diffTime);
+                try {
+                    long startTime = System.currentTimeMillis();
+                    task.run();
+                    long diffTime = System.currentTimeMillis() - startTime;
+                    if (diffTime > TASK_TIME_THRESHOLD_IN_MS) {  //time limit for each server task to finish
+                        logger.warn("{} Task took {} ms to complete", name, diffTime);
+                    }
+                }
+                catch(Exception e){
+                    logger.error("Error while running the Task {}" ,name, e);
                 }
             }
         };

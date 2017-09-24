@@ -1,8 +1,8 @@
 package com.appdynamics.extensions.metrics.transformers;
 
-import com.appdynamics.extensions.util.NumberUtils;
 import com.appdynamics.extensions.metrics.DeltaMetricsCalculator;
 import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.util.NumberUtils;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;

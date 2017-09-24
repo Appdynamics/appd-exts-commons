@@ -1,7 +1,8 @@
 package com.appdynamics.extensions.workbench.metric;
 
-import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
+import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,10 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         return _instance;
     }
 
+    public static void initialize(DerivedMetricsCalculator derivedMetricsCalculator) {
+        _instance.derivedMetricsCalculator = derivedMetricsCalculator;
+    }
+
     @Override
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
         if(StringUtils.hasText(metricValue)){
@@ -66,6 +71,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         if (values.size() > 60) {
             values.remove();
         }
+        addForDerivedMetricsCalculation(metricPath,value.toString());
     }
 
     public Set<String> getMetricPaths() {
@@ -95,7 +101,6 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         }
         return null;
     }
-
 
     public static class MetricData {
         private String metricPath;
@@ -205,11 +210,6 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         } else {
             return "";
         }
-    }
-
-    @Override
-    public boolean isScheduledMode() {
-        return false;
     }
 
     public void setResetListener(ResetListener listener) {
