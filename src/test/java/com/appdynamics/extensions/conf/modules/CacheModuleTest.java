@@ -1,15 +1,9 @@
-package com.appdynamics.extensions.conf.configurationModules;
+package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.metrics.Metric;
-import com.appdynamics.extensions.util.AssertUtils;
-import com.appdynamics.extensions.yml.YmlReader;
-import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**

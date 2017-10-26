@@ -1,54 +1,41 @@
-package com.appdynamics.extensions.conf.configurationModules;
+package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.conf.monitorxml.Monitor;
 import com.appdynamics.extensions.yml.YmlReader;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.log4j.Appender;
+
 import java.io.File;
 import java.util.Map;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * Created by venkata.konala on 10/24/17.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({MonitorExecutorServiceModule.class, LoggerFactory.class})
+@SuppressStaticInitializationFor("com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule.class")
 public class MonitorExecutorServiceModuleTest {
 
-    /*private final Appender appender = mock(Appender.class);
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getRootLogger();
-
-    @Captor
-    private ArgumentCaptor<LoggingEvent> logCaptor;
-
-    @Before
-    public void setup() {
-        logger.setLevel(Level.ERROR);
-        logger.addAppender(appender);
-    }
-
-    @After
-    public void remove(){
-        logger.removeAppender(appender);
-    }
-*/
-
+    static Logger logger;
 
     class dummyThread implements Runnable{
         public void run(){
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             }
             catch(InterruptedException ie){
 
@@ -56,15 +43,20 @@ public class MonitorExecutorServiceModuleTest {
         }
     }
 
-
+    @BeforeClass
+    public static void init(){
+        PowerMockito.mockStatic(LoggerFactory.class);
+        logger = PowerMockito.mock(Logger.class);
+        PowerMockito.when(LoggerFactory.getLogger(MonitorExecutorServiceModule.class)).thenReturn(logger);
+    }
 
     @Test
     public void differentNumberOfThreadsWillTest(){
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
-        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config.yml"));
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config.yml"));
         monitorExecutorServiceModule.initExecutorService(conf);
         MonitorExecutorService executorService = monitorExecutorServiceModule.getExecutorService();
-        Map<String, ?> conf2 = YmlReader.readFromFile(new File("src/test/resources/configuration/config_WithDifferentThreadNumber.yml"));
+        Map<String, ?> conf2 = YmlReader.readFromFile(new File("src/test/resources/conf/config_WithDifferentThreadNumber.yml"));
         monitorExecutorServiceModule.initExecutorService(conf2);
         MonitorExecutorService executorService2 = monitorExecutorServiceModule.getExecutorService();
         Assert.assertTrue(executorService != executorService2);
@@ -74,10 +66,10 @@ public class MonitorExecutorServiceModuleTest {
     @Test
     public void sameNumberOfThreadsTest(){
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
-        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config.yml"));
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config.yml"));
         monitorExecutorServiceModule.initExecutorService(conf);
         MonitorExecutorService executorService = monitorExecutorServiceModule.getExecutorService();
-        Map<String, ?> conf2 = YmlReader.readFromFile(new File("src/test/resources/configuration/config_WithSameThreadNumber.yml"));
+        Map<String, ?> conf2 = YmlReader.readFromFile(new File("src/test/resources/conf/config_WithSameThreadNumber.yml"));
         monitorExecutorServiceModule.initExecutorService(conf2);
         MonitorExecutorService executorService2 = monitorExecutorServiceModule.getExecutorService();
         Assert.assertTrue(executorService == executorService2);
@@ -86,15 +78,15 @@ public class MonitorExecutorServiceModuleTest {
     @Test(expected = RuntimeException.class)
     public void numberOfThreadsNotPresentTest(){
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
-        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config_WithNoThreadNumber.yml"));
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config_WithNoThreadNumber.yml"));
         monitorExecutorServiceModule.initExecutorService(conf);
         MonitorExecutorService executorService = monitorExecutorServiceModule.getExecutorService();
     }
 
     @Test
-    public void queueCapacityReachedPrintsLogStatementTest(){
+    public void queueCapacityReachedPrintsLogStatementTest() throws InterruptedException {
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config_WithQueueCapacityGrowthFactor.yml"));
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
-        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config_WithQueueCapacityGrowthFactor.yml"));
         monitorExecutorServiceModule.initExecutorService(conf);
         MonitorExecutorService executorService = monitorExecutorServiceModule.getExecutorService();
         dummyThread t1 = new dummyThread();
@@ -105,8 +97,8 @@ public class MonitorExecutorServiceModuleTest {
         executorService.submit("task2", t2);
         executorService.submit("task3", t3);
         executorService.submit("task4", t4);
-        /*verify(appender,times(2)).doAppend(logCaptor.capture());
-        LoggingEvent loggingEvent = logCaptor.getAllValues().get(0);
-        Assert.assertEquals("Queue Capacity reached!! Rejecting runnable tasks..", loggingEvent.getMessage());*/
+        Thread.sleep(2000);
+        //verify(logger,atLeastOnce()).error(anyString());
+        verify(logger,atLeastOnce()).error("Queue Capacity reached!! Rejecting runnable tasks..");
     }
 }

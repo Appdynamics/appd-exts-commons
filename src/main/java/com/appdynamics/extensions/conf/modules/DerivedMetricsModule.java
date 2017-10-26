@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.conf.configurationModules;
+package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import org.slf4j.Logger;

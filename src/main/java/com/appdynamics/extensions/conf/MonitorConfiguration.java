@@ -2,7 +2,7 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorTaskRunner;
 import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.conf.configurationModules.*;
+import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -35,26 +35,31 @@ import java.util.concurrent.*;
 public class MonitorConfiguration {
     public static final Logger logger = LoggerFactory.getLogger(MonitorConfiguration.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
-    TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
+
+    private String monitorName;
     private AMonitorTaskRunner taskRunner;
-    public enum ConfItem {
-        CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE
-    }
+
     private String defaultMetricPrefix;
     private final File installDir;
     private Map<String, ?> config;
     private String metricPrefix;
-    MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
-    HttpClientModule httpClientModule = new HttpClientModule();
     private JAXBContext jaxbContext;
     private Object metricXml;
     private boolean enabled;
-    CacheModule cacheModule = new CacheModule();
-    private String monitorName;
-    WorkBenchModule workBenchModule = new WorkBenchModule();
-    DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
-    FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
-    PerMinValueCalculatorModule perMinValueCalculatorModule = new PerMinValueCalculatorModule();
+
+
+    private final TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
+    private final CacheModule cacheModule = new CacheModule();
+    private final MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
+    private final HttpClientModule httpClientModule = new HttpClientModule();
+    private final WorkBenchModule workBenchModule = new WorkBenchModule();
+    private final DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
+    private final FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
+    private final PerMinValueCalculatorModule perMinValueCalculatorModule = new PerMinValueCalculatorModule();
+
+    public enum ConfItem {
+        CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE
+    }
 
     public MonitorConfiguration(String monitorName, String defaultMetricPrefix, AMonitorTaskRunner taskRunner) {
         AssertUtils.assertNotNull(monitorName,"The monitor name cannot be empty");

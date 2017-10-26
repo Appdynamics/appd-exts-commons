@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.conf.configurationModules;
+package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
 import org.junit.Assert;
@@ -28,12 +28,12 @@ public class FileWatchListenerModuleTest {
                    count++;
             }
         };
-        fileWatchListenerModule.createListener("src/test/resources/configuration/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/configuration"), null, 2000);
+        fileWatchListenerModule.createListener("src/test/resources/conf/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/conf"), null, 2000);
         int i = 0;
         while(i <= 2) {
             List<String> newLines = new ArrayList<>();
             newLines.add("Hi");// newLines.add("By1e");
-            Files.write(Paths.get(new File("src/test/resources/configuration/config_WithFileWatchListener.yml").toURI()), newLines, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+            Files.write(Paths.get(new File("src/test/resources/conf/config_WithFileWatchListener.yml").toURI()), newLines, StandardCharsets.UTF_8);
             Thread.sleep(2500);
             i++;
         }

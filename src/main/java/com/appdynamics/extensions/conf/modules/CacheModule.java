@@ -1,11 +1,10 @@
-package com.appdynamics.extensions.conf.configurationModules;
+package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**

@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.conf.configurationModules;
+package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.AMonitorTaskRunner;
 import com.appdynamics.extensions.MonitorExecutorService;
@@ -19,7 +19,7 @@ public class TaskScheduleModuleTest {
     @Test
     public void noParametersInTaskScheduleReturnsNullSchedulerTest(){
         AMonitorTaskRunner aMonitorTaskRunner = mock(AMonitorTaskRunner.class);
-        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config_WithTaskSchedule.yml"));
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config_WithTaskSchedule.yml"));
         TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
         taskScheduleModule.initScheduledTask(conf, "redis Monitor", aMonitorTaskRunner);
         MonitorExecutorService scheduler = taskScheduleModule.getScheduler();
@@ -29,7 +29,7 @@ public class TaskScheduleModuleTest {
     @Test
     public void noTaskScheduleReturnsNullSchedulerTest(){
         AMonitorTaskRunner aMonitorTaskRunner = mock(AMonitorTaskRunner.class);
-        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config.yml"));
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config.yml"));
         TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
         taskScheduleModule.initScheduledTask(conf, "redis Monitor", aMonitorTaskRunner);
         MonitorExecutorService scheduler = taskScheduleModule.getScheduler();
@@ -39,7 +39,7 @@ public class TaskScheduleModuleTest {
     @Test
     public void withPartialOrFullParametersInTaskScheduleReturnsSchedulerTest(){
         AMonitorTaskRunner aMonitorTaskRunner = mock(AMonitorTaskRunner.class);
-        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config_WithTaskScheduleParameters.yml"));
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config_WithTaskScheduleParameters.yml"));
         TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
         taskScheduleModule.initScheduledTask(conf, "redis Monitor", aMonitorTaskRunner);
         MonitorExecutorService scheduler = taskScheduleModule.getScheduler();
