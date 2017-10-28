@@ -1,0 +1,41 @@
+package com.appdynamics.extensions.conf.modules;
+
+import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
+import com.appdynamics.extensions.yml.YmlReader;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.File;
+import java.util.Map;
+
+/**
+ * Created by venkata.konala on 10/24/17.
+ */
+public class DerivedMetricsModuleTest {
+
+    @Test
+<<<<<<< HEAD:src/test/java/com/appdynamics/extensions/conf/configurationModules/DerivedMetricsModuleTest.java
+    public void derivedMetricsSectionPresentWillInitialiseDerivedMetricsCalculatorTest(){
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config.yml"));
+=======
+    public void derivedMetricsSectionPresentTest(){
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config.yml"));
+>>>>>>> f0ef23f249bc9b30e10e86a73deead2c74bb8fed:src/test/java/com/appdynamics/extensions/conf/modules/DerivedMetricsModuleTest.java
+        DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
+        DerivedMetricsCalculator derivedMetricsCalculator = derivedMetricsModule.initDerivedMetricsCalculator(conf, "Custom Metrics|Redis");
+        Assert.assertTrue(derivedMetricsCalculator != null);
+    }
+
+    @Test
+<<<<<<< HEAD:src/test/java/com/appdynamics/extensions/conf/configurationModules/DerivedMetricsModuleTest.java
+    public void derivedMetricsSectionNotPresentWillGiveNullForDerivedMetricsCalculatorTest(){
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config_NoDerivedSection.yml"));
+=======
+    public void derivedMetricsSectionNotPresentTest(){
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config_NoDerivedSection.yml"));
+>>>>>>> f0ef23f249bc9b30e10e86a73deead2c74bb8fed:src/test/java/com/appdynamics/extensions/conf/modules/DerivedMetricsModuleTest.java
+        DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
+        DerivedMetricsCalculator derivedMetricsCalculator = derivedMetricsModule.initDerivedMetricsCalculator(conf, "Custom Metrics|Redis");
+        Assert.assertTrue(derivedMetricsCalculator == null);
+    }
+}

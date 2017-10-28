@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.conf.configurationModules;
+package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.AMonitorTaskRunner;
 import com.appdynamics.extensions.MonitorExecutorService;

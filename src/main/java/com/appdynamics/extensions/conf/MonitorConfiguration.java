@@ -2,7 +2,7 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorTaskRunner;
 import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.conf.configurationModules.*;
+import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -21,8 +21,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Created by abey.tom on 3/14/16.
@@ -35,6 +35,8 @@ import java.util.concurrent.ConcurrentMap;
 public class MonitorConfiguration {
     public static final Logger logger = LoggerFactory.getLogger(MonitorConfiguration.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
+
+    private String monitorName;
     private AMonitorTaskRunner taskRunner;
     public enum ConfItem {
         CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE
@@ -46,7 +48,6 @@ public class MonitorConfiguration {
     private JAXBContext jaxbContext;
     private Object metricXml;
     private boolean enabled;
-    private String monitorName;
 
     private HttpClientModule httpClientModule = new HttpClientModule();
     private MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
