@@ -14,7 +14,7 @@ import java.util.Map;
 public class DerivedMetricsModuleTest {
 
     @Test
-    public void derivedMetricsSectionPresentTest(){
+    public void derivedMetricsSectionPresentWillInitialiseDerivedMetricsCalculatorTest(){
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config.yml"));
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
         DerivedMetricsCalculator derivedMetricsCalculator = derivedMetricsModule.initDerivedMetricsCalculator(conf, "Custom Metrics|Redis");
@@ -22,7 +22,7 @@ public class DerivedMetricsModuleTest {
     }
 
     @Test
-    public void derivedMetricsSectionNotPresentTest(){
+    public void derivedMetricsSectionNotPresentWillGiveNullForDerivedMetricsCalculatorTest(){
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config_NoDerivedSection.yml"));
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
         DerivedMetricsCalculator derivedMetricsCalculator = derivedMetricsModule.initDerivedMetricsCalculator(conf, "Custom Metrics|Redis");

@@ -5,7 +5,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**

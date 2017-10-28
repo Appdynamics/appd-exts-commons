@@ -6,15 +6,16 @@ import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.metrics.transformers.Transformer;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.MetricPathUtils;
+import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
 import static com.appdynamics.extensions.util.StringUtils.validateStrings;
 
 
@@ -27,6 +28,7 @@ public class MetricWriteHelper {
     private boolean cacheMetrics;
 
     protected DerivedMetricsCalculator derivedMetricsCalculator;
+    private Map<String, String> metricsMap = Maps.newConcurrentMap();
 
     //used from WorkBench.
     protected MetricWriteHelper() {
@@ -38,9 +40,8 @@ public class MetricWriteHelper {
         derivedMetricsCalculator = baseMonitor.configuration.createDerivedMetricsCalculator();
     }
 
-
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup)) {
+        if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue)) {
             if (baseMonitor.configuration.isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
                 logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
@@ -57,6 +58,7 @@ public class MetricWriteHelper {
                 }
             }
             addForDerivedMetricsCalculation(metricPath, metricValue);
+            metricsMap.put(metricPath, metricValue);
         } else {
             Metric arg = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
             logger.error("The metric is not valid {}", arg);
@@ -68,7 +70,6 @@ public class MetricWriteHelper {
             derivedMetricsCalculator.addToBaseMetricsMap(metricPath,metricValue);
         }
     }
-
 
     public void transformAndPrintMetrics(List<Metric> metrics){
         Transformer transformer = new Transformer(metrics);
@@ -88,7 +89,6 @@ public class MetricWriteHelper {
             printMetric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
         }
     }
-
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
         if (validateStrings(metricPath,metricType) && value != null) {
@@ -115,6 +115,7 @@ public class MetricWriteHelper {
             transformAndPrintMetrics(metricList);
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
+        logger.debug("Total number of metrics reported in this run are : {}", metricsMap.size());
     }
 
     public boolean isCacheMetrics() {

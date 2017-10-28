@@ -3,6 +3,7 @@ package com.appdynamics.extensions.conf.configurationModules;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +21,7 @@ public class FileWatchListenerModuleTest {
     int count = 0;
 
     @Test
-    public void simpleTest() throws IOException, InterruptedException {
+    public void whenFileChangedWillCountNumberOfChanges() throws IOException, InterruptedException {
 
         FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
         MonitorConfiguration.FileWatchListener fileWatchListener = new MonitorConfiguration.FileWatchListener() {

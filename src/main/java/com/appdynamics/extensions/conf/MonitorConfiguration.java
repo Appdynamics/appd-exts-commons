@@ -9,11 +9,11 @@ import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
-import com.appdynamics.extensions.util.YmlUtils;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
@@ -21,8 +21,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by abey.tom on 3/14/16.
@@ -35,7 +35,6 @@ import java.util.concurrent.*;
 public class MonitorConfiguration {
     public static final Logger logger = LoggerFactory.getLogger(MonitorConfiguration.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
-    TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
     private AMonitorTaskRunner taskRunner;
     public enum ConfItem {
         CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE
@@ -44,17 +43,19 @@ public class MonitorConfiguration {
     private final File installDir;
     private Map<String, ?> config;
     private String metricPrefix;
-    MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
-    HttpClientModule httpClientModule = new HttpClientModule();
     private JAXBContext jaxbContext;
     private Object metricXml;
     private boolean enabled;
-    CacheModule cacheModule = new CacheModule();
     private String monitorName;
-    WorkBenchModule workBenchModule = new WorkBenchModule();
-    DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
-    FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
-    PerMinValueCalculatorModule perMinValueCalculatorModule = new PerMinValueCalculatorModule();
+
+    private HttpClientModule httpClientModule = new HttpClientModule();
+    private MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
+    private WorkBenchModule workBenchModule = new WorkBenchModule();
+    private DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
+    private FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
+    private PerMinValueCalculatorModule perMinValueCalculatorModule = new PerMinValueCalculatorModule();
+    private TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
+    private CacheModule cacheModule = new CacheModule();
 
     public MonitorConfiguration(String monitorName, String defaultMetricPrefix, AMonitorTaskRunner taskRunner) {
         AssertUtils.assertNotNull(monitorName,"The monitor name cannot be empty");
@@ -106,7 +107,7 @@ public class MonitorConfiguration {
                 }
             }
         };
-        fileWatchListenerModule.createListener(path, fileWatchListener, installDir, workBenchModule.getWorkBench(), YmlUtils.getInt(config.get("fileWatcherInterval"), 30000));
+        fileWatchListenerModule.createListener(path, fileWatchListener, installDir, workBenchModule.getWorkBench(), 30000);
     }
 
     public void setConfigYml(String path) {
@@ -130,7 +131,7 @@ public class MonitorConfiguration {
                 }
             }
         };
-        fileWatchListenerModule.createListener(path, fileWatchListener, installDir, workBenchModule.getWorkBench(), YmlUtils.getInt(config.get("fileWatcherInterval"), 30000));
+        fileWatchListenerModule.createListener(path, fileWatchListener, installDir, workBenchModule.getWorkBench(), 30000);
     }
 
     private <T> void loadMetricsXml(File file, Class<T> clazz) {
@@ -229,6 +230,10 @@ public class MonitorConfiguration {
         }
     }
 
+    public CloseableHttpClient getHttpClient(){
+        return httpClientModule.getHttpClient();
+    }
+
     public PerMinValueCalculator getPerMinValueCalculator(){
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
@@ -268,5 +273,4 @@ public class MonitorConfiguration {
     public void putInWriterCache(String metricPath, MetricWriter writer) {
         cacheModule.putInWriterCache(metricPath,writer);
     }
-
 }

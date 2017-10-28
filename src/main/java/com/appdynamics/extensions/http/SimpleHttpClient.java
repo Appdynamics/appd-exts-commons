@@ -25,6 +25,8 @@ import java.util.Map;
 
 import static com.appdynamics.extensions.TaskInputArgs.*;
 
+import java.net.URI;
+
 /**
  * Created with IntelliJ IDEA.
  * User: abey.tom

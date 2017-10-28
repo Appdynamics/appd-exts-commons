@@ -23,7 +23,17 @@ public class NumberUtils {
         return false;
     }
 
+    /*
+      Please make sure String str is a valid number before passing it to this method.
+     */
+    public static boolean isNegative(String str){
+        if(Double.parseDouble(str) < 0){
+            return true;
+        }
+        return false;
+    }
+
     public static String roundToWhole(BigDecimal value){
-        return value.setScale(0, RoundingMode.HALF_UP).toString();
+        return value.setScale(0, RoundingMode.HALF_UP).toBigInteger().toString();
     }
 }

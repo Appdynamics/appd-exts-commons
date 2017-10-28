@@ -1,15 +1,9 @@
 package com.appdynamics.extensions.conf.configurationModules;
 
-import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.metrics.Metric;
-import com.appdynamics.extensions.util.AssertUtils;
-import com.appdynamics.extensions.yml.YmlReader;
-import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -18,7 +12,7 @@ import java.util.concurrent.ConcurrentMap;
 public class CacheModuleTest {
 
     @Test
-    public void simpleMetricCacheTest(){
+    public void metricCacheEntryExistsCheckAfterEntryHasBeenAddedTest(){
         CacheModule cacheModule = new CacheModule();
         cacheModule.initCache();
         cacheModule.putInMetricCache("Redis|Server1|ratio", new Metric("ratio", "2", "Redis|Server1|ratio"));
@@ -28,7 +22,7 @@ public class CacheModuleTest {
     }
 
     @Test
-    public void redundantEntryTest(){
+    public void whenRedundantEntriesWithSameKeysLatestEntryOverridesTheOldEntryTest(){
         CacheModule cacheModule = new CacheModule();
         cacheModule.initCache();
         cacheModule.putInMetricCache("Redis|Server1|ratio", new Metric("ratio", "2", "Redis|Server1|ratio"));

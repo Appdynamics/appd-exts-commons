@@ -1,7 +1,6 @@
 package com.appdynamics.extensions.conf.configurationModules;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 
 import java.util.Map;

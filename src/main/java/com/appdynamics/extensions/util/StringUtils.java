@@ -137,4 +137,11 @@ public class StringUtils {
         }
         return false;
     }
+
+    public static boolean isValidMetricValue(String metricValue){
+        if(metricValue != null && NumberUtils.isNumber(metricValue) && !NumberUtils.isNegative(metricValue)){
+            return true;
+        }
+        return false;
+    }
 }

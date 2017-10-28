@@ -1,25 +1,12 @@
 package com.appdynamics.extensions.conf.configurationModules;
 
 import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.conf.monitorxml.Monitor;
 import com.appdynamics.extensions.yml.YmlReader;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggingEvent;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.log4j.Appender;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.Map;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created by venkata.konala on 10/24/17.
@@ -59,7 +46,7 @@ public class MonitorExecutorServiceModuleTest {
 
 
     @Test
-    public void differentNumberOfThreadsWillTest(){
+    public void differentNumberOfThreadsWillreturnDifferentExecutorServiceTest(){
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config.yml"));
         monitorExecutorServiceModule.initExecutorService(conf);
@@ -72,7 +59,7 @@ public class MonitorExecutorServiceModuleTest {
 
 
     @Test
-    public void sameNumberOfThreadsTest(){
+    public void sameNumberOfThreadsWillReturnSameExecutorServiceTest(){
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config.yml"));
         monitorExecutorServiceModule.initExecutorService(conf);
@@ -84,7 +71,7 @@ public class MonitorExecutorServiceModuleTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void numberOfThreadsNotPresentTest(){
+    public void numberOfThreadsNotPresentWillThrowExceptionTest(){
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/configuration/config_WithNoThreadNumber.yml"));
         monitorExecutorServiceModule.initExecutorService(conf);
