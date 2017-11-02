@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.util;
 
+import com.google.common.base.Strings;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -122,5 +124,24 @@ public class StringUtils {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
+    }
+
+    public static boolean validateStrings(String...args) {
+        if(args != null){
+            for(String arg : args){
+                if(Strings.isNullOrEmpty(arg)){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isValidMetricValue(String metricValue){
+        if(metricValue != null && NumberUtils.isNumber(metricValue) && !NumberUtils.isNegative(metricValue)){
+            return true;
+        }
+        return false;
     }
 }

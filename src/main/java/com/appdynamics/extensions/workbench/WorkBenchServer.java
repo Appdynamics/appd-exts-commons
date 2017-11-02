@@ -245,7 +245,7 @@ public class WorkBenchServer extends NanoHTTPD {
         Class<?> clazz = implClass.getClass();
         try {
             Class<?> taskExecutionContextClass = clazz.getClassLoader().loadClass("com.singularity.ee.agent.systemagent.api.TaskExecutionContext");
-            java.lang.reflect.Method method = clazz.getDeclaredMethod("execute", Map.class, taskExecutionContextClass);
+            java.lang.reflect.Method method = clazz.getMethod("execute", Map.class, taskExecutionContextClass);
             method.invoke(implClass, taskArgs, null);
         } catch (Exception e) {
             logger.error("", e);

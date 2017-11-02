@@ -1,6 +1,5 @@
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.util.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

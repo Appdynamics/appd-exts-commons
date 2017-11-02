@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.metrics.transformers;
 
-import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.util.AssertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

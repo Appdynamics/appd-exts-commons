@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.metrics.derived;
 
+import com.appdynamics.extensions.util.MetricPathUtils;
 import com.appdynamics.extensions.util.NumberUtils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -78,7 +79,7 @@ class IndividualDerivedMetricCalculator {
             if(NumberUtils.isNumber(baseMetric)){
                 continue;
             }
-            String baseMetricName = pathHandler.getMetricName(baseMetric);
+            String baseMetricName = MetricPathUtils.getMetricName(baseMetric);
             Map<String, BigDecimal> baseMetricMap = organisedBaseMetricsMap.get(baseMetricName);
             BigDecimal baseMetricValue = baseMetricMap.get(baseMetric);
             if(baseMetricValue != null) {

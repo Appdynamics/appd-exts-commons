@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.metrics.derived;
 
+import com.appdynamics.extensions.util.MetricPathUtils;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ class IndividualDerivedMetricProcessor {
         IndividualDerivedMetricCalculator individualDerivedMetricCalculator = new IndividualDerivedMetricCalculator(organisedBaseMetricsMap, dynamicvariables, metricPath, operandsHandler,pathHandler);
         Multimap<String, BigDecimal> derivedMetricMap = individualDerivedMetricCalculator.calculateDerivedMetric();
         long endTime = System.currentTimeMillis();
-        logger.debug("Time taken to calculate {} metric is {} ms", pathHandler.getMetricName(metricPath), endTime - startTime);
+        logger.debug("Time taken to calculate {} metric is {} ms", MetricPathUtils.getMetricName(metricPath), endTime - startTime);
         return derivedMetricMap;
     }
 }

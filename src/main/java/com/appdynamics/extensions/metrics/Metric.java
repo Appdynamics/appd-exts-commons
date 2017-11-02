@@ -23,6 +23,13 @@ public class Metric {
         this.metricProperties = new DefaultMetricProperties(metricName);
     }
 
+    public Metric(String metricName, String metricValue, String metricPath, String aggregationType,String timeRollUpType,String clusterRollUpType){
+        this(metricName,metricValue,metricPath);
+        this.metricProperties.setAggregationType(aggregationType);
+        this.metricProperties.setTimeRollUpType(timeRollUpType);
+        this.metricProperties.setClusterRollUpType(clusterRollUpType);
+    }
+
     public Metric(String metricName, String metricValue, String metricPath, Map<String, ?> metricProperties){
         this(metricName,metricValue,metricPath);
         AssertUtils.assertNotNull(metricProperties,"Metric Properties cannot be null");
@@ -56,5 +63,21 @@ public class Metric {
 
     public MetricProperties getMetricProperties(){
         return metricProperties;
+    }
+
+    public String getAggregationType(){
+        return metricProperties.getAggregationType();
+    }
+
+    public String getTimeRollUpType(){
+        return metricProperties.getTimeRollUpType();
+    }
+
+    public String getClusterRollUpType(){
+        return metricProperties.getClusterRollUpType();
+    }
+
+    public String toString() {
+        return String.format("[%s/%s/%s] [%s]=[%s]]", metricProperties.getAggregationType(),metricProperties.getTimeRollUpType(),metricProperties.getClusterRollUpType(),getMetricPath(),getMetricValue());
     }
 }
