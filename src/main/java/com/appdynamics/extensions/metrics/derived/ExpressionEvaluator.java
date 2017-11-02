@@ -22,7 +22,7 @@ public class  ExpressionEvaluator {
             return new BigDecimal(result);
         }
         catch(Exception exception){
-            throw new IllegalExpressionException("The expression " + expression + " is illegal" + exception);
+            throw new IllegalExpressionException("The expression " + expression + " is illegal : " + exception);
         }
     }
 }
