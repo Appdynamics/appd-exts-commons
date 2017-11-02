@@ -7,7 +7,6 @@ import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 
 /**
@@ -18,7 +17,7 @@ import java.util.Map;
  *
  * <p>An {@code ABaseMonitor} is a wrapper on top of
  * {@link AManagedMonitor} to remove the boiler plate code of
- * creating a {@link AMonitorTaskRunner} and initializing the
+ * creating a {@link AMonitorJob} and initializing the
  * {@link MonitorConfiguration}.
  *
  * <p>The MA or SIM agent loads all the {@link AManagedMonitor}s
@@ -46,7 +45,7 @@ import java.util.Map;
  *     return "Sample Monitor"
  * }
  *
- * protected abstract void doRun(AMonitorRunContext taskCounter){
+ * protected abstract void doRun(TasksExecutionServiceProvider taskCounter){
  *     //...logic to add the core logic for the SampleMonitor
  * }
  *
@@ -81,7 +80,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
      * A runnable which does all the leg work for fetching the
      * metrics in a separate thread.
      */
-    protected AMonitorTaskRunner monitorTaskRunner;
+    protected AMonitorJob monitorJob;
 
     public ABaseMonitor(){
         this.monitorName = getMonitorName();
@@ -90,16 +89,16 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     protected void initialize(Map<String, String> args) {
         if(configuration == null){
-            monitorTaskRunner = createMonitorTask();
-            MonitorConfiguration conf = new MonitorConfiguration(monitorName,getDefaultMetricPrefix(),monitorTaskRunner);
+            monitorJob = createMonitorJob();
+            MonitorConfiguration conf = new MonitorConfiguration(monitorName,getDefaultMetricPrefix(), monitorJob);
             conf.setConfigYml(args.get("config-file"));
             initializeMoreStuff(conf);
             this.configuration = conf;
         }
     }
 
-    protected AMonitorTaskRunner createMonitorTask() {
-        return new AMonitorTaskRunner(this);
+    protected AMonitorJob createMonitorJob() {
+        return new AMonitorJob(this);
     }
 
     /**
@@ -134,10 +133,10 @@ public abstract class ABaseMonitor extends AManagedMonitor{
         if(configuration.isEnabled()){
             if(configuration.isScheduledModeEnabled()){ //scheduled mode
                 logger.debug("Task scheduler is enabled, printing the metrics from the cache");
-                monitorTaskRunner.printAllFromCache();
+                monitorJob.printAllFromCache();
             }
             else{   // normal mode
-                monitorTaskRunner.run();
+                monitorJob.run();
             }
         } else{
             logger.debug("The monitor [{}] is not enabled.", getMonitorName());
@@ -152,11 +151,15 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     public abstract String getMonitorName();
 
-    protected abstract void doRun(AMonitorRunContext taskCounter);
+    public MonitorConfiguration getConfiguration(){
+        return configuration;
+    }
+
+    protected abstract void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider);
 
     protected abstract int getTaskCount();
 
     protected void onComplete() {
-        logger.info("Finished processing all tasks for {}",getMonitorName());
+        logger.info("Finished processing all tasks in the job for {}",getMonitorName());
     }
 }

@@ -10,11 +10,13 @@ import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+
 import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
 import static com.appdynamics.extensions.util.StringUtils.validateStrings;
 
@@ -37,15 +39,15 @@ public class MetricWriteHelper {
     MetricWriteHelper(ABaseMonitor baseMonitor) {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
-        derivedMetricsCalculator = baseMonitor.configuration.createDerivedMetricsCalculator();
+        derivedMetricsCalculator = baseMonitor.getConfiguration().createDerivedMetricsCalculator();
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
         if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue)) {
-            if (baseMonitor.configuration.isScheduledModeEnabled()) {
+            if (baseMonitor.getConfiguration().isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
                 logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
-                baseMonitor.configuration.putInMetricCache(metricPath, metric);
+                baseMonitor.getConfiguration().putInMetricCache(metricPath, metric);
             } else {
                 MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
                 metricWriter.printMetric(metricValue);
@@ -54,7 +56,7 @@ public class MetricWriteHelper {
                 }
                 if (cacheMetrics) {
                     Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
-                    baseMonitor.configuration.putInMetricCache(metricPath, metric);
+                    baseMonitor.getConfiguration().putInMetricCache(metricPath, metric);
                 }
             }
             addForDerivedMetricsCalculation(metricPath, metricValue);
@@ -101,21 +103,25 @@ public class MetricWriteHelper {
     }
 
     public MetricWriter getMetricWriter(String metricPath, String aggregationType, String timeRollup, String clusterRollup) {
-        MetricWriter writer = baseMonitor.configuration.getFromWriterCache(metricPath);
+        MetricWriter writer = baseMonitor.getConfiguration().getFromWriterCache(metricPath);
         if (writer == null) {
             writer = baseMonitor.getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
-            baseMonitor.configuration.putInWriterCache(metricPath, writer);
+            baseMonitor.getConfiguration().putInWriterCache(metricPath, writer);
         }
         return writer;
     }
 
     public void onComplete(){
+        int baseMetricsSize = 0;
         if(derivedMetricsCalculator != null){
             List<com.appdynamics.extensions.metrics.Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+            baseMetricsSize = metricsMap.size();
+            logger.debug("Total number of base metrics reported in this job run are : {}", baseMetricsSize);
             transformAndPrintMetrics(metricList);
+            logger.debug("Total number of derived metrics reported in this job run are : {}", metricsMap.size() - baseMetricsSize);
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
-        logger.debug("Total number of metrics reported in this run are : {}", metricsMap.size());
+        logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
     }
 
     public boolean isCacheMetrics() {

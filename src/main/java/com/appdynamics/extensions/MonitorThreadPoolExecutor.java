@@ -1,10 +1,8 @@
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.util.AssertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -13,7 +11,7 @@ import java.util.concurrent.*;
  */
 public class MonitorThreadPoolExecutor implements MonitorExecutorService {
 
-    public static final Logger logger = LoggerFactory.getLogger(MonitorConfiguration.class);
+    public static final Logger logger = LoggerFactory.getLogger(MonitorThreadPoolExecutor.class);
     private static final long TASK_TIME_THRESHOLD_IN_MS = 60 * 1000l;
 
     private ThreadPoolExecutor executor;

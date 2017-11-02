@@ -1,7 +1,6 @@
 package com.appdynamics.extensions;
 
 import com.google.common.base.Strings;
-
 import java.util.Map;
 
 /**

@@ -2,9 +2,7 @@ package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
-
 import java.util.Map;
-
 import static com.appdynamics.extensions.conf.MonitorConfiguration.isWorkbenchMode;
 
 /**

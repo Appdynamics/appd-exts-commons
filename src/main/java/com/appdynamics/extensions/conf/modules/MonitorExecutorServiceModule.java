@@ -6,7 +6,6 @@ import com.appdynamics.extensions.util.YmlUtils;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -17,7 +16,6 @@ import java.util.concurrent.TimeUnit;
  * Created by venkata.konala on 10/24/17.
  */
 public class MonitorExecutorServiceModule {
-
 
     static final Logger logger = LoggerFactory.getLogger(MonitorExecutorServiceModule.class);
     private MonitorExecutorService executorService;

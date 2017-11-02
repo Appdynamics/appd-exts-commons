@@ -1,6 +1,6 @@
 package com.appdynamics.extensions.conf;
 
-import com.appdynamics.extensions.AMonitorTaskRunner;
+import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.metrics.Metric;
@@ -16,13 +16,14 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by abey.tom on 3/14/16.
@@ -37,7 +38,7 @@ public class MonitorConfiguration {
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
 
     private String monitorName;
-    private AMonitorTaskRunner taskRunner;
+    private AMonitorJob aMonitorJob;
     public enum ConfItem {
         CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE
     }
@@ -55,16 +56,16 @@ public class MonitorConfiguration {
     private DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
     private FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
     private PerMinValueCalculatorModule perMinValueCalculatorModule = new PerMinValueCalculatorModule();
-    private TaskScheduleModule taskScheduleModule = new TaskScheduleModule();
+    private JobScheduleModule jobScheduleModule = new JobScheduleModule();
     private CacheModule cacheModule = new CacheModule();
 
-    public MonitorConfiguration(String monitorName, String defaultMetricPrefix, AMonitorTaskRunner taskRunner) {
+    public MonitorConfiguration(String monitorName, String defaultMetricPrefix, AMonitorJob aMonitorJob) {
         AssertUtils.assertNotNull(monitorName,"The monitor name cannot be empty");
         AssertUtils.assertNotNull(defaultMetricPrefix, "The Default Metric Prefix cannot be empty");
-        AssertUtils.assertNotNull(taskRunner, "The Runnable[taskRunner] cannot be null");
+        AssertUtils.assertNotNull(aMonitorJob, "The Runnable[aMonitorJob] cannot be null");
         this.monitorName = monitorName;
         this.defaultMetricPrefix = StringUtils.trim(defaultMetricPrefix.trim(), "|");
-        this.taskRunner = taskRunner;
+        this.aMonitorJob = aMonitorJob;
         installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         if (installDir == null) {
             throw new RuntimeException("The install directory cannot be located.");
@@ -178,7 +179,7 @@ public class MonitorConfiguration {
                 workBenchModule.initWorkBenchStore(config, metricPrefix);
                 monitorExecutorServiceModule.initExecutorService(config);
                 httpClientModule.initHttpClient(config);
-                taskScheduleModule.initScheduledTask(config, monitorName, taskRunner);
+                jobScheduleModule.initScheduledJob(config, monitorName, aMonitorJob);
                 cacheModule.initCache();
             } else{
                 this.enabled = false;
@@ -256,7 +257,7 @@ public class MonitorConfiguration {
     }
 
     public boolean isScheduledModeEnabled(){
-        return taskScheduleModule.getScheduler() != null;
+        return jobScheduleModule.getScheduler() != null;
     }
 
     public ConcurrentMap<String,Metric> getCachedMetrics(){

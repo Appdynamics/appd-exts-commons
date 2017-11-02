@@ -1,0 +1,6 @@
+derivedMetrics:
+  - derivedMetricPath: "sample3"
+    formula: "sample1 + sample2"
+  - derivedMetricPath: "sample4"
+    formula: "sample1 / (sample1 + sample2)"
+

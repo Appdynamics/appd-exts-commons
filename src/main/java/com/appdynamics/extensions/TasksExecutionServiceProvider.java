@@ -1,34 +1,34 @@
 package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * AMonitorRunContext holds the state across a complete AMonitorTaskRunner's run.
- *
- */
-
-public class AMonitorRunContext {
+/*
+ * TaskExecutionServiceProvider is responsible for submitting all the tasks of
+ * a job to the ExecutorService and also making sure that all the job tasks are
+ * completed before executing the onComplete() method of MetricWriteHelper.
+*/
+public class TasksExecutionServiceProvider {
 
     private ABaseMonitor aBaseMonitor;
     private AtomicInteger taskCounter;
     private MetricWriteHelper metricWriteHelper;
 
 
-    public AMonitorRunContext(ABaseMonitor aBaseMonitor) {
+    public TasksExecutionServiceProvider(ABaseMonitor aBaseMonitor, MetricWriteHelper metricWriteHelper) {
         this.aBaseMonitor = aBaseMonitor;
+        this.metricWriteHelper = metricWriteHelper;
         taskCounter = new AtomicInteger(this.aBaseMonitor.getTaskCount());
-        metricWriteHelper = MetricWriteHelperFactory.create(aBaseMonitor);
     }
 
 
-    public void submit(final String name, final Runnable aServerTask){
-        aBaseMonitor.configuration.getExecutorService().submit(name,new Runnable() {
+    public void submit(final String name, final AMonitorTaskRunnable aServerTask){
+        aBaseMonitor.getConfiguration().getExecutorService().submit(name,new Runnable() {
             @Override
             public void run() {
                 try{
                     aServerTask.run();
+                    aServerTask.onTaskComplete();
                 }
                 finally {
                     if(taskCounter.decrementAndGet() <= 0){
