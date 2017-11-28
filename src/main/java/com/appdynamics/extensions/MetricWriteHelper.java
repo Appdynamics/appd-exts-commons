@@ -36,7 +36,7 @@ public class MetricWriteHelper {
     protected MetricWriteHelper() {
     }
 
-    MetricWriteHelper(ABaseMonitor baseMonitor) {
+    public MetricWriteHelper(ABaseMonitor baseMonitor) {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
         derivedMetricsCalculator = baseMonitor.getConfiguration().createDerivedMetricsCalculator();
