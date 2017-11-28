@@ -97,4 +97,21 @@ public class MetricWriteHelperTest {
         }
 
     }
+
+    @Test
+    public void whenMetricValuesNullShouldNotPrint(){
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
+        MonitorConfiguration configuration = mock(MonitorConfiguration.class);
+        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        when(configuration.createDerivedMetricsCalculator()).thenReturn(null);
+        MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
+
+
+        MetricWriter metricWriter = mock(MetricWriter.class);
+        when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
+        metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|sample1", null,MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
+        MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
+        verify(metricWriter, times(0)).printMetric(stringArgumentCaptor.capture());
+    }
 }

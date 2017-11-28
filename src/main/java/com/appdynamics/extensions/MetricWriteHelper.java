@@ -62,8 +62,7 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            Metric arg = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
-            logger.error("The metric is not valid {}", arg);
+            logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath),metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
         }
     }
 
