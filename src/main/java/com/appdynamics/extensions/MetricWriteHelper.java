@@ -36,7 +36,7 @@ public class MetricWriteHelper {
     protected MetricWriteHelper() {
     }
 
-    MetricWriteHelper(ABaseMonitor baseMonitor) {
+    public MetricWriteHelper(ABaseMonitor baseMonitor) {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
         derivedMetricsCalculator = baseMonitor.getConfiguration().createDerivedMetricsCalculator();
@@ -62,8 +62,7 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            Metric arg = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
-            logger.error("The metric is not valid {}", arg);
+            logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath),metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
         }
     }
 

@@ -122,7 +122,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
      */
     @Override
     public TaskOutput execute(Map<String, String> args, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-        logger.debug("Monitor {} is invoked.",monitorName);
+        logger.info("Using {} Version [" + getImplementationVersion() + "]",monitorName);
         logger.debug("The raw arguments are {}",args);
         initialize(args);
         executeMonitor();
