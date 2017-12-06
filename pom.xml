@@ -94,6 +94,11 @@
             <version>0.4.8</version>
         </dependency>
         <dependency>
+            <groupId>org.unix4j</groupId>
+            <artifactId>unix4j-command</artifactId>
+            <version>0.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
             <version>8.1.10.v20130312</version>

@@ -2,7 +2,15 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.conf.modules.*;
+import com.appdynamics.extensions.checks.HealthCheckModule;
+import com.appdynamics.extensions.conf.modules.CacheModule;
+import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
+import com.appdynamics.extensions.conf.modules.FileWatchListenerModule;
+import com.appdynamics.extensions.conf.modules.HttpClientModule;
+import com.appdynamics.extensions.conf.modules.JobScheduleModule;
+import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
+import com.appdynamics.extensions.conf.modules.PerMinValueCalculatorModule;
+import com.appdynamics.extensions.conf.modules.WorkBenchModule;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -39,9 +47,11 @@ public class MonitorConfiguration {
 
     private String monitorName;
     private AMonitorJob aMonitorJob;
+
     public enum ConfItem {
         CONFIG_YML, HTTP_CLIENT, METRICS_XML, METRIC_PREFIX, EXECUTOR_SERVICE
     }
+
     private String defaultMetricPrefix;
     private final File installDir;
     private Map<String, ?> config;
@@ -58,9 +68,10 @@ public class MonitorConfiguration {
     private PerMinValueCalculatorModule perMinValueCalculatorModule = new PerMinValueCalculatorModule();
     private JobScheduleModule jobScheduleModule = new JobScheduleModule();
     private CacheModule cacheModule = new CacheModule();
+    private HealthCheckModule healthCheckModule = new HealthCheckModule();
 
     public MonitorConfiguration(String monitorName, String defaultMetricPrefix, AMonitorJob aMonitorJob) {
-        AssertUtils.assertNotNull(monitorName,"The monitor name cannot be empty");
+        AssertUtils.assertNotNull(monitorName, "The monitor name cannot be empty");
         AssertUtils.assertNotNull(defaultMetricPrefix, "The Default Metric Prefix cannot be empty");
         AssertUtils.assertNotNull(aMonitorJob, "The Runnable[aMonitorJob] cannot be null");
         this.monitorName = monitorName;
@@ -173,7 +184,7 @@ public class MonitorConfiguration {
                 config = rootElem;
             }
             Boolean enabled = (Boolean) config.get("enabled");
-            if(!Boolean.FALSE.equals(enabled)){
+            if (!Boolean.FALSE.equals(enabled)) {
                 this.enabled = true;
                 metricPrefix = getMetricPrefix((String) config.get("metricPrefix"), defaultMetricPrefix);
                 workBenchModule.initWorkBenchStore(config, metricPrefix);
@@ -181,12 +192,14 @@ public class MonitorConfiguration {
                 httpClientModule.initHttpClient(config);
                 jobScheduleModule.initScheduledJob(config, monitorName, aMonitorJob);
                 cacheModule.initCache();
-            } else{
+                healthCheckModule.initMATroubleshootChecks(monitorName, installDir, config);
+            } else {
                 this.enabled = false;
                 logger.error("The configuration is not enabled {}", config);
             }
         }
     }
+
 
     protected static String getMetricPrefix(String metricPrefix, String defaultMetricPrefix) {
         logger.debug("The metric prefix from the config file is {}", metricPrefix);
@@ -232,19 +245,19 @@ public class MonitorConfiguration {
         }
     }
 
-    public CloseableHttpClient getHttpClient(){
+    public CloseableHttpClient getHttpClient() {
         return httpClientModule.getHttpClient();
     }
 
-    public PerMinValueCalculator getPerMinValueCalculator(){
+    public PerMinValueCalculator getPerMinValueCalculator() {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
 
-    public MonitorExecutorService getExecutorService(){
+    public MonitorExecutorService getExecutorService() {
         return monitorExecutorServiceModule.getExecutorService();
     }
 
-    public DerivedMetricsCalculator createDerivedMetricsCalculator(){
+    public DerivedMetricsCalculator createDerivedMetricsCalculator() {
         return derivedMetricsModule.initDerivedMetricsCalculator(config, getMetricPrefix());
     }
 
@@ -256,16 +269,16 @@ public class MonitorConfiguration {
         return enabled;
     }
 
-    public boolean isScheduledModeEnabled(){
+    public boolean isScheduledModeEnabled() {
         return jobScheduleModule.getScheduler() != null;
     }
 
-    public ConcurrentMap<String,Metric> getCachedMetrics(){
+    public ConcurrentMap<String, Metric> getCachedMetrics() {
         return cacheModule.getMetricCache().asMap();
     }
 
-    public void putInMetricCache(String metricPath, Metric metric){
-        cacheModule.putInMetricCache(metricPath,metric);
+    public void putInMetricCache(String metricPath, Metric metric) {
+        cacheModule.putInMetricCache(metricPath, metric);
     }
 
     public MetricWriter getFromWriterCache(String metricPath) {
@@ -273,6 +286,6 @@ public class MonitorConfiguration {
     }
 
     public void putInWriterCache(String metricPath, MetricWriter writer) {
-        cacheModule.putInWriterCache(metricPath,writer);
+        cacheModule.putInWriterCache(metricPath, writer);
     }
 }

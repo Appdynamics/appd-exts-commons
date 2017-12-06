@@ -1,0 +1,27 @@
+[Agent-Monitor-Scheduler-1] 11 Sep 2017 11:16:32,081 INFO PeriodicTaskRunner - Periodic Task - setup metric feed for [Tuxedo Monitor Run task]
+
+[Agent-Monitor-Scheduler-1] 11 Sep 2017 11:16:32,474 INFO TuxedoMonitor - Collecting the Tuxedo stats for the domain Custom Metrics|Tuxedo|iud-app101
+
+[Tuxedo Err Reader] 11 Sep 2017 11:16:32,483 ERROR ErrorLogger - tmadmin - Copyright (c) 1996-2010 Oracle.
+
+[Tuxedo Err Reader] 11 Sep 2017 11:16:32,483 ERROR ErrorLogger - Portions * Copyright 1986-1997 RSA Data Security, Inc.
+
+[Tuxedo Err Reader] 11 Sep 2017 11:16:32,483 ERROR ErrorLogger - All Rights Reserved.
+
+[Tuxedo Err Reader] 11 Sep 2017 11:16:32,483 ERROR ErrorLogger - Distributed under license by Oracle.
+
+[Tuxedo Err Reader] 11 Sep 2017 11:16:32,483 ERROR ErrorLogger - Tuxedo is a registered trademark.
+
+[Tuxedo Err Reader] 11 Sep 2017 11:16:32,485 ERROR ErrorLogger - TMADMIN_CAT:199: WARN: Cannot become administrator.Limited set of commands available.
+
+[Tuxedo Err Reader] 11 Sep 2017 11:16:32,507 ERROR ErrorLogger - TMADMIN_CAT:629: INFO: No outstanding transactions
+
+[Agent-Monitor-Scheduler-1] 11 Sep 2017 11:16:32,579 ERROR ManagedMonitorDelegate - Maximum metrics limit reached [450] no new metrics can be created. This exception will not repeat until restart.
+
+com.singularity.ee.agent.commonservices.metricgeneration.metrics.spi.MetricOverflowException: Maximum metrics limit reached [450] no new metrics can be created. This exception will not repeat until restart.
+
+at com.singularity.ee.agent.commonservices.metricgeneration.aggregation.AMetricAggregatorFactory.getEmptyAggregator(AMetricAggregatorFactory.java:196)
+
+at com.singularity.ee.agent.systemagent.components.monitormanager.managed.SystemMetricAggregatorFactory.safeGetAggregatorNoProxy(SystemMetricAggregatorFactory.java:174)
+
+at com.singularity.ee.agent.systemagent.components.monitormanager.man
