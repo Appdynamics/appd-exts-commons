@@ -81,7 +81,7 @@ public class ExtensionPathConfigCheckTest {
         Mockito.verify(logger, Mockito.times(1)).warn(logCaptor.capture());
 
         String value = logCaptor.getValue();
-        Assert.assertEquals(value, "Configured metric prefix with no tier id. With this configuration, metric browser will show metrics names in all the available tiers");
+        Assert.assertEquals(value, "Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers");
     }
 
     @Test
