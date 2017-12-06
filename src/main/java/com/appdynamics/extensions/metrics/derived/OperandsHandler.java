@@ -14,7 +14,7 @@ import static com.appdynamics.extensions.util.MetricPathUtils.PIPE_SPLITTER;
 /**
  * Created by venkata.konala on 8/28/17.
  */
-class OperandsHandler {
+public class OperandsHandler {
 
     private String formula;
     private Set<String> baseOperands;
@@ -88,7 +88,7 @@ class OperandsHandler {
          return modifiedExpression;
      }
 
-    private boolean match(String operand, String modifiedOperand){
+    public static boolean match(String operand, String modifiedOperand){
         List<String> operandList = PIPE_SPLITTER.splitToList(operand);
         List<String> modifiedOperandList = PIPE_SPLITTER.splitToList(modifiedOperand);
         if(operandList.size() == modifiedOperandList.size()){

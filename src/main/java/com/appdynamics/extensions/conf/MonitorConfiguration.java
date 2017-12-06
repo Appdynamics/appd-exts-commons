@@ -2,6 +2,7 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.customEvents.CustomEventTrigger;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
@@ -58,6 +59,7 @@ public class MonitorConfiguration {
     private PerMinValueCalculatorModule perMinValueCalculatorModule = new PerMinValueCalculatorModule();
     private JobScheduleModule jobScheduleModule = new JobScheduleModule();
     private CacheModule cacheModule = new CacheModule();
+    private CustomEventsTriggerModule customEventsTriggerModule = new CustomEventsTriggerModule();
 
     public MonitorConfiguration(String monitorName, String defaultMetricPrefix, AMonitorJob aMonitorJob) {
         AssertUtils.assertNotNull(monitorName,"The monitor name cannot be empty");
@@ -181,6 +183,7 @@ public class MonitorConfiguration {
                 httpClientModule.initHttpClient(config);
                 jobScheduleModule.initScheduledJob(config, monitorName, aMonitorJob);
                 cacheModule.initCache();
+                customEventsTriggerModule.initCustomEventsTrigger(config, metricPrefix);
             } else{
                 this.enabled = false;
                 logger.error("The configuration is not enabled {}", config);
@@ -274,5 +277,9 @@ public class MonitorConfiguration {
 
     public void putInWriterCache(String metricPath, MetricWriter writer) {
         cacheModule.putInWriterCache(metricPath,writer);
+    }
+
+    public CustomEventTrigger getCustomEventTrigger(){
+        return customEventsTriggerModule.getCustomEventTrigger();
     }
 }

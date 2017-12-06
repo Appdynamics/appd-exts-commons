@@ -1,5 +1,6 @@
 package com.appdynamics.extensions;
 
+import com.appdynamics.extensions.customEvents.CustomEventTrigger;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -30,6 +31,7 @@ public class MetricWriteHelper {
     private boolean cacheMetrics;
 
     protected DerivedMetricsCalculator derivedMetricsCalculator;
+    protected CustomEventTrigger customEventTrigger;
     private Map<String, String> metricsMap = Maps.newConcurrentMap();
 
     //used from WorkBench.
@@ -40,6 +42,7 @@ public class MetricWriteHelper {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
         derivedMetricsCalculator = baseMonitor.getConfiguration().createDerivedMetricsCalculator();
+        customEventTrigger = baseMonitor.getConfiguration().getCustomEventTrigger();
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
@@ -120,6 +123,9 @@ public class MetricWriteHelper {
             transformAndPrintMetrics(metricList);
             logger.debug("Total number of derived metrics reported in this job run are : {}", metricsMap.size() - baseMetricsSize);
             derivedMetricsCalculator.clearBaseMetricsMap();
+        }
+        if(customEventTrigger != null){
+            customEventTrigger.triggerEvents(metricsMap);
         }
         logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
     }
