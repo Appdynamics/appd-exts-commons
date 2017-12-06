@@ -71,7 +71,7 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
             }
         } else { //Tier is not configured in metric prefix
             if (!controllerInfo.getSimEnabled()) {
-                logger.warn("Configured metric prefix with no tier id. With this configuration, metric browser will show metrics names in all the available tiers");
+                logger.warn("Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers");
             } else {
                 logger.info("SIM is enabled, please look in the SIM metric browser for metrics.");
             }
