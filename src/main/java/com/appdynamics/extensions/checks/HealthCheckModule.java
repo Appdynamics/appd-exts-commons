@@ -20,8 +20,15 @@ public class HealthCheckModule {
 
     public void initMATroubleshootChecks(String monitorName, File installDir, Map<String, ?> config) {
 
+        Boolean enableHealthChecks = (Boolean) config.get("enableHealthChecks");
+
+        if (enableHealthChecks == null || !enableHealthChecks) {
+            logger.info("Not initializing extension health checks as it is disabled in config");
+            return;
+        }
+
         if (monitorName == null) {
-            logger.warn("Not initializing extension troubleshooting process as I have no idea on what extension is running now");
+            logger.warn("Not initializing extension health checks as I have no idea on what extension is running now");
             return;
         }
 

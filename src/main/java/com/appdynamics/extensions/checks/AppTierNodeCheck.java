@@ -36,7 +36,7 @@ public class AppTierNodeCheck implements RunOnceCheck {
                 || Strings.isNullOrEmpty(controllerInfo.getNodeName())) {
 
             if (!simEnabled) {
-                logger.error("SIM is not enabled and Application name, Tier name are node name not configured. " +
+                logger.error("SIM is not enabled and Application name, Tier name or node name not configured. " +
                         "Please configure these details using this link, https://docs.appdynamics.com/display/PRO42/Standalone+Machine+Agent+Configuration+Property+Reference");
             } else {
                 logger.info("Application name, Tier name or node name not configured but SIM is enabled. Check for metrics in the SIM metric browser.");

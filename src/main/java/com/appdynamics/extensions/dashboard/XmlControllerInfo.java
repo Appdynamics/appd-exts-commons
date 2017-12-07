@@ -69,6 +69,11 @@ public class XmlControllerInfo extends ControllerInfo {
         return tierName;
     }
 
+    @XmlElement(name = "node-name")
+    public String getNodeName() {
+        return nodeName;
+    }
+
     @Override
     public void setAccount(String account) {
         super.setAccount(account);
@@ -117,6 +122,11 @@ public class XmlControllerInfo extends ControllerInfo {
     @Override
     public void setTierName(String tierName) {
         super.setTierName(tierName);
+    }
+
+    @Override
+    public void setNodeName(String nodeName) {
+        super.setNodeName(nodeName);
     }
 
     @Override
