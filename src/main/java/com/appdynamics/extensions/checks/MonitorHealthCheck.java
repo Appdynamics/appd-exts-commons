@@ -99,6 +99,7 @@ public class MonitorHealthCheck implements Runnable {
             } else if (check instanceof RunAlwaysCheck) {
 
                 final RunAlwaysCheck runAlwaysCheck = (RunAlwaysCheck) check;
+                //#TODO use the MonitorExecutorService....
                 final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
                 scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
                     @Override

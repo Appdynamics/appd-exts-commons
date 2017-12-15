@@ -43,6 +43,7 @@ public class HealthCheckModule {
             healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerRequestHandler, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerRequestHandler, MonitorHealthCheck.logger));
 
+            //#TODO use monitorexecutorservice...
             Executors.newSingleThreadExecutor().submit(healthCheckMonitor);
         } catch (Exception e) {
             logger.error("Error initializing health check module", e);
