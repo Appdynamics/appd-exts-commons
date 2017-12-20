@@ -4,7 +4,7 @@
 
     <groupId>com.appdynamics</groupId>
     <artifactId>appd-exts-commons</artifactId>
-    <version>1.6.6</version>
+    <version>1.6.6.1</version>
     <packaging>jar</packaging>
     <name>extension-utils</name>
     <properties>

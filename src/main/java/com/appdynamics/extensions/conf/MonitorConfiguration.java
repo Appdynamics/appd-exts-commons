@@ -57,7 +57,7 @@ public class MonitorConfiguration {
     private Object metricXml;
     private PerMinValueCalculator perMinValueCalculator;
     private MetricWriteHelper metricWriter;
-    private boolean enabled;
+    private boolean enabled = true;
 
     public MonitorConfiguration(String defaultMetricPrefix, Runnable taskRunner, MetricWriteHelper metricWriter) {
         AssertUtils.assertNotNull(defaultMetricPrefix, "The Default Metric Prefix cannot be empty");
@@ -73,14 +73,14 @@ public class MonitorConfiguration {
     }
 
     public void executeTask() {
-        if(isEnabled()){
+        if (isEnabled()) {
             if (scheduler == null) {
                 taskRunner.run();
             } else {
                 logger.debug("Task scheduler is enabled, printing the metrics from the cache");
                 metricWriter.printAllFromCache();
             }
-        } else{
+        } else {
             logger.debug("The monitor [{}] is not enabled.", getMetricPrefix());
         }
     }
@@ -218,14 +218,14 @@ public class MonitorConfiguration {
                 config = rootElem;
             }
             Boolean enabled = (Boolean) config.get("enabled");
-            if(!Boolean.FALSE.equals(enabled)){
+            if (!Boolean.FALSE.equals(enabled)) {
                 this.enabled = true;
                 metricPrefix = getMetricPrefix((String) config.get("metricPrefix"), defaultMetricPrefix);
                 initExecutorService(config);
                 initHttpClient(config);
                 initScheduledTask(config);
                 metricWriter.setScheduledMode(scheduler != null);
-            } else{
+            } else {
                 this.enabled = false;
                 logger.error("The configuration is not enabled {}", config);
             }
@@ -407,7 +407,6 @@ public class MonitorConfiguration {
             throw new IllegalArgumentException("The path [" + path + "] cannot be resolved to a file");
         }
     }
-
 
 
     public interface FileWatchListener {
