@@ -41,8 +41,7 @@ public class MaxMetricLimitCheck implements RunAlwaysCheck {
         File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
         if (directory.exists()) {
             File logs = new File(directory, "logs");
-            //#TODO test on windows.
-            //#TODO performance test
+            //This is taking around 500ms for 25MB log files ( 5 files * 5 MB )
             List<Line> metricLimitErrorLogLines = Unix4j.cd(logs).grep(Grep.Options.lineNumber, MAX_METRIC_ERROR_LINE, "*.log*").toLineList();
 
             if (metricLimitErrorLogLines != null && metricLimitErrorLogLines.size() > 0) {

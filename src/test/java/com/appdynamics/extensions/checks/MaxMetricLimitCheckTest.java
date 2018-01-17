@@ -27,15 +27,17 @@ public class MaxMetricLimitCheckTest {
 
 
     @Test
-    public void testMaxMetricLimitReached() throws Exception {
+    public void testMaxMetricLimitReached() {
         
         PowerMockito.mockStatic(PathResolver.class);
         Mockito.when(PathResolver.resolveDirectory(AManagedMonitor.class)).thenReturn(new File("src/test/resources"));
 
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
+        long start = System.currentTimeMillis();
         MaxMetricLimitCheck maxMetricLimitCheck = new MaxMetricLimitCheck(5, TimeUnit.SECONDS, logger);
         maxMetricLimitCheck.check();
+        long time = System.currentTimeMillis() - start;
 
         Mockito.verify(logger, Mockito.times(2)).error(logCaptor.capture());
 
@@ -43,5 +45,7 @@ public class MaxMetricLimitCheckTest {
 
         String value = allValues.get(0);
         Assert.assertEquals(value, "Found metric limit reached error, below are the details");
+        Assert.assertNotNull(allValues.get(1));
+        System.out.println("Took "+time+" ms");
     }
 }

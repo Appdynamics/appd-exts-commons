@@ -1,9 +1,8 @@
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.dashboard.ControllerInfo;
-import com.appdynamics.extensions.util.PathResolver;
+import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.util.StringUtils;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
@@ -13,15 +12,14 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * @author Satish Muddam
  */
 public class MonitorHealthCheck implements Runnable {
 
-    public static final String EXTENSIONS_CHECKS_LOG_LEVEL = "monitor.checks.log.level";
+    private static final String EXTENSIONS_CHECKS_LOG_LEVEL = "monitor.checks.log.level";
     public static Logger logger = null;
 
     private LinkedList<Check> healthChecks = new LinkedList<>();
@@ -60,30 +58,6 @@ public class MonitorHealthCheck implements Runnable {
         }
     }
 
-    public ControllerInfo init() {
-
-        ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
-        ControllerInfo controllerInfoFromXml = getControllerInfoFromXml();
-        ControllerInfo controllerInfo = controllerInfoFromXml.merge(controllerInfoFromSystemProps);
-
-        return controllerInfo;
-    }
-
-    private ControllerInfo getControllerInfoFromXml() {
-        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
-        logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
-        ControllerInfo from = null;
-        if (directory.exists()) {
-            File cinfo = new File(new File(directory, "conf"), "controller-info.xml");
-            if (cinfo.exists()) {
-                from = ControllerInfo.fromXml(cinfo);
-            }
-        }
-        if (from == null) {
-            from = new ControllerInfo();
-        }
-        return from;
-    }
 
     public void registerChecks(Check healthCheck) {
         healthChecks.add(healthCheck);
@@ -99,9 +73,10 @@ public class MonitorHealthCheck implements Runnable {
             } else if (check instanceof RunAlwaysCheck) {
 
                 final RunAlwaysCheck runAlwaysCheck = (RunAlwaysCheck) check;
-                //#TODO use the MonitorExecutorService....
-                final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-                scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+
+                final MonitorExecutorService scheduledExecutorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(1));
+
+                scheduledExecutorService.scheduleAtFixedRate("RunAlwaysCheck", new Runnable() {
                     @Override
                     public void run() {
 
@@ -112,7 +87,7 @@ public class MonitorHealthCheck implements Runnable {
                         }
 
                     }
-                }, 0, runAlwaysCheck.getPeriod(), runAlwaysCheck.getTimeUnit());
+                }, 0, (int) runAlwaysCheck.getPeriod(), runAlwaysCheck.getTimeUnit());
 
             } else {
                 //Nothing matched
