@@ -35,7 +35,7 @@ public class TaskInputArgs {
     public static final String ENCRYPTION_KEY = "encryption-key";
     public static final String SSL_PROTOCOL = "ssl-protocol";
 
-    public static String getArg(Map<String, String> taskArgs, String key, String defaultValue) {
+    public static String getArg(final Map<String, String> taskArgs, String key, String defaultValue) {
         if (taskArgs.containsKey(key)) {
             return taskArgs.get(key);
         } else {

@@ -26,7 +26,7 @@ public class CustomEventsTriggerModule {
             List<Map<String, ?>> customEventMetricsList = (List) customEvents.get("metrics");
             if(customEventsGlobalConfig != null && customEventMetricsList != null) {
                 logger.info("The CustomEventsTrigger is initialized");
-                customEventTrigger = new CustomEventTrigger(customEventsGlobalConfig, customEventMetricsList, metricPrefix);
+                customEventTrigger = new CustomEventTrigger(customEventsGlobalConfig, customEventMetricsList, metricPrefix, null);
             }
         }
         else{

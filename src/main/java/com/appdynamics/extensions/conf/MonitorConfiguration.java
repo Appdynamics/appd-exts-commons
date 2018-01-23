@@ -230,7 +230,6 @@ public class MonitorConfiguration {
                         AssertUtils.assertNotNull(metricXml, "The metrics path is incorect or it contains errors. Please check the logs");
                         break;
                 }
-
             }
         }
     }

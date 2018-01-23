@@ -1,8 +1,8 @@
 username: user
 passwordEncrypted: C043Fag+LKEZM0AQTWPy2g==
 encryptionKey: welcome
-applicationName: app
-tierName: tier
+application: app
+tier: tier
 account: account
 controllerHost: host
 controllerPort: 80

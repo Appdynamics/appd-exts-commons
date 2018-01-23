@@ -125,7 +125,8 @@ public class MetricWriteHelper {
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
         if(customEventTrigger != null){
-            customEventTrigger.triggerEvents(metricsMap);
+            Long timeStamp = System.currentTimeMillis();
+            customEventTrigger.triggerEvents(metricsMap, timeStamp);
         }
         logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
     }

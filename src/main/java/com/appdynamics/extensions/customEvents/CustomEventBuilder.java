@@ -2,13 +2,13 @@ package com.appdynamics.extensions.customEvents;
 
 import com.appdynamics.extensions.dashboard.ControllerInfo;
 import org.apache.http.client.utils.URIBuilder;
-
 import java.net.URL;
 
 /**
  * Created by venkata.konala on 12/1/17.
  */
 public class CustomEventBuilder {
+    //#TODO Add datils about the metric path
     public static URL createEvent(ControllerInfo controllerInfo, EventParameters eventParameters) throws Exception {
         URIBuilder builder = new URIBuilder();
         builder.setScheme("http")

@@ -129,6 +129,11 @@ derivedMetrics:
       formula: "({x}|cpuWrite + {x}|{y}|memoryWrite) / 2"
     - alias: "ratio"
 
+customEvents:
+    - metricPath: "{x}|hits" Server1|hits 18 19 22
+      thresholdValue: "15"   Server2|hits
+      operator: ">"
+
 
 
 
