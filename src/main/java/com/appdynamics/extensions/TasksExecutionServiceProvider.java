@@ -1,6 +1,9 @@
 package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -10,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 */
 public class TasksExecutionServiceProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(TasksExecutionServiceProvider.class);
     private ABaseMonitor aBaseMonitor;
     private AtomicInteger taskCounter;
     private MetricWriteHelper metricWriteHelper;
@@ -29,6 +33,9 @@ public class TasksExecutionServiceProvider {
                 try{
                     aServerTask.run();
                     aServerTask.onTaskComplete();
+                }
+                catch (Throwable e){
+                    logger.error(e.toString());
                 }
                 finally {
                     if(taskCounter.decrementAndGet() <= 0){
