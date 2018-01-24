@@ -91,9 +91,11 @@ public class CustomDashboardUploader {
         }
     }
 
-    private boolean isDashboardPresent(SimpleHttpClient client, StringBuilder cookies, String dashboardName) {
-        Response response = client.target().path("controller/restui/dashboards/list/false")
-                .header("Cookie", cookies.toString()).get();
+    private boolean isDashboardPresent(SimpleHttpClient client, StringBuilder cookies, String dashboardName, String csrf) {
+        Response response = client.target().path("controller/restui/dashboards/list/getAllDashboardsByType/false")
+                .header("Cookie", cookies.toString())
+                .header("X-CSRF-TOKEN",csrf)
+                .get();
         if (response.getStatus() == 200) {
             ArrayNode arrayNode = response.json(ArrayNode.class);
             boolean isPresent = false;
@@ -111,7 +113,8 @@ public class CustomDashboardUploader {
                     , response.getStatus());
             logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
                     "The xml will be written to the logs folder. Please import it to controller manually");
-            return false;
+            logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
+            return true;//Fake that the dashboard exists.
         }
     }
 
