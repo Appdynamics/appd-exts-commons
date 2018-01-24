@@ -58,7 +58,7 @@ public class CustomDashboardUploader {
                     }
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
-                boolean isPresent = isDashboardPresent(client, cookies, dashboardName);
+                boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf);
                 if (isPresent) {
                     if (overwrite) {
                         uploadFile(dashboardName, xml, argsMap, cookies, csrf);
