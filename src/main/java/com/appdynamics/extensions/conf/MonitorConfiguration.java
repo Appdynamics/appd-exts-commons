@@ -275,4 +275,5 @@ public class MonitorConfiguration {
     public void putInWriterCache(String metricPath, MetricWriter writer) {
         cacheModule.putInWriterCache(metricPath,writer);
     }
+
 }
