@@ -7,6 +7,8 @@ import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -91,11 +93,18 @@ public abstract class ABaseMonitor extends AManagedMonitor{
         if(configuration == null){
             monitorJob = createMonitorJob();
             MonitorConfiguration conf = new MonitorConfiguration(monitorName,getDefaultMetricPrefix(), monitorJob);
-            conf.setConfigYml(args.get("config-file"));
+            conf.setConfigYml(args.get("config-file"), new MonitorConfiguration.FileWatchListener() {
+                @Override
+                public void onFileChange(File file) {
+                    onConfigReload(file);
+                }
+            });
             initializeMoreStuff(conf);
             this.configuration = conf;
         }
     }
+
+    protected void onConfigReload(File file){};
 
     protected AMonitorJob createMonitorJob() {
         return new AMonitorJob(this);
