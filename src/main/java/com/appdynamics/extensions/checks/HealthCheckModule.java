@@ -31,8 +31,11 @@ public class HealthCheckModule {
 
     public void initMATroubleshootChecks(String monitorName, File installDir, Map<String, ?> config) {
 
+
         Boolean enableHealthChecks = (Boolean) config.get("enableHealthChecks");
 
+        //TODO we should enableHealthChecks to be TRUE always. We can have a way to disable it. Otherwise we will have to enable it individually
+        //for all extensions.
         if (enableHealthChecks == null || !enableHealthChecks) {
             logger.info("Not initializing extension health checks as it is disabled in config");
             return;
@@ -58,6 +61,8 @@ public class HealthCheckModule {
                 healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerRequestHandler, MonitorHealthCheck.logger));
             }
 
+            //#TODO BUG here..whenever the config changes there will be a new threadpool executor created. You should check for that.
+            // TODO Why can't you use the MonitorExecutionService from monitor configuration here.
             MonitorExecutorService executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(1));
             executorService.submit("HealthCheckMonitor", healthCheckMonitor);
 

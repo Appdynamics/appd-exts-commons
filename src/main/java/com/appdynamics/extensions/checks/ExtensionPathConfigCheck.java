@@ -52,7 +52,7 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
 
         if (metricPrefix.startsWith("Server|Component")) { //Tier is configured in metric prefix
             if (controllerInfo.getSimEnabled()) {
-                logger.warn("No need to configure tier-id as SIM is enabled. Please use the alternate metric prefix.");
+                logger.error("No need to configure tier-id as SIM is enabled. Please use the alternate metric prefix.");
             } else {
 
                 String[] split = metricPrefix.split(":|\\|");
@@ -71,7 +71,7 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
             }
         } else { //Tier is not configured in metric prefix
             if (!controllerInfo.getSimEnabled()) {
-                logger.warn("Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers");
+                logger.error("Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers");
             } else {
                 logger.info("SIM is enabled, please look in the SIM metric browser for metrics.");
             }

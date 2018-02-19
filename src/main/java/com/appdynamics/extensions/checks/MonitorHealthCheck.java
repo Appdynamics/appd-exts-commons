@@ -74,6 +74,7 @@ public class MonitorHealthCheck implements Runnable {
 
                 final RunAlwaysCheck runAlwaysCheck = (RunAlwaysCheck) check;
 
+                // TODO Why can't you use the MonitorExecutionService from monitor configuration here.
                 final MonitorExecutorService scheduledExecutorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(1));
 
                 scheduledExecutorService.scheduleAtFixedRate("RunAlwaysCheck", new Runnable() {
