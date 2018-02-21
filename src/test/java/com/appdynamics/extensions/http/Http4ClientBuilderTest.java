@@ -344,4 +344,41 @@ public class Http4ClientBuilderTest {
         aBoolean = YmlUtils.getBoolean(null);
         Assert.assertNull(aBoolean);
     }
+
+    @Test
+    public void whenSSLConfiguredWithProperClientCertsFromYmlThenAuthenticateSuccessfully(){
+
+    }
+
+    @Test
+    public void whenSSLConfiguredWithProperClientCertsFromSysArgThenAuthenticateSuccessfully(){
+
+    }
+
+    @Test
+    public void whenSSLConfiguredWithProperClientCertsFromFileSystemThenAuthenticateSuccessfully(){
+
+    }
+
+    @Test
+    public void whenSSLConfiguredWithProperClientCertsFromYmlAndProperKeyStorePasswordThenAuthenticateSuccessfully(){
+
+    }
+
+    @Test
+    public void whenSSLConfiguredWithProperClientCertsFromYmlInPKCS12FormatThenAuthenticateSuccessfully(){
+
+    }
+
+    @Test
+    public void whenSSLConfiguredWithProperClientCertsFromYmlAndImproperKeyStorePasswordThenAuthenticationFailure(){
+
+    }
+
+    @Test
+    public void whenSSLConfiguredWithImproperClientCertsFromYmlThenAuthenticationFailure(){
+
+    }
+
+
 }
