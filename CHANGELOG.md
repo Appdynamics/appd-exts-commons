@@ -1,6 +1,6 @@
 # AppDynamics Extensions SDK CHANGELOG
 
-##2.0.0 - Nov 02, 2017
+## 2.0.0 - Nov 02, 2017
 1. Modularized the MonitorConfiguration class.
 2. Added DerivedMetricsCalculation feature.
 3. Added Metric data structure and Transformers(alias, delta, multiplier, convert, rounding).
