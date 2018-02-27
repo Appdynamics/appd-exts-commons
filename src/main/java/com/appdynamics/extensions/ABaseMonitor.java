@@ -99,7 +99,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
                     onConfigReload(file);
                 }
             });
-            initializeMoreStuff(conf);
+            initializeMoreStuff(args, conf);
             this.configuration = conf;
         }
     }
@@ -115,7 +115,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
      * custom objects to be initialized in the monitor.
      * @param conf
      */
-    protected void initializeMoreStuff(MonitorConfiguration conf) {
+    protected void initializeMoreStuff(Map<String, String> args, MonitorConfiguration conf) {
         ;
     }
 
