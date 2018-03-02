@@ -152,7 +152,7 @@ public class Http4ClientBuilderTest {
 
     @Test
     public void testConfigureAuthenticationWithWrongPassword() throws Exception {
-        final int port = 8759;
+        final int port = 8721;
         Server jetty = MockJettyServer.start(port, new MockJettyServer.AuthenticatedHandler());
         Map map = new HashMap();
         List list = new ArrayList();
@@ -187,7 +187,7 @@ public class Http4ClientBuilderTest {
 
     @Test(expected = SSLHandshakeException.class)
     public void testWithIncorrectSslProtocol() throws Exception {
-        final int port = 8759;
+        final int port = 8729;
         String uri = "https://localhost:" + port + "/test/hello/abey";
 
         Map map = new HashMap();
@@ -210,7 +210,7 @@ public class Http4ClientBuilderTest {
 
     @Test
     public void testWithCorrectSslProtocolWithoutHostNameVerify() throws Exception {
-        final int port = 8759;
+        final int port = 8723;
         String uri = "https://localhost:" + port + "/test/hello/abey";
         Map map = new HashMap();
         List list = new ArrayList();
@@ -222,6 +222,7 @@ public class Http4ClientBuilderTest {
         connection.put("sslProtocols", "TLSv1.1");
         connection.put("sslVerifyHostname", false);
         connection.put("sslTrustStorePath", "src/test/resources/keystore/keystore.jks");
+       // connection.put("sslTrustStorePassword", "changeit");
         Server jetty = MockJettyServer.startSSL(port, "TLSv1.1");
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         final CloseableHttpClient client = builder.build();
@@ -266,6 +267,7 @@ public class Http4ClientBuilderTest {
         System.setProperty("appdynamics.extensions.truststore.path", "src/test/resources/keystore/keystore.jks");
         file = Http4ClientBuilder.resolveTrustStorePath(connection);
         Assert.assertEquals("keystore.jks", file.getName());
+        System.getProperties().remove("appdynamics.extensions.truststore.path");
     }
 
     @Test
@@ -291,6 +293,44 @@ public class Http4ClientBuilderTest {
 
         connection.put("sslTrustStorePassword", "welcome1");
         pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
+        Assert.assertEquals("welcome1", new String(pwd));
+    }
+
+    @Test
+    public void resolveKeyStorePath() {
+        Map<String, String> connection = Collections.singletonMap("sslKeyStorePath", "src/test/resources/clientCertWithHttps/hostverify/server.jks");
+        File file = Http4ClientBuilder.resolveKeyStorePath(connection);
+        Assert.assertEquals("server.jks", file.getName());
+
+        System.setProperty("appdynamics.extensions.keystore.path", "src/test/resources/keystore/keystore.jks");
+        file = Http4ClientBuilder.resolveKeyStorePath(connection);
+        Assert.assertEquals("keystore.jks", file.getName());
+        System.getProperties().remove("appdynamics.extensions.keystore.path");
+    }
+
+    @Test
+    public void getKeyStorePassword() {
+        Map propMap = new HashMap();
+
+        Map connection = new HashMap();
+        propMap.put("connection", connection);
+        String encrypted = new Encryptor("welcome").encrypt("welcome");
+        //No Pass
+        char[] pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
+        Assert.assertNull(pwd);
+
+        // Enc Pass without password
+        connection.put("sslKeyStorePasswordEncrypted", encrypted);
+        pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
+        Assert.assertNull(pwd);
+
+        //With enc key
+        propMap.put("encryptionKey", "welcome");
+        pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
+        Assert.assertEquals("welcome", new String(pwd));
+
+        connection.put("sslKeyStorePassword", "welcome1");
+        pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
         Assert.assertEquals("welcome1", new String(pwd));
     }
 
@@ -345,40 +385,149 @@ public class Http4ClientBuilderTest {
         Assert.assertNull(aBoolean);
     }
 
-    @Test
-    public void whenSSLConfiguredWithProperClientCertsFromYmlThenAuthenticateSuccessfully(){
 
+    /*
+        keytool -genkey -keyalg RSA -alias appd-extensions -keystore selfsigned.jks -validity 2000 -keysize 2048
+
+        keytool -list -v -alias appd-extensions -keystore selfsigned.jks
+
+        keytool -export -alias appd-extensions -file client.cer -keystore selfsigned.jks
+
+        keytool -import -v -alias extensions-client -file client.cer -keystore client-keystore.jks
+     */
+    @Test
+    public void whenSSLWithMutualAuthWithProperClientCertsAndNoHostnameVerificationThenAuthenticateSuccessfully() throws Exception {
+        int port = 8768;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        connection.put("sslVerifyHostname", false);
+        connection.put("sslKeyStorePassword","changeit");
+        connection.put("sslTrustStorePassword","changeit");
+        connection.put("sslTrustStorePath", "src/test/resources/clientCertWithHttps/nohostverify/server.jks");
+        connection.put("sslKeyStorePath","src/test/resources/clientCertWithHttps/nohostverify/client.jks");
+        Server jetty = MockJettyServer.startSSLWithMutualAuth(port, "TLSv1.1", "/clientCertWithHttps/nohostverify/server.jks","JKS","/clientCertWithHttps/nohostverify/client.jks","JKS");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
     }
 
-    @Test
-    public void whenSSLConfiguredWithProperClientCertsFromSysArgThenAuthenticateSuccessfully(){
 
+    @Test(expected = java.net.SocketException.class)
+    public void whenSSLWithMutualAuthAndIncorrectClientCertsAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
+        int port = 8775;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        connection.put("sslVerifyHostname", false);
+        connection.put("sslKeyStorePassword","changeit");
+        connection.put("sslTrustStorePassword","changeit");
+        connection.put("sslTrustStorePath", "src/test/resources/clientCertWithHttps/nohostverify/server.jks");
+        connection.put("sslKeyStorePath","src/test/resources/keystore/keystore.jks");
+        Server jetty = MockJettyServer.startSSLWithMutualAuth(port, "TLSv1.1", "/clientCertWithHttps/nohostverify/server.jks","JKS","/clientCertWithHttps/nohostverify/client.jks","JKS");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
     }
 
-    @Test
-    public void whenSSLConfiguredWithProperClientCertsFromFileSystemThenAuthenticateSuccessfully(){
-
+    @Test(expected = javax.net.ssl.SSLHandshakeException.class)
+    public void whenSSLWithMutualAuthAndIncorrectPasswordAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
+        int port = 8769;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        connection.put("sslVerifyHostname", false);
+        connection.put("sslTrustStorePassword","changeit");
+        connection.put("sslTrustStorePath", "src/test/resources/clientCertWithHttps/nohostverify/server.jks");
+        connection.put("sslKeyStorePath","src/test/resources/keystore/keystore.jks");
+        Server jetty = MockJettyServer.startSSLWithMutualAuth(port, "TLSv1.1", "/clientCertWithHttps/nohostverify/server.jks","JKS","/clientCertWithHttps/nohostverify/client.jks","JKS");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
     }
 
-    @Test
-    public void whenSSLConfiguredWithProperClientCertsFromYmlAndProperKeyStorePasswordThenAuthenticateSuccessfully(){
 
+    @Test(expected = java.net.SocketException.class)
+    public void whenSSLWithMutualAuthWithNoClientCertsAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
+        int port = 8774;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        connection.put("sslVerifyHostname", false);
+        connection.put("sslKeyStorePassword","changeit");
+        connection.put("sslTrustStorePassword","changeit");
+        connection.put("sslTrustStorePath", "src/test/resources/clientCertWithHttps/nohostverify/server.jks");
+        Server jetty = MockJettyServer.startSSLWithMutualAuth(port, "TLSv1.1", "/clientCertWithHttps/nohostverify/server.jks","JKS","/clientCertWithHttps/nohostverify/client.jks","JKS");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
     }
 
-    @Test
-    public void whenSSLConfiguredWithProperClientCertsFromYmlInPKCS12FormatThenAuthenticateSuccessfully(){
 
-    }
 
     @Test
-    public void whenSSLConfiguredWithProperClientCertsFromYmlAndImproperKeyStorePasswordThenAuthenticationFailure(){
-
+    public void whenSSLWithMutualAuthWithProperClientCertsAndWithProperHostnameThenAuthenticateSuccessfully() throws Exception{
+        int port = 8770;
+        String uri = "https://localhost:" + port + "/test/hello/abey";
+        Map map = new HashMap();
+        List list = new ArrayList();
+        map.put("servers", list);
+        HashMap<String, String> server = new HashMap<String, String>();
+        server.put("uri", uri);
+        Map connection = new HashMap();
+        map.put("connection", connection);
+        connection.put("sslProtocols", "TLSv1.1");
+        connection.put("sslVerifyHostname", true);
+        connection.put("sslKeyStorePassword","changeit");
+        connection.put("sslTrustStorePassword","changeit");
+        connection.put("sslTrustStorePath", "src/test/resources/clientCertWithHttps/hostverify/server.jks");
+        connection.put("sslKeyStorePath","src/test/resources/clientCertWithHttps/hostverify/client.jks");
+        Server jetty = MockJettyServer.startSSLWithMutualAuth(port, "TLSv1.1", "/clientCertWithHttps/hostverify/server.jks","JKS","/clientCertWithHttps/hostverify/client.jks","JKS");
+        HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
+        final CloseableHttpClient client = builder.build();
+        HttpGet get = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(get);
+        response.close();
+        jetty.stop();
     }
 
-    @Test
-    public void whenSSLConfiguredWithImproperClientCertsFromYmlThenAuthenticationFailure(){
 
-    }
 
 
 }

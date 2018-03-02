@@ -72,15 +72,29 @@ public class MockJettyServer {
         return server;
     }
 
-    public static Server startSSLWithClientCertAuth(int port,String keyStorePath,String keyStoreType,String trustStorePath,String trustStoreType){
+    public static Server startSSLWithMutualAuth(int port, String protocol, String keyStorePath, String keyStoreType, String trustStorePath, String trustStoreType){
         SslContextFactory factory = new SslContextFactory();
-        factory.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
-        factory.setKeyStorePassword("changeit");
+        if(protocol!=null){
+            factory.setIncludeProtocols(protocol);
+        }
+        if(keyStorePath != null){
+            factory.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+            factory.setKeyStoreType(keyStoreType);
+            factory.setKeyStorePassword("changeit");
+        }
+        if(trustStorePath != null){
+            factory.setTrustStoreResource(Resource.newClassPathResource(trustStorePath));
+            factory.setTrustStoreType(trustStoreType);
+            factory.setTrustStorePassword("changeit");
+        }
+
+
+        factory.setNeedClientAuth(true);
         SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
         sslConnector.setPort(port);
         final Server server = new Server();
         server.setConnectors(new Connector[]{sslConnector});
-        server.setHandler(handler);
+        server.setHandler(new HelloHandler());
         try {
             server.start();
         } catch (Exception e) {

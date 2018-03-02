@@ -286,7 +286,7 @@ public class Http4ClientBuilder {
                     hostnameVerifier = new BrowserCompatHostnameVerifier();
                 }
                 KeyStore trustStore = loadDefaultTrustStore(propMap);
-                //for client certificates in keystore
+                //for client certificates in keystore aka mutual auth on ssl
                 char[] keyStorePassword = getKeyStorePassword(propMap, connection);
                 KeyStore keyStore = loadKeyStore(propMap,keyStorePassword);
 
