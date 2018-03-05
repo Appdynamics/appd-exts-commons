@@ -16,15 +16,25 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
-import com.appdynamics.extensions.http.Response;
-import com.appdynamics.extensions.http.SimpleHttpClient;
-import com.appdynamics.extensions.http.SimpleHttpClientBuilder;
-import com.appdynamics.extensions.http.UrlBuilder;
+import com.appdynamics.extensions.http.*;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.xml.Xml;
-import org.apache.commons.httpclient.Header;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.sun.javafx.fxml.builder.URLBuilder;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.*;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,16 +43,14 @@ import javax.net.ssl.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
+import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,11 +61,30 @@ public class CustomDashboardUploader {
 
     public void uploadDashboard(String dashboardName, Xml xml, Map<String, String> argsMap, boolean overwrite) {
         setProxyIfApplicable(argsMap);
-        SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(10000).socketTimeout(15000).build();
+
+
+        Map<String, ? super Object> propMap = Maps.newHashMap();
+        List<Map<String, String>> serverList = Lists.newArrayList();
+        serverList.add(argsMap);
+        propMap.put("servers", serverList);
+        Map<String, ? super Object> connectionArgs = Maps.newHashMap();
+        connectionArgs.put("socketTimeout", "15000");
+        connectionArgs.put("connectionTimeout", "10000");
+        String sslProtocols[] = {argsMap.get("ssl-protocol")};
+        connectionArgs.put("sslProtocols", sslProtocols);
+        connectionArgs.put("sslCertCheckEnabled", argsMap.get("sslCertCheckEnabled"));
+        propMap.put("connection", connectionArgs);
+
+        CloseableHttpClient client = Http4ClientBuilder.getBuilder(propMap).build();
+        //SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(10000).socketTimeout(15000).build();
         try {
-            Response response = client.target().path("controller/auth?action=login").get();
-            if (response.getStatus() == 200) {
-                Header[] headers = response.getHeaders();
+            //path("controller/auth?action=login")
+
+            HttpGet get = new HttpGet(UrlBuilder.builder(argsMap).path("controller/auth?action=login").build());
+            HttpResponse response = client.execute(get);
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine != null && statusLine.getStatusCode() == 200) {
+                Header[] headers = response.getAllHeaders();
                 StringBuilder cookies = new StringBuilder();
                 String csrf = null;
                 for (Header header : headers) {
@@ -73,7 +100,7 @@ public class CustomDashboardUploader {
                     }
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
-                boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf);
+                boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap);
                 if (isPresent) {
                     if (overwrite) {
                         uploadFile(dashboardName, xml, argsMap, cookies, csrf);
@@ -83,14 +110,31 @@ public class CustomDashboardUploader {
                 } else {
                     uploadFile(dashboardName, xml, argsMap, cookies, csrf);
                 }
-            } else {
+            } else if(statusLine!= null) {
                 logger.error("Custom Dashboard Upload Failed. The login to the controller is unsuccessful. The response code is {}"
-                        , response.getStatus());
-                logger.error("The response headers are {} and content is {}", Arrays.toString(response.getHeaders()), response.string());
+                        , statusLine.getStatusCode());
+                logger.error("The response headers are {} and content is {}", Arrays.toString(response.getAllHeaders()), response.getEntity());
             }
+        } catch (Exception e){
+          logger.error(e.getMessage());
         } finally {
-            client.close();
+            try {
+                client.close();
+            }
+            catch (Exception e){
+                logger.error(e.getMessage());
+            }
         }
+    }
+
+    private CloseableHttpClient createClient(Map<String, String> argsMap){
+        HttpHost httpHost = new HttpHost(argsMap.get("host"), Integer.parseInt(argsMap.get("port")), "http");
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()), new UsernamePasswordCredentials(argsMap.get("username"), argsMap.get("password")));
+        RequestConfig.Builder configBuilder = RequestConfig.custom()
+                .setConnectTimeout(10000).setSocketTimeout(15000);
+        CloseableHttpClient closeableHttpClient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).setDefaultRequestConfig(configBuilder.build()).build();
+        return closeableHttpClient;
     }
 
     private void setProxyIfApplicable(Map<String, String> argsMap) {
@@ -106,31 +150,39 @@ public class CustomDashboardUploader {
         }
     }
 
-    private boolean isDashboardPresent(SimpleHttpClient client, StringBuilder cookies, String dashboardName, String csrf) {
-        Response response = client.target().path("controller/restui/dashboards/list/getAllDashboardsByType/false")
-                .header("Cookie", cookies.toString())
-                .header("X-CSRF-TOKEN",csrf)
-                .get();
-        if (response.getStatus() == 200) {
-            ArrayNode arrayNode = response.json(ArrayNode.class);
-            boolean isPresent = false;
-            if (arrayNode != null) {
-                for (JsonNode jsonNode : arrayNode) {
-                    String name = getTextValue(jsonNode.get("name"));
-                    if (dashboardName.equals(name)) {
-                        isPresent = true;
+    private boolean isDashboardPresent(CloseableHttpClient client, StringBuilder cookies, String dashboardName, String csrf, Map<String, String> argsMap) {
+        try {
+            HttpGet get = new HttpGet(UrlBuilder.builder(argsMap).path("controller/restui/dashboards/list/getAllDashboardsByType/false").build());
+            get.setHeader("Cookie", cookies.toString());
+            get.setHeader("X-CSRF-TOKEN", csrf);
+            HttpResponse response = client.execute(get);
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine != null && statusLine.getStatusCode() == 200) {
+                HttpEntity entity = response.getEntity();
+                JsonNode arrayNode = new ObjectMapper().readValue(EntityUtils.toString(entity), JsonNode.class);
+                boolean isPresent = false;
+                if (arrayNode != null) {
+                    for (JsonNode jsonNode : arrayNode) {
+                        String name = getTextValue(jsonNode.get("name"));
+                        if (dashboardName.equals(name)) {
+                            isPresent = true;
+                        }
                     }
                 }
+                return isPresent;
+            } else if(statusLine != null) {
+                logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
+                        , statusLine.getStatusCode());
+                logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
+                        "The xml will be written to the logs folder. Please import it to controller manually");
+                logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
+                return true;//Fake that the dashboard exists.
             }
-            return isPresent;
-        } else {
-            logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
-                    , response.getStatus());
-            logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
-                    "The xml will be written to the logs folder. Please import it to controller manually");
-            logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
-            return true;//Fake that the dashboard exists.
         }
+        catch(Exception e){
+            logger.error(e.getMessage());
+        }
+        return false;
     }
 
     private void uploadFile(String instanceName, Xml xml, Map<String, String> argsMap, StringBuilder cookies, String csrf) {

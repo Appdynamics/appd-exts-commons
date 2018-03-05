@@ -33,7 +33,7 @@ public class TaskInputArgs {
     public static final String HOST = "host";
     public static final String URI = "uri";
     public static final String PORT = "port";
-    public static final String USE_SSL = "use-ssl";
+    public static final String USE_SSL = "useSsl";
     public static final String DISABLE_SSL_CERT_VALIDATION = "disable-ssl-cert-validation";
     public static final String METRIC_PREFIX = "metric-prefix";
     public static final String TRUST_STORE_FILE = "trust-store-file";
