@@ -24,7 +24,7 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.HttpHeaders;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -198,10 +198,10 @@ public class WebTarget {
         }
 
         if (accept != null) {
-            get.addRequestHeader(HttpHeaders.ACCEPT, accept);
+            get.addRequestHeader("Accept", accept);
         }
         if (contentType != null) {
-            get.addRequestHeader(HttpHeaders.CONTENT_TYPE, contentType);
+            get.addRequestHeader("Content-Type", contentType);
         }
         if (headers != null) {
             for (String key : headers.keySet()) {

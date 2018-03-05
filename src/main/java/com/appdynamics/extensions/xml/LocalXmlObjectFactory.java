@@ -44,6 +44,7 @@ public class LocalXmlObjectFactory {
         @Override
         protected DocumentBuilder initialValue() {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setIgnoringComments(true);
             try {
                 return factory.newDocumentBuilder();
             } catch (ParserConfigurationException e) {
