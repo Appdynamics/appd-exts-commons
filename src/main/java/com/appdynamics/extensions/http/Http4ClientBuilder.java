@@ -414,13 +414,13 @@ public class Http4ClientBuilder {
         if (!Strings.isNullOrEmpty(sslKeyStorePassword)) {
             return sslKeyStorePassword.toCharArray();
         } else {
-            String sslKeyStorePasswordEncrypted = (String) connection.get("sslKeyStorePasswordEncrypted");
+            String sslKeyStorePasswordEncrypted = (String) connection.get("sslKeyStoreEncryptedPassword");
             String encryptionKey = getEncryptionKey(propMap);
             if (!Strings.isNullOrEmpty(sslKeyStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
                 return new Decryptor(encryptionKey).decrypt(sslKeyStorePasswordEncrypted).toCharArray();
             } else {
                 logger.warn("Returning null password for sslKeyStore. Please set the [connection.sslKeyStorePassword] or " +
-                        "[connection.sslKeyStorePasswordEncrypted + encryptionKey]");
+                        "[connection.sslKeyStoreEncryptedPassword + encryptionKey]");
                 return null;
             }
         }
@@ -432,13 +432,13 @@ public class Http4ClientBuilder {
         if (!Strings.isNullOrEmpty(sslTrustStorePassword)) {
             return sslTrustStorePassword.toCharArray();
         } else {
-            String sslTrustStorePasswordEncrypted = (String) connection.get("sslTrustStorePasswordEncrypted");
+            String sslTrustStorePasswordEncrypted = (String) connection.get("sslTrustStoreEncryptedPassword");
             String encryptionKey = getEncryptionKey(propMap);
             if (!Strings.isNullOrEmpty(sslTrustStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
                 return new Decryptor(encryptionKey).decrypt(sslTrustStorePasswordEncrypted).toCharArray();
             } else {
                 logger.warn("Returning null password for sslTrustStore. Please set the [connection.sslTrustStorePassword] or " +
-                        "[connection.sslTrustStorePasswordEncrypted + encryptionKey]");
+                        "[connection.sslTrustStoreEncryptedPassword + encryptionKey]");
                 return null;
             }
         }
