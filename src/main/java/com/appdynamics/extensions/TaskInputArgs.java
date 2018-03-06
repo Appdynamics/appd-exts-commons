@@ -28,7 +28,7 @@ import java.util.Map;
 public class TaskInputArgs {
     public static final String USER = "username";
     public static final String PASSWORD = "password";
-    public static final String PASSWORD_ENCRYPTED = "passwordEncrypted";
+    public static final String ENCRYPTED_PASSWORD = "encryptedPassword";
     public static final String AUTH_TYPE = "auth-type";
     public static final String HOST = "host";
     public static final String URI = "uri";

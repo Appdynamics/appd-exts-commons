@@ -238,14 +238,14 @@ public class Http4ClientBuilder {
         if (!Strings.isNullOrEmpty(password)) {
             return password;
         } else {
-            String encrypted = (String) propMap.get("passwordEncrypted");
+            String encrypted = (String) propMap.get("encryptedPassword");
             if (!Strings.isNullOrEmpty(encrypted)) {
                 String encryptionKey = getEncryptionKey(config);
                 if (!Strings.isNullOrEmpty(encryptionKey)) {
                     return new Decryptor(encryptionKey).decrypt(encrypted);
                 } else {
                     logger.error("Cannot decrypt the password. Encryption key not set");
-                    throw new RuntimeException("Cannot decrypt [passwordEncrypted], since [encryptionKey] is not set");
+                    throw new RuntimeException("Cannot decrypt [encryptedPassword], since [encryptionKey] is not set");
                 }
             } else {
                 logger.warn("No password set, using empty string");
@@ -371,13 +371,13 @@ public class Http4ClientBuilder {
         if (!Strings.isNullOrEmpty(sslTrustStorePassword)) {
             return sslTrustStorePassword.toCharArray();
         } else {
-            String sslTrustStorePasswordEncrypted = (String) connection.get("sslTrustStorePasswordEncrypted");
+            String sslTrustStoreEncryptedPassword = (String) connection.get("sslTrustStoreEncryptedPassword");
             String encryptionKey = getEncryptionKey(propMap);
-            if (!Strings.isNullOrEmpty(sslTrustStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
-                return new Decryptor(encryptionKey).decrypt(sslTrustStorePasswordEncrypted).toCharArray();
+            if (!Strings.isNullOrEmpty(sslTrustStoreEncryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
+                return new Decryptor(encryptionKey).decrypt(sslTrustStoreEncryptedPassword).toCharArray();
             } else {
                 logger.warn("Returning null password for sslTrustStore. Please set the [connection.sslTrustStorePassword] or " +
-                        "[connection.sslTrustStorePasswordEncrypted + encryptionKey]");
+                        "[connection.sslTrustStoreEncryptedPassword + encryptionKey]");
                 return null;
             }
         }

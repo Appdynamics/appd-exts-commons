@@ -34,8 +34,8 @@ public class CryptoUtil {
     public static String getPassword(Map<String,String> taskArgs){
         if(taskArgs.containsKey(PASSWORD)){
             return taskArgs.get(PASSWORD);
-        } else if(taskArgs.containsKey(PASSWORD_ENCRYPTED)){
-            String encryptedPassword = taskArgs.get(PASSWORD_ENCRYPTED);
+        } else if(taskArgs.containsKey(ENCRYPTED_PASSWORD)){
+            String encryptedPassword = taskArgs.get(ENCRYPTED_PASSWORD);
             String encryptionKey = taskArgs.get(ENCRYPTION_KEY);
             if(Strings.isNullOrEmpty(encryptionKey)){
                 encryptionKey = System.getProperty(SYSTEM_ARG_KEY);
