@@ -295,7 +295,7 @@ public class Http4ClientBuilderTest {
         Assert.assertNull(pwd);
 
         // Enc Pass without password
-        connection.put("sslTrustStorePasswordEncrypted", encrypted);
+        connection.put("sslTrustStoreEncryptedPassword", encrypted);
         pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
         Assert.assertNull(pwd);
 
