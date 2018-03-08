@@ -93,7 +93,8 @@ public class CustomDashboardUploader {
                     }
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
-                boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap, serverStringMap);
+                //boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap, serverStringMap);
+                boolean isPresent = false;
                 if (isPresent) {
                     if (overwrite) {
                         uploadFile(dashboardName, xml, argsMap, serverStringMap, cookies, csrf);
@@ -118,16 +119,6 @@ public class CustomDashboardUploader {
                 logger.error(e.getMessage());
             }
         }
-    }
-
-    private CloseableHttpClient createClient(Map<String, String> argsMap){
-        HttpHost httpHost = new HttpHost(argsMap.get("host"), Integer.parseInt(argsMap.get("port")), "http");
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()), new UsernamePasswordCredentials(argsMap.get("username"), argsMap.get("password")));
-        RequestConfig.Builder configBuilder = RequestConfig.custom()
-                .setConnectTimeout(10000).setSocketTimeout(15000);
-        CloseableHttpClient closeableHttpClient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).setDefaultRequestConfig(configBuilder.build()).build();
-        return closeableHttpClient;
     }
 
     private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {
@@ -201,8 +192,8 @@ public class CustomDashboardUploader {
         URL url = new URL(urlStr);
         if (argsMap.containsKey("proxy")) {
             Map<String, ?> proxyMap = (Map<String, ?>)argsMap.get("proxy");
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String)proxyMap.get(TaskInputArgs.PROXY_HOST)
-                    , Integer.parseInt((String)proxyMap.get(TaskInputArgs.PROXY_PORT))));
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String)proxyMap.get(TaskInputArgs.HOST)
+                    , Integer.parseInt((String)proxyMap.get(TaskInputArgs.PORT))));
             connection = (HttpURLConnection) url.openConnection(proxy);
             logger.debug("Created an HttpConnection for Fileupload with a proxy {}", proxy);
         } else {

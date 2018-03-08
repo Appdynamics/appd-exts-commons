@@ -15,7 +15,16 @@
 
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.xml.Xml;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by abey.tom on 10/13/15.
@@ -24,14 +33,29 @@ public class CustomDashboardUploaderTest {
 
     @Test
     public void testUploadDashboard() throws Exception {
-//        String content = FileUtils.readFileToString(new File("/Users/abey.tom/tmp/Junk/Docker Monitor-UnixSocket.xml"));
-//        argsMap.put(TaskInputArgs.HOST, "192.168.1.132");
-//        argsMap.put(TaskInputArgs.PORT, "8090");
-//        argsMap.put(TaskInputArgs.USE_SSL, "false");
-//        argsMap.put(TaskInputArgs.USER, "abey@customer1");
-//        argsMap.put(TaskInputArgs.PASSWORD, "welcome");
-//        argsMap.put(TaskInputArgs.SSL_PROTOCOL, "TLSv1.2");
-//        argsMap.put("sslCertCheckEnabled", "false");
-//        new CustomDashboardUploader().uploadDashboard("Test1", Xml.fromString(content),argsMap,false);
+        /*String content = FileUtils.readFileToString(new File("src/test/resources/dashboard/test-custom-dashboard-template.xml"));
+
+        Map<String,? super Object> argsMap = new HashMap<>();
+
+        List<Map<String, ?>> serverList = new ArrayList<>();
+        Map<String, ? super Object> serverMap = new HashMap<>();
+        serverMap.put(TaskInputArgs.HOST, "");
+        serverMap.put(TaskInputArgs.PORT, "");
+        serverMap.put(TaskInputArgs.USE_SSL, false);
+        serverMap.put(TaskInputArgs.USER, "");
+        serverMap.put(TaskInputArgs.PASSWORD, "");
+        serverList.add(serverMap);
+        argsMap.put("servers", serverList);
+
+        Map<String, ? super Object> connectionMap = new HashMap<>();
+        String[] sslProtocols = {"TLSv1.2"};
+        connectionMap.put(TaskInputArgs.SSL_PROTOCOL, sslProtocols);
+        connectionMap.put("sslCertCheckEnabled", false);
+        connectionMap.put("connectTimeout", 10000);
+        connectionMap.put("socketTimeout", 15000);
+        argsMap.put("connection", connectionMap);
+
+
+        new CustomDashboardUploader().uploadDashboard("Test1", Xml.fromString(content),argsMap,false);*/
     }
 }
