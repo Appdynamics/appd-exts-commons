@@ -449,7 +449,7 @@ public class Http4ClientBuilderTest {
     }
 
     @Test(expected = javax.net.ssl.SSLHandshakeException.class)
-    public void whenSSLWithMutualAuthAndIncorrectPasswordAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
+    public void whenSSLWithMutualAuthAndNoPasswordAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
         int port = 8769;
         String uri = "https://localhost:" + port + "/test/hello/abey";
         Map map = new HashMap();
