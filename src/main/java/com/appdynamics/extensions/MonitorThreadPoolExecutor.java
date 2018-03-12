@@ -16,6 +16,7 @@
 package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.util.AssertUtils;
+import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
@@ -53,8 +54,13 @@ public class MonitorThreadPoolExecutor implements MonitorExecutorService {
 
     @Override
     public void scheduleAtFixedRate(String name,Runnable task, int initialDelaySeconds, int taskDelaySeconds, TimeUnit seconds) {
-        ScheduledThreadPoolExecutor scheduledExecutor = (ScheduledThreadPoolExecutor)executor;
-        scheduledExecutor.scheduleAtFixedRate(wrapWithRunnable(name,task),initialDelaySeconds,taskDelaySeconds,seconds);
+        if(executor instanceof ScheduledThreadPoolExecutor) {
+            ScheduledThreadPoolExecutor scheduledExecutor = (ScheduledThreadPoolExecutor) executor;
+            scheduledExecutor.scheduleAtFixedRate(wrapWithRunnable(name, task), initialDelaySeconds, taskDelaySeconds, seconds);
+        }
+        else {
+            throw new RuntimeException("The ThreadPoolExecutor being used does not support scheduleAtFixedRate() method");
+        }
     }
 
     @Override

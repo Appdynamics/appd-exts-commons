@@ -29,6 +29,8 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -93,10 +95,10 @@ public class CustomDashboardUploader {
                     }
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
-                //boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap, serverStringMap);
-                boolean isPresent = false;
+                boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap, serverStringMap);
                 if (isPresent) {
                     if (overwrite) {
+                        //#TODO Eventhough we intend to overwrite, this will actually create a new dashboard.
                         uploadFile(dashboardName, xml, argsMap, serverStringMap, cookies, csrf);
                     } else {
                         logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
@@ -138,7 +140,7 @@ public class CustomDashboardUploader {
 
     private boolean isDashboardPresent(CloseableHttpClient client, StringBuilder cookies, String dashboardName, String csrf, Map<String, ?> argsMap, Map<String, String> serverStringMap) {
         try {
-            HttpGet get = new HttpGet(UrlBuilder.builder(serverStringMap).path("controller/restui/dashboards/list/getAllDashboardsByType/false").build());
+            HttpGet get = new HttpGet(UrlBuilder.builder(serverStringMap).path("controller/restui/dashboards/getAllDashboardsByType/false").build());
             get.setHeader("Cookie", cookies.toString());
             get.setHeader("X-CSRF-TOKEN", csrf);
             HttpResponse response = client.execute(get);
@@ -179,6 +181,7 @@ public class CustomDashboardUploader {
         }
     }
 
+    //#TODO use the same httpClient created above to call CustomDashboardImportExportServlet.
     public void uploadFile(String dashboardName, Xml xml, StringBuilder cookies, Map<String, ?> argsMap, Map<String, String> serverStringMap, String csrf) throws IOException {
         String fileName = dashboardName + ".xml";
         String twoHyphens = "--";
@@ -213,6 +216,11 @@ public class CustomDashboardUploader {
         connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
         connection.setRequestProperty("Cookie", cookies.toString());
         DataOutputStream request = new DataOutputStream(connection.getOutputStream());
+
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        /*builder.addTextBody();
+        builder.addTextBody();
+        builder.addTextBody();*/
 
         request.writeBytes(twoHyphens + boundary + lineEnd);
         request.writeBytes("Content-Disposition: form-data; name=\"" + dashboardName + "\";filename=\"" + fileName + "\"" + lineEnd);
