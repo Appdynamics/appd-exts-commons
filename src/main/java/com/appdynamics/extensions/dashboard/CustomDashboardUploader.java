@@ -209,19 +209,13 @@ public class CustomDashboardUploader {
         }
         connection.setUseCaches(false);
         connection.setDoOutput(true);
-
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Connection", "Keep-Alive");
         connection.setRequestProperty("Cache-Control", "no-cache");
         connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
         connection.setRequestProperty("Cookie", cookies.toString());
+
         DataOutputStream request = new DataOutputStream(connection.getOutputStream());
-
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        /*builder.addTextBody();
-        builder.addTextBody();
-        builder.addTextBody();*/
-
         request.writeBytes(twoHyphens + boundary + lineEnd);
         request.writeBytes("Content-Disposition: form-data; name=\"" + dashboardName + "\";filename=\"" + fileName + "\"" + lineEnd);
         request.writeBytes("Content-Type: text/xml" + lineEnd);
