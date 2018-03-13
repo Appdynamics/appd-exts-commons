@@ -447,7 +447,11 @@ public class Http4ClientBuilder {
         if (!Strings.isNullOrEmpty(sslTrustStorePassword)) {
             return sslTrustStorePassword.toCharArray();
         } else {
+<<<<<<< HEAD
+            String sslTrustStorePasswordEncrypted = (String) connection.get("sslTrustStoreEncryptedPassword");
+=======
             String sslTrustStoreEncryptedPassword = (String) connection.get("sslTrustStoreEncryptedPassword");
+>>>>>>> v2.0.3.1
             String encryptionKey = getEncryptionKey(propMap);
             if (!Strings.isNullOrEmpty(sslTrustStoreEncryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
                 return new Decryptor(encryptionKey).decrypt(sslTrustStoreEncryptedPassword).toCharArray();
