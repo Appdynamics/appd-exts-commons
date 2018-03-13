@@ -1,12 +1,17 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.0.4 - Mar 13, 2018
+1. Implemented mutual SSL Authentication
 
-## 2.0.3.1 - Feb 27, 2018
+## 2.0.3.1 - Feb 27, 2018 (UNRELEASED --> MERGED with v2.0.4)
 1. Added args(task arguments from monitor.xml) as an argument to the initializeMoreStuff() method.
 2. Added Copyright header to all the files.
-3. Removed jsr dependency from pom.xml
+3. Removed jsr dependency from pom.xml.
+4. Packaged LICENSE.txt and NOTICE.txt.
+5. Made the names for passwordEncrypted and encryptionKey consistent.
+6. Refactored dashboard module to be consistent with CloseableHttpClientUsage(except the uploadFile() method).
 
-## 2.0.3  - Feb 02, 2018
+## 2.0.3  - Feb 02, 2018 (UNRELEASED --> MERGED with v2.0.4)
 1. Provided a method in ABaseMonitor that can be used to set FileWatchListener callback in the setConfigYml() method of MonitorConfiguration when it is called in the initialize() method of ABaseMonitor.
 2. Added changes from the commons version 1.6.6.1, related to CSRF token for accessing controller APIs in the CustomDashboardUploader.
 
