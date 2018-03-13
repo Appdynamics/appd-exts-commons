@@ -2,7 +2,7 @@ servers:
   - uri: ""
     username: ""
     password: ""
-    passwordEncrypted: ""
+    encryptedPassword: ""
 
     # Uri is preferred instead of host-port-useSsl combo.
   - host: "" # Avoid this, use uri instead
@@ -10,7 +10,7 @@ servers:
     useSsl: false # Avoid this, use uri instead.
     username: ""
     password: ""
-    passwordEncrypted: ""
+    encryptedPassword: ""
 
 connection:
   socketTimeout: 3000 # Read Timeout
@@ -24,7 +24,7 @@ connection:
   sslTrustStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-cacerts.jks
                         # The prop "-Dappdynamics.extensions.truststore.path=/path/cacerts" takes precedence if set
   sslTrustStorePassword: ""
-  sslTrustStorePasswordEncrypted: ""
+  sslTrustStoreEncryptedPassword: ""
   enableCookies: false #Defaults to false
   enablePreemptiveAuth: true
 
@@ -32,7 +32,7 @@ proxy:
   uri: ""
   username: ""
   password: ""
-  passwordEncrypted: ""
+  encryptedPassword: ""
 
 # Common for all the encrypted passwords in this file.
 encryptionKey: ""
