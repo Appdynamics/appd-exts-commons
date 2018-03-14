@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2018 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.TaskInputArgs;
@@ -44,7 +59,7 @@ import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyStore;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -223,14 +238,14 @@ public class Http4ClientBuilder {
         if (!Strings.isNullOrEmpty(password)) {
             return password;
         } else {
-            String encrypted = (String) propMap.get("passwordEncrypted");
+            String encrypted = (String) propMap.get("encryptedPassword");
             if (!Strings.isNullOrEmpty(encrypted)) {
                 String encryptionKey = getEncryptionKey(config);
                 if (!Strings.isNullOrEmpty(encryptionKey)) {
                     return new Decryptor(encryptionKey).decrypt(encrypted);
                 } else {
                     logger.error("Cannot decrypt the password. Encryption key not set");
-                    throw new RuntimeException("Cannot decrypt [passwordEncrypted], since [encryptionKey] is not set");
+                    throw new RuntimeException("Cannot decrypt [encryptedPassword], since [encryptionKey] is not set");
                 }
             } else {
                 logger.warn("No password set, using empty string");
@@ -285,10 +300,13 @@ public class Http4ClientBuilder {
                 } else {
                     hostnameVerifier = new BrowserCompatHostnameVerifier();
                 }
-                KeyStore keyStore = loadDefaultTrustStore(propMap);
+                KeyStore trustStore = loadDefaultTrustStore(propMap);
+                //for client certificates in keystore aka mutual auth on ssl
+                char[] keyStorePassword = getKeyStorePassword(propMap, connection);
+                KeyStore keyStore = loadKeyStore(propMap,keyStorePassword);
+
                 try {
-                    SSLContext sslContext = SSLContexts.custom()
-                            .loadTrustMaterial(keyStore).build();
+                    SSLContext sslContext = getSslContext(trustStore,keyStore,keyStorePassword);
                     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
                             sslContext,
                             sslProtocols,
@@ -311,12 +329,45 @@ public class Http4ClientBuilder {
         }
     }
 
+
+    private static SSLContext getSslContext(KeyStore trustStore, KeyStore keyStore,char[] keyStorePassword) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        SSLContextBuilder sslContextBuilder =  SSLContexts.custom();
+        if(trustStore != null){
+            sslContextBuilder.loadTrustMaterial(trustStore);
+        }
+        if(keyStore != null){
+            sslContextBuilder.loadKeyMaterial(keyStore,keyStorePassword);
+        }
+        return sslContextBuilder.build();
+    }
+
+    protected static KeyStore loadKeyStore(Map<String, ?> propMap,char[] keystorePassword) {
+        Map<String, ?> connection = (Map<String, ?>) propMap.get("connection");
+        File file = resolveKeyStorePath(connection);
+        if (file != null && file.exists()) {
+            try {
+                logger.debug("Loading the keystore from [{}]", file.getAbsolutePath());
+                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+                keystore.load(new FileInputStream(file), keystorePassword);
+                return keystore;
+            } catch (Exception e) {
+                logger.error("Error while loading the keystore from " + file.getAbsolutePath(), e);
+            }
+        } else {
+            logger.info("Couldn't resolve the keystore for extensions. The default jre keystore will be used");
+        }
+        return null;
+    }
+
+
+
+
     protected static KeyStore loadDefaultTrustStore(Map<String, ?> propMap) {
         Map<String, ?> connection = (Map<String, ?>) propMap.get("connection");
         File file = resolveTrustStorePath(connection);
         if (file != null && file.exists()) {
             try {
-                logger.debug("Loading the keystore from [{}]", file.getAbsolutePath());
+                logger.debug("Loading the truststore from [{}]", file.getAbsolutePath());
                 KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
                 char[] password = getTrustStorePassword(propMap, connection);
                 keystore.load(new FileInputStream(file), password);
@@ -329,6 +380,28 @@ public class Http4ClientBuilder {
         }
         return null;
     }
+
+    protected static File resolveKeyStorePath(Map<String, ?> connection) {
+        String property = System.getProperty("appdynamics.extensions.keystore.path");
+        File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
+        File file = PathResolver.getFile(property, installDir);
+        logger.debug("The system property [appdynamics.extensions.keystore.path] with value [{}] is resolved to file [{}]"
+                , property, getPath(file));
+        if (file == null || !file.exists()) {
+            String sslKeyStore = (String) connection.get("sslKeyStorePath");
+            file = PathResolver.getFile(sslKeyStore, installDir);
+            logger.debug("The config property [sslKeyStorePath] with value [{}] is resolved to file [{}]"
+                    , sslKeyStore, getPath(file));
+        }
+        if (file == null || !file.exists()) {
+            file = PathResolver.getFile("conf/extensions-clientcerts.jks", installDir);
+            if (file == null || !file.exists()) {
+                logger.debug("The sslKeyStorePath [{}] doesn't exist", getPath(file));
+            }
+        }
+        return file;
+    }
+
 
     protected static File resolveTrustStorePath(Map<String, ?> connection) {
         String property = System.getProperty("appdynamics.extensions.truststore.path");
@@ -351,18 +424,36 @@ public class Http4ClientBuilder {
         return file;
     }
 
+    protected static char[] getKeyStorePassword(Map<String, ?> propMap, Map<String, ?> connection) {
+        String sslKeyStorePassword = (String) connection.get("sslKeyStorePassword");
+        if (!Strings.isNullOrEmpty(sslKeyStorePassword)) {
+            return sslKeyStorePassword.toCharArray();
+        } else {
+            String sslKeyStorePasswordEncrypted = (String) connection.get("sslKeyStoreEncryptedPassword");
+            String encryptionKey = getEncryptionKey(propMap);
+            if (!Strings.isNullOrEmpty(sslKeyStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
+                return new Decryptor(encryptionKey).decrypt(sslKeyStorePasswordEncrypted).toCharArray();
+            } else {
+                logger.warn("Returning null password for sslKeyStore. Please set the [connection.sslKeyStorePassword] or " +
+                        "[connection.sslKeyStoreEncryptedPassword + encryptionKey]");
+                return null;
+            }
+        }
+    }
+
+
     protected static char[] getTrustStorePassword(Map<String, ?> propMap, Map<String, ?> connection) {
         String sslTrustStorePassword = (String) connection.get("sslTrustStorePassword");
         if (!Strings.isNullOrEmpty(sslTrustStorePassword)) {
             return sslTrustStorePassword.toCharArray();
         } else {
-            String sslTrustStorePasswordEncrypted = (String) connection.get("sslTrustStorePasswordEncrypted");
+            String sslTrustStoreEncryptedPassword = (String) connection.get("sslTrustStoreEncryptedPassword");
             String encryptionKey = getEncryptionKey(propMap);
-            if (!Strings.isNullOrEmpty(sslTrustStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
-                return new Decryptor(encryptionKey).decrypt(sslTrustStorePasswordEncrypted).toCharArray();
+            if (!Strings.isNullOrEmpty(sslTrustStoreEncryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
+                return new Decryptor(encryptionKey).decrypt(sslTrustStoreEncryptedPassword).toCharArray();
             } else {
                 logger.warn("Returning null password for sslTrustStore. Please set the [connection.sslTrustStorePassword] or " +
-                        "[connection.sslTrustStorePasswordEncrypted + encryptionKey]");
+                        "[connection.sslTrustStoreEncryptedPassword + encryptionKey]");
                 return null;
             }
         }

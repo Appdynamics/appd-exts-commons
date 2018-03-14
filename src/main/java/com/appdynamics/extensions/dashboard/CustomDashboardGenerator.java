@@ -1,10 +1,27 @@
+/*
+ * Copyright (c) 2018 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.xml.Xml;
+import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
@@ -173,7 +190,7 @@ public class CustomDashboardGenerator {
 
     protected void persistDashboard(String dashboardName, Xml xml) {
         if (getBoolean(dashboardConfig, "uploadDashboard")) {
-            Map<String, String> argsMap = getArgsMap();
+            Map<String, ? super Object> argsMap = getArgsMap();
             dashboardUploader.uploadDashboard(dashboardName, xml, argsMap,
                     getBoolean(dashboardConfig, "overwriteDashboard"));
         }
@@ -181,8 +198,8 @@ public class CustomDashboardGenerator {
     }
 
 
-    protected Map<String, String> getArgsMap() {
-        Map<String, String> argsMap = new HashMap<String, String>();
+    protected Map<String, ? super Object> getArgsMap() {
+        /*Map<String, String> argsMap = new HashMap<String, String>();
         argsMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
         argsMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.getControllerPort()));
         argsMap.put(TaskInputArgs.USE_SSL, String.valueOf(agentEnvResolver.isControllerUseSSL()));
@@ -195,6 +212,31 @@ public class CustomDashboardGenerator {
         } else {
             argsMap.put("sslCertCheckEnabled", "true");
         }
+        return argsMap;*/
+
+        Map<String, ? super Object> argsMap = new HashMap<>();
+
+        List<Map<String, ? super Object>> serverList = Lists.newArrayList();
+        Map<String, ? super Object> serverMap = new HashMap<>();
+        serverMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
+        serverMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.isControllerUseSSL()));
+        serverMap.put(TaskInputArgs.USE_SSL, agentEnvResolver.isControllerUseSSL());
+        serverMap.put(TaskInputArgs.USER, getUserName());
+        serverMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
+        serverList.add(serverMap);
+        argsMap.put("servers", serverList);
+
+        Map<String, ? super Object> connectionMap = new HashMap<>();
+        String[] sslProtocols = {"TLSv1.2"};
+        connectionMap.put(TaskInputArgs.SSL_PROTOCOL, sslProtocols);
+        Object sslCertCheckEnabled = dashboardConfig.get("sslCertCheckEnabled");
+        if (sslCertCheckEnabled != null) {
+            connectionMap.put("sslCertCheckEnabled", Boolean.valueOf(sslCertCheckEnabled.toString()));
+        } else {
+            connectionMap.put("sslCertCheckEnabled", true);
+        }
+        argsMap.put("connection", connectionMap);
+
         return argsMap;
     }
 

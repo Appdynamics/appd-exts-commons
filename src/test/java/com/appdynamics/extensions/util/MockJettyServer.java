@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2018 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.util;
 
 import com.google.common.base.Strings;
@@ -59,6 +74,37 @@ public class MockJettyServer {
         }
         factory.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
         factory.setKeyStorePassword("changeit");
+        SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
+        sslConnector.setPort(port);
+        final Server server = new Server();
+        server.setConnectors(new Connector[]{sslConnector});
+        server.setHandler(handler);
+        try {
+            server.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return server;
+    }
+
+    public static Server startSSLWithMutualAuth(int port, String protocol, String keyStorePath, String keyStoreType, String trustStorePath, String trustStoreType){
+        SslContextFactory factory = new SslContextFactory();
+        if(protocol!=null){
+            factory.setIncludeProtocols(protocol);
+        }
+        if(keyStorePath != null){
+            factory.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+            factory.setKeyStoreType(keyStoreType);
+            factory.setKeyStorePassword("changeit");
+        }
+        if(trustStorePath != null){
+            factory.setTrustStoreResource(Resource.newClassPathResource(trustStorePath));
+            factory.setTrustStoreType(trustStoreType);
+            factory.setTrustStorePassword("changeit");
+        }
+
+
+        factory.setNeedClientAuth(true);
         SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
         sslConnector.setPort(port);
         final Server server = new Server();
