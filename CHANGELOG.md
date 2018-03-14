@@ -10,6 +10,7 @@
 4. Packaged LICENSE.txt and NOTICE.txt.
 5. Made the names for passwordEncrypted and encryptionKey consistent.
 6. Refactored dashboard module to be consistent with CloseableHttpClientUsage(except the uploadFile() method).
+7. Fixed the bug caused by casting ThreadPoolExecutor to ScheduledThreadPoolExecutor.
 
 ## 2.0.3  - Feb 02, 2018 (UNRELEASED --> MERGED with v2.0.4)
 1. Provided a method in ABaseMonitor that can be used to set FileWatchListener callback in the setConfigYml() method of MonitorConfiguration when it is called in the initialize() method of ABaseMonitor.
