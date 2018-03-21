@@ -34,28 +34,33 @@ public class MaxMetricLimitCheck implements RunAlwaysCheck {
     @Override
     public void check() {
 
-        long start = System.currentTimeMillis();
+        if (!stop) {
 
-        logger.info("Starting MaxMetricLimitCheck");
+            long start = System.currentTimeMillis();
 
-        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
-        if (directory.exists()) {
-            File logs = new File(directory, "logs");
-            //This is taking around 500ms for 25MB log files ( 5 files * 5 MB )
-            List<Line> metricLimitErrorLogLines = Unix4j.cd(logs).grep(Grep.Options.lineNumber, MAX_METRIC_ERROR_LINE, "*.log*").toLineList();
+            logger.info("Starting MaxMetricLimitCheck");
 
-            if (metricLimitErrorLogLines != null && metricLimitErrorLogLines.size() > 0) {
+            File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
+            if (directory.exists()) {
+                File logs = new File(directory, "logs");
+                //This is taking around 500ms for 25MB log files ( 5 files * 5 MB )
+                List<Line> metricLimitErrorLogLines = Unix4j.cd(logs).grep(Grep.Options.lineNumber, MAX_METRIC_ERROR_LINE, "*.log*").toLineList();
 
-                logger.error("Found metric limit reached error, below are the details");
-                for (Line line : metricLimitErrorLogLines) {
-                    logger.error(line.toString());
+                if (metricLimitErrorLogLines != null && metricLimitErrorLogLines.size() > 0) {
+
+                    logger.error("Found metric limit reached error, below are the details");
+                    for (Line line : metricLimitErrorLogLines) {
+                        logger.error(line.toString());
+                    }
+                    stop = true;
                 }
-                stop = true;
             }
-        }
 
-        long diff = System.currentTimeMillis() - start;
-        logger.info("MaxMetricLimitCheck took {} ms to complete ", diff);
+            long diff = System.currentTimeMillis() - start;
+            logger.info("MaxMetricLimitCheck took {} ms to complete ", diff);
+        } else {
+            logger.info("Metric limit is reached and the message logged. Not executing MaxMetricLimitCheck.");
+        }
     }
 
     @Override

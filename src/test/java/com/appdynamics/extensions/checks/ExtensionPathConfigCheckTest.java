@@ -60,7 +60,7 @@ public class ExtensionPathConfigCheckTest {
         ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, null, logger);
         extensionPathConfigCheck.check();
 
-        Mockito.verify(logger, Mockito.times(1)).warn(logCaptor.capture());
+        Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
 
         String value = logCaptor.getValue();
         Assert.assertEquals(value, "No need to configure tier-id as SIM is enabled. Please use the alternate metric prefix.");
@@ -78,7 +78,7 @@ public class ExtensionPathConfigCheckTest {
         ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, null, logger);
         extensionPathConfigCheck.check();
 
-        Mockito.verify(logger, Mockito.times(1)).warn(logCaptor.capture());
+        Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
 
         String value = logCaptor.getValue();
         Assert.assertEquals(value, "Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers");

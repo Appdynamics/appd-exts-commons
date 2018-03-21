@@ -23,22 +23,37 @@ public class HealthCheckModule {
     public static final Logger logger = LoggerFactory.getLogger(HealthCheckModule.class);
     private Map<String, MonitorHealthCheck> healthChecksForMonitors = new ConcurrentHashMap<>();
     private ControllerInfo controllerInfo;
+    private MonitorExecutorService executorService;
 
     public HealthCheckModule() {
         controllerInfo = getControllerInfo();
+
     }
 
 
     public void initMATroubleshootChecks(String monitorName, File installDir, Map<String, ?> config) {
 
+        if (executorService != null) {
+            executorService.shutdown();
+            executorService = null;
+        }
+
+        /**
+         *  Initializing the thread pool with 2 threads.
+         *    one thread will be used for all the normal checks
+         *    second thread will be used for run-always check
+         *
+         **/
+        executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(2));
+
 
         Boolean enableHealthChecks = (Boolean) config.get("enableHealthChecks");
 
-        //TODO we should enableHealthChecks to be TRUE always. We can have a way to disable it. Otherwise we will have to enable it individually
-        //for all extensions.
-        if (enableHealthChecks == null || !enableHealthChecks) {
+        if (enableHealthChecks != null && !enableHealthChecks) {
             logger.info("Not initializing extension health checks as it is disabled in config");
             return;
+        } else {
+            logger.info("Running extension health checks");
         }
 
         if (monitorName == null) {
@@ -50,20 +65,20 @@ public class HealthCheckModule {
 
             MonitorHealthCheck healthCheckMonitor = healthChecksForMonitors.get(monitorName);
             if (healthCheckMonitor == null) {
-                healthCheckMonitor = new MonitorHealthCheck(monitorName, installDir);
+                healthCheckMonitor = new MonitorHealthCheck(monitorName, installDir, executorService);
                 healthChecksForMonitors.put(monitorName, healthCheckMonitor);
-
-                ControllerRequestHandler controllerRequestHandler = new ControllerRequestHandler(controllerInfo, MonitorHealthCheck.logger);
-
-                healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
-                healthCheckMonitor.registerChecks(new MaxMetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
-                healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerRequestHandler, MonitorHealthCheck.logger));
-                healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerRequestHandler, MonitorHealthCheck.logger));
+            } else {
+                healthCheckMonitor.updateMonitorExecutorService(executorService);
+                healthCheckMonitor.clearAllChecks();
             }
+            ControllerRequestHandler controllerRequestHandler = new ControllerRequestHandler(controllerInfo, MonitorHealthCheck.logger);
 
-            //#TODO BUG here..whenever the config changes there will be a new threadpool executor created. You should check for that.
-            // TODO Why can't you use the MonitorExecutionService from monitor configuration here.
-            MonitorExecutorService executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(1));
+            healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new MaxMetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerRequestHandler, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerRequestHandler, MonitorHealthCheck.logger));
+
+
             executorService.submit("HealthCheckMonitor", healthCheckMonitor);
 
         } catch (Exception e) {

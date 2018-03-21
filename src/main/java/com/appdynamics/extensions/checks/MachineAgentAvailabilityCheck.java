@@ -68,7 +68,6 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(responseString);
 
-            //#TODO please create a test case for this with a sample JSON output.
             JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
             return valueNode.get(0).asInt();
         } catch (InvalidResponseException e) {
