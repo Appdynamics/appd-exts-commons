@@ -74,6 +74,7 @@ public class TasksExecutionServiceProvider {
         return this.metricWriteHelper;
     }
 
+    //TODO Remove this getter
     public MonitorConfiguration getMonitorConfiguration(){
         return this.aBaseMonitor.configuration;
     }

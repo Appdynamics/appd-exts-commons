@@ -15,7 +15,12 @@
 
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.ExtensionConfiguration;
+import com.appdynamics.extensions.conf.ExtensionContext;
+import com.appdynamics.extensions.conf.modules.FileWatchListenerModule;
+import com.appdynamics.extensions.conf.modules.WorkBenchModule;
+import com.appdynamics.extensions.file.FileWatchListener;
+import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
@@ -35,7 +40,7 @@ import java.util.Map;
  * <p>An {@code ABaseMonitor} is a wrapper on top of
  * {@link AManagedMonitor} to remove the boiler plate code of
  * creating a {@link AMonitorJob} and initializing the
- * {@link MonitorConfiguration}.
+ * {@link }.
  *
  * <p>The MA or SIM agent loads all the {@link AManagedMonitor}s
  * from their respective subdirectories in the monitors directory
@@ -91,7 +96,13 @@ public abstract class ABaseMonitor extends AManagedMonitor{
      * A configuration object that reads the monitor's config file
      * and initializes the different bits required by the monitor.
      */
-    protected MonitorConfiguration configuration;
+    //protected MonitorConfiguration configuration;
+
+    private File installDir;
+
+    protected ExtensionConfiguration configuration;
+
+    protected ExtensionContext context;
 
     /**
      * A runnable which does all the leg work for fetching the
@@ -104,8 +115,29 @@ public abstract class ABaseMonitor extends AManagedMonitor{
         logger.info("Using {} Version [{}]",monitorName, getImplementationVersion());
     }
 
-    protected void initialize(Map<String, String> args) {
-        if(configuration == null){
+    protected void initialize(final Map<String, String> args) {
+        if(context == null){
+            monitorJob = createMonitorJob();
+            installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
+
+            configuration = new ExtensionConfiguration(getDefaultMetricPrefix(), installDir);
+            context = new ExtensionContext(monitorName, configuration);
+
+
+            FileWatchListener fileWatchListener = new FileWatchListener() {
+                @Override
+                public void onFileChange(File file) {
+                    configuration.setConfigYml(args.get("config-file"));
+                    context.initialize(monitorJob);
+                    onConfigReload(file);
+                }
+            };
+            configuration.registerListener(args.get("config-file"), fileWatchListener, context);
+            initializeMoreStuff(args);
+        }
+
+
+        /*if(configuration == null){
             monitorJob = createMonitorJob();
             MonitorConfiguration conf = new MonitorConfiguration(monitorName,getDefaultMetricPrefix(), monitorJob);
             conf.setConfigYml(args.get("config-file"), new MonitorConfiguration.FileWatchListener() {
@@ -116,7 +148,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
             });
             initializeMoreStuff(args, conf);
             this.configuration = conf;
-        }
+        }*/
     }
 
     protected void onConfigReload(File file){};
@@ -128,9 +160,9 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     /**
      * A placeholder method which should be overridden if there are
      * custom objects to be initialized in the monitor.
-     * @param conf
+     * @param
      */
-    protected void initializeMoreStuff(Map<String, String> args, MonitorConfiguration conf) {
+    protected void initializeMoreStuff(Map<String, String> args) {
         ;
     }
 
@@ -155,7 +187,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     protected void executeMonitor() {
         if(configuration.isEnabled()){
-            if(configuration.isScheduledModeEnabled()){ //scheduled mode
+            if(context.isScheduledModeEnabled()){ //scheduled mode
                 logger.debug("Task scheduler is enabled, printing the metrics from the cache");
                 monitorJob.printAllFromCache();
             }
@@ -175,8 +207,16 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     public abstract String getMonitorName();
 
-    public MonitorConfiguration getConfiguration(){
+    /*public MonitorConfiguration getConfiguration(){
         return configuration;
+    }*/
+
+    public ExtensionConfiguration getExtensionConfiguration() {
+        return configuration;
+    }
+
+    public ExtensionContext getContext(){
+        return context;
     }
 
     protected abstract void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider);
@@ -186,4 +226,5 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     protected void onComplete() {
         logger.info("Finished processing all tasks in the job for {}",getMonitorName());
     }
+
 }

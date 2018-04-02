@@ -11,7 +11,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 
 package com.appdynamics.extensions.conf;
 
@@ -40,6 +41,7 @@ import java.io.FileInputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
+*/
 /**
  * Created by abey.tom on 3/14/16.
  * <p/>
@@ -47,7 +49,8 @@ import java.util.concurrent.ConcurrentMap;
  * <p/>
  * TODO checkIfInitialized should be called after each reload of configuration
  * TODO have the default-yml in the codebase and merge it with the other YML
- */
+ *//*
+
 public class MonitorConfiguration {
     public static final Logger logger = LoggerFactory.getLogger(MonitorConfiguration.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
@@ -292,3 +295,4 @@ public class MonitorConfiguration {
     }
 
 }
+*/

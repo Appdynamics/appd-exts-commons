@@ -1,0 +1,126 @@
+/*
+ *  Copyright 2018. AppDynamics LLC and its affiliates.
+ * All Rights Reserved.
+ * This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+ * The copyright notice above does not evidence any actual or intended publication of such source code.
+ */
+
+package com.appdynamics.extensions.conf;
+
+import com.appdynamics.extensions.AMonitorJob;
+import com.appdynamics.extensions.conf.modules.*;
+import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.metrics.PerMinValueCalculator;
+import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
+import com.singularity.ee.agent.systemagent.api.MetricWriter;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+
+/**
+ * Created by venkata.konala on 3/29/18.
+ */
+public class ExtensionContext {
+
+    public static final Logger logger = LoggerFactory.getLogger(ExtensionContext.class);
+    public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
+    private String monitorName;
+    private ExtensionConfiguration extensionConfiguration;
+    private WorkBenchModule workBenchModule;
+    private HttpClientModule httpClientModule;
+    private MonitorExecutorServiceModule monitorExecutorServiceModule;
+    private JobScheduleModule jobScheduleModule;
+    private CacheModule cacheModule;
+    private DerivedMetricsModule derivedMetricsModule;
+    private PerMinValueCalculatorModule perMinValueCalculatorModule;
+
+    public ExtensionContext(String monitorName, ExtensionConfiguration extensionConfiguration){
+        this.extensionConfiguration = extensionConfiguration;
+        this.monitorName = monitorName;
+        workBenchModule = new WorkBenchModule();
+        httpClientModule = new HttpClientModule();
+        monitorExecutorServiceModule = new MonitorExecutorServiceModule();
+        jobScheduleModule = new JobScheduleModule();
+        cacheModule = new CacheModule();
+        derivedMetricsModule = new DerivedMetricsModule();
+        perMinValueCalculatorModule = new PerMinValueCalculatorModule();
+    }
+
+    public void initialize(AMonitorJob monitorJob){
+        Map<String, ?> config = extensionConfiguration.getConfigYml();
+        Boolean enabled = (Boolean) config.get("enabled");
+        if(!Boolean.FALSE.equals(enabled)){
+            workBenchModule.initWorkBenchStore(config, extensionConfiguration.getMetricPrefix());
+            httpClientModule.initHttpClient(config);
+            monitorExecutorServiceModule.initExecutorService(config);
+            jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
+            cacheModule.initCache();
+        } else{
+            logger.error("The configuration is not enabled {}", config);
+        }
+
+    }
+
+    public static boolean isWorkbenchMode() {
+        return "true".equals(System.getProperty(EXTENSION_WORKBENCH_MODE));
+    }
+
+    public WorkBenchModule getWorkBenchModule(){
+        return workBenchModule;
+    }
+
+    public void setWorkBenchModule(WorkBenchModule workBenchModule) {
+        this.workBenchModule = workBenchModule;
+    }
+
+    public void setHttpClientModule(HttpClientModule httpClientModule) {
+        this.httpClientModule = httpClientModule;
+    }
+
+    public CloseableHttpClient getHttpClient(){
+        return httpClientModule.getHttpClient();
+    }
+
+    public void setMonitorExecutorServiceModule(MonitorExecutorServiceModule monitorExecutorServiceModule){
+        this.monitorExecutorServiceModule = monitorExecutorServiceModule;
+    }
+
+    public void setJobScheduleModule(JobScheduleModule jobScheduleModule){
+        this.jobScheduleModule = jobScheduleModule;
+    }
+
+    public void setCacheModule(CacheModule cacheModule){
+        this.cacheModule = cacheModule;
+    }
+
+    public boolean isScheduledModeEnabled(){
+        return jobScheduleModule.getScheduler() != null;
+    }
+
+    public ConcurrentMap<String,Metric> getCachedMetrics(){
+        return cacheModule.getMetricCache().asMap();
+    }
+
+    public void putInMetricCache(String metricPath, Metric metric){
+        cacheModule.putInMetricCache(metricPath,metric);
+    }
+
+    public MetricWriter getFromWriterCache(String metricPath) {
+        return cacheModule.getWriterCache().getIfPresent(metricPath);
+    }
+
+    public void putInWriterCache(String metricPath, MetricWriter writer) {
+        cacheModule.putInWriterCache(metricPath,writer);
+    }
+
+    public void createDerivedMetricsCalculator(){
+        derivedMetricsModule.initDerivedMetricsCalculator(extensionConfiguration.getConfigYml(), extensionConfiguration.getMetricPrefix());
+    }
+
+    public PerMinValueCalculator getPerMinValueCalculator(){
+        return perMinValueCalculatorModule.getPerMinValueCalculator();
+    }
+}

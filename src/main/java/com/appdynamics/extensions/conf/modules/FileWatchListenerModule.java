@@ -16,7 +16,7 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.util.PathResolver;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.appdynamics.extensions.conf.MonitorConfiguration.isWorkbenchMode;
+import static com.appdynamics.extensions.conf.ExtensionContext.isWorkbenchMode;
 
 /**
  * Created by venkata.konala on 10/24/17.
@@ -38,11 +38,11 @@ public class FileWatchListenerModule {
 
     private static final Logger logger = LoggerFactory.getLogger(FileWatchListenerModule.class);
     private Set<File> monitoredDirs;
-    private Map<File, MonitorConfiguration.FileWatchListener> listenerMap;
+    private Map<File, FileWatchListener> listenerMap;
     private FileAlterationMonitor monitor;
     private Integer fileWatcherInterval;
 
-    public void createListener(String path, MonitorConfiguration.FileWatchListener fileWatchListener, File installDir, MetricWriteHelper workbench, Integer fileWatcherInterval) {
+    public void createListener(String path, FileWatchListener fileWatchListener, File installDir, MetricWriteHelper workbench, Integer fileWatcherInterval) {
         this.fileWatcherInterval = fileWatcherInterval;
         File file = resolvePath(path, installDir);
         logger.debug("The path [{}] is resolved to file {}", path, file.getAbsolutePath());
@@ -61,9 +61,9 @@ public class FileWatchListenerModule {
         }
     }
 
-    private void createListener(File file, MonitorConfiguration.FileWatchListener fileWatchListener) {
+    private void createListener(File file, FileWatchListener fileWatchListener) {
         if (listenerMap == null) {
-            listenerMap = new HashMap<File, MonitorConfiguration.FileWatchListener>();
+            listenerMap = new HashMap<File, FileWatchListener>();
         }
         listenerMap.put(file, fileWatchListener);
     }
@@ -81,7 +81,7 @@ public class FileWatchListenerModule {
                 public void onFileChange(File file) {
                     try {
                         logger.info("The file {} has been modified", file.getAbsolutePath());
-                        MonitorConfiguration.FileWatchListener fileWatchListener = listenerMap.get(file);
+                        FileWatchListener fileWatchListener = listenerMap.get(file);
                         if (fileWatchListener != null) {
                             fileWatchListener.onFileChange(file);
                         }
