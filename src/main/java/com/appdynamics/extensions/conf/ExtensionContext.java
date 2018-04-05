@@ -8,6 +8,7 @@
 package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
+import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
@@ -28,7 +29,9 @@ public class ExtensionContext {
     public static final Logger logger = LoggerFactory.getLogger(ExtensionContext.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
     private String monitorName;
-    private ExtensionConfiguration extensionConfiguration;
+    private Map<String, ?> config;
+    private String metricPrefix;
+
     private WorkBenchModule workBenchModule;
     private HttpClientModule httpClientModule;
     private MonitorExecutorServiceModule monitorExecutorServiceModule;
@@ -37,8 +40,7 @@ public class ExtensionContext {
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
 
-    public ExtensionContext(String monitorName, ExtensionConfiguration extensionConfiguration){
-        this.extensionConfiguration = extensionConfiguration;
+    public ExtensionContext(String monitorName){
         this.monitorName = monitorName;
         workBenchModule = new WorkBenchModule();
         httpClientModule = new HttpClientModule();
@@ -49,11 +51,12 @@ public class ExtensionContext {
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
     }
 
-    public void initialize(AMonitorJob monitorJob){
-        Map<String, ?> config = extensionConfiguration.getConfigYml();
+    public void initialize(AMonitorJob monitorJob, Map<String,?> config, String metricPrefix){
+        this.config = config;
+        this.metricPrefix = metricPrefix;
         Boolean enabled = (Boolean) config.get("enabled");
         if(!Boolean.FALSE.equals(enabled)){
-            workBenchModule.initWorkBenchStore(config, extensionConfiguration.getMetricPrefix());
+            workBenchModule.initWorkBenchStore(config, metricPrefix);
             httpClientModule.initHttpClient(config);
             monitorExecutorServiceModule.initExecutorService(config);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
@@ -88,6 +91,14 @@ public class ExtensionContext {
         this.monitorExecutorServiceModule = monitorExecutorServiceModule;
     }
 
+    public MonitorExecutorService getExecutorService(){
+        return monitorExecutorServiceModule.getExecutorService();
+    }
+
+    public JobScheduleModule getJobScheduleModule(){
+        return jobScheduleModule;
+    }
+
     public void setJobScheduleModule(JobScheduleModule jobScheduleModule){
         this.jobScheduleModule = jobScheduleModule;
     }
@@ -116,8 +127,8 @@ public class ExtensionContext {
         cacheModule.putInWriterCache(metricPath,writer);
     }
 
-    public void createDerivedMetricsCalculator(){
-        derivedMetricsModule.initDerivedMetricsCalculator(extensionConfiguration.getConfigYml(), extensionConfiguration.getMetricPrefix());
+    public DerivedMetricsCalculator createDerivedMetricsCalculator(){
+        return derivedMetricsModule.initDerivedMetricsCalculator(config, metricPrefix);
     }
 
     public PerMinValueCalculator getPerMinValueCalculator(){

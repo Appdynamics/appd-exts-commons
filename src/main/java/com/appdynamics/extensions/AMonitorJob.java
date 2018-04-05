@@ -45,7 +45,7 @@ public class AMonitorJob implements Runnable{
     }
 
     public void printAllFromCache() {
-        ConcurrentMap<String, Metric> map = baseMonitor.context.getCachedMetrics();
+        ConcurrentMap<String, Metric> map = baseMonitor.configuration.getContext().getCachedMetrics();
         Set<String> keys;
         if (map != null && (keys = map.keySet()) != null) {
             for (String key : keys) {

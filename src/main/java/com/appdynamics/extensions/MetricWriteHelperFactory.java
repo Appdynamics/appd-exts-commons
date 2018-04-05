@@ -15,10 +15,11 @@
 
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.appdynamics.extensions.conf.ExtensionContext.isWorkbenchMode;
 
 /**
  * Created by abey.tom on 3/20/16.
@@ -28,7 +29,7 @@ public class MetricWriteHelperFactory {
 
     public static MetricWriteHelper create(ABaseMonitor baseMonitor) {
         MetricWriteHelper helper;
-        if (MonitorConfiguration.isWorkbenchMode()) {
+        if (isWorkbenchMode()) {
             helper = WorkbenchMetricStore.getInstance();
         } else {
             helper = new MetricWriteHelper(baseMonitor);

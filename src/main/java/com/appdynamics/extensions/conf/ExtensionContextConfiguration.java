@@ -7,19 +7,13 @@
 
 package com.appdynamics.extensions.conf;
 
-import com.appdynamics.extensions.ABaseMonitor;
-import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
+import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.conf.modules.FileWatchListenerModule;
-import com.appdynamics.extensions.conf.modules.WorkBenchModule;
-import com.appdynamics.extensions.conf.monitorxml.Monitor;
 import com.appdynamics.extensions.file.FileWatchListener;
-import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
-import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +27,13 @@ import java.util.Map;
 /**
  * Created by venkata.konala on 3/29/18.
  */
-public class ExtensionConfiguration {
+public class ExtensionContextConfiguration {
 
 
-    public static final Logger logger = LoggerFactory.getLogger(ExtensionConfiguration.class);
+    public static final Logger logger = LoggerFactory.getLogger(ExtensionContextConfiguration.class);
+    private String monitorName;
     private File installDir;
+    private AMonitorJob aMonitorJob;
     private Map<String, ?> configYml;
     private Object metricXml;
     private String metricPrefix;
@@ -45,14 +41,17 @@ public class ExtensionConfiguration {
     private JAXBContext jaxbContext;
     private FileWatchListenerModule fileWatchListenerModule;
     private boolean enabled;
+    private ExtensionContext context;
 
-    public ExtensionConfiguration(String defaultMetricPrefix, File installDir){
+    public ExtensionContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir, AMonitorJob aMonitorJob){
+        this.monitorName = monitorName;
         this.defaultMetricPrefix = defaultMetricPrefix;
         this.installDir = installDir;
         if(installDir == null){
             throw new RuntimeException("The install directory cannot be null");
         }
         fileWatchListenerModule = new FileWatchListenerModule();
+        context = new ExtensionContext(monitorName);
     }
 
     public void setConfigYml(String path){
@@ -73,6 +72,7 @@ public class ExtensionConfiguration {
             this.enabled = false;
             logger.error("The configuration is not enabled {}", configYml);
         }
+        context.initialize(aMonitorJob, getConfigYml(), getMetricPrefix());
     }
 
 
@@ -143,6 +143,10 @@ public class ExtensionConfiguration {
 
     public boolean isEnabled(){
         return enabled;
+    }
+
+    public ExtensionContext getContext(){
+        return context;
     }
 
 }

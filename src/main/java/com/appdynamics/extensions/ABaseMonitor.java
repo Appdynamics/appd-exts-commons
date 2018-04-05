@@ -15,11 +15,10 @@
 
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.ExtensionConfiguration;
+import com.appdynamics.extensions.conf.ExtensionContextConfiguration;
 import com.appdynamics.extensions.conf.ExtensionContext;
-import com.appdynamics.extensions.conf.modules.FileWatchListenerModule;
-import com.appdynamics.extensions.conf.modules.WorkBenchModule;
 import com.appdynamics.extensions.file.FileWatchListener;
+import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
@@ -92,17 +91,13 @@ public abstract class ABaseMonitor extends AManagedMonitor{
      */
     protected String monitorName;
 
+    private File installDir;
+
     /**
      * A configuration object that reads the monitor's config file
      * and initializes the different bits required by the monitor.
      */
-    //protected MonitorConfiguration configuration;
-
-    private File installDir;
-
-    protected ExtensionConfiguration configuration;
-
-    protected ExtensionContext context;
+    protected ExtensionContextConfiguration configuration;
 
     /**
      * A runnable which does all the leg work for fetching the
@@ -116,39 +111,21 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     }
 
     protected void initialize(final Map<String, String> args) {
-        if(context == null){
+        if(configuration == null){
             monitorJob = createMonitorJob();
             installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
-
-            configuration = new ExtensionConfiguration(getDefaultMetricPrefix(), installDir);
-            context = new ExtensionContext(monitorName, configuration);
-
+            configuration = new ExtensionContextConfiguration(getMonitorName(), getDefaultMetricPrefix(), installDir, monitorJob);
 
             FileWatchListener fileWatchListener = new FileWatchListener() {
                 @Override
                 public void onFileChange(File file) {
                     configuration.setConfigYml(args.get("config-file"));
-                    context.initialize(monitorJob);
                     onConfigReload(file);
                 }
             };
-            configuration.registerListener(args.get("config-file"), fileWatchListener, context);
+            configuration.registerListener(args.get("config-file"), fileWatchListener, configuration.getContext());
             initializeMoreStuff(args);
         }
-
-
-        /*if(configuration == null){
-            monitorJob = createMonitorJob();
-            MonitorConfiguration conf = new MonitorConfiguration(monitorName,getDefaultMetricPrefix(), monitorJob);
-            conf.setConfigYml(args.get("config-file"), new MonitorConfiguration.FileWatchListener() {
-                @Override
-                public void onFileChange(File file) {
-                    onConfigReload(file);
-                }
-            });
-            initializeMoreStuff(args, conf);
-            this.configuration = conf;
-        }*/
     }
 
     protected void onConfigReload(File file){};
@@ -187,6 +164,8 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     protected void executeMonitor() {
         if(configuration.isEnabled()){
+            ExtensionContext context = configuration.getContext();
+            AssertUtils.assertNotNull(context, "The context of the extension has not been initialised!!!!");
             if(context.isScheduledModeEnabled()){ //scheduled mode
                 logger.debug("Task scheduler is enabled, printing the metrics from the cache");
                 monitorJob.printAllFromCache();
@@ -211,13 +190,13 @@ public abstract class ABaseMonitor extends AManagedMonitor{
         return configuration;
     }*/
 
-    public ExtensionConfiguration getExtensionConfiguration() {
+    public ExtensionContextConfiguration getConfiguration() {
         return configuration;
     }
 
-    public ExtensionContext getContext(){
+    /*public ExtensionContext getContext(){
         return context;
-    }
+    }*/
 
     protected abstract void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider);
 

@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.file.FileWatchListener;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ public class FileWatchListenerModuleTest {
     public void whenFileChangedWillCountNumberOfChanges() throws IOException, InterruptedException {
 
         FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
-        MonitorConfiguration.FileWatchListener fileWatchListener = new MonitorConfiguration.FileWatchListener() {
+        FileWatchListener fileWatchListener = new FileWatchListener() {
             public void onFileChange(File file) {
                    count++;
             }

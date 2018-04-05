@@ -15,7 +15,6 @@
 
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
 import org.apache.commons.httpclient.util.ExceptionUtil;
 import org.apache.http.util.ExceptionUtils;
 import org.slf4j.Logger;
@@ -46,7 +45,7 @@ public class TasksExecutionServiceProvider {
 
 
     public void submit(final String name, final AMonitorTaskRunnable aServerTask){
-        aBaseMonitor.getConfiguration().getExecutorService().submit(name,new Runnable() {
+        aBaseMonitor.getConfiguration().getContext().getExecutorService().submit(name,new Runnable() {
             @Override
             public void run() {
                 try{
@@ -72,10 +71,5 @@ public class TasksExecutionServiceProvider {
 
     public MetricWriteHelper getMetricWriteHelper() {
         return this.metricWriteHelper;
-    }
-
-    //TODO Remove this getter
-    public MonitorConfiguration getMonitorConfiguration(){
-        return this.aBaseMonitor.configuration;
     }
 }
