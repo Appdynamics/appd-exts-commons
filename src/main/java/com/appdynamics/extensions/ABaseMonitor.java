@@ -39,7 +39,7 @@ import java.util.Map;
  * <p>An {@code ABaseMonitor} is a wrapper on top of
  * {@link AManagedMonitor} to remove the boiler plate code of
  * creating a {@link AMonitorJob} and initializing the
- * {@link }.
+ * {@link ExtensionContextConfiguration}.
  *
  * <p>The MA or SIM agent loads all the {@link AManagedMonitor}s
  * from their respective subdirectories in the monitors directory
@@ -115,7 +115,6 @@ public abstract class ABaseMonitor extends AManagedMonitor{
             monitorJob = createMonitorJob();
             installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
             configuration = new ExtensionContextConfiguration(getMonitorName(), getDefaultMetricPrefix(), installDir, monitorJob);
-
             FileWatchListener fileWatchListener = new FileWatchListener() {
                 @Override
                 public void onFileChange(File file) {
@@ -123,7 +122,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
                     onConfigReload(file);
                 }
             };
-            configuration.registerListener(args.get("config-file"), fileWatchListener, configuration.getContext());
+            configuration.registerListener(args.get("config-file"), fileWatchListener);
             initializeMoreStuff(args);
         }
     }
@@ -137,7 +136,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     /**
      * A placeholder method which should be overridden if there are
      * custom objects to be initialized in the monitor.
-     * @param
+     * @param args
      */
     protected void initializeMoreStuff(Map<String, String> args) {
         ;
@@ -165,7 +164,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     protected void executeMonitor() {
         if(configuration.isEnabled()){
             ExtensionContext context = configuration.getContext();
-            AssertUtils.assertNotNull(context, "The context of the extension has not been initialised!!!!");
+            AssertUtils.assertNotNull(context, "The context of the extension has not been initialised!!!! Please check your configuration");
             if(context.isScheduledModeEnabled()){ //scheduled mode
                 logger.debug("Task scheduler is enabled, printing the metrics from the cache");
                 monitorJob.printAllFromCache();
@@ -186,17 +185,9 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     public abstract String getMonitorName();
 
-    /*public MonitorConfiguration getConfiguration(){
-        return configuration;
-    }*/
-
     public ExtensionContextConfiguration getConfiguration() {
         return configuration;
     }
-
-    /*public ExtensionContext getContext(){
-        return context;
-    }*/
 
     protected abstract void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider);
 

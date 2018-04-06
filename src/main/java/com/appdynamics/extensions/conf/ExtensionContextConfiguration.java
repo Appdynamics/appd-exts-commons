@@ -59,7 +59,7 @@ public class ExtensionContextConfiguration {
         logger.info("Loading the configuration from {}", configFile.getAbsolutePath());
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(configFile);
         if(rootElem == null){
-            logger.error("The element [{}] was not found in the config file", rootElem);
+            logger.error("Unable to get data from the config file");
             return;
         }
         configYml = rootElem;
@@ -137,8 +137,8 @@ public class ExtensionContextConfiguration {
         }
     }
 
-    public void registerListener(String path, FileWatchListener callback, ExtensionContext context){
-        fileWatchListenerModule.createListener(path , callback, installDir, context.getWorkBenchModule().getWorkBench(), 3000);
+    public void registerListener(String path, FileWatchListener callback){
+        fileWatchListenerModule.createListener(path , callback, installDir, context, 3000);
     }
 
     public boolean isEnabled(){

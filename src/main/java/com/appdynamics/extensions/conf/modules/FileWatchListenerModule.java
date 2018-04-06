@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.conf.ExtensionContext;
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.util.PathResolver;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
@@ -42,12 +43,12 @@ public class FileWatchListenerModule {
     private FileAlterationMonitor monitor;
     private Integer fileWatcherInterval;
 
-    public void createListener(String path, FileWatchListener fileWatchListener, File installDir, MetricWriteHelper workbench, Integer fileWatcherInterval) {
+    public void createListener(String path, FileWatchListener fileWatchListener, File installDir, ExtensionContext context, Integer fileWatcherInterval) {
         this.fileWatcherInterval = fileWatcherInterval;
         File file = resolvePath(path, installDir);
         logger.debug("The path [{}] is resolved to file {}", path, file.getAbsolutePath());
         createListener(file, fileWatchListener);
-        createWatcher(file, workbench);
+        createWatcher(file, context);
         //Initialize it for the fisrt time
         fileWatchListener.onFileChange(file);
     }
@@ -68,7 +69,7 @@ public class FileWatchListenerModule {
         listenerMap.put(file, fileWatchListener);
     }
 
-    private void createWatcher(File file, final MetricWriteHelper workbench) {
+    private void createWatcher(File file, final ExtensionContext context) {
         File dir = file.getParentFile();
         if (monitor == null) {
             initMonitor();
@@ -88,8 +89,11 @@ public class FileWatchListenerModule {
                     } catch (Exception e) {
                         logger.error("Error while invoking the file watch listener", e);
                     } finally {
-                        if (workbench != null) {
-                            workbench.reset();
+                        if(context != null) {
+                            MetricWriteHelper workbench = context.getWorkBenchModule().getWorkBench();
+                            if (workbench != null) {
+                                workbench.reset();
+                            }
                         }
                     }
                 }
