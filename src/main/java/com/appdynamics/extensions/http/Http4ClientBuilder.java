@@ -88,7 +88,7 @@ public class Http4ClientBuilder {
             Map<String, ?> propMap = (Map) yaml.load(new FileReader(file));
             return getBuilder(propMap);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("Error while reading the configuration from " + getPath(file), e);
+            throw new RuntimeException("Error while reading the contextConfiguration from " + getPath(file), e);
         }
     }
 

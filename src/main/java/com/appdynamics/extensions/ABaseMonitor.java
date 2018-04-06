@@ -15,8 +15,8 @@
 
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.ExtensionContextConfiguration;
-import com.appdynamics.extensions.conf.ExtensionContext;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.PathResolver;
@@ -39,7 +39,7 @@ import java.util.Map;
  * <p>An {@code ABaseMonitor} is a wrapper on top of
  * {@link AManagedMonitor} to remove the boiler plate code of
  * creating a {@link AMonitorJob} and initializing the
- * {@link ExtensionContextConfiguration}.
+ * {@link MonitorContextConfiguration}.
  *
  * <p>The MA or SIM agent loads all the {@link AManagedMonitor}s
  * from their respective subdirectories in the monitors directory
@@ -94,10 +94,10 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     private File installDir;
 
     /**
-     * A configuration object that reads the monitor's config file
+     * A contextConfiguration object that reads the monitor's config file
      * and initializes the different bits required by the monitor.
      */
-    protected ExtensionContextConfiguration configuration;
+    private MonitorContextConfiguration contextConfiguration;
 
     /**
      * A runnable which does all the leg work for fetching the
@@ -111,20 +111,36 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     }
 
     protected void initialize(final Map<String, String> args) {
-        if(configuration == null){
+        if(contextConfiguration == null){
+            installDir = getInstallDirectory();
             monitorJob = createMonitorJob();
-            installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
-            configuration = new ExtensionContextConfiguration(getMonitorName(), getDefaultMetricPrefix(), installDir, monitorJob);
-            FileWatchListener fileWatchListener = new FileWatchListener() {
-                @Override
-                public void onFileChange(File file) {
-                    configuration.setConfigYml(args.get("config-file"));
-                    onConfigReload(file);
-                }
-            };
-            configuration.registerListener(args.get("config-file"), fileWatchListener);
+            contextConfiguration = createContextConfiguration();
+            contextConfiguration.registerListener(args.get("config-file"), createYmlFileListener(args.get("config-file")));
             initializeMoreStuff(args);
         }
+    }
+
+    private FileWatchListener createYmlFileListener(final String ymlFile) {
+        FileWatchListener fileWatchListener = new FileWatchListener() {
+            @Override
+            public void onFileChange(File file) {
+                contextConfiguration.setConfigYml(ymlFile);
+                onConfigReload(file);
+            }
+        };
+        return fileWatchListener;
+    }
+
+    private File getInstallDirectory() {
+        File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
+        if(installDir == null){
+            throw new RuntimeException("The install directory cannot be null");
+        }
+        return installDir;
+    }
+
+    private MonitorContextConfiguration createContextConfiguration() {
+        return new MonitorContextConfiguration(getMonitorName(), getDefaultMetricPrefix(), installDir, monitorJob);
     }
 
     protected void onConfigReload(File file){};
@@ -162,9 +178,9 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     }
 
     protected void executeMonitor() {
-        if(configuration.isEnabled()){
-            ExtensionContext context = configuration.getContext();
-            AssertUtils.assertNotNull(context, "The context of the extension has not been initialised!!!! Please check your configuration");
+        if(contextConfiguration.isEnabled()){
+            MonitorContext context = contextConfiguration.getContext();
+            AssertUtils.assertNotNull(context, "The context of the extension has not been initialised!!!! Please check your contextConfiguration");
             if(context.isScheduledModeEnabled()){ //scheduled mode
                 logger.debug("Task scheduler is enabled, printing the metrics from the cache");
                 monitorJob.printAllFromCache();
@@ -185,8 +201,8 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     public abstract String getMonitorName();
 
-    public ExtensionContextConfiguration getConfiguration() {
-        return configuration;
+    public MonitorContextConfiguration getContextConfiguration() {
+        return contextConfiguration;
     }
 
     protected abstract void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider);

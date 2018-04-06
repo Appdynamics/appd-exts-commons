@@ -43,7 +43,7 @@ public class FileWatchListenerModuleTest {
                    count++;
             }
         };
-        fileWatchListenerModule.createListener("src/test/resources/conf/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/conf"), null, 2000);
+        fileWatchListenerModule.createListener("src/test/resources/conf/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/conf"), 2000);
         int i = 0;
         while(i <= 2) {
             List<String> newLines = new ArrayList<>();

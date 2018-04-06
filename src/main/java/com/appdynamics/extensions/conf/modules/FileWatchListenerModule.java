@@ -16,7 +16,7 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.ExtensionContext;
+import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.util.PathResolver;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.appdynamics.extensions.conf.ExtensionContext.isWorkbenchMode;
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by venkata.konala on 10/24/17.
@@ -43,12 +43,12 @@ public class FileWatchListenerModule {
     private FileAlterationMonitor monitor;
     private Integer fileWatcherInterval;
 
-    public void createListener(String path, FileWatchListener fileWatchListener, File installDir, ExtensionContext context, Integer fileWatcherInterval) {
+    public void createListener(String path, FileWatchListener fileWatchListener, File installDir, Integer fileWatcherInterval) {
         this.fileWatcherInterval = fileWatcherInterval;
         File file = resolvePath(path, installDir);
         logger.debug("The path [{}] is resolved to file {}", path, file.getAbsolutePath());
         createListener(file, fileWatchListener);
-        createWatcher(file, context);
+        createWatcher(file);
         //Initialize it for the fisrt time
         fileWatchListener.onFileChange(file);
     }
@@ -69,7 +69,7 @@ public class FileWatchListenerModule {
         listenerMap.put(file, fileWatchListener);
     }
 
-    private void createWatcher(File file, final ExtensionContext context) {
+    private void createWatcher(File file) {
         File dir = file.getParentFile();
         if (monitor == null) {
             initMonitor();
@@ -88,13 +88,6 @@ public class FileWatchListenerModule {
                         }
                     } catch (Exception e) {
                         logger.error("Error while invoking the file watch listener", e);
-                    } finally {
-                        if(context != null) {
-                            MetricWriteHelper workbench = context.getWorkBenchModule().getWorkBench();
-                            if (workbench != null) {
-                                workbench.reset();
-                            }
-                        }
                     }
                 }
             });

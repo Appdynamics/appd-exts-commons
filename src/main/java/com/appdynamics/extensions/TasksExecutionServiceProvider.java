@@ -15,13 +15,9 @@
 
 package com.appdynamics.extensions;
 
-import org.apache.commons.httpclient.util.ExceptionUtil;
-import org.apache.http.util.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -45,7 +41,7 @@ public class TasksExecutionServiceProvider {
 
 
     public void submit(final String name, final AMonitorTaskRunnable aServerTask){
-        aBaseMonitor.getConfiguration().getContext().getExecutorService().submit(name,new Runnable() {
+        aBaseMonitor.getContextConfiguration().getContext().getExecutorService().submit(name,new Runnable() {
             @Override
             public void run() {
                 try{

@@ -27,11 +27,10 @@ import java.util.Map;
 /**
  * Created by venkata.konala on 3/29/18.
  */
-public class ExtensionContextConfiguration {
+public class MonitorContextConfiguration {
 
 
-    public static final Logger logger = LoggerFactory.getLogger(ExtensionContextConfiguration.class);
-    private String monitorName;
+    public static final Logger logger = LoggerFactory.getLogger(MonitorContextConfiguration.class);
     private File installDir;
     private AMonitorJob aMonitorJob;
     private Map<String, ?> configYml;
@@ -41,22 +40,19 @@ public class ExtensionContextConfiguration {
     private JAXBContext jaxbContext;
     private FileWatchListenerModule fileWatchListenerModule;
     private boolean enabled;
-    private ExtensionContext context;
+    private MonitorContext context;
 
-    public ExtensionContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir, AMonitorJob aMonitorJob){
-        this.monitorName = monitorName;
+    public MonitorContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir, AMonitorJob aMonitorJob){
         this.defaultMetricPrefix = defaultMetricPrefix;
         this.installDir = installDir;
-        if(installDir == null){
-            throw new RuntimeException("The install directory cannot be null");
-        }
-        fileWatchListenerModule = new FileWatchListenerModule();
-        context = new ExtensionContext(monitorName);
+        this.aMonitorJob = aMonitorJob;
+        this.fileWatchListenerModule = new FileWatchListenerModule();
+        this.context = new MonitorContext(monitorName);
     }
 
     public void setConfigYml(String path){
         File configFile = resolvePath(path, installDir);
-        logger.info("Loading the configuration from {}", configFile.getAbsolutePath());
+        logger.info("Loading the contextConfiguration from {}", configFile.getAbsolutePath());
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(configFile);
         if(rootElem == null){
             logger.error("Unable to get data from the config file");
@@ -70,7 +66,7 @@ public class ExtensionContextConfiguration {
         }
         else{
             this.enabled = false;
-            logger.error("The configuration is not enabled {}", configYml);
+            logger.error("The contextConfiguration is not enabled {}", configYml);
         }
         context.initialize(aMonitorJob, getConfigYml(), getMetricPrefix());
     }
@@ -120,7 +116,7 @@ public class ExtensionContextConfiguration {
         }
         logger.info("The metric prefix is initialized as {}", metricPrefix);
         if (Strings.isNullOrEmpty(metricPrefix)) {
-            throw new IllegalArgumentException("The metricPrefix cannot be resolved. Please set it in the configuration");
+            throw new IllegalArgumentException("The metricPrefix cannot be resolved. Please set it in the contextConfiguration");
         }
     }
 
@@ -138,14 +134,14 @@ public class ExtensionContextConfiguration {
     }
 
     public void registerListener(String path, FileWatchListener callback){
-        fileWatchListenerModule.createListener(path , callback, installDir, context, 3000);
+        fileWatchListenerModule.createListener(path , callback, installDir, 3000);
     }
 
     public boolean isEnabled(){
         return enabled;
     }
 
-    public ExtensionContext getContext(){
+    public MonitorContext getContext(){
         return context;
     }
 

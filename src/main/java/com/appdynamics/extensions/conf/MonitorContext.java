@@ -24,9 +24,9 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Created by venkata.konala on 3/29/18.
  */
-public class ExtensionContext {
+public class MonitorContext {
 
-    public static final Logger logger = LoggerFactory.getLogger(ExtensionContext.class);
+    public static final Logger logger = LoggerFactory.getLogger(MonitorContext.class);
     public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
     private String monitorName;
     private Map<String, ?> config;
@@ -40,7 +40,7 @@ public class ExtensionContext {
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
 
-    public ExtensionContext(String monitorName){
+    MonitorContext(String monitorName){
         this.monitorName = monitorName;
         workBenchModule = new WorkBenchModule();
         httpClientModule = new HttpClientModule();
@@ -62,7 +62,7 @@ public class ExtensionContext {
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
         } else{
-            logger.error("The configuration is not enabled {}", config);
+            logger.error("The contextConfiguration is not enabled {}", config);
         }
 
     }

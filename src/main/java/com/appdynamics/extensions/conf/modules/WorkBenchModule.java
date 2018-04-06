@@ -19,7 +19,7 @@ import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import java.util.Map;
 
-import static com.appdynamics.extensions.conf.ExtensionContext.isWorkbenchMode;
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by venkata.konala on 10/24/17.

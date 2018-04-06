@@ -16,8 +16,8 @@
 
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.ExtensionContext;
-import com.appdynamics.extensions.conf.ExtensionContextConfiguration;
+import com.appdynamics.extensions.conf.MonitorContext;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -45,9 +45,9 @@ public class MetricWriteHelperTest {
     public void transformAndPrintMetricWithRoundingTest(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        ExtensionContextConfiguration configuration = mock(ExtensionContextConfiguration.class);
-        ExtensionContext context = mock(ExtensionContext.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
@@ -68,9 +68,9 @@ public class MetricWriteHelperTest {
     public void transformAndPrintMetricWithDerivedTest(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        ExtensionContextConfiguration configuration = mock(ExtensionContextConfiguration.class);
-        ExtensionContext context = mock(ExtensionContext.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/DerivedSample.yml"));
@@ -100,9 +100,9 @@ public class MetricWriteHelperTest {
     public void printMetricWithMetricTypeDoesRoundValueTest(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        ExtensionContextConfiguration configuration = mock(ExtensionContextConfiguration.class);
-        ExtensionContext context = mock(ExtensionContext.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
@@ -127,9 +127,9 @@ public class MetricWriteHelperTest {
     public void whenMetricValuesNullShouldNotPrint(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        ExtensionContextConfiguration configuration = mock(ExtensionContextConfiguration.class);
-        ExtensionContext context = mock(ExtensionContext.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);

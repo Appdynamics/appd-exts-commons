@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static com.appdynamics.extensions.conf.ExtensionContext.EXTENSION_WORKBENCH_MODE;
+import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
 
 /**
  * Created by abey.tom on 3/16/16.

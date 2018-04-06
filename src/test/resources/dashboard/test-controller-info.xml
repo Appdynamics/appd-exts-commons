@@ -54,9 +54,9 @@
     <node-name></node-name>
     
     <!-- Change to 'true' only under special circumstances where this agent has been moved to a new application and/or tier 
-    from the UI but you want to override that move by specifying a new application name and/or tier name in the agent configuration. 
+    from the UI but you want to override that move by specifying a new application name and/or tier name in the agent contextConfiguration.
     If there is already a registered app server agent installed on the same host as this machine agent then this override DOES not work. 
-    If you want to override the UI in this case, you must force the agent registration change from the app server agent configuration. -->
+    If you want to override the UI in this case, you must force the agent registration change from the app server agent contextConfiguration. -->
     <force-agent-registration>false</force-agent-registration>    
 
 </controller-info>

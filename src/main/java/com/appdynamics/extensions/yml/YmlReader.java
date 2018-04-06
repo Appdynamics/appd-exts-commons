@@ -40,7 +40,7 @@ public class YmlReader {
     }
 
     public static <T> T readFromClasspath(String path, Class<T> clazz) {
-        logger.info("Reading the configuration file from class path {}", path);
+        logger.info("Reading the contextConfiguration file from class path {}", path);
         InputStream in = YmlReader.class.getResourceAsStream(path);
         if (in != null) {
             return read(in, clazz);

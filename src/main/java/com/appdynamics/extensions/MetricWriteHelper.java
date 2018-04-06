@@ -54,15 +54,15 @@ public class MetricWriteHelper {
     public MetricWriteHelper(ABaseMonitor baseMonitor) {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
-        derivedMetricsCalculator = baseMonitor.getConfiguration().getContext().createDerivedMetricsCalculator();
+        derivedMetricsCalculator = baseMonitor.getContextConfiguration().getContext().createDerivedMetricsCalculator();
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
         if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue)) {
-            if (baseMonitor.getConfiguration().getContext().isScheduledModeEnabled()) {
+            if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
                 logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
-                baseMonitor.getConfiguration().getContext().putInMetricCache(metricPath, metric);
+                baseMonitor.getContextConfiguration().getContext().putInMetricCache(metricPath, metric);
             } else {
                 MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
                 metricWriter.printMetric(metricValue);
@@ -71,7 +71,7 @@ public class MetricWriteHelper {
                 }
                 if (cacheMetrics) {
                     Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
-                    baseMonitor.getConfiguration().getContext().putInMetricCache(metricPath, metric);
+                    baseMonitor.getContextConfiguration().getContext().putInMetricCache(metricPath, metric);
                 }
             }
             addForDerivedMetricsCalculation(metricPath, metricValue);
@@ -117,10 +117,10 @@ public class MetricWriteHelper {
     }
 
     public MetricWriter getMetricWriter(String metricPath, String aggregationType, String timeRollup, String clusterRollup) {
-        MetricWriter writer = baseMonitor.getConfiguration().getContext().getFromWriterCache(metricPath);
+        MetricWriter writer = baseMonitor.getContextConfiguration().getContext().getFromWriterCache(metricPath);
         if (writer == null) {
             writer = baseMonitor.getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
-            baseMonitor.getConfiguration().getContext().putInWriterCache(metricPath, writer);
+            baseMonitor.getContextConfiguration().getContext().putInWriterCache(metricPath, writer);
         }
         return writer;
     }
@@ -189,7 +189,7 @@ public class MetricWriteHelper {
     }
 
     public Set<String> getMetricPaths() {
-        ConcurrentMap<String, Metric> map = baseMonitor.getConfiguration().getContext().getCachedMetrics();
+        ConcurrentMap<String, Metric> map = baseMonitor.getContextConfiguration().getContext().getCachedMetrics();
         if(map != null){
             return map.keySet();
         }

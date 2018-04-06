@@ -19,7 +19,7 @@ import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.appdynamics.extensions.conf.ExtensionContext.isWorkbenchMode;
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by abey.tom on 3/20/16.
