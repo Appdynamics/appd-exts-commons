@@ -1,5 +1,9 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.1.0 - Apr 5, 2018
+1. Extracted Configuration and Context from the MonitorConfiguration and dissolved it.
+2. onConfigReload(File file) will now have access to configuration and context after the refactoring.
+
 ## 2.0.4 - Mar 13, 2018
 1. Implemented mutual SSL Authentication
 

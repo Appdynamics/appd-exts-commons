@@ -15,8 +15,6 @@
 
 package com.appdynamics.extensions.workbench;
 
-
-import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.conf.monitorxml.Argument;
 import com.appdynamics.extensions.conf.monitorxml.Monitor;
 import com.appdynamics.extensions.conf.monitorxml.TaskArguments;
@@ -43,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -212,7 +212,7 @@ public class WorkBenchServer extends NanoHTTPD {
         final Map<String, String> taskArgs = getTaskArgs(monitor);
         final Object implClass = getImplClassInstance(monitor);
         if (implClass != null) {
-            System.setProperty(MonitorConfiguration.EXTENSION_WORKBENCH_MODE, "true");
+            System.setProperty(EXTENSION_WORKBENCH_MODE, "true");
             String host = "0.0.0.0";
             int port = 9090;
             if (args.length > 0) {

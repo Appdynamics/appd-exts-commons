@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.file.FileWatchListener;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,12 +38,12 @@ public class FileWatchListenerModuleTest {
     public void whenFileChangedWillCountNumberOfChanges() throws IOException, InterruptedException {
 
         FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
-        MonitorConfiguration.FileWatchListener fileWatchListener = new MonitorConfiguration.FileWatchListener() {
+        FileWatchListener fileWatchListener = new FileWatchListener() {
             public void onFileChange(File file) {
                    count++;
             }
         };
-        fileWatchListenerModule.createListener("src/test/resources/conf/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/conf"), null, 2000);
+        fileWatchListenerModule.createListener("src/test/resources/conf/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/conf"), 2000);
         int i = 0;
         while(i <= 2) {
             List<String> newLines = new ArrayList<>();

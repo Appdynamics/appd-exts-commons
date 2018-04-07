@@ -13,21 +13,25 @@
  * limitations under the License.
  */
 
+
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContext;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
 import com.google.common.collect.Maps;
 import org.junit.Test;
 import java.util.Map;
 import static org.mockito.Mockito.*;
 
+
 /**
  * Created by venkata.konala on 11/1/17.
  */
+
 public class TasksExecutionServiceProviderTest {
 
-    class SampleRunnable implements AMonitorTaskRunnable{
+    class SampleRunnable implements AMonitorTaskRunnable {
 
         @Override
         public void onTaskComplete() {
@@ -43,14 +47,16 @@ public class TasksExecutionServiceProviderTest {
     public void checkIfOnCompleteMethodsAreCalledAfterTasksSubmittedTest() throws InterruptedException{
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
         when(aBaseMonitor.getTaskCount()).thenReturn(2);
-        MonitorConfiguration configuration = mock(MonitorConfiguration.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ? super Object> conf = Maps.newHashMap();
         conf.put("numberOfThreads", "10");
         monitorExecutorServiceModule.initExecutorService(conf);
         MonitorExecutorService monitorExecutorService = monitorExecutorServiceModule.getExecutorService();
-        when(configuration.getExecutorService()).thenReturn(monitorExecutorService);
+        MonitorContext context = mock(MonitorContext.class);
+        when(configuration.getContext()).thenReturn(context);
+        when(context.getExecutorService()).thenReturn(monitorExecutorService);
         MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
         TasksExecutionServiceProvider tasksExecutionServiceProvider =  new TasksExecutionServiceProvider(aBaseMonitor, metricWriteHelper);
         //SampleRunnable sampleRunnable = new SampleRunnable();
@@ -65,14 +71,16 @@ public class TasksExecutionServiceProviderTest {
     public void checkIfOnCompleteMethodsAreNotCalledAfterTasksSubmittedAreLessThanTaskCountTest() throws  InterruptedException{
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
         when(aBaseMonitor.getTaskCount()).thenReturn(3);
-        MonitorConfiguration configuration = mock(MonitorConfiguration.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ? super Object> conf = Maps.newHashMap();
         conf.put("numberOfThreads", "10");
         monitorExecutorServiceModule.initExecutorService(conf);
         MonitorExecutorService monitorExecutorService = monitorExecutorServiceModule.getExecutorService();
-        when(configuration.getExecutorService()).thenReturn(monitorExecutorService);
+        MonitorContext context = mock(MonitorContext.class);
+        when(configuration.getContext()).thenReturn(context);
+        when(context.getExecutorService()).thenReturn(monitorExecutorService);
         MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
         TasksExecutionServiceProvider tasksExecutionServiceProvider =  new TasksExecutionServiceProvider(aBaseMonitor, metricWriteHelper);
         //SampleRunnable sampleRunnable = new SampleRunnable();
@@ -84,3 +92,4 @@ public class TasksExecutionServiceProviderTest {
     }
 
 }
+

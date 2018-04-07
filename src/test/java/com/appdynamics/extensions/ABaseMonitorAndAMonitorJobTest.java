@@ -91,7 +91,7 @@ public class ABaseMonitorAndAMonitorJobTest {
         args.put("config-file", "src/test/resources/conf/config.yml");
         sampleMonitor.execute(args, null);
         Thread.sleep(1000);
-        ConcurrentMap<String, Metric> cache = sampleMonitor.getConfiguration().getCachedMetrics();
+        ConcurrentMap<String, Metric> cache = sampleMonitor.getContextConfiguration().getContext().getCachedMetrics();
         Assert.assertTrue(cache.get("Custom Metric|Sample|sample value").getMetricValue().equals("3") || cache.get("Custom Metric|Sample|sample value").getMetricValue().equals("4"));
     }
 
