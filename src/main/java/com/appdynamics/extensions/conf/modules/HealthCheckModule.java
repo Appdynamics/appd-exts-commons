@@ -1,3 +1,10 @@
+/*
+ *  Copyright 2018. AppDynamics LLC and its affiliates.
+ * All Rights Reserved.
+ * This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+ * The copyright notice above does not evidence any actual or intended publication of such source code.
+ */
+
 package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.MonitorExecutorService;
@@ -31,7 +38,7 @@ public class HealthCheckModule {
     }
 
 
-    public void initMATroubleshootChecks(String monitorName, File installDir, Map<String, ?> config) {
+    public void initMATroubleshootChecks(String monitorName, Map<String, ?> config) {
 
         if (executorService != null) {
             executorService.shutdown();
@@ -62,6 +69,8 @@ public class HealthCheckModule {
         }
 
         try {
+
+            File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
 
             MonitorHealthCheck healthCheckMonitor = healthChecksForMonitors.get(monitorName);
             if (healthCheckMonitor == null) {

@@ -1,6 +1,23 @@
+/*
+ * Copyright (c) 2018 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContext;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -17,18 +34,22 @@ import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
+
 /**
  * Created by venkata.konala on 10/31/17.
  */
+
 public class MetricWriteHelperTest {
 
     @Test
     public void transformAndPrintMetricWithRoundingTest(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        MonitorConfiguration configuration = mock(MonitorConfiguration.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
-        when(configuration.createDerivedMetricsCalculator()).thenReturn(null);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        when(configuration.getContext()).thenReturn(context);
+        when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample", "2.04", "Custom Metrics|Sample Monitor|sample");
@@ -47,13 +68,15 @@ public class MetricWriteHelperTest {
     public void transformAndPrintMetricWithDerivedTest(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        MonitorConfiguration configuration = mock(MonitorConfiguration.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/DerivedSample.yml"));
         DerivedMetricsCalculator derivedMetricsCalculator = derivedMetricsModule.initDerivedMetricsCalculator(conf, "Custom Metrics|Sample Monitor");
-        when(configuration.createDerivedMetricsCalculator()).thenReturn(derivedMetricsCalculator);
+        when(configuration.getContext()).thenReturn(context);
+        when(context.createDerivedMetricsCalculator()).thenReturn(derivedMetricsCalculator);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
 
         List<Metric> metricList = Lists.newArrayList();
@@ -77,9 +100,11 @@ public class MetricWriteHelperTest {
     public void printMetricWithMetricTypeDoesRoundValueTest(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        MonitorConfiguration configuration = mock(MonitorConfiguration.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
-        when(configuration.createDerivedMetricsCalculator()).thenReturn(null);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        when(configuration.getContext()).thenReturn(context);
+        when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
 
 
@@ -102,9 +127,11 @@ public class MetricWriteHelperTest {
     public void whenMetricValuesNullShouldNotPrint(){
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        MonitorConfiguration configuration = mock(MonitorConfiguration.class);
-        when(aBaseMonitor.getConfiguration()).thenReturn(configuration);
-        when(configuration.createDerivedMetricsCalculator()).thenReturn(null);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        when(configuration.getContext()).thenReturn(context);
+        when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
 
 
@@ -115,3 +142,4 @@ public class MetricWriteHelperTest {
         verify(metricWriter, times(0)).printMetric(stringArgumentCaptor.capture());
     }
 }
+

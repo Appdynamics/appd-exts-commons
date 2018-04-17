@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2018 AppDynamics,Inc.
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <controller-info>
 
     <!-- This is the host name or the IP address of the AppDynamics Controller e.g. 192.168.1.22 or myhost or myhost.abc.com
@@ -39,9 +54,9 @@
     <node-name></node-name>
     
     <!-- Change to 'true' only under special circumstances where this agent has been moved to a new application and/or tier 
-    from the UI but you want to override that move by specifying a new application name and/or tier name in the agent configuration. 
+    from the UI but you want to override that move by specifying a new application name and/or tier name in the agent contextConfiguration.
     If there is already a registered app server agent installed on the same host as this machine agent then this override DOES not work. 
-    If you want to override the UI in this case, you must force the agent registration change from the app server agent configuration. -->
+    If you want to override the UI in this case, you must force the agent registration change from the app server agent contextConfiguration. -->
     <force-agent-registration>false</force-agent-registration>    
 
 </controller-info>

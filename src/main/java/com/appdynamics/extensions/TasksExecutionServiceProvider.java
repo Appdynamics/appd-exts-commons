@@ -1,6 +1,23 @@
+/*
+ * Copyright (c) 2018 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -10,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 */
 public class TasksExecutionServiceProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(TasksExecutionServiceProvider.class);
     private ABaseMonitor aBaseMonitor;
     private AtomicInteger taskCounter;
     private MetricWriteHelper metricWriteHelper;
@@ -23,12 +41,15 @@ public class TasksExecutionServiceProvider {
 
 
     public void submit(final String name, final AMonitorTaskRunnable aServerTask){
-        aBaseMonitor.getConfiguration().getExecutorService().submit(name,new Runnable() {
+        aBaseMonitor.getContextConfiguration().getContext().getExecutorService().submit(name,new Runnable() {
             @Override
             public void run() {
                 try{
                     aServerTask.run();
                     aServerTask.onTaskComplete();
+                }
+                catch (Throwable e){
+                    logger.error("Unforeseen error or exception happened", e);
                 }
                 finally {
                     if(taskCounter.decrementAndGet() <= 0){
@@ -46,9 +67,5 @@ public class TasksExecutionServiceProvider {
 
     public MetricWriteHelper getMetricWriteHelper() {
         return this.metricWriteHelper;
-    }
-
-    public MonitorConfiguration getMonitorConfiguration(){
-        return this.aBaseMonitor.configuration;
     }
 }

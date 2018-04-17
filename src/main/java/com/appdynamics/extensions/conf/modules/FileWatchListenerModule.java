@@ -1,7 +1,23 @@
+/*
+ * Copyright (c) 2018 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContext;
+import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.util.PathResolver;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
@@ -14,7 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.appdynamics.extensions.conf.MonitorConfiguration.isWorkbenchMode;
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by venkata.konala on 10/24/17.
@@ -23,16 +39,16 @@ public class FileWatchListenerModule {
 
     private static final Logger logger = LoggerFactory.getLogger(FileWatchListenerModule.class);
     private Set<File> monitoredDirs;
-    private Map<File, MonitorConfiguration.FileWatchListener> listenerMap;
+    private Map<File, FileWatchListener> listenerMap;
     private FileAlterationMonitor monitor;
     private Integer fileWatcherInterval;
 
-    public void createListener(String path, MonitorConfiguration.FileWatchListener fileWatchListener, File installDir, MetricWriteHelper workbench, Integer fileWatcherInterval) {
+    public void createListener(String path, FileWatchListener fileWatchListener, File installDir, Integer fileWatcherInterval) {
         this.fileWatcherInterval = fileWatcherInterval;
         File file = resolvePath(path, installDir);
         logger.debug("The path [{}] is resolved to file {}", path, file.getAbsolutePath());
         createListener(file, fileWatchListener);
-        createWatcher(file, workbench);
+        createWatcher(file);
         //Initialize it for the fisrt time
         fileWatchListener.onFileChange(file);
     }
@@ -46,14 +62,14 @@ public class FileWatchListenerModule {
         }
     }
 
-    private void createListener(File file, MonitorConfiguration.FileWatchListener fileWatchListener) {
+    private void createListener(File file, FileWatchListener fileWatchListener) {
         if (listenerMap == null) {
-            listenerMap = new HashMap<File, MonitorConfiguration.FileWatchListener>();
+            listenerMap = new HashMap<File, FileWatchListener>();
         }
         listenerMap.put(file, fileWatchListener);
     }
 
-    private void createWatcher(File file, final MetricWriteHelper workbench) {
+    private void createWatcher(File file) {
         File dir = file.getParentFile();
         if (monitor == null) {
             initMonitor();
@@ -66,16 +82,12 @@ public class FileWatchListenerModule {
                 public void onFileChange(File file) {
                     try {
                         logger.info("The file {} has been modified", file.getAbsolutePath());
-                        MonitorConfiguration.FileWatchListener fileWatchListener = listenerMap.get(file);
+                        FileWatchListener fileWatchListener = listenerMap.get(file);
                         if (fileWatchListener != null) {
                             fileWatchListener.onFileChange(file);
                         }
                     } catch (Exception e) {
                         logger.error("Error while invoking the file watch listener", e);
-                    } finally {
-                        if (workbench != null) {
-                            workbench.reset();
-                        }
                     }
                 }
             });
