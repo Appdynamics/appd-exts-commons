@@ -9,6 +9,7 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.conf.modules.HealthCheckModule;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
@@ -39,6 +40,8 @@ public class MonitorContext {
     private CacheModule cacheModule;
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
+    private HealthCheckModule healthCheckModule = new HealthCheckModule();
+
 
     MonitorContext(String monitorName){
         this.monitorName = monitorName;
@@ -61,6 +64,7 @@ public class MonitorContext {
             monitorExecutorServiceModule.initExecutorService(config);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
+            healthCheckModule.initMATroubleshootChecks(monitorName, config);
         } else{
             logger.error("The contextConfiguration is not enabled {}", config);
         }

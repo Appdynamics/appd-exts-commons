@@ -5,10 +5,16 @@
  * The copyright notice above does not evidence any actual or intended publication of such source code.
  */
 
-package com.appdynamics.extensions.checks;
+package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.MonitorThreadPoolExecutor;
+import com.appdynamics.extensions.checks.AppTierNodeCheck;
+import com.appdynamics.extensions.checks.ControllerRequestHandler;
+import com.appdynamics.extensions.checks.ExtensionPathConfigCheck;
+import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
+import com.appdynamics.extensions.checks.MaxMetricLimitCheck;
+import com.appdynamics.extensions.checks.MonitorHealthCheck;
 import com.appdynamics.extensions.dashboard.ControllerInfo;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
