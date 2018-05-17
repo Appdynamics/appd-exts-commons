@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ import java.security.ProtectionDomain;
  * To change this template use File | Settings | File Templates.
  */
 public class PathResolver {
-    public static final Logger logger = LoggerFactory.getLogger(PathResolver.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(PathResolver.class);
 
     public static File resolveDirectory(Class clazz) {
         File installDir = null;

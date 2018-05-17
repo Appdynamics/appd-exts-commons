@@ -58,9 +58,10 @@ public class ControllerRequestHandler {
             return null;
         }
 
+        CloseableHttpResponse response = null;
         try {
             HttpGet get = new HttpGet(controllerURI + "/controller/auth?action=login");
-            CloseableHttpResponse response = client.execute(get);
+            response = client.execute(get);
             if (response.getStatusLine().getStatusCode() == 200) {
                 Header[] allHeaders = response.getAllHeaders();
                 StringBuilder cookies = new StringBuilder();
@@ -71,14 +72,19 @@ public class ControllerRequestHandler {
                     }
                 }
                 loginCookie = cookies.toString();
-                //Releases the connection
-                response.close();
-
             } else {
                 logger.error("Not able to login to controller. Received status [{}] and response [{}]", response.getStatusLine().getStatusCode(), EntityUtils.toString(response.getEntity()));
             }
         } catch (Exception e) {
             logger.error("Exception while trying to get the MA status", e);
+        } finally {
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    logger.error("Error when closing the connection", e);
+                }
+            }
         }
 
         return loginCookie;

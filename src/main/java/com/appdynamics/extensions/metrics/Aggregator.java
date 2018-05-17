@@ -15,9 +15,9 @@
 
 package com.appdynamics.extensions.metrics;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -31,7 +31,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Aggregator<K> {
-    public static final Logger logger = LoggerFactory.getLogger(Aggregator.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(Aggregator.class);
     private AggregationType aggregationType;
     public Map<K, AggregatedValue> map;
 
@@ -74,9 +74,9 @@ public class Aggregator<K> {
     public BigDecimal getAggregatedValue(K key) {
         AggregatedValue aggVal = get(key);
         if (aggVal != null) {
-            if(aggregationType.equals(AggregationType.SUM)){
+            if (aggregationType.equals(AggregationType.SUM)) {
                 return aggVal.getSum();
-            } else{
+            } else {
                 return aggVal.getAverage();
             }
         }

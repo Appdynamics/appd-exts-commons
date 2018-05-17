@@ -15,16 +15,21 @@
 
 package com.appdynamics.extensions.http;
 
+import static com.appdynamics.extensions.TaskInputArgs.defaultIfEmpty;
+import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
+
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
-import static com.appdynamics.extensions.TaskInputArgs.defaultIfEmpty;
-import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +39,7 @@ import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
  * To change this template use File | Settings | File Templates.
  */
 public class UrlBuilder {
-    public static final Logger logger = LoggerFactory.getLogger(UrlBuilder.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(UrlBuilder.class);
     private List<String> paths;
     private Map<String, String> taskArgs;
     private Map<String, String> queryParams;
@@ -59,29 +64,28 @@ public class UrlBuilder {
     }
 
 
-
-    public UrlBuilder ssl(boolean useSSL){
-        taskArgs.put(TaskInputArgs.USE_SSL,String.valueOf(useSSL));
+    public UrlBuilder ssl(boolean useSSL) {
+        taskArgs.put(TaskInputArgs.USE_SSL, String.valueOf(useSSL));
         return this;
     }
 
-    public UrlBuilder host(String host){
-        taskArgs.put(TaskInputArgs.HOST,host);
+    public UrlBuilder host(String host) {
+        taskArgs.put(TaskInputArgs.HOST, host);
         return this;
     }
 
-    public UrlBuilder port(String port){
-        taskArgs.put(TaskInputArgs.PORT,port);
+    public UrlBuilder port(String port) {
+        taskArgs.put(TaskInputArgs.PORT, port);
         return this;
     }
 
-    public UrlBuilder port(int port){
-        taskArgs.put(TaskInputArgs.PORT,String.valueOf(port));
+    public UrlBuilder port(int port) {
+        taskArgs.put(TaskInputArgs.PORT, String.valueOf(port));
         return this;
     }
 
-    public UrlBuilder uri(String uri){
-        taskArgs.put(TaskInputArgs.URI,uri);
+    public UrlBuilder uri(String uri) {
+        taskArgs.put(TaskInputArgs.URI, uri);
         return this;
     }
 
@@ -133,9 +137,9 @@ public class UrlBuilder {
     public String build() {
         StringBuilder sb = new StringBuilder();
         String uri = taskArgs.get(TaskInputArgs.URI);
-        if(!Strings.isNullOrEmpty(uri)){
+        if (!Strings.isNullOrEmpty(uri)) {
             sb.append(trimTrailingSlash(uri.trim()));
-        }else{
+        } else {
             String useSSL = defaultIfEmpty(taskArgs, TaskInputArgs.USE_SSL, "false");
             if (Boolean.valueOf(useSSL)) {
                 sb.append("https://");
@@ -165,8 +169,8 @@ public class UrlBuilder {
             }
             sb.deleteCharAt(sb.length() - 1);
         }
-        if(logger.isDebugEnabled()){
-            logger.debug("The url is initialized to {}",sb);
+        if (logger.isDebugEnabled()) {
+            logger.debug("The url is initialized to {}", sb);
         }
         return sb.toString();
     }

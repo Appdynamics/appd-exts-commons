@@ -51,6 +51,7 @@ public class WorkbenchServerLauncher {
                     List<String> commands = new ArrayList<>();
                     commands.add(java.getAbsolutePath());
                     commands.addAll(workbenchSysProps);
+                    commands.add("-DenableHealthChecks=false");
                     commands.add("-cp");
                     commands.add(cp);
                     commands.add(WorkBenchServer.class.getName());

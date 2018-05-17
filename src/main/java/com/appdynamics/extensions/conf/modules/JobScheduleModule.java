@@ -18,9 +18,10 @@ package com.appdynamics.extensions.conf.modules;
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.MonitorThreadPoolExecutor;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.YmlUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -30,10 +31,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class JobScheduleModule {
 
-    private static final Logger logger = LoggerFactory.getLogger(JobScheduleModule.class);
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(JobScheduleModule.class);
     private MonitorExecutorService scheduler;
 
-    public MonitorExecutorService getScheduler(){
+    public MonitorExecutorService getScheduler() {
         return scheduler;
     }
 
@@ -56,8 +57,8 @@ public class JobScheduleModule {
         int numberOfThreads = YmlUtils.getInt(taskSchedule.get("numberOfThreads"), 1);
         int taskDelaySeconds = YmlUtils.getInt(taskSchedule.get("taskDelaySeconds"), 300);
         int initialDelaySeconds = YmlUtils.getInt(taskSchedule.get("initialDelaySeconds"), 10);
-        scheduler = new MonitorThreadPoolExecutor(createScheduledThreadPool(numberOfThreads));
-        scheduler.scheduleAtFixedRate("" + monitorName + " ScheduledTaskRunner",monitorJob, initialDelaySeconds, taskDelaySeconds, TimeUnit.SECONDS);
+        scheduler = new MonitorThreadPoolExecutor(createScheduledThreadPool(numberOfThreads), monitorName);
+        scheduler.scheduleAtFixedRate("" + monitorName + " ScheduledTaskRunner", monitorJob, initialDelaySeconds, taskDelaySeconds, TimeUnit.SECONDS);
         logger.info("Created a Task Scheduler for {} with a delay of {} seconds", monitorJob, taskDelaySeconds);
     }
 

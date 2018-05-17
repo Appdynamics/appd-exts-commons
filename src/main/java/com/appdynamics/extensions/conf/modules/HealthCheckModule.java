@@ -16,10 +16,10 @@ import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
 import com.appdynamics.extensions.checks.MaxMetricLimitCheck;
 import com.appdynamics.extensions.checks.MonitorHealthCheck;
 import com.appdynamics.extensions.dashboard.ControllerInfo;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Collections;
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class HealthCheckModule {
 
-    public static final Logger logger = LoggerFactory.getLogger(HealthCheckModule.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(HealthCheckModule.class);
     private Map<String, MonitorHealthCheck> healthChecksForMonitors = new ConcurrentHashMap<>();
     private ControllerInfo controllerInfo;
     private MonitorExecutorService executorService;
@@ -46,21 +46,19 @@ public class HealthCheckModule {
 
     public void initMATroubleshootChecks(String monitorName, Map<String, ?> config) {
 
-        if (executorService != null) {
-            executorService.shutdown();
-            executorService = null;
+        String enableHealthChecksSysPropString = System.getProperty("enableHealthChecks");
+
+        Boolean enableHealthChecksSysProp = true;
+        if (enableHealthChecksSysPropString != null) {
+            enableHealthChecksSysProp = Boolean.valueOf(enableHealthChecksSysPropString);
         }
 
-        /**
-         *  Initializing the thread pool with 2 threads.
-         *    one thread will be used for all the normal checks
-         *    second thread will be used for run-always check
-         *
-         **/
-        executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(2));
-
-
         Boolean enableHealthChecks = (Boolean) config.get("enableHealthChecks");
+
+        if (enableHealthChecks == null && !enableHealthChecksSysProp) {
+            enableHealthChecks = false;
+        }
+
 
         if (enableHealthChecks != null && !enableHealthChecks) {
             logger.info("Not initializing extension health checks as it is disabled in config");
@@ -74,6 +72,23 @@ public class HealthCheckModule {
             return;
         }
 
+        if (!validateControllerInfo()) {
+            return;
+        }
+
+        if (executorService != null) {
+            executorService.shutdown();
+            executorService = null;
+        }
+
+        /**
+         *  Initializing the thread pool with 2 threads.
+         *    one thread will be used for all the normal checks
+         *    second thread will be used for run-always check
+         *
+         **/
+        executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(2), monitorName);
+
         try {
 
             File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
@@ -86,6 +101,7 @@ public class HealthCheckModule {
                 healthCheckMonitor.updateMonitorExecutorService(executorService);
                 healthCheckMonitor.clearAllChecks();
             }
+
             ControllerRequestHandler controllerRequestHandler = new ControllerRequestHandler(controllerInfo, MonitorHealthCheck.logger);
 
             healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
@@ -99,6 +115,19 @@ public class HealthCheckModule {
         } catch (Exception e) {
             logger.error("Error initializing health check module", e);
         }
+    }
+
+    private boolean validateControllerInfo() {
+
+        if (controllerInfo == null) {
+            return false;
+        }
+
+        if (controllerInfo.getControllerHost() == null || controllerInfo.getControllerPort() == null
+                || controllerInfo.getControllerSslEnabled() == null || controllerInfo.getSimEnabled() == null) {
+            return false;
+        }
+        return true;
     }
 
     private ControllerInfo getControllerInfo() {

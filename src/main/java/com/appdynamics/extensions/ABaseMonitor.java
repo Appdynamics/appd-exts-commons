@@ -15,9 +15,10 @@
 
 package com.appdynamics.extensions;
 
-import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.MonitorContext;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.file.FileWatchListener;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -25,13 +26,11 @@ import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
 
 /**
- *
  * An {@link AManagedMonitor} extends the core functionality of
  * AppDynamics machine agent (MA) / server infrastructure monitoring
  * (SIM) and can be implemented to perform custom tasks.
@@ -78,13 +77,12 @@ import java.util.Map;
  * }}
  * </pre>
  *
- * @since 2.0
  * @author kunal.gupta
- *
+ * @since 2.0
  */
-public abstract class ABaseMonitor extends AManagedMonitor{
+public abstract class ABaseMonitor extends AManagedMonitor {
 
-    private static final Logger logger = LoggerFactory.getLogger(ABaseMonitor.class);
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(ABaseMonitor.class);
 
     /**
      * The name of the monitor.
@@ -105,13 +103,14 @@ public abstract class ABaseMonitor extends AManagedMonitor{
      */
     protected AMonitorJob monitorJob;
 
-    public ABaseMonitor(){
+    public ABaseMonitor() {
         this.monitorName = getMonitorName();
-        logger.info("Using {} Version [{}]",monitorName, getImplementationVersion());
+        logger.info("Using {} Version [{}]", monitorName, getImplementationVersion());
+        ExtensionName.setName(monitorName);
     }
 
     protected void initialize(final Map<String, String> args) {
-        if(contextConfiguration == null){
+        if (contextConfiguration == null) {
             installDir = getInstallDirectory();
             monitorJob = createMonitorJob();
             contextConfiguration = createContextConfiguration();
@@ -133,7 +132,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
 
     private File getInstallDirectory() {
         File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
-        if(installDir == null){
+        if (installDir == null) {
             throw new RuntimeException("The install directory cannot be null");
         }
         return installDir;
@@ -143,7 +142,10 @@ public abstract class ABaseMonitor extends AManagedMonitor{
         return new MonitorContextConfiguration(getMonitorName(), getDefaultMetricPrefix(), installDir, monitorJob);
     }
 
-    protected void onConfigReload(File file){};
+    protected void onConfigReload(File file) {
+    }
+
+    ;
 
     protected AMonitorJob createMonitorJob() {
         return new AMonitorJob(this);
@@ -152,6 +154,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     /**
      * A placeholder method which should be overridden if there are
      * custom objects to be initialized in the monitor.
+     *
      * @param args
      */
     protected void initializeMoreStuff(Map<String, String> args) {
@@ -159,10 +162,10 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     }
 
     /**
-     *
      * This method is invoked by the MA or SIM agent with a
      * frequency as specified by the <execution-frequency-in-seconds>
      * field in the monitor.xml.
+     *
      * @param args
      * @param taskExecutionContext
      * @return
@@ -170,25 +173,24 @@ public abstract class ABaseMonitor extends AManagedMonitor{
      */
     @Override
     public TaskOutput execute(Map<String, String> args, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-        logger.info("Using {} Version [" + getImplementationVersion() + "]",monitorName);
-        logger.debug("The raw arguments are {}",args);
+        logger.info("Using {} Version [" + getImplementationVersion() + "]", monitorName);
+        logger.debug("The raw arguments are {}", args);
         initialize(args);
         executeMonitor();
-        return new TaskOutput(String.format("Monitor {} completes.",monitorName));
+        return new TaskOutput(String.format("Monitor {} completes.", monitorName));
     }
 
     protected void executeMonitor() {
-        if(contextConfiguration.isEnabled()){
+        if (contextConfiguration.isEnabled()) {
             MonitorContext context = contextConfiguration.getContext();
             AssertUtils.assertNotNull(context, "The context of the extension has not been initialised!!!! Please check your contextConfiguration");
-            if(context.isScheduledModeEnabled()){ //scheduled mode
+            if (context.isScheduledModeEnabled()) { //scheduled mode
                 logger.debug("Task scheduler is enabled, printing the metrics from the cache");
                 monitorJob.printAllFromCache();
-            }
-            else{   // normal mode
+            } else {   // normal mode
                 monitorJob.run();
             }
-        } else{
+        } else {
             logger.debug("The monitor [{}] is not enabled.", getMonitorName());
         }
     }
@@ -210,7 +212,7 @@ public abstract class ABaseMonitor extends AManagedMonitor{
     protected abstract int getTaskCount();
 
     protected void onComplete() {
-        logger.info("Finished processing all tasks in the job for {}",getMonitorName());
+        logger.info("Finished processing all tasks in the job for {}", getMonitorName());
     }
 
 }

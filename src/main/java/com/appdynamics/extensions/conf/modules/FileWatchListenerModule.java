@@ -15,29 +15,28 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorContext;
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
+
 import com.appdynamics.extensions.file.FileWatchListener;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
-
 /**
  * Created by venkata.konala on 10/24/17.
  */
 public class FileWatchListenerModule {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileWatchListenerModule.class);
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(FileWatchListenerModule.class);
     private Set<File> monitoredDirs;
     private Map<File, FileWatchListener> listenerMap;
     private FileAlterationMonitor monitor;

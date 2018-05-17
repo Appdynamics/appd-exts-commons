@@ -15,17 +15,17 @@
 
 package com.appdynamics.extensions;
 
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
+
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by abey.tom on 3/20/16.
  */
 public class MetricWriteHelperFactory {
-    public static final Logger logger = LoggerFactory.getLogger(MetricWriteHelperFactory.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricWriteHelperFactory.class);
 
     public static MetricWriteHelper create(ABaseMonitor baseMonitor) {
         MetricWriteHelper helper;

@@ -16,16 +16,22 @@
 package com.appdynamics.extensions.workbench.metric;
 
 import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,7 +40,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by abey.tom on 3/16/16.
  */
 public class WorkbenchMetricStore extends MetricWriteHelper {
-    public static final Logger logger = LoggerFactory.getLogger(WorkbenchMetricStore.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(WorkbenchMetricStore.class);
     public long lastMetricRefresh;
 
     private Map<String, Queue<MetricValue>> metricMap;
@@ -57,9 +63,9 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
 
     @Override
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if(StringUtils.hasText(metricValue)){
-            addMetric(metricPath,new BigDecimal(metricValue));
-        }else{
+        if (StringUtils.hasText(metricValue)) {
+            addMetric(metricPath, new BigDecimal(metricValue));
+        } else {
             logger.error("The value of [{}] is {}", metricPath, metricValue);
         }
     }
@@ -86,7 +92,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         if (values.size() > 60) {
             values.remove();
         }
-        addForDerivedMetricsCalculation(metricPath,value.toString());
+        addForDerivedMetricsCalculation(metricPath, value.toString());
     }
 
     public Set<String> getMetricPaths() {

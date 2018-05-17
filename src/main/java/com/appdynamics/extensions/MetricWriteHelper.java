@@ -15,6 +15,10 @@
 
 package com.appdynamics.extensions;
 
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
+import static com.appdynamics.extensions.util.StringUtils.validateStrings;
+
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -24,7 +28,6 @@ import com.appdynamics.extensions.util.MetricPathUtils;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,13 +35,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
-import static com.appdynamics.extensions.util.StringUtils.validateStrings;
-
 
 public class MetricWriteHelper {
 
-    public static final Logger logger = LoggerFactory.getLogger(MetricWriteHelper.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricWriteHelper.class);
 
     private ABaseMonitor baseMonitor;
     //Used for Dashboard. Cache the current list of metrics.
@@ -77,17 +77,17 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath),metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
+            logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
         }
     }
 
     protected void addForDerivedMetricsCalculation(String metricPath, String metricValue) {
-        if(derivedMetricsCalculator != null){
-            derivedMetricsCalculator.addToBaseMetricsMap(metricPath,metricValue);
+        if (derivedMetricsCalculator != null) {
+            derivedMetricsCalculator.addToBaseMetricsMap(metricPath, metricValue);
         }
     }
 
-    public void transformAndPrintMetrics(List<Metric> metrics){
+    public void transformAndPrintMetrics(List<Metric> metrics) {
         Transformer transformer = new Transformer(metrics);
         transformer.transform();
         printMetric(metrics);
@@ -107,10 +107,10 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
-        if (validateStrings(metricPath,metricType) && value != null) {
+        if (validateStrings(metricPath, metricType) && value != null) {
             String valStr = value.setScale(0, BigDecimal.ROUND_HALF_UP).toPlainString();
             String[] qualifiers = createMetricType(metricType);
-            printMetric(metricPath,valStr,qualifiers[0],qualifiers[1],qualifiers[2]);
+            printMetric(metricPath, valStr, qualifiers[0], qualifiers[1], qualifiers[2]);
         } else {
             logger.error("Cannot send the metric [{}], value=[{}] and metricType=[{}]", metricPath, value, metricType);
         }
@@ -125,9 +125,9 @@ public class MetricWriteHelper {
         return writer;
     }
 
-    public void onComplete(){
+    public void onComplete() {
         int baseMetricsSize = 0;
-        if(derivedMetricsCalculator != null){
+        if (derivedMetricsCalculator != null) {
             List<com.appdynamics.extensions.metrics.Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
             baseMetricsSize = metricsMap.size();
             logger.debug("Total number of base metrics reported in this job run are : {}", baseMetricsSize);
@@ -190,7 +190,7 @@ public class MetricWriteHelper {
 
     public Set<String> getMetricPaths() {
         ConcurrentMap<String, Metric> map = baseMonitor.getContextConfiguration().getContext().getCachedMetrics();
-        if(map != null){
+        if (map != null) {
             return map.keySet();
         }
         return null;

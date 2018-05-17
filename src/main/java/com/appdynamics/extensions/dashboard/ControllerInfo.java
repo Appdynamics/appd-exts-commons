@@ -263,6 +263,7 @@ public class ControllerInfo {
                 "controllerHost='" + controllerHost + '\'' +
                 ", controllerPort=" + controllerPort +
                 ", controllerSslEnabled=" + controllerSslEnabled +
+                ", simEnabled=" + simEnabled +
                 ", account='" + account + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + tmpPass + '\'' +

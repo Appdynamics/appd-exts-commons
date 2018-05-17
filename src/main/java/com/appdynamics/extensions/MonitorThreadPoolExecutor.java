@@ -15,50 +15,55 @@
 
 package com.appdynamics.extensions;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
-import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Thread Pool Executor to be used for extensions.
  */
 public class MonitorThreadPoolExecutor implements MonitorExecutorService {
 
-    public static final Logger logger = LoggerFactory.getLogger(MonitorThreadPoolExecutor.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorThreadPoolExecutor.class);
     private static final long TASK_TIME_THRESHOLD_IN_MS = 60 * 1000l;
+    private String monitorName;
 
     private ThreadPoolExecutor executor;
 
-    public MonitorThreadPoolExecutor(ThreadPoolExecutor executor) {
-        AssertUtils.assertNotNull(executor,"Threadpool executor cannot be null.");
+    public MonitorThreadPoolExecutor(ThreadPoolExecutor executor, String monitorName) {
+        AssertUtils.assertNotNull(executor, "Threadpool executor cannot be null.");
         this.executor = executor;
+        this.monitorName = monitorName;
     }
 
     @Override
     public Future<?> submit(String name, Runnable task) {
-        return executor.submit(wrapWithRunnable(name,task));
+        return executor.submit(wrapWithRunnable(name, task));
     }
 
     @Override
     public void execute(String name, Runnable task) {
-        executor.execute(wrapWithRunnable(name,task));
+        executor.execute(wrapWithRunnable(name, task));
     }
 
     @Override
-    public <T> Future<T> submit(String name,Callable<T> task) {
-        return executor.submit(wrapWithCallable(name,task));
+    public <T> Future<T> submit(String name, Callable<T> task) {
+        return executor.submit(wrapWithCallable(name, task));
     }
 
     @Override
-    public void scheduleAtFixedRate(String name,Runnable task, int initialDelaySeconds, int taskDelaySeconds, TimeUnit seconds) {
-        if(executor instanceof ScheduledThreadPoolExecutor) {
+    public void scheduleAtFixedRate(String name, Runnable task, int initialDelaySeconds, int taskDelaySeconds, TimeUnit seconds) {
+        if (executor instanceof ScheduledThreadPoolExecutor) {
             ScheduledThreadPoolExecutor scheduledExecutor = (ScheduledThreadPoolExecutor) executor;
             scheduledExecutor.scheduleAtFixedRate(wrapWithRunnable(name, task), initialDelaySeconds, taskDelaySeconds, seconds);
-        }
-        else {
+        } else {
             throw new RuntimeException("The ThreadPoolExecutor being used does not support scheduleAtFixedRate() method");
         }
     }
@@ -85,30 +90,43 @@ public class MonitorThreadPoolExecutor implements MonitorExecutorService {
                 long startTime = System.currentTimeMillis();
                 T t = task.call();
                 long diffTime = System.currentTimeMillis() - startTime;
-                if(diffTime > TASK_TIME_THRESHOLD_IN_MS){  //time limit for each server task to finish
-                    logger.warn("{} Task took {} ms to complete",name,diffTime);
+                if (diffTime > TASK_TIME_THRESHOLD_IN_MS) {  //time limit for each server task to finish
+                    logger.warn("{} Task took {} ms to complete", name, diffTime);
                 }
                 return t;
             }
         };
     }
 
-    private Runnable wrapWithRunnable(final String name,final Runnable task) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    long startTime = System.currentTimeMillis();
-                    task.run();
-                    long diffTime = System.currentTimeMillis() - startTime;
-                    if (diffTime > TASK_TIME_THRESHOLD_IN_MS) {  //time limit for each server task to finish
-                        logger.warn("{} Task took {} ms to complete", name, diffTime);
-                    }
+    private Runnable wrapWithRunnable(final String name, final Runnable task) {
+        return new TaskRunnable(name, task, monitorName);
+    }
+
+    private class TaskRunnable implements Runnable {
+
+        private String name;
+        private Runnable task;
+        private ThreadLocal<String> threadLocal = new ThreadLocal<>();
+
+        TaskRunnable(String name, Runnable task, String monitorName) {
+            this.name = name;
+            this.task = task;
+            threadLocal.set(monitorName);
+        }
+
+        @Override
+        public void run() {
+            try {
+                long startTime = System.currentTimeMillis();
+                task.run();
+                long diffTime = System.currentTimeMillis() - startTime;
+                if (diffTime > TASK_TIME_THRESHOLD_IN_MS) {  //time limit for each server task to finish
+                    logger.warn("{} Task took {} ms to complete", name, diffTime);
                 }
-                catch(Exception e){
-                    logger.error("Error while running the Task {}" ,name, e);
-                }
+            } catch (Exception e) {
+                logger.error("Error while running the Task {}", name, e);
             }
-        };
+        }
+
     }
 }

@@ -15,13 +15,13 @@
 
 package com.appdynamics.extensions.file;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -29,7 +29,7 @@ import java.io.File;
  * Created by abey.tom on 7/1/15.
  */
 public class FileLoader {
-    public static final Logger logger = LoggerFactory.getLogger(FileLoader.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(FileLoader.class);
 
     public static void load(final Listener listener, String... paths) {
         FileAlterationMonitor monitor = new FileAlterationMonitor(30000);

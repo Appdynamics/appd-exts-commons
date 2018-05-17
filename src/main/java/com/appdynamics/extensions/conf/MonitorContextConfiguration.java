@@ -10,12 +10,12 @@ package com.appdynamics.extensions.conf;
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.conf.modules.FileWatchListenerModule;
 import com.appdynamics.extensions.file.FileWatchListener;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -30,7 +30,7 @@ import java.util.Map;
 public class MonitorContextConfiguration {
 
 
-    public static final Logger logger = LoggerFactory.getLogger(MonitorContextConfiguration.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorContextConfiguration.class);
     private File installDir;
     private AMonitorJob aMonitorJob;
     private Map<String, ?> configYml;
@@ -42,7 +42,7 @@ public class MonitorContextConfiguration {
     private boolean enabled;
     private MonitorContext context;
 
-    public MonitorContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir, AMonitorJob aMonitorJob){
+    public MonitorContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir, AMonitorJob aMonitorJob) {
         this.defaultMetricPrefix = defaultMetricPrefix;
         this.installDir = installDir;
         this.aMonitorJob = aMonitorJob;
@@ -50,21 +50,20 @@ public class MonitorContextConfiguration {
         this.context = new MonitorContext(monitorName);
     }
 
-    public void setConfigYml(String path){
+    public void setConfigYml(String path) {
         File configFile = resolvePath(path, installDir);
         logger.info("Loading the contextConfiguration from {}", configFile.getAbsolutePath());
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(configFile);
-        if(rootElem == null){
+        if (rootElem == null) {
             logger.error("Unable to get data from the config file");
             return;
         }
         configYml = rootElem;
         Boolean enabled = (Boolean) configYml.get("enabled");
-        if(!Boolean.FALSE.equals(enabled)) {
+        if (!Boolean.FALSE.equals(enabled)) {
             this.enabled = true;
             setMetricPrefix((String) configYml.get("metricPrefix"), defaultMetricPrefix);
-        }
-        else{
+        } else {
             this.enabled = false;
             logger.error("The contextConfiguration is not enabled {}", configYml);
         }
@@ -80,7 +79,7 @@ public class MonitorContextConfiguration {
         }
     }
 
-    public <T> void setMetricXml(String path, final Class<T> clazz){
+    public <T> void setMetricXml(String path, final Class<T> clazz) {
         File metricFile = resolvePath(path, installDir);
         if (jaxbContext == null) {
             try {
@@ -107,7 +106,7 @@ public class MonitorContextConfiguration {
         }
     }
 
-    private void setMetricPrefix(String metricPrefix, String defaultMetricPrefix){
+    private void setMetricPrefix(String metricPrefix, String defaultMetricPrefix) {
         logger.debug("The metric prefix from the config file is {}", metricPrefix);
         if (!Strings.isNullOrEmpty(metricPrefix)) {
             this.metricPrefix = StringUtils.trim(metricPrefix.trim(), "|");
@@ -120,7 +119,7 @@ public class MonitorContextConfiguration {
         }
     }
 
-    public String getMetricPrefix(){
+    public String getMetricPrefix() {
         return metricPrefix;
     }
 
@@ -133,15 +132,15 @@ public class MonitorContextConfiguration {
         }
     }
 
-    public void registerListener(String path, FileWatchListener callback){
-        fileWatchListenerModule.createListener(path , callback, installDir, 3000);
+    public void registerListener(String path, FileWatchListener callback) {
+        fileWatchListenerModule.createListener(path, callback, installDir, 3000);
     }
 
-    public boolean isEnabled(){
+    public boolean isEnabled() {
         return enabled;
     }
 
-    public MonitorContext getContext(){
+    public MonitorContext getContext() {
         return context;
     }
 

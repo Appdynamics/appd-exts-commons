@@ -16,9 +16,10 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.http.Http4ClientBuilder;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +28,13 @@ import java.util.Map;
  */
 public class HttpClientModule {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpClientModule.class);
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(HttpClientModule.class);
     private CloseableHttpClient httpClient;
 
     public CloseableHttpClient getHttpClient() {
         if (httpClient != null) {
             return httpClient;
-        }
-        else {
+        } else {
             throw new RuntimeException("Cannot Initialize HttpClient.The [servers] section is not set in the config.yml");
         }
     }
@@ -44,8 +44,7 @@ public class HttpClientModule {
         List servers = (List) config.get("servers");
         if (servers != null && !servers.isEmpty()) {
             httpClient = Http4ClientBuilder.getBuilder(config).build();
-        }
-        else {
+        } else {
             logger.info("The httpClient is not initialized since the [servers] are not present in config.yml");
         }
     }

@@ -46,7 +46,7 @@ public class MonitorHealthCheckTest {
     @Test
     public void testRegisteredChecksForRunAlways() throws InterruptedException {
 
-        MonitorThreadPoolExecutor monitorThreadPoolExecutor = new MonitorThreadPoolExecutor((ThreadPoolExecutor) Executors.newScheduledThreadPool(1));
+        MonitorThreadPoolExecutor monitorThreadPoolExecutor = new MonitorThreadPoolExecutor((ThreadPoolExecutor) Executors.newScheduledThreadPool(1), "test");
 
         monitorHealthCheck = new MonitorHealthCheck("TestMonitor", new File("monitors/TestMonitor"), monitorThreadPoolExecutor);
         TestCheckAlways testCheck = new TestCheckAlways();

@@ -16,36 +16,37 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
-import com.appdynamics.extensions.http.*;
+import com.appdynamics.extensions.http.Http4ClientBuilder;
+import com.appdynamics.extensions.http.UrlBuilder;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.xml.Xml;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.sun.javafx.fxml.builder.URLBuilder;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.*;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -60,7 +61,7 @@ import java.util.Map;
  * Created by abey.tom on 4/11/15.
  */
 public class CustomDashboardUploader {
-    public static final Logger logger = LoggerFactory.getLogger(CustomDashboardUploader.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUploader.class);
 
     public void uploadDashboard(String dashboardName, Xml xml, Map<String, ? super Object> argsMap, boolean overwrite) {
         setProxyIfApplicable(argsMap);
@@ -68,11 +69,11 @@ public class CustomDashboardUploader {
         //SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(10000).socketTimeout(15000).build();
         try {
             //path("controller/auth?action=login")
-            List<Map<String, ?>> serversList = (List<Map<String, ?>>)argsMap.get("servers");
-            Map<String, ?> serverMap = (Map)serversList.iterator().next();
+            List<Map<String, ?>> serversList = (List<Map<String, ?>>) argsMap.get("servers");
+            Map<String, ?> serverMap = (Map) serversList.iterator().next();
             Map<String, String> serverStringMap = new HashMap<>();
-            serverStringMap.put(TaskInputArgs.HOST, (String)serverMap.get(TaskInputArgs.HOST));
-            serverStringMap.put(TaskInputArgs.PORT, (String)serverMap.get(TaskInputArgs.PORT));
+            serverStringMap.put(TaskInputArgs.HOST, (String) serverMap.get(TaskInputArgs.HOST));
+            serverStringMap.put(TaskInputArgs.PORT, (String) serverMap.get(TaskInputArgs.PORT));
             serverStringMap.put(TaskInputArgs.USE_SSL, String.valueOf(serverMap.get(TaskInputArgs.USE_SSL)));
 
             HttpGet get = new HttpGet(UrlBuilder.builder(serverStringMap).path("controller/auth?action=login").build());
@@ -106,18 +107,17 @@ public class CustomDashboardUploader {
                 } else {
                     uploadFile(dashboardName, xml, argsMap, serverStringMap, cookies, csrf);
                 }
-            } else if(statusLine!= null) {
+            } else if (statusLine != null) {
                 logger.error("Custom Dashboard Upload Failed. The login to the controller is unsuccessful. The response code is {}"
                         , statusLine.getStatusCode());
                 logger.error("The response headers are {} and content is {}", Arrays.toString(response.getAllHeaders()), response.getEntity());
             }
-        } catch (Exception e){
-          logger.error(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         } finally {
             try {
                 client.close();
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 logger.error(e.getMessage());
             }
         }
@@ -158,7 +158,7 @@ public class CustomDashboardUploader {
                     }
                 }
                 return isPresent;
-            } else if(statusLine != null) {
+            } else if (statusLine != null) {
                 logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
                         , statusLine.getStatusCode());
                 logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
@@ -166,8 +166,7 @@ public class CustomDashboardUploader {
                 logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
                 return true;//Fake that the dashboard exists.
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
         }
         return false;
@@ -194,9 +193,9 @@ public class CustomDashboardUploader {
         HttpURLConnection connection = null;
         URL url = new URL(urlStr);
         if (argsMap.containsKey("proxy")) {
-            Map<String, ?> proxyMap = (Map<String, ?>)argsMap.get("proxy");
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String)proxyMap.get(TaskInputArgs.HOST)
-                    , Integer.parseInt((String)proxyMap.get(TaskInputArgs.PORT))));
+            Map<String, ?> proxyMap = (Map<String, ?>) argsMap.get("proxy");
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String) proxyMap.get(TaskInputArgs.HOST)
+                    , Integer.parseInt((String) proxyMap.get(TaskInputArgs.PORT))));
             connection = (HttpURLConnection) url.openConnection(proxy);
             logger.debug("Created an HttpConnection for Fileupload with a proxy {}", proxy);
         } else {

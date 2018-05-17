@@ -16,13 +16,18 @@
 
 package com.appdynamics.extensions;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
 import com.google.common.collect.Maps;
 import org.junit.Test;
+
 import java.util.Map;
-import static org.mockito.Mockito.*;
 
 
 /**
@@ -43,8 +48,9 @@ public class TasksExecutionServiceProviderTest {
 
         }
     }
+
     @Test
-    public void checkIfOnCompleteMethodsAreCalledAfterTasksSubmittedTest() throws InterruptedException{
+    public void checkIfOnCompleteMethodsAreCalledAfterTasksSubmittedTest() throws InterruptedException {
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
         when(aBaseMonitor.getTaskCount()).thenReturn(2);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
@@ -52,13 +58,13 @@ public class TasksExecutionServiceProviderTest {
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ? super Object> conf = Maps.newHashMap();
         conf.put("numberOfThreads", "10");
-        monitorExecutorServiceModule.initExecutorService(conf);
+        monitorExecutorServiceModule.initExecutorService(conf, "test");
         MonitorExecutorService monitorExecutorService = monitorExecutorServiceModule.getExecutorService();
         MonitorContext context = mock(MonitorContext.class);
         when(configuration.getContext()).thenReturn(context);
         when(context.getExecutorService()).thenReturn(monitorExecutorService);
         MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
-        TasksExecutionServiceProvider tasksExecutionServiceProvider =  new TasksExecutionServiceProvider(aBaseMonitor, metricWriteHelper);
+        TasksExecutionServiceProvider tasksExecutionServiceProvider = new TasksExecutionServiceProvider(aBaseMonitor, metricWriteHelper);
         //SampleRunnable sampleRunnable = new SampleRunnable();
         tasksExecutionServiceProvider.submit("Task1", new SampleRunnable());
         tasksExecutionServiceProvider.submit("Task2", new SampleRunnable());
@@ -68,7 +74,7 @@ public class TasksExecutionServiceProviderTest {
     }
 
     @Test
-    public void checkIfOnCompleteMethodsAreNotCalledAfterTasksSubmittedAreLessThanTaskCountTest() throws  InterruptedException{
+    public void checkIfOnCompleteMethodsAreNotCalledAfterTasksSubmittedAreLessThanTaskCountTest() throws InterruptedException {
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
         when(aBaseMonitor.getTaskCount()).thenReturn(3);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
@@ -76,13 +82,13 @@ public class TasksExecutionServiceProviderTest {
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ? super Object> conf = Maps.newHashMap();
         conf.put("numberOfThreads", "10");
-        monitorExecutorServiceModule.initExecutorService(conf);
+        monitorExecutorServiceModule.initExecutorService(conf, "test");
         MonitorExecutorService monitorExecutorService = monitorExecutorServiceModule.getExecutorService();
         MonitorContext context = mock(MonitorContext.class);
         when(configuration.getContext()).thenReturn(context);
         when(context.getExecutorService()).thenReturn(monitorExecutorService);
         MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
-        TasksExecutionServiceProvider tasksExecutionServiceProvider =  new TasksExecutionServiceProvider(aBaseMonitor, metricWriteHelper);
+        TasksExecutionServiceProvider tasksExecutionServiceProvider = new TasksExecutionServiceProvider(aBaseMonitor, metricWriteHelper);
         //SampleRunnable sampleRunnable = new SampleRunnable();
         tasksExecutionServiceProvider.submit("Task1", new SampleRunnable());
         tasksExecutionServiceProvider.submit("Task2", new SampleRunnable());

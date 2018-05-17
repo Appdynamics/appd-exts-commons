@@ -33,6 +33,7 @@ public class MonitorHealthCheck implements Runnable {
 
     public MonitorHealthCheck(String monitorName, File installDir, MonitorExecutorService executorService) {
         configureLogger(installDir, monitorName);
+        //Do not change this logger
         logger = LoggerFactory.getLogger(monitorName);
         this.executorService = executorService;
     }

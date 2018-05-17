@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.server.Connector;
@@ -27,7 +28,6 @@ import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -40,7 +40,7 @@ import java.io.PrintWriter;
  * Created by abey.tom on 6/30/15.
  */
 public class MockJettyServer {
-    public static final Logger logger = LoggerFactory.getLogger(MockJettyServer.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(MockJettyServer.class);
 
     public static Server start(int port) {
         return start(port, new HelloHandler());
@@ -61,15 +61,16 @@ public class MockJettyServer {
     }
 
     public static Server startSSL(int port) {
-        return startSSL(port,null);
+        return startSSL(port, null);
     }
+
     public static Server startSSL(int port, String protocol) {
-        return startSSL(port, protocol,new HelloHandler());
+        return startSSL(port, protocol, new HelloHandler());
     }
 
     public static Server startSSL(int port, String protocol, Handler handler) {
         SslContextFactory factory = new SslContextFactory();
-        if(protocol!=null){
+        if (protocol != null) {
             factory.setIncludeProtocols(protocol);
         }
         factory.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
@@ -87,17 +88,17 @@ public class MockJettyServer {
         return server;
     }
 
-    public static Server startSSLWithMutualAuth(int port, String protocol, String keyStorePath, String keyStoreType, String trustStorePath, String trustStoreType){
+    public static Server startSSLWithMutualAuth(int port, String protocol, String keyStorePath, String keyStoreType, String trustStorePath, String trustStoreType) {
         SslContextFactory factory = new SslContextFactory();
-        if(protocol!=null){
+        if (protocol != null) {
             factory.setIncludeProtocols(protocol);
         }
-        if(keyStorePath != null){
+        if (keyStorePath != null) {
             factory.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
             factory.setKeyStoreType(keyStoreType);
             factory.setKeyStorePassword("changeit");
         }
-        if(trustStorePath != null){
+        if (trustStorePath != null) {
             factory.setTrustStoreResource(Resource.newClassPathResource(trustStorePath));
             factory.setTrustStoreType(trustStoreType);
             factory.setTrustStorePassword("changeit");
@@ -143,22 +144,22 @@ public class MockJettyServer {
         public void handle(String target, Request baseRequest, HttpServletRequest request
                 , HttpServletResponse response) throws IOException, ServletException {
             PrintWriter writer = response.getWriter();
-            if(authenticate){
+            if (authenticate) {
                 String header = request.getHeader("Proxy-Authorization");
-                if(Strings.isNullOrEmpty(header)){
+                if (Strings.isNullOrEmpty(header)) {
                     response.setStatus(407);
-                    response.setHeader("Proxy-Authenticate","Basic realm=\"proxy.com\"");
-                } else{
+                    response.setHeader("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
+                } else {
                     String value = header.replace("Basic ", "");
                     String s = new String(Base64.decodeBase64(value));
-                    if(s.equals("proxyuser:proxypassword")){
+                    if (s.equals("proxyuser:proxypassword")) {
                         writer.write("AuthSuccess");
-                    } else{
+                    } else {
                         response.setStatus(407);
-                        response.setHeader("Proxy-Authenticate","Basic realm=\"proxy.com\"");
+                        response.setHeader("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
                     }
                 }
-            } else{
+            } else {
                 writer.write("NoAuth");
             }
             baseRequest.setHandled(true);
