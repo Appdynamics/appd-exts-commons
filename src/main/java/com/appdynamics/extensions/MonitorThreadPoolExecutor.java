@@ -33,14 +33,12 @@ public class MonitorThreadPoolExecutor implements MonitorExecutorService {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorThreadPoolExecutor.class);
     private static final long TASK_TIME_THRESHOLD_IN_MS = 60 * 1000l;
-    private String monitorName;
 
     private ThreadPoolExecutor executor;
 
-    public MonitorThreadPoolExecutor(ThreadPoolExecutor executor, String monitorName) {
+    public MonitorThreadPoolExecutor(ThreadPoolExecutor executor) {
         AssertUtils.assertNotNull(executor, "Threadpool executor cannot be null.");
         this.executor = executor;
-        this.monitorName = monitorName;
     }
 
     @Override
@@ -99,19 +97,17 @@ public class MonitorThreadPoolExecutor implements MonitorExecutorService {
     }
 
     private Runnable wrapWithRunnable(final String name, final Runnable task) {
-        return new TaskRunnable(name, task, monitorName);
+        return new TaskRunnable(name, task);
     }
 
     private class TaskRunnable implements Runnable {
 
         private String name;
         private Runnable task;
-        private ThreadLocal<String> threadLocal = new ThreadLocal<>();
 
-        TaskRunnable(String name, Runnable task, String monitorName) {
+        TaskRunnable(String name, Runnable task) {
             this.name = name;
             this.task = task;
-            threadLocal.set(monitorName);
         }
 
         @Override

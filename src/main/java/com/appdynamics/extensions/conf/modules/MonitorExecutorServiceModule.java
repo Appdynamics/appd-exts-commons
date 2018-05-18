@@ -87,7 +87,7 @@ public class MonitorExecutorServiceModule {
                         }
                     }
             );
-            return new MonitorThreadPoolExecutor(executor, monitorName);
+            return new MonitorThreadPoolExecutor(executor);
 
         } else {
             return null;

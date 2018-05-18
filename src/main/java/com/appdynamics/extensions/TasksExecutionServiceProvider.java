@@ -45,7 +45,6 @@ public class TasksExecutionServiceProvider {
             @Override
             public void run() {
                 try {
-                    new InheritableThreadLocal<String>().set(aBaseMonitor.monitorName);
                     aServerTask.run();
                     aServerTask.onTaskComplete();
                 } catch (Throwable e) {

@@ -57,7 +57,7 @@ public class JobScheduleModule {
         int numberOfThreads = YmlUtils.getInt(taskSchedule.get("numberOfThreads"), 1);
         int taskDelaySeconds = YmlUtils.getInt(taskSchedule.get("taskDelaySeconds"), 300);
         int initialDelaySeconds = YmlUtils.getInt(taskSchedule.get("initialDelaySeconds"), 10);
-        scheduler = new MonitorThreadPoolExecutor(createScheduledThreadPool(numberOfThreads), monitorName);
+        scheduler = new MonitorThreadPoolExecutor(createScheduledThreadPool(numberOfThreads));
         scheduler.scheduleAtFixedRate("" + monitorName + " ScheduledTaskRunner", monitorJob, initialDelaySeconds, taskDelaySeconds, TimeUnit.SECONDS);
         logger.info("Created a Task Scheduler for {} with a delay of {} seconds", monitorJob, taskDelaySeconds);
     }

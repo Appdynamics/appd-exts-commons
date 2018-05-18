@@ -53,7 +53,7 @@ public class MonitorThreadPoolExecutorTest {
 
     @Test
     public void checkIfLoggingHappensIfTaskExceedsThreshold() throws InterruptedException, ExecutionException {
-        MonitorThreadPoolExecutor monitorThreadPoolExecutor = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(5), "test");
+        MonitorThreadPoolExecutor monitorThreadPoolExecutor = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(5));
         monitorThreadPoolExecutor.submit("sampleRunnable", new sampleRunnable());
         Thread.sleep(20);
     }
