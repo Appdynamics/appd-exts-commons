@@ -177,7 +177,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
         logger.debug("The raw arguments are {}", args);
         initialize(args);
         executeMonitor();
-        return new TaskOutput(String.format("Monitor {} completes.", monitorName));
+        return new TaskOutput(String.format("Monitor %s completes.", monitorName));
     }
 
     protected void executeMonitor() {
