@@ -17,10 +17,11 @@ package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.MonitorThreadPoolExecutor;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MonitorExecutorServiceModule {
 
-    static final Logger logger = LoggerFactory.getLogger(MonitorExecutorServiceModule.class);
+    static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorExecutorServiceModule.class);
     private MonitorExecutorService executorService;
     private int executorServiceSize;
 
@@ -44,16 +45,16 @@ public class MonitorExecutorServiceModule {
         }
     }
 
-    public void initExecutorService(Map<String, ?> config) {
+    public void initExecutorService(Map<String, ?> config, String monitorName) {
         Integer numberOfThreads = YmlUtils.getInteger(config.get("numberOfThreads"));
-        Integer queueCapacityGrowthFactor = YmlUtils.getInt(config.get("queueCapacityGrowthFactor"),10);
+        Integer queueCapacityGrowthFactor = YmlUtils.getInt(config.get("queueCapacityGrowthFactor"), 10);
         if (numberOfThreads != null) {
             if (executorService == null) {
-                executorService = createThreadPool(numberOfThreads,numberOfThreads * queueCapacityGrowthFactor);
+                executorService = createThreadPool(numberOfThreads, numberOfThreads * queueCapacityGrowthFactor, monitorName);
             } else if (numberOfThreads != executorServiceSize) {
                 logger.info("The ThreadPool size has been updated from {} -> {}", executorServiceSize, numberOfThreads);
                 executorService.shutdown();
-                executorService = createThreadPool(numberOfThreads,numberOfThreads * queueCapacityGrowthFactor);
+                executorService = createThreadPool(numberOfThreads, numberOfThreads * queueCapacityGrowthFactor, monitorName);
             }
             executorServiceSize = numberOfThreads;
         } else {
@@ -65,7 +66,7 @@ public class MonitorExecutorServiceModule {
         }
     }
 
-    private MonitorExecutorService createThreadPool(Integer numberOfThreads, Integer queueCapacity) {
+    private MonitorExecutorService createThreadPool(Integer numberOfThreads, Integer queueCapacity, String monitorName) {
         if (numberOfThreads != null && numberOfThreads > 0) {
             logger.info("Initializing the ThreadPool with size {}", numberOfThreads);
             ThreadPoolExecutor executor = new ThreadPoolExecutor(numberOfThreads, numberOfThreads,
@@ -80,7 +81,7 @@ public class MonitorExecutorServiceModule {
                             return thread;
                         }
                     },
-                    new ThreadPoolExecutor.DiscardPolicy(){
+                    new ThreadPoolExecutor.DiscardPolicy() {
                         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
                             logger.error("Queue Capacity reached!! Rejecting runnable tasks..");
                         }

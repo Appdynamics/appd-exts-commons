@@ -15,34 +15,36 @@
 
 package com.appdynamics.extensions.crypto;
 
+import static com.appdynamics.extensions.TaskInputArgs.ENCRYPTED_PASSWORD;
+import static com.appdynamics.extensions.TaskInputArgs.ENCRYPTION_KEY;
+import static com.appdynamics.extensions.TaskInputArgs.PASSWORD;
+
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static com.appdynamics.extensions.TaskInputArgs.*;
-
 public class CryptoUtil {
-    public static final Logger logger = LoggerFactory.getLogger(CryptoUtil.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CryptoUtil.class);
     private static URLCodec codec = new URLCodec("UTF-8");
 
     public static final String SYSTEM_ARG_KEY = "appdynamics.extensions.key";
 
-    public static String getPassword(Map<String,String> taskArgs){
-        if(taskArgs.containsKey(PASSWORD)){
+    public static String getPassword(Map<String, String> taskArgs) {
+        if (taskArgs.containsKey(PASSWORD)) {
             return taskArgs.get(PASSWORD);
-        } else if(taskArgs.containsKey(ENCRYPTED_PASSWORD)){
+        } else if (taskArgs.containsKey(ENCRYPTED_PASSWORD)) {
             String encryptedPassword = taskArgs.get(ENCRYPTED_PASSWORD);
             String encryptionKey = taskArgs.get(ENCRYPTION_KEY);
-            if(Strings.isNullOrEmpty(encryptionKey)){
+            if (Strings.isNullOrEmpty(encryptionKey)) {
                 encryptionKey = System.getProperty(SYSTEM_ARG_KEY);
             }
-            if(!Strings.isNullOrEmpty(encryptionKey)){
+            if (!Strings.isNullOrEmpty(encryptionKey)) {
                 return new Decryptor(encryptionKey).decrypt(encryptedPassword);
-            } else{
+            } else {
                 String msg = "Encryption Key not specified. Please set the property 'encryption-key' in monitor.xml or add the System Property '-Dappdynamics.extensions.key'";
                 logger.error(msg);
                 throw new IllegalArgumentException(msg);

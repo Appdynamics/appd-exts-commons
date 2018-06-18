@@ -15,10 +15,10 @@
 
 package com.appdynamics.extensions.workbench.ui;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.JsonUtils;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -27,7 +27,7 @@ import java.util.Set;
  * Created by abey.tom on 3/16/16.
  */
 public class MetricTreeBuilder {
-    public static final Logger logger = LoggerFactory.getLogger(MetricTreeBuilder.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricTreeBuilder.class);
     private WorkbenchMetricStore metricStore;
 
     public MetricTreeBuilder(WorkbenchMetricStore metricStore) {

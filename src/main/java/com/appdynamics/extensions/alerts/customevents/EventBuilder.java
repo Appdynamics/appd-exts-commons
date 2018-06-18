@@ -16,8 +16,9 @@
 package com.appdynamics.extensions.alerts.customevents;
 
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 /**
  * Builds an event from command line arguments.
@@ -25,10 +26,11 @@ import org.apache.log4j.Logger;
 
 public class EventBuilder {
 
-    private static Logger logger = Logger.getLogger(EventBuilder.class);
+    Logger logger = ExtensionsLoggerFactory.getLogger(EventBuilder.class);
 
     /**
      * Builds an event from command line arguments
+     *
      * @param args
      * @return Event
      */
@@ -36,11 +38,10 @@ public class EventBuilder {
         if (isEventValid(args)) {
             String[] cleanedArgs = cleanArgs(args);
             //confirmed with Jon Reid from controller team to determine the differentiating condition
-            if(isHRVEvent(cleanedArgs[(cleanedArgs.length - 3)])){
+            if (isHRVEvent(cleanedArgs[(cleanedArgs.length - 3)])) {
                 HealthRuleViolationEvent event = createHealthRuleViolationEvent(cleanedArgs);
                 return event;
-            }
-            else{
+            } else {
                 OtherEvent otherEvent = createOtherEvent(cleanedArgs);
                 return otherEvent;
             }
@@ -78,7 +79,7 @@ public class EventBuilder {
         try {
             int numOfEventTypes = Integer.parseInt(cleanedArgs[currentArgPos]);
             otherEvent.setNumberOfEventTypes(cleanedArgs[currentArgPos]);
-            for(int index = 1; index <= numOfEventTypes; index++){
+            for (int index = 1; index <= numOfEventTypes; index++) {
                 EventType eventType = new EventType();
                 currentArgPos++;
                 eventType.setEventType(cleanedArgs[currentArgPos]);
@@ -87,9 +88,8 @@ public class EventBuilder {
                 otherEvent.getEventTypes().add(eventType);
             }
             currentArgPos = setEventSummary(otherEvent, cleanedArgs, currentArgPos);
-        }
-        catch(NumberFormatException nfe){
-            logger.error("Cannot convert string to int because of mismatch of arguments ",nfe);
+        } catch (NumberFormatException nfe) {
+            logger.error("Cannot convert string to int because of mismatch of arguments ", nfe);
         }
         return currentArgPos;
     }
@@ -113,16 +113,15 @@ public class EventBuilder {
                 eventSummary.setEventSummaryString(cleanedArgs[currentArgPos]);
                 otherEvent.getEventSummaries().add(eventSummary);
             }
-        }
-        catch(NumberFormatException nfe){
-            logger.error("Cannot convert string to int because of mismatch of arguments ",nfe);
+        } catch (NumberFormatException nfe) {
+            logger.error("Cannot convert string to int because of mismatch of arguments ", nfe);
         }
         return currentArgPos;
     }
 
     private boolean isEventValid(String[] args) {
         //TODO kunal.gupta check if this condition makes sense
-        if(args != null && args.length > 16){
+        if (args != null && args.length > 16) {
             return true;
         }
         return false;
@@ -138,7 +137,7 @@ public class EventBuilder {
         event.setAffectedEntityType(cleanedArgs[9]);
         event.setAffectedEntityName(cleanedArgs[10]);
         event.setAffectedEntityID(cleanedArgs[11]);
-        int currentArgPos = setEvaluationDetails(event,cleanedArgs);
+        int currentArgPos = setEvaluationDetails(event, cleanedArgs);
         currentArgPos++;
         event.setSummaryMessage(cleanedArgs[currentArgPos]);
         currentArgPos++;
@@ -147,7 +146,7 @@ public class EventBuilder {
         event.setDeepLinkUrl(cleanedArgs[currentArgPos]);
         currentArgPos++;
         event.setEventType(cleanedArgs[currentArgPos]);
-        event.setIncidentUrl(event.getDeepLinkUrl()+event.getIncidentID());
+        event.setIncidentUrl(event.getDeepLinkUrl() + event.getIncidentID());
         currentArgPos++;
         event.setAccountName(cleanedArgs[currentArgPos]);
         currentArgPos++;
@@ -168,7 +167,7 @@ public class EventBuilder {
         int currentArgPos = 12;
         try {
             int numOfEvaluationEntities = Integer.parseInt(cleanedArgs[12]);
-            for(int index = 1; index <= numOfEvaluationEntities; index++){
+            for (int index = 1; index <= numOfEvaluationEntities; index++) {
                 EvaluationEntity eval = new EvaluationEntity();
                 currentArgPos++;
                 eval.setType(cleanedArgs[currentArgPos]);
@@ -176,22 +175,21 @@ public class EventBuilder {
                 eval.setName(cleanedArgs[currentArgPos]);
                 currentArgPos++;
                 eval.setId(cleanedArgs[currentArgPos]);
-                currentArgPos = setTriggeredConditionDetails(eval,cleanedArgs,currentArgPos);
+                currentArgPos = setTriggeredConditionDetails(eval, cleanedArgs, currentArgPos);
                 event.getEvaluationEntity().add(eval);
             }
-        }
-        catch(NumberFormatException nfe){
-            logger.error("Cannot convert string to int because of mismatch of arguments ",nfe);
+        } catch (NumberFormatException nfe) {
+            logger.error("Cannot convert string to int because of mismatch of arguments ", nfe);
         }
         return currentArgPos;
     }
 
     private int setTriggeredConditionDetails(EvaluationEntity eval, String[] cleanedArgs, int currentArgPos) {
-        try{
+        try {
             currentArgPos++;
             int numOfTriggeredCond = Integer.parseInt(cleanedArgs[currentArgPos]);
             eval.setNumberOfTriggeredConditions(cleanedArgs[currentArgPos]);
-            for (int index=1; index <= numOfTriggeredCond; index++){
+            for (int index = 1; index <= numOfTriggeredCond; index++) {
                 TriggerCondition triggerCond = new TriggerCondition();
                 currentArgPos++;
                 triggerCond.setScopeType(cleanedArgs[currentArgPos]);
@@ -207,8 +205,8 @@ public class EventBuilder {
                 triggerCond.setOperator(getOperator(cleanedArgs[currentArgPos]));
                 currentArgPos++;
                 triggerCond.setConditionUnitType(cleanedArgs[currentArgPos]);
-                if(triggerCond.getConditionUnitType() != null &&  triggerCond.getConditionUnitType().toUpperCase().startsWith("BASELINE")){
-                    currentArgPos = setBaseLineDetails(triggerCond,cleanedArgs,currentArgPos);
+                if (triggerCond.getConditionUnitType() != null && triggerCond.getConditionUnitType().toUpperCase().startsWith("BASELINE")) {
+                    currentArgPos = setBaseLineDetails(triggerCond, cleanedArgs, currentArgPos);
                 }
                 currentArgPos++;
                 triggerCond.setThresholdValue(cleanedArgs[currentArgPos]);
@@ -216,30 +214,29 @@ public class EventBuilder {
                 triggerCond.setObservedValue(cleanedArgs[currentArgPos]);
                 eval.getTriggeredConditions().add(triggerCond);
             }
-        }
-        catch(NumberFormatException nfe){
+        } catch (NumberFormatException nfe) {
             logger.error("Cannot convert string to int because of mismatch of arguments", nfe);
         }
         return currentArgPos;
     }
 
     private String getOperator(String operator) {
-        if("LESS_THAN".equalsIgnoreCase(operator)){
+        if ("LESS_THAN".equalsIgnoreCase(operator)) {
             return "<";
         }
-        if("LESS_THAN_EQUALS".equalsIgnoreCase(operator)){
+        if ("LESS_THAN_EQUALS".equalsIgnoreCase(operator)) {
             return "<=";
         }
-        if("GREATER_THAN".equalsIgnoreCase(operator)){
+        if ("GREATER_THAN".equalsIgnoreCase(operator)) {
             return ">";
         }
-        if("GREATER_THAN_EQUALS".equalsIgnoreCase(operator)){
+        if ("GREATER_THAN_EQUALS".equalsIgnoreCase(operator)) {
             return ">=";
         }
-        if("EQUALS".equalsIgnoreCase(operator)){
+        if ("EQUALS".equalsIgnoreCase(operator)) {
             return "==";
         }
-        if("NOT_EQUALS".equalsIgnoreCase(operator)){
+        if ("NOT_EQUALS".equalsIgnoreCase(operator)) {
             return "!=";
         }
         return "";
@@ -248,7 +245,7 @@ public class EventBuilder {
     private int setBaseLineDetails(TriggerCondition triggerCond, String[] cleanedArgs, int currentArgPos) {
         currentArgPos++;
         triggerCond.setUseDefaultBaseline(Boolean.valueOf(cleanedArgs[currentArgPos]));
-        if(!triggerCond.isUseDefaultBaseline()){
+        if (!triggerCond.isUseDefaultBaseline()) {
             currentArgPos++;
             triggerCond.setBaselineName(cleanedArgs[currentArgPos]);
             currentArgPos++;
@@ -258,7 +255,7 @@ public class EventBuilder {
     }
 
 
-    private String[] cleanArgs(String[] args){
+    private String[] cleanArgs(String[] args) {
         StringBuilder sb = new StringBuilder();
         String[] stripped = new String[args.length];
         for (int i = 0; i < args.length; i++) {

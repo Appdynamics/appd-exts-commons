@@ -15,9 +15,12 @@
 
 package com.appdynamics.extensions.workbench;
 
+import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
+
 import com.appdynamics.extensions.conf.monitorxml.Argument;
 import com.appdynamics.extensions.conf.monitorxml.Monitor;
 import com.appdynamics.extensions.conf.monitorxml.TaskArguments;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.JsonUtils;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import com.appdynamics.extensions.workbench.ui.MetricTreeBuilder;
@@ -28,7 +31,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,8 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -104,7 +104,7 @@ public class WorkBenchServer extends NanoHTTPD {
                 contentType = "text/plain";
             }
             return newFixedLengthResponse(Response.Status.OK, contentType, content);
-        } else{
+        } else {
             return newFixedLengthResponse(Response.Status.NOT_FOUND, "application/json", "");
         }
 
@@ -135,8 +135,8 @@ public class WorkBenchServer extends NanoHTTPD {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         File extensionDir = resolveDirectory(WorkBenchServer.class);
         if (extensionDir != null) {
-            configureLogging(extensionDir,args);
-            logger = LoggerFactory.getLogger(WorkBenchServer.class);
+            configureLogging(extensionDir, args);
+            logger = ExtensionsLoggerFactory.getLogger(WorkBenchServer.class);
             bootstrap(args, extensionDir);
         } else {
             System.out.println("[ERROR] Cannot resolve the install Directory");
@@ -174,25 +174,25 @@ public class WorkBenchServer extends NanoHTTPD {
         Properties properties = System.getProperties();
         for (Object o : properties.keySet()) {
             String name = (String) o;
-            if(name.startsWith("workbench.logger.")){
+            if (name.startsWith("workbench.logger.")) {
                 String value = (String) properties.get(o);
                 String logger = name.substring(17);
                 System.out.println(logger);
                 org.apache.log4j.Logger extLogger = org.apache.log4j.Logger.getLogger(logger);
                 extLogger.addAppender(consoleAppender);
-                if("trace".equalsIgnoreCase(value)){
+                if ("trace".equalsIgnoreCase(value)) {
                     extLogger.setLevel(Level.TRACE);
-                } else if("debug".equalsIgnoreCase(value)){
+                } else if ("debug".equalsIgnoreCase(value)) {
                     extLogger.setLevel(Level.DEBUG);
-                } else if("info".equalsIgnoreCase(value)){
+                } else if ("info".equalsIgnoreCase(value)) {
                     extLogger.setLevel(Level.INFO);
-                } else if("warn".equalsIgnoreCase(value)){
+                } else if ("warn".equalsIgnoreCase(value)) {
                     extLogger.setLevel(Level.WARN);
-                } else if("error".equalsIgnoreCase(value)){
+                } else if ("error".equalsIgnoreCase(value)) {
                     extLogger.setLevel(Level.ERROR);
-                } else if("fatal".equalsIgnoreCase(value)){
+                } else if ("fatal".equalsIgnoreCase(value)) {
                     extLogger.setLevel(Level.FATAL);
-                } else if("off".equalsIgnoreCase(value)){
+                } else if ("off".equalsIgnoreCase(value)) {
                     extLogger.setLevel(Level.OFF);
                 }
                 extLogger.setAdditivity(false);

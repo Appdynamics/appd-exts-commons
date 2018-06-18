@@ -15,8 +15,8 @@
 
 package com.appdynamics.extensions.conf.monitorxml;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -32,7 +32,7 @@ import java.io.File;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Monitor {
-    public static final Logger logger = LoggerFactory.getLogger(Monitor.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(Monitor.class);
     @XmlElement(name = "monitor-run-task")
     private MonitorRunTask monitorRunTask;
 

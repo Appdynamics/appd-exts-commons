@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.http;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -24,7 +25,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class HttpClientUtils {
 
-    public static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(HttpClientUtils.class);
 
     public static <T> T getResponseAsJson(CloseableHttpClient httpClient, final String url, final Class<T> clazz) {
         return getResponseAsJson(httpClient, url, clazz, Collections.<String, String>emptyMap());

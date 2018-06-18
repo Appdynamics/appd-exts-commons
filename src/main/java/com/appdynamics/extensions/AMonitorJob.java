@@ -16,20 +16,21 @@
 package com.appdynamics.extensions;
 
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 /*
  *Job represents a single run of the extension
-*/
+ */
 
-public class AMonitorJob implements Runnable{
+public class AMonitorJob implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(AMonitorJob.class);
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(AMonitorJob.class);
     private ABaseMonitor baseMonitor;
 
 
@@ -39,7 +40,7 @@ public class AMonitorJob implements Runnable{
 
     @Override
     public void run() {
-        logger.debug("Monitor {} Task Runner invoked",baseMonitor.getMonitorName());
+        logger.debug("Monitor {} Task Runner invoked", baseMonitor.getMonitorName());
         TasksExecutionServiceProvider obj = new TasksExecutionServiceProvider(baseMonitor, MetricWriteHelperFactory.create(baseMonitor));
         baseMonitor.doRun(obj);
     }

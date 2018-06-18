@@ -15,16 +15,16 @@
 
 package com.appdynamics.extensions.http;
 
+import static com.appdynamics.extensions.TaskInputArgs.AUTH_TYPE;
+import static com.appdynamics.extensions.TaskInputArgs.USER;
+
 import com.appdynamics.extensions.crypto.CryptoUtil;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-
-import static com.appdynamics.extensions.TaskInputArgs.AUTH_TYPE;
-import static com.appdynamics.extensions.TaskInputArgs.USER;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +34,7 @@ import static com.appdynamics.extensions.TaskInputArgs.USER;
  * To change this template use File | Settings | File Templates.
  */
 public class AuthenticationConfig {
-    public static final Logger logger = LoggerFactory.getLogger(AuthenticationConfig.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(AuthenticationConfig.class);
 
     private AuthenticationMode mode;
     private String authHeader;
@@ -67,7 +67,6 @@ public class AuthenticationConfig {
         return null;
     }
 
-   
 
     private void buildAuthentication(String user, String password, AuthenticationMode authMode) {
         this.mode = authMode;

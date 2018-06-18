@@ -15,8 +15,8 @@
 
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Map;
@@ -26,7 +26,7 @@ import java.util.Set;
  * Created by abey.tom on 4/11/15.
  */
 public class CustomDashboardTask {
-    public static final Logger logger = LoggerFactory.getLogger(CustomDashboardTask.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardTask.class);
 
     private CustomDashboardGenerator dashboardGenerator;
     private long nextRunTime;

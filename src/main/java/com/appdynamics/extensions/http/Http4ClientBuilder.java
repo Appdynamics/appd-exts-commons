@@ -18,6 +18,7 @@ package com.appdynamics.extensions.http;
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.util.YmlUtils;
@@ -39,7 +40,12 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.*;
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -49,20 +55,31 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.*;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -70,7 +87,7 @@ import java.util.*;
  * appd-exts-commons/src/test/resources/expected.config.yml
  */
 public class Http4ClientBuilder {
-    public static final Logger logger = LoggerFactory.getLogger(Http4ClientBuilder.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(Http4ClientBuilder.class);
 
 
     public static HttpClientBuilder getBuilder(String configYmlPath) {
@@ -303,10 +320,10 @@ public class Http4ClientBuilder {
                 KeyStore trustStore = loadDefaultTrustStore(propMap);
                 //for client certificates in keystore aka mutual auth on ssl
                 char[] keyStorePassword = getKeyStorePassword(propMap, connection);
-                KeyStore keyStore = loadKeyStore(propMap,keyStorePassword);
+                KeyStore keyStore = loadKeyStore(propMap, keyStorePassword);
 
                 try {
-                    SSLContext sslContext = getSslContext(trustStore,keyStore,keyStorePassword);
+                    SSLContext sslContext = getSslContext(trustStore, keyStore, keyStorePassword);
                     SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
                             sslContext,
                             sslProtocols,
@@ -330,18 +347,18 @@ public class Http4ClientBuilder {
     }
 
 
-    private static SSLContext getSslContext(KeyStore trustStore, KeyStore keyStore,char[] keyStorePassword) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-        SSLContextBuilder sslContextBuilder =  SSLContexts.custom();
-        if(trustStore != null){
+    private static SSLContext getSslContext(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        SSLContextBuilder sslContextBuilder = SSLContexts.custom();
+        if (trustStore != null) {
             sslContextBuilder.loadTrustMaterial(trustStore);
         }
-        if(keyStore != null){
-            sslContextBuilder.loadKeyMaterial(keyStore,keyStorePassword);
+        if (keyStore != null) {
+            sslContextBuilder.loadKeyMaterial(keyStore, keyStorePassword);
         }
         return sslContextBuilder.build();
     }
 
-    protected static KeyStore loadKeyStore(Map<String, ?> propMap,char[] keystorePassword) {
+    protected static KeyStore loadKeyStore(Map<String, ?> propMap, char[] keystorePassword) {
         Map<String, ?> connection = (Map<String, ?>) propMap.get("connection");
         File file = resolveKeyStorePath(connection);
         if (file != null && file.exists()) {
@@ -358,8 +375,6 @@ public class Http4ClientBuilder {
         }
         return null;
     }
-
-
 
 
     protected static KeyStore loadDefaultTrustStore(Map<String, ?> propMap) {

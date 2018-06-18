@@ -16,27 +16,37 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.xml.Xml;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by abey.tom on 4/10/15.
  */
 public class CustomDashboardGenerator {
-    public static final Logger logger = LoggerFactory.getLogger(CustomDashboardGenerator.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardGenerator.class);
     public static final String TIER_METRIC_PREFIX = "Server|Component:";
     private Set<String> instanceNames;
     private String metricPrefix;
@@ -252,7 +262,7 @@ public class CustomDashboardGenerator {
     private void writeDashboardToFile(String dashboardName, Xml xml) {
         File file = PathResolver.resolveDirectory(AManagedMonitor.class);
         File dir = new File(file, "logs");
-        if(!dir.exists()){
+        if (!dir.exists()) {
             dir.mkdirs();
         }
         try {

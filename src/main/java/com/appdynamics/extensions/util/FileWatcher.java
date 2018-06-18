@@ -15,8 +15,8 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.concurrent.Executors;
@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by abey.tom on 9/17/14.
  */
 public class FileWatcher {
-    public static final Logger logger = LoggerFactory.getLogger(FileWatcher.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(FileWatcher.class);
     private File file;
     private FileChangeListener listener;
 

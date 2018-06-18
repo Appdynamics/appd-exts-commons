@@ -15,8 +15,8 @@
 
 package com.appdynamics.extensions;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,10 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * TaskExecutionServiceProvider is responsible for submitting all the tasks of
  * a job to the ExecutorService and also making sure that all the job tasks are
  * completed before executing the onComplete() method of MetricWriteHelper.
-*/
+ */
 public class TasksExecutionServiceProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(TasksExecutionServiceProvider.class);
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(TasksExecutionServiceProvider.class);
     private ABaseMonitor aBaseMonitor;
     private AtomicInteger taskCounter;
     private MetricWriteHelper metricWriteHelper;
@@ -40,19 +40,17 @@ public class TasksExecutionServiceProvider {
     }
 
 
-    public void submit(final String name, final AMonitorTaskRunnable aServerTask){
-        aBaseMonitor.getContextConfiguration().getContext().getExecutorService().submit(name,new Runnable() {
+    public void submit(final String name, final AMonitorTaskRunnable aServerTask) {
+        aBaseMonitor.getContextConfiguration().getContext().getExecutorService().submit(name, new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     aServerTask.run();
                     aServerTask.onTaskComplete();
-                }
-                catch (Throwable e){
+                } catch (Throwable e) {
                     logger.error("Unforeseen error or exception happened", e);
-                }
-                finally {
-                    if(taskCounter.decrementAndGet() <= 0){
+                } finally {
+                    if (taskCounter.decrementAndGet() <= 0) {
                         onRunComplete();
                     }
                 }
@@ -60,7 +58,7 @@ public class TasksExecutionServiceProvider {
         });
     }
 
-    private void onRunComplete(){
+    private void onRunComplete() {
         metricWriteHelper.onComplete();
         aBaseMonitor.onComplete();
     }

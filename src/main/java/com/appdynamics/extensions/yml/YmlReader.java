@@ -15,13 +15,17 @@
 
 package com.appdynamics.extensions.yml;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -32,7 +36,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class YmlReader {
-    public static final Logger logger = LoggerFactory.getLogger(YmlReader.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(YmlReader.class);
 
     public static <T> T read(InputStream inputStream, Class<T> clazz) {
         Yaml yaml = new Yaml(new Constructor(clazz));

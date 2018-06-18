@@ -16,12 +16,12 @@
 package com.appdynamics.extensions.util;
 
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
@@ -29,7 +29,7 @@ import java.util.Iterator;
  * Created by abey.tom on 3/16/16.
  */
 public class JsonUtils {
-    public static final Logger logger = LoggerFactory.getLogger(JsonUtils.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(JsonUtils.class);
 
     public static String asJson(Object object) {
         if (object != null) {

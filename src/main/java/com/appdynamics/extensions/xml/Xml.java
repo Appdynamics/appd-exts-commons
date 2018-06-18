@@ -15,8 +15,8 @@
 
 package com.appdynamics.extensions.xml;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -50,7 +50,7 @@ import java.util.List;
  * Time: 2:33 PM
  */
 public class Xml {
-    public static final Logger logger = LoggerFactory.getLogger(Xml.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(Xml.class);
     private Node node;
     private Document document;
 

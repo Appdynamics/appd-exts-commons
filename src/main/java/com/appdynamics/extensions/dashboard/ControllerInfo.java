@@ -43,6 +43,7 @@ public class ControllerInfo {
     protected Boolean simEnabled;
     protected String applicationName;
     protected String tierName;
+    protected String nodeName;
 
     public void setPassword(String password) {
         this.password = password;
@@ -88,6 +89,10 @@ public class ControllerInfo {
         this.tierName = tierName;
     }
 
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
+    }
+
     public static ControllerInfo fromXml(File file) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(XmlControllerInfo.class);
@@ -95,7 +100,7 @@ public class ControllerInfo {
             return (XmlControllerInfo) unmarshaller.unmarshal(file);
         } catch (JAXBException e) {
             String msg = "Cannot unmarshall the controller-info.xml from " + file.getAbsolutePath();
-            throw new RuntimeException(msg,e);
+            throw new RuntimeException(msg, e);
         }
     }
 
@@ -122,6 +127,7 @@ public class ControllerInfo {
         info.account = System.getProperty("appdynamics.agent.accountName");
         info.applicationName = System.getProperty("appdynamics.agent.applicationName");
         info.tierName = System.getProperty("appdynamics.agent.tierName");
+        info.nodeName = System.getProperty("appdynamics.agent.nodeName");
         info.controllerHost = System.getProperty("appdynamics.controller.hostName");
         String port = System.getProperty("appdynamics.controller.port");
         if (NumberUtils.isNumber(port)) {
@@ -132,6 +138,12 @@ public class ControllerInfo {
             info.controllerSslEnabled = Boolean.valueOf(sslEnabled.trim());
         }
         info.uniqueHostId = System.getProperty("appdynamics.agent.uniqueHostId");
+
+        String simEnabled = System.getProperty("appdynamics.sim.enabled");
+        if (!Strings.isNullOrEmpty(simEnabled)) {
+            info.simEnabled = Boolean.valueOf(simEnabled.trim());
+        }
+
         return info;
     }
 
@@ -176,6 +188,9 @@ public class ControllerInfo {
         }
         if (!Strings.isNullOrEmpty(info.tierName)) {
             this.tierName = info.tierName;
+        }
+        if (!Strings.isNullOrEmpty(info.nodeName)) {
+            this.nodeName = info.nodeName;
         }
         return this;
     }
@@ -232,6 +247,10 @@ public class ControllerInfo {
         this.username = username;
     }
 
+    public String getNodeName() {
+        return nodeName;
+    }
+
     @Override
     public String toString() {
         String tmpPass;
@@ -244,11 +263,13 @@ public class ControllerInfo {
                 "controllerHost='" + controllerHost + '\'' +
                 ", controllerPort=" + controllerPort +
                 ", controllerSslEnabled=" + controllerSslEnabled +
+                ", simEnabled=" + simEnabled +
                 ", account='" + account + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + tmpPass + '\'' +
                 ", applicationName='" + applicationName + '\'' +
                 ", tierName='" + tierName + '\'' +
+                ", nodeName='" + nodeName + '\'' +
                 '}';
     }
 }

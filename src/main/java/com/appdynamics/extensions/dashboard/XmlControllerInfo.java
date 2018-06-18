@@ -16,8 +16,8 @@
 package com.appdynamics.extensions.dashboard;
 
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "controller-info")
 public class XmlControllerInfo extends ControllerInfo {
-    public static final Logger logger = LoggerFactory.getLogger(XmlControllerInfo.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(XmlControllerInfo.class);
 
     @XmlElement(name = "account-access-key")
     public String getPassword() {
@@ -84,6 +84,11 @@ public class XmlControllerInfo extends ControllerInfo {
         return tierName;
     }
 
+    @XmlElement(name = "node-name")
+    public String getNodeName() {
+        return nodeName;
+    }
+
     @Override
     public void setAccount(String account) {
         super.setAccount(account);
@@ -132,6 +137,11 @@ public class XmlControllerInfo extends ControllerInfo {
     @Override
     public void setTierName(String tierName) {
         super.setTierName(tierName);
+    }
+
+    @Override
+    public void setNodeName(String nodeName) {
+        super.setNodeName(nodeName);
     }
 
     @Override

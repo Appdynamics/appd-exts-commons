@@ -16,9 +16,9 @@
 package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -31,7 +31,7 @@ import java.util.Map;
  * as of now, it validates on the metric prefix and default the garuments which are not available in the input.
  */
 public class ArgumentsValidator {
-    public static final Logger logger = LoggerFactory.getLogger(ArgumentsValidator.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(ArgumentsValidator.class);
 
     /**
      * Set the default value if the argument is not present in the input args.
