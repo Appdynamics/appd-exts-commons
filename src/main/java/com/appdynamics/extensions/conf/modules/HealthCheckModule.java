@@ -87,7 +87,7 @@ public class HealthCheckModule {
          *    second thread will be used for run-always check
          *
          **/
-        executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(2), monitorName);
+        executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(2));
 
         try {
 
