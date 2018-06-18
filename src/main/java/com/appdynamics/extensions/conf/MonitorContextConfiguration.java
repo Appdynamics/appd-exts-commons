@@ -113,8 +113,8 @@ public class MonitorContextConfiguration {
         } else {
             this.metricPrefix = defaultMetricPrefix;
         }
-        logger.info("The metric prefix is initialized as {}", metricPrefix);
-        if (Strings.isNullOrEmpty(metricPrefix)) {
+        logger.info("The metric prefix is initialized as {}", this.metricPrefix);
+        if (Strings.isNullOrEmpty(this.metricPrefix)) {
             throw new IllegalArgumentException("The metricPrefix cannot be resolved. Please set it in the contextConfiguration");
         }
     }
