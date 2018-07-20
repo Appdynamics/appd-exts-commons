@@ -7,7 +7,7 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.dashboard.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfo;
 import com.appdynamics.extensions.util.JsonUtils;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;

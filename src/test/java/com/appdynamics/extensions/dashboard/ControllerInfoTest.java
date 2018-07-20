@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.extensions.conf.ControllerInfo;
 import com.appdynamics.extensions.yml.YmlReader;
 import org.junit.Assert;
 import org.junit.Test;

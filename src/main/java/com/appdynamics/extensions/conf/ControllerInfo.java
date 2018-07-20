@@ -1,24 +1,23 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   Copyright 2018 . AppDynamics LLC and its affiliates.
+ *   All Rights Reserved.
+ *   This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+ *   The copyright notice above does not evidence any actual or intended publication of such source code.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
-package com.appdynamics.extensions.dashboard;
+package com.appdynamics.extensions.conf;
 
+import com.appdynamics.extensions.ABaseMonitor;
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.dashboard.XmlControllerInfo;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.NumberUtils;
+import com.appdynamics.extensions.util.PathResolver;
 import com.google.common.base.Strings;
+import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import org.slf4j.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -30,6 +29,7 @@ import java.util.Map;
  * Created by abey.tom on 2/11/16.
  */
 public class ControllerInfo {
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfo.class);
 
     protected String controllerHost;
     protected Integer controllerPort;
@@ -272,4 +272,30 @@ public class ControllerInfo {
                 ", nodeName='" + nodeName + '\'' +
                 '}';
     }
+
+    public ControllerInfo getControllerInfo() {
+
+        ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
+        ControllerInfo controllerInfoFromXml = getControllerInfoFromXml();
+        ControllerInfo controllerInfo = controllerInfoFromXml.merge(controllerInfoFromSystemProps);
+
+        return controllerInfo;
+    }
+
+    private ControllerInfo getControllerInfoFromXml() {
+        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
+        logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
+        ControllerInfo from = null;
+        if (directory.exists()) {
+            File cinfo = new File(new File(directory, "conf"), "controller-info.xml");
+            if (cinfo.exists()) {
+                from = ControllerInfo.fromXml(cinfo);
+            }
+        }
+        if (from == null) {
+            from = new ControllerInfo();
+        }
+        return from;
+    }
+
 }

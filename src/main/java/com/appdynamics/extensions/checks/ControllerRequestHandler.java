@@ -8,7 +8,7 @@
 package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.crypto.CryptoUtil;
-import com.appdynamics.extensions.dashboard.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfo;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.util.StringUtils;
 import org.apache.commons.io.FileUtils;

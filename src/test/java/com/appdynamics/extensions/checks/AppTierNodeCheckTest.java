@@ -1,6 +1,6 @@
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.dashboard.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfo;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

@@ -15,7 +15,7 @@ import com.appdynamics.extensions.checks.ExtensionPathConfigCheck;
 import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
 import com.appdynamics.extensions.checks.MaxMetricLimitCheck;
 import com.appdynamics.extensions.checks.MonitorHealthCheck;
-import com.appdynamics.extensions.dashboard.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import com.appdynamics.extensions.conf.ControllerInfo;
 
 /**
  * @author Satish Muddam
@@ -39,7 +40,8 @@ public class HealthCheckModule {
     private MonitorExecutorService executorService;
 
     public HealthCheckModule() {
-        controllerInfo = getControllerInfo();
+
+        controllerInfo = new ControllerInfo().getControllerInfo();
 
     }
 
@@ -130,28 +132,4 @@ public class HealthCheckModule {
         return true;
     }
 
-    private ControllerInfo getControllerInfo() {
-
-        ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
-        ControllerInfo controllerInfoFromXml = getControllerInfoFromXml();
-        ControllerInfo controllerInfo = controllerInfoFromXml.merge(controllerInfoFromSystemProps);
-
-        return controllerInfo;
-    }
-
-    private ControllerInfo getControllerInfoFromXml() {
-        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
-        logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
-        ControllerInfo from = null;
-        if (directory.exists()) {
-            File cinfo = new File(new File(directory, "conf"), "controller-info.xml");
-            if (cinfo.exists()) {
-                from = ControllerInfo.fromXml(cinfo);
-            }
-        }
-        if (from == null) {
-            from = new ControllerInfo();
-        }
-        return from;
-    }
 }
