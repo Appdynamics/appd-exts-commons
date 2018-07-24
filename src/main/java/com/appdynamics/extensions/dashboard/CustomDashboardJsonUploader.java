@@ -109,7 +109,7 @@ import java.util.Map;
  * Created by abey.tom on 4/11/15.
  */
 public class CustomDashboardJsonUploader {
-    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUploader.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardJsonUploader.class);
 
     public void uploadDashboard(String dashboardName, String jsonNode, Map<String, ? super Object> argsMap, boolean overwrite) {
         setProxyIfApplicable(argsMap);
