@@ -270,6 +270,7 @@ public class ControllerInfo {
                 ", applicationName='" + applicationName + '\'' +
                 ", tierName='" + tierName + '\'' +
                 ", nodeName='" + nodeName + '\'' +
+                ", machinePath='" + machinePath + '\'' +
                 '}';
     }
 
