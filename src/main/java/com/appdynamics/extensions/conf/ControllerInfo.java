@@ -8,7 +8,6 @@
 
 package com.appdynamics.extensions.conf;
 
-import com.appdynamics.extensions.ABaseMonitor;
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.dashboard.XmlControllerInfo;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
@@ -38,6 +37,9 @@ public class ControllerInfo {
     protected String uniqueHostId;
     protected String username;
     protected String password;
+    protected String encryptedPassword;
+    protected String encryptedKey;
+    protected String accountAccessKey;
     protected String account;
     protected String machinePath;
     protected Boolean simEnabled;
@@ -47,6 +49,18 @@ public class ControllerInfo {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
+    }
+
+    public void setEncryptedKey(String encryptedKey) {
+        this.encryptedKey = encryptedKey;
+    }
+
+    public void setAccountAccessKey(String accountAccessKey) {
+        this.accountAccessKey = accountAccessKey;
     }
 
     public void setAccount(String account) {
@@ -115,7 +129,7 @@ public class ControllerInfo {
         info.uniqueHostId = (String) config.get("uniqueHostId");
         info.account = (String) config.get("account");
         info.username = (String) config.get(TaskInputArgs.USER);
-        info.password = Http4ClientBuilder.getPassword(config, config);
+        info.accountAccessKey = Http4ClientBuilder.getPassword(config, config);
         info.applicationName = (String) config.get("applicationName");
         info.tierName = (String) config.get("tierName");
         return info;
@@ -123,12 +137,18 @@ public class ControllerInfo {
 
     public static ControllerInfo fromSystemProperties() {
         ControllerInfo info = new ControllerInfo();
-        info.password = System.getProperty("appdynamics.agent.accountAccessKey");
+        info.accountAccessKey = System.getProperty("appdynamics.agent.accountAccessKey");
         info.account = System.getProperty("appdynamics.agent.accountName");
         info.applicationName = System.getProperty("appdynamics.agent.applicationName");
         info.tierName = System.getProperty("appdynamics.agent.tierName");
         info.nodeName = System.getProperty("appdynamics.agent.nodeName");
         info.controllerHost = System.getProperty("appdynamics.controller.hostName");
+        info.username = System.getProperty("appdynamics.agent.monitors.controller.username");
+        info.password = System.getProperty("appdynamics.agent.monitors.controller.password");
+        info.encryptedKey = System.getProperty("appdynamics.agent.monitors.controller.encryptedKey");
+        info.encryptedPassword = System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword");
+
+
         String port = System.getProperty("appdynamics.controller.port");
         if (NumberUtils.isNumber(port)) {
             info.controllerPort = Integer.parseInt(port);
@@ -168,13 +188,17 @@ public class ControllerInfo {
         if (!Strings.isNullOrEmpty(info.username)) {
             this.username = info.username;
         }
+
         if (!Strings.isNullOrEmpty(info.password)) {
             this.password = info.password;
+        }
+
+        if (!Strings.isNullOrEmpty(info.accountAccessKey)) {
+            this.accountAccessKey = info.accountAccessKey;
         }
         if (!Strings.isNullOrEmpty(info.account)) {
             this.account = info.account;
         }
-
 
         if (info.simEnabled != null) {
             this.simEnabled = info.simEnabled;
@@ -195,8 +219,8 @@ public class ControllerInfo {
         return this;
     }
 
-    public String getPassword() {
-        return password;
+    public String getAccountAccessKey() {
+        return accountAccessKey;
     }
 
     public String getAccount() {
@@ -251,11 +275,23 @@ public class ControllerInfo {
         return nodeName;
     }
 
+    public String getEncryptedPassword() {
+        return encryptedPassword;
+    }
+
+    public String getEncryptedKey() {
+        return encryptedKey;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
     @Override
     public String toString() {
         String tmpPass;
-        if (password != null && password.length() > 2) {
-            tmpPass = password.substring(0, 2) + "******";
+        if (accountAccessKey != null && accountAccessKey.length() > 2) {
+            tmpPass = accountAccessKey.substring(0, 2) + "******";
         } else {
             tmpPass = null;
         }
@@ -266,7 +302,7 @@ public class ControllerInfo {
                 ", simEnabled=" + simEnabled +
                 ", account='" + account + '\'' +
                 ", username='" + username + '\'' +
-                ", password='" + tmpPass + '\'' +
+                ", accountAccessKey='" + tmpPass + '\'' +
                 ", applicationName='" + applicationName + '\'' +
                 ", tierName='" + tierName + '\'' +
                 ", nodeName='" + nodeName + '\'' +

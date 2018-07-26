@@ -122,7 +122,7 @@ public class ControllerRequestHandler {
         String userName = getUserName(controllerInfo);
         if (userName != null && userName.length() > 0) {
             server.put("username", userName);
-            server.put("password", CryptoUtil.encode(controllerInfo.getPassword()));
+            server.put("accountAccessKey", CryptoUtil.encode(controllerInfo.getAccountAccessKey()));
         }
         list.add(server);
 
@@ -150,10 +150,10 @@ public class ControllerRequestHandler {
                 try {
                     lines = FileUtils.readLines(new File(proxyPasswordFilePath));
                 } catch (IOException e) {
-                    logger.error("Unable to read the proxy password from the file");
+                    logger.error("Unable to read the proxy accountAccessKey from the file");
                 }
                 if (lines != null && lines.size() > 0) {
-                    proxyProps.put("password", lines.get(0));
+                    proxyProps.put("accountAccessKey", lines.get(0));
                 }
             }
         }

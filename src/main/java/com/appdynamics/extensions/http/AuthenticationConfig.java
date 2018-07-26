@@ -49,7 +49,7 @@ public class AuthenticationConfig {
             String password = CryptoUtil.getPassword(taskArgs);
             if (Strings.isNullOrEmpty(password)) {
                 password = "";
-                logger.warn("The password is empty, empty string will be used as the password");
+                logger.warn("The accountAccessKey is empty, empty string will be used as the accountAccessKey");
             }
             String authType = taskArgs.get(AUTH_TYPE);
             if (Strings.isNullOrEmpty(authType)) {

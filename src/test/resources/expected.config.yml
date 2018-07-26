@@ -1,7 +1,7 @@
 servers:
   - uri: ""
     username: ""
-    password: ""
+    accountAccessKey: ""
     encryptedPassword: ""
 
     # Uri is preferred instead of host-port-useSsl combo.
@@ -9,7 +9,7 @@ servers:
     port: "" # Avoid this, use uri instead
     useSsl: false # Avoid this, use uri instead.
     username: ""
-    password: ""
+    accountAccessKey: ""
     encryptedPassword: ""
 
 connection:
@@ -36,7 +36,7 @@ connection:
 proxy:
   uri: ""
   username: ""
-  password: ""
+  accountAccessKey: ""
   encryptedPassword: ""
 
 # Common for all the encrypted passwords in this file.

@@ -214,7 +214,7 @@ public class CustomDashboardGenerator {
         argsMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.getControllerPort()));
         argsMap.put(TaskInputArgs.USE_SSL, String.valueOf(agentEnvResolver.isControllerUseSSL()));
         argsMap.put(TaskInputArgs.USER, getUserName());
-        argsMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
+        argsMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getAccountAccessKey());
         argsMap.put(TaskInputArgs.SSL_PROTOCOL, "TLSv1.2");
         Object sslCertCheckEnabled = dashboardConfig.get("sslCertCheckEnabled");
         if (sslCertCheckEnabled != null) {

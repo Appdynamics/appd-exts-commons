@@ -31,8 +31,8 @@ public class XmlControllerInfo extends ControllerInfo {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(XmlControllerInfo.class);
 
     @XmlElement(name = "account-access-key")
-    public String getPassword() {
-        return password;
+    public String getAccountAccessKey() {
+        return accountAccessKey;
     }
 
     @XmlElement(name = "account-name")
@@ -126,8 +126,8 @@ public class XmlControllerInfo extends ControllerInfo {
     }
 
     @Override
-    public void setPassword(String password) {
-        super.setPassword(password);
+    public void setAccountAccessKey(String accountAccessKey) {
+        super.setAccountAccessKey(accountAccessKey);
     }
 
     @Override

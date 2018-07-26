@@ -42,7 +42,7 @@ public class ControllerInfoTest {
         Assert.assertEquals(new Boolean(true),info.getControllerSslEnabled());
         Assert.assertEquals("account",info.getAccount());
         Assert.assertEquals("user",info.getUsername());
-        Assert.assertEquals("welcome",info.getPassword());
+        Assert.assertEquals("welcome",info.getAccountAccessKey());
         Assert.assertEquals("app",info.getApplicationName());
         Assert.assertEquals("tier",info.getTierName());
     }
@@ -78,7 +78,7 @@ public class ControllerInfoTest {
         info2.setControllerSslEnabled(false);
         info2.setAccount("account1");
         info2.setUsername("user1");
-        info2.setPassword("welcome1");
+        info2.setAccountAccessKey("welcome1");
         info2.setApplicationName("app1");
         info2.setTierName("tier1");
         ControllerInfo merge = info2.merge(info1);
