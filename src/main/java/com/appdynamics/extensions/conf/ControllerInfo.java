@@ -9,7 +9,6 @@
 package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.TaskInputArgs;
-import com.appdynamics.extensions.dashboard.XmlControllerInfo;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.NumberUtils;
@@ -46,6 +45,12 @@ public class ControllerInfo {
     protected String applicationName;
     protected String tierName;
     protected String nodeName;
+
+
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public void setPassword(String password) {
         this.password = password;
@@ -265,10 +270,6 @@ public class ControllerInfo {
 
     public String getUsername() {
         return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getNodeName() {
