@@ -13,7 +13,7 @@ servers:
   - name: "Server1"
     host: "localhost"
     port: "6379"
-    accountAccessKey: ""
+    password: ""
 
 encryptionKey: ""
 

@@ -23,14 +23,14 @@ use-ssl           |      |
 
 #Authentication Properties
 username
-accountAccessKey
+password
 auth-type : (optional) default BASIC
 
 #Proxy Properties
 proxy-host        | or | proxy-uri
 proxy-port        |    |
 proxy-username
-proxy-accountAccessKey
+proxy-password
 ```
 
 #####Respose

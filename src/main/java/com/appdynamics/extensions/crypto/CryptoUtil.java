@@ -58,7 +58,7 @@ public class CryptoUtil {
             try {
                 return codec.encode(val);
             } catch (EncoderException e) {
-                logger.error("Error while encoding the value [cant log might be a accountAccessKey]", e);
+                logger.error("Error while encoding the value [cant log might be a password]", e);
             }
         }
         return val;

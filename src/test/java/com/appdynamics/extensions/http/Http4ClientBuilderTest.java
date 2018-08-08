@@ -97,7 +97,7 @@ public class Http4ClientBuilderTest {
         map.put("proxy", proxyProps);
         proxyProps.put("uri", PROXY_URI);
         proxyProps.put("username", PROXYUSER);
-        proxyProps.put("accountAccessKey", PROXYPASSWORD);
+        proxyProps.put("password", PROXYPASSWORD);
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         CloseableHttpClient client = builder.build();
         HttpGet get = new HttpGet("http://www.google.com");
@@ -115,7 +115,7 @@ public class Http4ClientBuilderTest {
         map.put("proxy", proxyProps);
         proxyProps.put("uri", PROXY_URI);
         proxyProps.put("username", PROXYUSER);
-        proxyProps.put("accountAccessKey", PROXYPASSWORD + "1");
+        proxyProps.put("password", PROXYPASSWORD + "1");
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         CloseableHttpClient client = builder.build();
         HttpGet get = new HttpGet("https://www.google.com");
@@ -154,7 +154,7 @@ public class Http4ClientBuilderTest {
         HashMap<String, String> server = new HashMap<String, String>();
         server.put("uri", "http://localhost:" + port);
         server.put("username", "user");
-        server.put("accountAccessKey", "welcome");
+        server.put("password", "welcome");
         list.add(server);
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         CloseableHttpClient client = builder.build();
@@ -175,7 +175,7 @@ public class Http4ClientBuilderTest {
         HashMap<String, String> server = new HashMap<String, String>();
         server.put("uri", "http://localhost:" + port + "/test/hello/abey");
         server.put("username", "user");
-        server.put("accountAccessKey", "welcome1");
+        server.put("password", "welcome1");
         list.add(server);
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         final CloseableHttpClient client = builder.build();
@@ -296,7 +296,7 @@ public class Http4ClientBuilderTest {
         char[] pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
         Assert.assertNull(pwd);
 
-        // Enc Pass without accountAccessKey
+        // Enc Pass without password
         connection.put("sslTrustStoreEncryptedPassword", encrypted);
         pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
         Assert.assertNull(pwd);
@@ -334,7 +334,7 @@ public class Http4ClientBuilderTest {
         char[] pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
         Assert.assertNull(pwd);
 
-        // Enc Pass without accountAccessKey
+        // Enc Pass without password
         connection.put("sslKeyStoreEncryptedPassword", encrypted);
         pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
         Assert.assertNull(pwd);

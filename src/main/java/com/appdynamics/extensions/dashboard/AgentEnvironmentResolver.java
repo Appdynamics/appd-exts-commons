@@ -63,7 +63,7 @@ public class AgentEnvironmentResolver {
             cInfo.setAccount("customer1");
         }
         check(TaskInputArgs.USER, cInfo.getUsername());
-        check(TaskInputArgs.PASSWORD, cInfo.getAccountAccessKey());
+        check(TaskInputArgs.PASSWORD, cInfo.getPassword());
         check("account", cInfo.getAccount());
         check("applicationName", cInfo.getApplicationName());
         check("controllerHost", cInfo.getControllerHost());
@@ -162,7 +162,7 @@ public class AgentEnvironmentResolver {
 
     public String getPassword() {
         if (resolved) {
-            return CryptoUtil.encode(cInfo.getAccountAccessKey());
+            return CryptoUtil.encode(cInfo.getPassword());
         }
         return null;
     }

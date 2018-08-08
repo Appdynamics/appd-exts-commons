@@ -291,8 +291,8 @@ public class ControllerInfo {
     @Override
     public String toString() {
         String tmpPass;
-        if (accountAccessKey != null && accountAccessKey.length() > 2) {
-            tmpPass = accountAccessKey.substring(0, 2) + "******";
+        if (password != null && password.length() > 2) {
+            tmpPass = password.substring(0, 2) + "******";
         } else {
             tmpPass = null;
         }
@@ -303,7 +303,7 @@ public class ControllerInfo {
                 ", simEnabled=" + simEnabled +
                 ", account='" + account + '\'' +
                 ", username='" + username + '\'' +
-                ", accountAccessKey='" + tmpPass + '\'' +
+                ", password='" + tmpPass + '\'' +
                 ", applicationName='" + applicationName + '\'' +
                 ", tierName='" + tierName + '\'' +
                 ", nodeName='" + nodeName + '\'' +

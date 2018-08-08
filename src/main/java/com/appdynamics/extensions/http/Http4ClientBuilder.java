@@ -232,7 +232,7 @@ public class Http4ClientBuilder {
                                 new AuthScope(url.getHost(), url.getPort()),
                                 new UsernamePasswordCredentials(proxyUserName, proxyPassword));
                         builder.setDefaultCredentialsProvider(credsProvider);
-                        logger.info("Configured the http client with the proxy [{}] and user [{}] and accountAccessKey [***]"
+                        logger.info("Configured the http client with the proxy [{}] and user [{}] and password [***]"
                                 , proxyUri, proxyUserName);
                     } else {
                         logger.info("Configured the http client with the proxy [{}] and and no proxy credentials"
@@ -251,7 +251,7 @@ public class Http4ClientBuilder {
     }
 
     public static String getPassword(Map<String, ?> propMap, Map<String, ?> config) {
-        String password = (String) propMap.get("accountAccessKey");
+        String password = (String) propMap.get("password");
         if (!Strings.isNullOrEmpty(password)) {
             return password;
         } else {
@@ -261,11 +261,11 @@ public class Http4ClientBuilder {
                 if (!Strings.isNullOrEmpty(encryptionKey)) {
                     return new Decryptor(encryptionKey).decrypt(encrypted);
                 } else {
-                    logger.error("Cannot decrypt the accountAccessKey. Encryption key not set");
+                    logger.error("Cannot decrypt the password. Encryption key not set");
                     throw new RuntimeException("Cannot decrypt [encryptedPassword], since [encryptionKey] is not set");
                 }
             } else {
-                logger.warn("No accountAccessKey set, using empty string");
+                logger.warn("No password set, using empty string");
                 return "";
             }
         }
@@ -449,7 +449,7 @@ public class Http4ClientBuilder {
             if (!Strings.isNullOrEmpty(sslKeyStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
                 return new Decryptor(encryptionKey).decrypt(sslKeyStorePasswordEncrypted).toCharArray();
             } else {
-                logger.warn("Returning null accountAccessKey for sslKeyStore. Please set the [connection.sslKeyStorePassword] or " +
+                logger.warn("Returning null password for sslKeyStore. Please set the [connection.sslKeyStorePassword] or " +
                         "[connection.sslKeyStoreEncryptedPassword + encryptionKey]");
                 return null;
             }
@@ -467,7 +467,7 @@ public class Http4ClientBuilder {
             if (!Strings.isNullOrEmpty(sslTrustStoreEncryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
                 return new Decryptor(encryptionKey).decrypt(sslTrustStoreEncryptedPassword).toCharArray();
             } else {
-                logger.warn("Returning null accountAccessKey for sslTrustStore. Please set the [connection.sslTrustStorePassword] or " +
+                logger.warn("Returning null password for sslTrustStore. Please set the [connection.sslTrustStorePassword] or " +
                         "[connection.sslTrustStoreEncryptedPassword + encryptionKey]");
                 return null;
             }
