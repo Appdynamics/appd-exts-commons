@@ -223,7 +223,7 @@ public class CustomDashboardJsonUploader {
         }
     }
 
-    //#TODO use the same httpClient created above to call CustomDashboardImportExportServlet.
+    // use the same httpClient created above to call CustomDashboardImportExportServlet.
     public void uploadFile(String dashboardName, String jsonNode, StringBuilder cookies, Map<String, ?> argsMap, Map<String, String> serverStringMap, String csrf) throws IOException {
         String fileName = dashboardName + ".json";
         String twoHyphens = "--";
