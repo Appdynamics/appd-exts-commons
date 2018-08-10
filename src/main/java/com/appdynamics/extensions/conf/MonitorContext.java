@@ -9,14 +9,7 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.conf.modules.CacheModule;
-import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
-import com.appdynamics.extensions.conf.modules.HealthCheckModule;
-import com.appdynamics.extensions.conf.modules.HttpClientModule;
-import com.appdynamics.extensions.conf.modules.JobScheduleModule;
-import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
-import com.appdynamics.extensions.conf.modules.PerMinValueCalculatorModule;
-import com.appdynamics.extensions.conf.modules.WorkBenchModule;
+import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
@@ -47,7 +40,7 @@ public class MonitorContext {
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
-
+    private DashboardModule dashboardModule;
 
     MonitorContext(String monitorName) {
         this.monitorName = monitorName;
@@ -59,6 +52,7 @@ public class MonitorContext {
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
         healthCheckModule = new HealthCheckModule();
+        dashboardModule = new DashboardModule();
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
@@ -72,6 +66,7 @@ public class MonitorContext {
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
             healthCheckModule.initMATroubleshootChecks(monitorName, config);
+            dashboardModule.initSendDashboard(config);
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
