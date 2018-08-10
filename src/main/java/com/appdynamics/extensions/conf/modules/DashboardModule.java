@@ -34,6 +34,7 @@ public class DashboardModule {
 
         Map customDashboardConfig = (Map) config.get("customDashboard");
         if(customDashboardConfig != null){
+            //TODO add timing in debug mode
             SendDashboard dashboard = new SendDashboard(customDashboardConfig, new CustomDashboardJsonUploader(), controllerInfo);
             dashboard.sendDashboard();
 
