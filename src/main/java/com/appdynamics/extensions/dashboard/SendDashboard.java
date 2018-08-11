@@ -28,9 +28,9 @@ public class SendDashboard {
     private String dashboardString;
 
     private ControllerInfo controllerInfo;
-    private CustomDashboardJsonUploader customDashboardJsonUploader;
+    private CustomDashboardUploader customDashboardJsonUploader;
 
-    public SendDashboard(Map config, CustomDashboardJsonUploader customDashboardJsonUploader, ControllerInfo controllerInfo) {
+    public SendDashboard(Map config, CustomDashboardUploader customDashboardJsonUploader, ControllerInfo controllerInfo) {
 
         this.config = config;
         this.customDashboardJsonUploader = customDashboardJsonUploader;

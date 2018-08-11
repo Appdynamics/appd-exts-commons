@@ -132,11 +132,12 @@ public class SendDashboardTest {
         Map config = new HashMap();
         config = valueMapWithoutSim(config);
         getJsonAsString();
-        CustomDashboardJsonUploader customDashboardJsonUploader = Mockito.mock(CustomDashboardJsonUploader.class);
-        Mockito.doNothing().when(customDashboardJsonUploader).uploadDashboard(config.get("dashboardName").toString(), dashboardJson, config, false);
+        CustomDashboardUploader customDashboardUploader = Mockito.mock(CustomDashboardUploader.class);
+
+        Mockito.doNothing().when(customDashboardUploader).uploadDashboard(config.get("dashboardName").toString(), dashboardJson, config, false);
         Mockito.when(controllerInfo.getControllerInfo()).thenReturn(controllerInformation);
         try {
-            SendDashboard dashboard = new SendDashboard(config, customDashboardJsonUploader, controllerInfo);
+            SendDashboard dashboard = new SendDashboard(config, customDashboardUploader, controllerInfo);
             dashboard.sendDashboard();
         } catch (Exception e) {
             Assert.fail();
@@ -150,11 +151,12 @@ public class SendDashboardTest {
 
         Map config = new HashMap();
         config = valueMapWithSim(config);
-        CustomDashboardJsonUploader customDashboardJsonUploader = Mockito.mock(CustomDashboardJsonUploader.class);
-        Mockito.doNothing().when(customDashboardJsonUploader).uploadDashboard(config.get("dashboardName").toString(), dashboardJson, config, false);
+        CustomDashboardUploader customDashboardUploader = Mockito.mock(CustomDashboardUploader.class);
+
+        Mockito.doNothing().when(customDashboardUploader).uploadDashboard(config.get("dashboardName").toString(), dashboardJson, config, false);
         Mockito.when(controllerInfo.getControllerInfo()).thenReturn(controllerInformation);
         try {
-            SendDashboard dashboard = new SendDashboard(config, customDashboardJsonUploader, controllerInfo);
+            SendDashboard dashboard = new SendDashboard(config, customDashboardUploader, controllerInfo);
             dashboard.sendDashboard();
         } catch (Exception e) {
             Assert.fail();
@@ -168,11 +170,12 @@ public class SendDashboardTest {
 
         Map config = new HashMap();
         config = valueMapWithSim(config);
-        CustomDashboardJsonUploader customDashboardJsonUploader = Mockito.mock(CustomDashboardJsonUploader.class);
-        Mockito.doNothing().when(customDashboardJsonUploader).uploadDashboard(config.get("dashboardName").toString(), dashboardJson, config, false);
+        CustomDashboardUploader customDashboardUploader = Mockito.mock(CustomDashboardUploader.class);
+
+        Mockito.doNothing().when(customDashboardUploader).uploadDashboard(config.get("dashboardName").toString(), dashboardJson, config, false);
         Mockito.when(controllerInfo.getControllerInfo()).thenReturn(controllerInformation);
         try {
-            SendDashboard dashboard = new SendDashboard(config, customDashboardJsonUploader, controllerInfo);
+            SendDashboard dashboard = new SendDashboard(config, customDashboardUploader, controllerInfo);
             dashboard.sendDashboard();
         } catch (Exception e) {
             Assert.fail();

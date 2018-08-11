@@ -63,7 +63,17 @@ import java.util.Map;
 public class CustomDashboardUploader {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUploader.class);
 
+    public void uploadDashboard(String dashboardName, String jsonValue, Map<String, ? super Object> argsMap, boolean overwrite) {
+        boolean isJSON = true;
+        uploadDashboard(dashboardName, jsonValue, argsMap, overwrite, isJSON);
+    }
+
     public void uploadDashboard(String dashboardName, Xml xml, Map<String, ? super Object> argsMap, boolean overwrite) {
+        boolean isJSON = false;
+        uploadDashboard(dashboardName, xml.toString(), argsMap, overwrite, isJSON);
+    }
+
+    public void uploadDashboard(String dashboardName, String dashboardString, Map<String, ? super Object> argsMap, boolean overwrite, boolean isJson) {
         setProxyIfApplicable(argsMap);
         CloseableHttpClient client = Http4ClientBuilder.getBuilder(argsMap).build();
         //SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(10000).socketTimeout(15000).build();
@@ -96,16 +106,11 @@ public class CustomDashboardUploader {
                     }
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
-                boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap, serverStringMap);
-                if (isPresent) {
-                    if (overwrite) {
-                        //#TODO Eventhough we intend to overwrite, this will actually create a new dashboard.
-                        uploadFile(dashboardName, xml, argsMap, serverStringMap, cookies, csrf);
-                    } else {
-                        logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
-                    }
+                boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap, serverStringMap, isJson);
+                if (!isPresent) {
+                    uploadFile(dashboardName, dashboardString, argsMap, serverStringMap, cookies, csrf, isJson);
                 } else {
-                    uploadFile(dashboardName, xml, argsMap, serverStringMap, cookies, csrf);
+                    logger.debug("Dashboard: " + dashboardName + " already present");
                 }
             } else if (statusLine != null) {
                 logger.error("Custom Dashboard Upload Failed. The login to the controller is unsuccessful. The response code is {}"
@@ -138,7 +143,7 @@ public class CustomDashboardUploader {
         }
     }
 
-    private boolean isDashboardPresent(CloseableHttpClient client, StringBuilder cookies, String dashboardName, String csrf, Map<String, ?> argsMap, Map<String, String> serverStringMap) {
+    private boolean isDashboardPresent(CloseableHttpClient client, StringBuilder cookies, String dashboardName, String csrf, Map<String, ?> argsMap, Map<String, String> serverStringMap, boolean isJson) {
         try {
             HttpGet get = new HttpGet(UrlBuilder.builder(serverStringMap).path("controller/restui/dashboards/getAllDashboardsByType/false").build());
             get.setHeader("Cookie", cookies.toString());
@@ -161,9 +166,16 @@ public class CustomDashboardUploader {
             } else if (statusLine != null) {
                 logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
                         , statusLine.getStatusCode());
-                logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
-                        "The xml will be written to the logs folder. Please import it to controller manually");
-                logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
+                if(isJson) {
+                    logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
+                            "The JSON will be written to the logs folder. Please import it to controller manually");
+                    logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard JSON file from the logs folder.");
+                } else {
+                    logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
+                            "The xml will be written to the logs folder. Please import it to controller manually");
+                    logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
+
+                }
                 return true;//Fake that the dashboard exists.
             }
         } catch (Exception e) {
@@ -172,17 +184,23 @@ public class CustomDashboardUploader {
         return false;
     }
 
-    private void uploadFile(String instanceName, Xml xml, Map<String, ?> argsMap, Map<String, String> serverStringMap, StringBuilder cookies, String csrf) {
+    private void uploadFile(String instanceName, String dashboardString, Map<String, ?> argsMap, Map<String, String> serverStringMap, StringBuilder cookies, String csrf, boolean isJson) {
         try {
-            uploadFile(instanceName, xml, cookies, argsMap, serverStringMap, csrf);
+            uploadFile(instanceName, dashboardString, cookies, argsMap, serverStringMap, csrf,  isJson);
         } catch (IOException e) {
             logger.error("", e);
         }
     }
 
     //#TODO use the same httpClient created above to call CustomDashboardImportExportServlet.
-    public void uploadFile(String dashboardName, Xml xml, StringBuilder cookies, Map<String, ?> argsMap, Map<String, String> serverStringMap, String csrf) throws IOException {
-        String fileName = dashboardName + ".xml";
+    public void uploadFile(String dashboardName, String dashboardString, StringBuilder cookies, Map<String, ?> argsMap, Map<String, String> serverStringMap, String csrf, boolean isJson) throws IOException {
+        String fileName = "";
+        if(isJson){
+            fileName = dashboardName + ".json";
+        }
+        else {
+            fileName = dashboardName + ".xml";
+        }
         String twoHyphens = "--";
         String boundary = "*****";
         String lineEnd = "\r\n";
@@ -217,9 +235,15 @@ public class CustomDashboardUploader {
         DataOutputStream request = new DataOutputStream(connection.getOutputStream());
         request.writeBytes(twoHyphens + boundary + lineEnd);
         request.writeBytes("Content-Disposition: form-data; name=\"" + dashboardName + "\";filename=\"" + fileName + "\"" + lineEnd);
-        request.writeBytes("Content-Type: text/xml" + lineEnd);
+
+        if (isJson) {
+            request.writeBytes("Content-Type: application/json" + lineEnd);
+        }
+        else {
+            request.writeBytes("Content-Type: text/xml" + lineEnd);
+        }
         request.writeBytes(lineEnd);
-        request.write(xml.toString().getBytes());
+        request.write(dashboardString.getBytes());
         request.writeBytes(lineEnd + lineEnd);
         request.writeBytes(twoHyphens + boundary + lineEnd);
 
