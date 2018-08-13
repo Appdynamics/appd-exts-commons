@@ -1,3 +1,58 @@
+///*
+// *   Copyright 2018 . AppDynamics LLC and its affiliates.
+// *   All Rights Reserved.
+// *   This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+// *   The copyright notice above does not evidence any actual or intended publication of such source code.
+// *
+// */
+//
+//package com.appdynamics.extensions.dashboard;
+//
+//import com.appdynamics.extensions.TaskInputArgs;
+//import com.appdynamics.extensions.http.Http4ClientBuilder;
+//import com.appdynamics.extensions.http.UrlBuilder;
+//import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+//import com.appdynamics.extensions.util.StringUtils;
+//import com.appdynamics.extensions.xml.Xml;
+//import org.apache.commons.io.IOUtils;
+//import org.apache.http.Header;
+//import org.apache.http.HttpEntity;
+////import org.apache.http.HttpResponse;
+////import org.apache.http.StatusLine;
+//import org.apache.http.client.methods.HttpGet;
+//import org.apache.http.impl.client.CloseableHttpClient;
+//import org.apache.http.util.EntityUtils;
+//import org.codehaus.jackson.JsonNode;
+//import org.codehaus.jackson.map.ObjectMapper;
+//import org.slf4j.Logger;
+//
+//import javax.net.ssl.*;
+//import java.io.DataOutputStream;
+//import java.io.IOException;
+//import java.io.InputStream;
+//import java.net.HttpURLConnection;
+//import java.net.InetSocketAddress;
+//import java.net.Proxy;
+//import java.net.URL;
+//import java.security.KeyManagementException;
+//import java.security.NoSuchAlgorithmException;
+//import java.security.SecureRandom;
+//import java.security.cert.CertificateException;
+//import java.security.cert.X509Certificate;
+//import java.util.Arrays;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//
+///**
+// * Created by bhuvnesh.kumar on 7/11/18.
+// */
+//public class CustomDashboardJsonUploader {
+//
+//
+//}
+
+
 /*
  * Copyright (c) 2018 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +75,6 @@ import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
-import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -33,13 +87,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,10 +108,10 @@ import java.util.Map;
 /**
  * Created by abey.tom on 4/11/15.
  */
-public class CustomDashboardUploader {
-    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUploader.class);
+public class CustomDashboardJsonUploader {
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardJsonUploader.class);
 
-    public void uploadDashboard(String dashboardName, Xml xml, Map<String, ? super Object> argsMap, boolean overwrite) {
+    public void uploadDashboard(String dashboardName, String jsonNode, Map<String, ? super Object> argsMap, boolean overwrite) {
         setProxyIfApplicable(argsMap);
         CloseableHttpClient client = Http4ClientBuilder.getBuilder(argsMap).build();
         //SimpleHttpClient client = new SimpleHttpClientBuilder(argsMap).connectionTimeout(10000).socketTimeout(15000).build();
@@ -97,15 +145,10 @@ public class CustomDashboardUploader {
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
                 boolean isPresent = isDashboardPresent(client, cookies, dashboardName, csrf, argsMap, serverStringMap);
-                if (isPresent) {
-                    if (overwrite) {
-                        //#TODO Eventhough we intend to overwrite, this will actually create a new dashboard.
-                        uploadFile(dashboardName, xml, argsMap, serverStringMap, cookies, csrf);
-                    } else {
-                        logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
-                    }
+                if (!isPresent) {
+                    uploadFile(dashboardName, jsonNode, argsMap, serverStringMap, cookies, csrf);
                 } else {
-                    uploadFile(dashboardName, xml, argsMap, serverStringMap, cookies, csrf);
+                    logger.debug("Dashboard: " + dashboardName + " already present");
                 }
             } else if (statusLine != null) {
                 logger.error("Custom Dashboard Upload Failed. The login to the controller is unsuccessful. The response code is {}"
@@ -162,8 +205,8 @@ public class CustomDashboardUploader {
                 logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
                         , statusLine.getStatusCode());
                 logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
-                        "The xml will be written to the logs folder. Please import it to controller manually");
-                logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
+                        "The json will be written to the logs folder. Please import it to controller manually");
+                logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard json file from the logs folder.");
                 return true;//Fake that the dashboard exists.
             }
         } catch (Exception e) {
@@ -172,17 +215,17 @@ public class CustomDashboardUploader {
         return false;
     }
 
-    private void uploadFile(String instanceName, Xml xml, Map<String, ?> argsMap, Map<String, String> serverStringMap, StringBuilder cookies, String csrf) {
+    private void uploadFile(String instanceName, String jsonNode, Map<String, ?> argsMap, Map<String, String> serverStringMap, StringBuilder cookies, String csrf) {
         try {
-            uploadFile(instanceName, xml, cookies, argsMap, serverStringMap, csrf);
+            uploadFile(instanceName, jsonNode, cookies, argsMap, serverStringMap, csrf);
         } catch (IOException e) {
-            logger.error("", e);
+            logger.error("Error while uploading", e);
         }
     }
 
-    //#TODO use the same httpClient created above to call CustomDashboardImportExportServlet.
-    public void uploadFile(String dashboardName, Xml xml, StringBuilder cookies, Map<String, ?> argsMap, Map<String, String> serverStringMap, String csrf) throws IOException {
-        String fileName = dashboardName + ".xml";
+    // use the same httpClient created above to call CustomDashboardImportExportServlet.
+    public void uploadFile(String dashboardName, String jsonNode, StringBuilder cookies, Map<String, ?> argsMap, Map<String, String> serverStringMap, String csrf) throws IOException {
+        String fileName = dashboardName + ".json";
         String twoHyphens = "--";
         String boundary = "*****";
         String lineEnd = "\r\n";
@@ -217,9 +260,9 @@ public class CustomDashboardUploader {
         DataOutputStream request = new DataOutputStream(connection.getOutputStream());
         request.writeBytes(twoHyphens + boundary + lineEnd);
         request.writeBytes("Content-Disposition: form-data; name=\"" + dashboardName + "\";filename=\"" + fileName + "\"" + lineEnd);
-        request.writeBytes("Content-Type: text/xml" + lineEnd);
+        request.writeBytes("Content-Type: application/json" + lineEnd);
         request.writeBytes(lineEnd);
-        request.write(xml.toString().getBytes());
+        request.write(jsonNode.getBytes());
         request.writeBytes(lineEnd + lineEnd);
         request.writeBytes(twoHyphens + boundary + lineEnd);
 
