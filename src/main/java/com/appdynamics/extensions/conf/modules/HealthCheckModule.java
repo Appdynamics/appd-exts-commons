@@ -16,6 +16,7 @@ import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
 import com.appdynamics.extensions.checks.MaxMetricLimitCheck;
 import com.appdynamics.extensions.checks.MonitorHealthCheck;
 import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfoFactory;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -27,7 +28,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import com.appdynamics.extensions.conf.ControllerInfo;
 
 /**
  * @author Satish Muddam
@@ -36,17 +36,10 @@ public class HealthCheckModule {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(HealthCheckModule.class);
     private Map<String, MonitorHealthCheck> healthChecksForMonitors = new ConcurrentHashMap<>();
-    private ControllerInfo controllerInfo;
     private MonitorExecutorService executorService;
 
-    public HealthCheckModule() {
 
-        controllerInfo = new ControllerInfo().getControllerInfo();
-
-    }
-
-
-    public void initMATroubleshootChecks(String monitorName, Map<String, ?> config) {
+    public void initMATroubleshootChecks(ControllerInfo controllerInfo,String monitorName, Map<String, ?> config) {
 
         String enableHealthChecksSysPropString = System.getProperty("enableHealthChecks");
 
@@ -74,7 +67,7 @@ public class HealthCheckModule {
             return;
         }
 
-        if (!validateControllerInfo()) {
+        if (!validateControllerInfo(controllerInfo)) {
             return;
         }
 
@@ -119,13 +112,13 @@ public class HealthCheckModule {
         }
     }
 
-    private boolean validateControllerInfo() {
+    private boolean validateControllerInfo(ControllerInfo controllerInfo) {
 
         if (controllerInfo == null) {
             return false;
         }
 
-        if (controllerInfo.getControllerHost() == null || controllerInfo.getControllerPort() == null
+        if(controllerInfo.getControllerHost() == null || controllerInfo.getControllerPort() == null
                 || controllerInfo.getControllerSslEnabled() == null || controllerInfo.getSimEnabled() == null) {
             return false;
         }

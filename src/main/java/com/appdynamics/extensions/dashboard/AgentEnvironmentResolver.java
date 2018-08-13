@@ -15,17 +15,12 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfoFactory;
+import com.appdynamics.extensions.conf.ControllerInfoValidator;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.PathResolver;
-import com.google.common.base.Strings;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,76 +30,11 @@ public class AgentEnvironmentResolver {
     public static final org.slf4j.Logger logger = ExtensionsLoggerFactory.getLogger(AgentEnvironmentResolver.class);
     private ControllerInfo cInfo;
     private boolean resolved;
-    private Map dashboardConfig;
-    private List<String> unresolvedProps;
 
-    public AgentEnvironmentResolver(Map dashboardConfig) {
-        ControllerInfo cInfoYml = ControllerInfo.fromYml(dashboardConfig);
-        logger.debug("The resolved properties from yml are {}", cInfoYml);
-        ControllerInfo cInfoSysProp = ControllerInfo.fromSystemProperties();
-        logger.debug("The resolved properties from SysProps are {}", cInfoSysProp);
-        ControllerInfo cInfoXml = getControllerInfoFromXml();
-        logger.debug("The resolved properties from Xml are {}", cInfoXml);
-        cInfoXml.merge(cInfoSysProp).merge(cInfoYml);
-        validateRequiredInfo(cInfoXml);
-        if (unresolvedProps != null) {
-            logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
-            resolved = false;
-        } else {
-            resolved = true;
-        }
-        this.dashboardConfig = dashboardConfig;
-        this.cInfo = cInfoXml;
-        logger.debug("The final resolved properties are {}", cInfo);
-    }
-
-    private void validateRequiredInfo(ControllerInfo cInfo) {
-        if (cInfo.getAccount() == null) {
-            cInfo.setAccount("customer1");
-        }
-        check(TaskInputArgs.USER, cInfo.getUsername());
-        check(TaskInputArgs.PASSWORD, cInfo.getPassword());
-        check("account", cInfo.getAccount());
-        check("applicationName", cInfo.getApplicationName());
-        check("controllerHost", cInfo.getControllerHost());
-        check("controllerPort", cInfo.getControllerPort());
-        check("controllerSslEnabled", cInfo.getControllerSslEnabled());
-        check("tierName", cInfo.getTierName());
-    }
-
-    protected ControllerInfo getControllerInfoFromXml() {
-        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
-        logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
-        ControllerInfo from = null;
-        if (directory.exists()) {
-            File cinfo = new File(new File(directory, "conf"), "controller-info.xml");
-            if (cinfo.exists()) {
-                from = ControllerInfo.fromXml(cinfo);
-            }
-        }
-        if (from == null) {
-            from = new ControllerInfo();
-        }
-        return from;
-    }
-
-    public void check(String propName, Object propVal) {
-        if (propVal != null) {
-            if (propVal instanceof String) {
-                if (Strings.isNullOrEmpty((String) propVal)) {
-                    markUnresolved(propName);
-                }
-            }
-        } else {
-            markUnresolved(propName);
-        }
-    }
-
-    private void markUnresolved(String propName) {
-        if (unresolvedProps == null) {
-            unresolvedProps = new ArrayList<String>();
-        }
-        unresolvedProps.add(propName);
+    AgentEnvironmentResolver(Map dashboardConfig) {
+        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
+        ControllerInfoValidator validator = new ControllerInfoValidator();
+        resolved = validator.validateAndCheckIfResolved(cInfo);
     }
 
     public String getTierName() {
@@ -120,7 +50,6 @@ public class AgentEnvironmentResolver {
             if (logger.isDebugEnabled()) {
                 logger.debug("The final resolved properties are {}", cInfo);
             }
-            logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
         }
         return resolved;
     }

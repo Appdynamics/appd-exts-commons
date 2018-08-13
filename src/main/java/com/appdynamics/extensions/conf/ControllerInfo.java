@@ -13,6 +13,7 @@ import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.NumberUtils;
 import com.appdynamics.extensions.util.PathResolver;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ public class ControllerInfo {
     protected String nodeName;
 
 
+    private ControllerInfo(){
+    }
 
     public void setUsername(String username) {
         this.username = username;
@@ -311,16 +314,7 @@ public class ControllerInfo {
                 '}';
     }
 
-    public ControllerInfo getControllerInfo() {
-
-        ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
-        ControllerInfo controllerInfoFromXml = getControllerInfoFromXml();
-        ControllerInfo controllerInfo = controllerInfoFromXml.merge(controllerInfoFromSystemProps);
-
-        return controllerInfo;
-    }
-
-    private ControllerInfo getControllerInfoFromXml() {
+    public static ControllerInfo getControllerInfoFromXml() {
         File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
         ControllerInfo from = null;

@@ -11,7 +11,6 @@ package com.appdynamics.extensions.dashboard;
 import com.appdynamics.extensions.TaskInputArgs;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import com.appdynamics.extensions.dashboard.CustomDashboardJsonUploader;
 
 import java.io.File;
 import java.util.ArrayList;

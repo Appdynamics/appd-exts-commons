@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.api.ApiException;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
@@ -201,8 +202,12 @@ public class CustomDashboardGenerator {
     protected void persistDashboard(String dashboardName, Xml xml) {
         if (getBoolean(dashboardConfig, "uploadDashboard")) {
             Map<String, ? super Object> argsMap = getArgsMap();
-            dashboardUploader.uploadDashboard(dashboardName, xml, argsMap,
-                    getBoolean(dashboardConfig, "overwriteDashboard"));
+            try {
+                dashboardUploader.uploadDashboard(dashboardName, ".xml",xml.toString(),"text/xml", argsMap,
+                        getBoolean(dashboardConfig, "overwriteDashboard"));
+            } catch (ApiException e) {
+                logger.error("Failed to upload dashboard",e);
+            }
         }
         writeDashboardToFile(dashboardName, xml);
     }

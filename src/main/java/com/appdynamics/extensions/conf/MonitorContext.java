@@ -31,6 +31,7 @@ public class MonitorContext {
     private String monitorName;
     private Map<String, ?> config;
     private String metricPrefix;
+    private ControllerInfo controllerInfo;
 
     private WorkBenchModule workBenchModule;
     private HttpClientModule httpClientModule;
@@ -40,7 +41,8 @@ public class MonitorContext {
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
-    private DashboardModule dashboardModule;
+    private CustomDashboardModule dashboardModule;
+
 
     MonitorContext(String monitorName) {
         this.monitorName = monitorName;
@@ -52,12 +54,13 @@ public class MonitorContext {
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
         healthCheckModule = new HealthCheckModule();
-        dashboardModule = new DashboardModule();
+        dashboardModule = new CustomDashboardModule();
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
         this.config = config;
         this.metricPrefix = metricPrefix;
+        controllerInfo = ControllerInfoFactory.getControllerInfo(config);
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
             workBenchModule.initWorkBenchStore(config, metricPrefix);
@@ -65,8 +68,9 @@ public class MonitorContext {
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
-            healthCheckModule.initMATroubleshootChecks(monitorName, config);
-            dashboardModule.initSendDashboard(config);
+            healthCheckModule.initMATroubleshootChecks(controllerInfo,monitorName, config);
+            dashboardModule.initCustomDashboard(controllerInfo,config);
+
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
@@ -140,4 +144,9 @@ public class MonitorContext {
     public PerMinValueCalculator getPerMinValueCalculator() {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
+
+    public ControllerInfo getControllerInfo() {
+        return controllerInfo;
+    }
+
 }
