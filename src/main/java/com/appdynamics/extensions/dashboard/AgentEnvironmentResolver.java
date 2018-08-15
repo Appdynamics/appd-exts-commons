@@ -31,9 +31,8 @@ public class AgentEnvironmentResolver {
     private ControllerInfo cInfo;
     private boolean resolved;
 
-    AgentEnvironmentResolver(Map dashboardConfig, ControllerInfo info) {
-//        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
-        this.cInfo = info;
+    AgentEnvironmentResolver(Map dashboardConfig) {
+        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
         ControllerInfoValidator validator = new ControllerInfoValidator();
         resolved = validator.validateAndCheckIfResolved(cInfo);
     }
@@ -42,6 +41,10 @@ public class AgentEnvironmentResolver {
         return cInfo.getTierName();
     }
 
+
+    public String getNodeName() {
+        return cInfo.getNodeName();
+    }
     public String getApplicationName() {
         return cInfo.getApplicationName();
     }
@@ -96,5 +99,20 @@ public class AgentEnvironmentResolver {
         }
         return null;
     }
+
+    public Boolean getSimEnabled() {
+        if (resolved) {
+            return cInfo.getSimEnabled();
+        }
+        return null;
+    }
+
+    public String getMachinePath() {
+        if (resolved) {
+            return cInfo.getMachinePath();
+        }
+        return null;
+    }
+
 
 }

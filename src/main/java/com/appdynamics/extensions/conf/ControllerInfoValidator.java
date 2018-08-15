@@ -25,7 +25,7 @@ public class ControllerInfoValidator {
         check("controllerPort", cInfo.getControllerPort());
         check("controllerSslEnabled", cInfo.getControllerSslEnabled());
         check("tierName", cInfo.getTierName());
-
+        check("nodeName", cInfo.getNodeName());
         if (unresolvedProps != null) {
             logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
             return false;

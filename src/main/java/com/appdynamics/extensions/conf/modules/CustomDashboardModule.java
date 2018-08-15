@@ -19,7 +19,9 @@ public class CustomDashboardModule {
         if(customDashboardConfig != null){
             long timestamp1 = System.currentTimeMillis();
             CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInformation);
-            dashboardGenerator.createDashboard();
+            if(dashboardGenerator != null){
+                dashboardGenerator.createDashboard();
+            }
             long timestamp2 = System.currentTimeMillis();
             logger.debug("Time to complete DashboardModule in :"+ (timestamp2-timestamp1)+ " ms");
 

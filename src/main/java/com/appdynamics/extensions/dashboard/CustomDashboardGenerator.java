@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
+
 /**
  * Created by abey.tom on 4/10/15.
  */
@@ -57,7 +59,7 @@ public class CustomDashboardGenerator {
     private Map dashboardConfig;
     private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
-    private ControllerInfo controllerInfo;
+//    private ControllerInfo controllerInfo;
 
     public CustomDashboardGenerator (Map dashboardConfig, Map controllerInformation){
         if (dashboardConfig == null) {
@@ -72,23 +74,35 @@ public class CustomDashboardGenerator {
         this.dashboardUploader = new CustomDashboardUploader();
         this.dashboardConfig = dashboardConfig;
         this.dashboardUploader = new CustomDashboardUploader();
-        this.controllerInfo = ControllerInfoFactory.getControllerInfo(controllerInformation);
-        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig,controllerInfo );
+        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation );
 
     }
 
-    public void gatherDataForDashbaord(){
+    public void createDashboard(){
         if (isResolved()) {
-            Map<String, ? super Object> argsMap = ConnectionProperties.getArgumentMap(controllerInfo, dashboardConfig);
+//            Map<String, ? super Object> argsMap = ConnectionProperties.getArgumentMap(controllerInfo, dashboardConfig);
+            Map<String, ? super Object> argsMap = getArgsMap();
             String dashboardTemplate = getDashboardContents();
-        } else {
+            dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
+            String dashboardName = dashboardConfig.get("dashboardName").toString();
+            String jsonExtension = "json";
+            String contentType = "application/json";
+            boolean overwrite = getBoolean(dashboardConfig, "overwriteDashboard");
+
+            try{
+                dashboardUploader.uploadDashboard(dashboardName,jsonExtension,dashboardTemplate, contentType, argsMap, overwrite);
+            }
+            catch (ApiException e){
+            logger.error("No overwriteDashboard present in config, please add it.");
+        }
+
+    } else {
             logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
         }
 
-
     }
 
-    // used for old
+//     used for old
     public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
         if (dashboardConfig == null) {
             logger.info("Custom Dashboard config is null");
@@ -99,12 +113,11 @@ public class CustomDashboardGenerator {
             logger.info("Custom Dashboard creation is not enabled");
             return;
         }
-        this.controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
         this.instanceNames = instanceNames;
         this.metricPrefix = StringUtils.trim(metricPrefix, "|");
         this.dashboardConfig = dashboardConfig;
         this.dashboardUploader = new CustomDashboardUploader();
-        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig, controllerInfo );
+        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig );
 
     }
 
@@ -213,10 +226,10 @@ public class CustomDashboardGenerator {
     }
 
     private String getDashboardContents(){
-        logger.debug("Sim Enabled: {}", controllerInfo.getSimEnabled());
+        logger.debug("Sim Enabled: {}", agentEnvResolver.getSimEnabled());
         String dashboardTemplate = "";
         String pathToFile ;
-        if(controllerInfo.getSimEnabled() == false){
+        if(agentEnvResolver.getSimEnabled() == false){
             pathToFile = dashboardConfig.get("pathToNormalDashboard").toString();
         }else {
             pathToFile = dashboardConfig.get("pathToSIMDashboard").toString();
@@ -233,6 +246,148 @@ public class CustomDashboardGenerator {
         }
         return dashboardTemplate;
     }
+
+    protected Map<String, ? super Object> getArgsMap() {
+
+        Map<String, ? super Object> argsMap = new HashMap<>();
+
+        List<Map<String, ? super Object>> serverList = Lists.newArrayList();
+        Map<String, ? super Object> serverMap = getServerMap();
+        serverList.add(serverMap);
+        argsMap.put("servers", serverList);
+
+        Map<String, ? super Object> connectionMap = getConnectionMap();
+        argsMap.put("connection", connectionMap);
+
+        return argsMap;
+    }
+
+    private Map<String, ? super Object> getServerMap() {
+        Map<String, ? super Object> serverMap = new HashMap<>();
+        serverMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
+        serverMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.isControllerUseSSL()));
+        serverMap.put(TaskInputArgs.USE_SSL, agentEnvResolver.isControllerUseSSL());
+        serverMap.put(TaskInputArgs.USER, getUserName());
+        serverMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
+
+        logger.debug("Controller Info: ");
+        logger.debug(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
+        logger.debug(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.isControllerUseSSL()));
+        logger.debug(TaskInputArgs.USE_SSL, agentEnvResolver.isControllerUseSSL());
+        logger.debug(TaskInputArgs.USER, getUserName());
+        logger.debug(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
+
+        return serverMap;
+    }
+
+    private Map<String, ? super Object> getConnectionMap() {
+        Map<String, ? super Object> connectionMap = new HashMap<>();
+        String[] sslProtocols = {TLSV_12};
+        connectionMap.put(TaskInputArgs.SSL_PROTOCOL, sslProtocols);
+        Object sslCertCheckEnabled = dashboardConfig.get(SSL_CERT_CHECK_ENABLED);
+        if (sslCertCheckEnabled != null) {
+            connectionMap.put(SSL_CERT_CHECK_ENABLED, Boolean.valueOf(sslCertCheckEnabled.toString()));
+        } else {
+            connectionMap.put(SSL_CERT_CHECK_ENABLED, true);
+        }
+        connectionMap.put(CONNECT_TIMEOUT, 10000);
+        connectionMap.put(SOCKET_TIMEOUT, 15000);
+        return connectionMap;
+    }
+
+    private String getUserName() {
+        String accountName = agentEnvResolver.getAccountName();
+        String username = agentEnvResolver.getUsername();
+        if (accountName != null && username != null) {
+            return username + AT + accountName;
+        }
+        return "";
+    }
+
+    private String setDefaultDashboardInfo( String dashboardString){
+        dashboardString = setApplicationName(dashboardString);
+        dashboardString = setSimApplicationName(dashboardString);
+        dashboardString = setTierName(dashboardString);
+        dashboardString = setNodeName(dashboardString);
+        dashboardString = setHostName(dashboardString);
+        dashboardString = setDashboardName(dashboardString);
+        dashboardString = setMachinePath(dashboardString);
+
+        return dashboardString;
+
+    }
+
+    private String setApplicationName(String dashboardString){
+        if(dashboardString.contains(REPLACE_APPLICATION_NAME)){
+            dashboardString = dashboardString.replace(REPLACE_APPLICATION_NAME, agentEnvResolver.getApplicationName());
+            logger.debug(REPLACE_APPLICATION_NAME + ": " + agentEnvResolver.getApplicationName());
+        }
+        return dashboardString;
+    }
+
+    private String setSimApplicationName(String dashboardString){
+        if(dashboardString.contains(REPLACE_SIM_APPLICATION_NAME)){
+            dashboardString = dashboardString.replace(REPLACE_SIM_APPLICATION_NAME, SIM_APPLICATION_NAME);
+            logger.debug(REPLACE_SIM_APPLICATION_NAME + ": " + REPLACE_SIM_APPLICATION_NAME);
+        }
+        return dashboardString;
+    }
+
+    private String setTierName(String dashboardString){
+        if(dashboardString.contains(REPLACE_TIER_NAME)){
+            dashboardString = dashboardString.replace(REPLACE_TIER_NAME, agentEnvResolver.getTierName());
+            logger.debug(REPLACE_TIER_NAME + ": " + agentEnvResolver.getTierName());
+        }
+        return dashboardString;
+    }
+
+    private String setNodeName(String dashboardString){
+        if(dashboardString.contains(REPLACE_NODE_NAME)){
+            dashboardString = dashboardString.replace(REPLACE_NODE_NAME, agentEnvResolver.getNodeName());
+            logger.debug(REPLACE_NODE_NAME + ": " + agentEnvResolver.getNodeName());
+        }
+        return dashboardString;
+    }
+
+    private String setHostName(String dashboardString){
+        if(dashboardString.contains(REPLACE_HOST_NAME)){
+            dashboardString = dashboardString.replace(REPLACE_HOST_NAME, agentEnvResolver.getControllerHostName());
+            logger.debug(REPLACE_HOST_NAME + ": " + agentEnvResolver.getControllerHostName());
+        }
+        return dashboardString;
+    }
+
+    private String setDashboardName(String dashboardString){
+        String dashBoardName = dashboardConfig.get("dashboardName").toString();
+        if (!StringUtils.hasText(dashBoardName)) {
+            dashBoardName = "Custom Dashboard";
+        }
+
+        if(dashboardString.contains(REPLACE_DASHBOARD_NAME)){
+            if(dashboardConfig.get("dashboardName") != null)
+            dashboardString = dashboardString.replace(REPLACE_DASHBOARD_NAME, dashBoardName);
+            logger.debug(REPLACE_DASHBOARD_NAME + ": " + dashBoardName);
+        }
+        return dashboardString;
+    }
+
+    private String setMachinePath(String dashboardString){
+        if(dashboardString.contains(REPLACE_MACHINE_PATH)){
+            if (agentEnvResolver.getMachinePath() != null) {
+                String machinePath = ROOT + METRICS_SEPARATOR + agentEnvResolver.getMachinePath();
+                machinePath = machinePath.substring(0, machinePath.lastIndexOf(METRICS_SEPARATOR));
+                dashboardString = dashboardString.replace(REPLACE_MACHINE_PATH, machinePath);
+                logger.debug(REPLACE_MACHINE_PATH + ": " + machinePath);
+            } else {
+                dashboardString = dashboardString.replace(REPLACE_MACHINE_PATH, ROOT);
+                logger.debug(REPLACE_MACHINE_PATH + ": " + ROOT);
+            }
+        }
+        return dashboardString;
+    }
+
+
+
 
     // used for old
     protected InputStream getDashboardTemplate() {
@@ -278,57 +433,6 @@ public class CustomDashboardGenerator {
     }
 
 
-    protected Map<String, ? super Object> getArgsMap() {
-        /*Map<String, String> argsMap = new HashMap<String, String>();
-        argsMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
-        argsMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.getControllerPort()));
-        argsMap.put(TaskInputArgs.USE_SSL, String.valueOf(agentEnvResolver.isControllerUseSSL()));
-        argsMap.put(TaskInputArgs.USER, getUserName());
-        argsMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
-        argsMap.put(TaskInputArgs.SSL_PROTOCOL, "TLSv1.2");
-        Object sslCertCheckEnabled = dashboardConfig.get("sslCertCheckEnabled");
-        if (sslCertCheckEnabled != null) {
-            argsMap.put("sslCertCheckEnabled", sslCertCheckEnabled.toString());
-        } else {
-            argsMap.put("sslCertCheckEnabled", "true");
-        }
-        return argsMap;*/
-
-        Map<String, ? super Object> argsMap = new HashMap<>();
-
-        List<Map<String, ? super Object>> serverList = Lists.newArrayList();
-        Map<String, ? super Object> serverMap = new HashMap<>();
-        serverMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
-        serverMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.isControllerUseSSL()));
-        serverMap.put(TaskInputArgs.USE_SSL, agentEnvResolver.isControllerUseSSL());
-        serverMap.put(TaskInputArgs.USER, getUserName());
-        serverMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
-        serverList.add(serverMap);
-        argsMap.put("servers", serverList);
-
-        Map<String, ? super Object> connectionMap = new HashMap<>();
-        String[] sslProtocols = {"TLSv1.2"};
-        connectionMap.put(TaskInputArgs.SSL_PROTOCOL, sslProtocols);
-        Object sslCertCheckEnabled = dashboardConfig.get("sslCertCheckEnabled");
-        if (sslCertCheckEnabled != null) {
-            connectionMap.put("sslCertCheckEnabled", Boolean.valueOf(sslCertCheckEnabled.toString()));
-        } else {
-            connectionMap.put("sslCertCheckEnabled", true);
-        }
-        argsMap.put("connection", connectionMap);
-
-        return argsMap;
-    }
-
-    // used for old
-    private String getUserName() {
-        String accountName = agentEnvResolver.getAccountName();
-        String username = agentEnvResolver.getUsername();
-        if (accountName != null && username != null) {
-            return username + "@" + accountName;
-        }
-        return "";
-    }
     // used for old
     private void writeDashboardToFile(String dashboardName, Xml xml) {
         File file = PathResolver.resolveDirectory(AManagedMonitor.class);
@@ -345,6 +449,7 @@ public class CustomDashboardGenerator {
             logger.error("", e);
         }
     }
+
     // used for old
     private boolean getBoolean(Map map, String key) {
         Object o = map.get(key);
