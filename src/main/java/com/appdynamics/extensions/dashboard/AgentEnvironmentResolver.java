@@ -31,8 +31,9 @@ public class AgentEnvironmentResolver {
     private ControllerInfo cInfo;
     private boolean resolved;
 
-    AgentEnvironmentResolver(Map dashboardConfig) {
-        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
+    AgentEnvironmentResolver(Map dashboardConfig, ControllerInfo info) {
+//        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
+        this.cInfo = info;
         ControllerInfoValidator validator = new ControllerInfoValidator();
         resolved = validator.validateAndCheckIfResolved(cInfo);
     }

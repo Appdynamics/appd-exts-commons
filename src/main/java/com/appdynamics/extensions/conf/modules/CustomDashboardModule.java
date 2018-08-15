@@ -15,10 +15,14 @@ public class CustomDashboardModule {
     public void initCustomDashboard(ControllerInfo controllerInfo,Map<String, ?> config){
 
         Map customDashboardConfig = (Map) config.get("customDashboard");
+        Map controllerInformation = (Map) config.get("controllerInfo");
         if(customDashboardConfig != null){
-            //TODO add timing in debug mode
-            CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator();
+            long timestamp1 = System.currentTimeMillis();
+            CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInformation);
             dashboardGenerator.createDashboard();
+            long timestamp2 = System.currentTimeMillis();
+            logger.debug("Time to complete DashboardModule in :"+ (timestamp2-timestamp1)+ " ms");
+
             logger.info("Dashboard sent");
         } else {
             logger.info("No customDashboard Info in config.yml, not uploading dashboard.");

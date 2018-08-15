@@ -8,7 +8,9 @@
 
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.extensions.api.ApiException;
 import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfoFactory;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -28,12 +30,12 @@ public class SendDashboard {
     private String dashboardString;
 
     private ControllerInfo controllerInfo;
-    private CustomDashboardJsonUploader customDashboardJsonUploader;
+    private CustomDashboardUploader customDashboardUploader;
 
-    public SendDashboard(Map config, CustomDashboardJsonUploader customDashboardJsonUploader, ControllerInfo controllerInfo) {
+    public SendDashboard(Map config, CustomDashboardUploader customDashboardUploader, ControllerInfo controllerInfo) {
 
         this.config = config;
-        this.customDashboardJsonUploader = customDashboardJsonUploader;
+        this.customDashboardUploader = customDashboardUploader;
         this.controllerInfo = controllerInfo;
         LOGGER.debug("Leaving Dashboard Class");
 
@@ -41,7 +43,8 @@ public class SendDashboard {
 
     public void sendDashboard() {
         try {
-            controllerInfo = controllerInfo.getControllerInfo();
+
+            controllerInfo = ControllerInfoFactory.getControllerInfo(config);
             Map<String, ? super Object> argsMap = ConnectionProperties.getArgumentMap(controllerInfo, config);
             if (config.get(ENALBED).toString().equals(TRUE)) {
                 uploadDashboard(argsMap);
@@ -62,8 +65,12 @@ public class SendDashboard {
 
         loadDashboardBasedOnSim();
         dashboardString = ReplaceDefaultInfo.replaceFields(dashboardString, controllerInfo, config);
-        customDashboardJsonUploader.uploadDashboard(config.get(DASHBOARD_NAME).toString(), dashboardString, argsMap, false);
-
+        try {
+            customDashboardUploader.uploadDashboard(config.get(DASHBOARD_NAME).toString(), "json", dashboardString, "application/json", argsMap, false);
+        }
+        catch (ApiException e){
+            LOGGER.error("Unable to upload dashboard: {}", e.getMessage());
+        }
         LOGGER.debug("done with uploadDashboard()");
     }
 

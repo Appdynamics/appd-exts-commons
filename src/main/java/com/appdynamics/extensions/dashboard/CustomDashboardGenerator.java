@@ -17,12 +17,15 @@ package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.api.ApiException;
+import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfoFactory;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.xml.Xml;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
@@ -54,7 +57,38 @@ public class CustomDashboardGenerator {
     private Map dashboardConfig;
     private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
+    private ControllerInfo controllerInfo;
 
+    public CustomDashboardGenerator (Map dashboardConfig, Map controllerInformation){
+        if (dashboardConfig == null) {
+            logger.info("Custom Dashboard config is null");
+            return;
+        }
+        Boolean enabled = (Boolean) dashboardConfig.get("enabled");
+        if (enabled == null || !enabled) {
+            logger.info("Custom Dashboard creation is not enabled");
+            return;
+        }
+        this.dashboardUploader = new CustomDashboardUploader();
+        this.dashboardConfig = dashboardConfig;
+        this.dashboardUploader = new CustomDashboardUploader();
+        this.controllerInfo = ControllerInfoFactory.getControllerInfo(controllerInformation);
+        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig,controllerInfo );
+
+    }
+
+    public void gatherDataForDashbaord(){
+        if (isResolved()) {
+            Map<String, ? super Object> argsMap = ConnectionProperties.getArgumentMap(controllerInfo, dashboardConfig);
+            String dashboardTemplate = getDashboardContents();
+        } else {
+            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
+        }
+
+
+    }
+
+    // used for old
     public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
         if (dashboardConfig == null) {
             logger.info("Custom Dashboard config is null");
@@ -65,13 +99,17 @@ public class CustomDashboardGenerator {
             logger.info("Custom Dashboard creation is not enabled");
             return;
         }
+        this.controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
         this.instanceNames = instanceNames;
         this.metricPrefix = StringUtils.trim(metricPrefix, "|");
         this.dashboardConfig = dashboardConfig;
-        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig);
         this.dashboardUploader = new CustomDashboardUploader();
+        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig, controllerInfo );
+
     }
 
+
+    // used for old
     public void createDashboards(Collection<String> metrics) {
         if (isResolved()) {
             StringBuilder ctrlMetricPrefix = buildMetricPrefix(metricPrefix);
@@ -87,10 +125,12 @@ public class CustomDashboardGenerator {
         }
     }
 
+    // used for Both
     protected boolean isResolved() {
         return agentEnvResolver != null && agentEnvResolver.isResolved();
     }
 
+    // used for old
     private Collection<String> replaceMetricPrefix(Collection<String> metrics, String metricPrefix, StringBuilder ctrlMetricPrefix) {
         Collection<String> list = new ArrayList<String>();
         for (String metric : metrics) {
@@ -98,7 +138,7 @@ public class CustomDashboardGenerator {
         }
         return list;
     }
-
+    // used for old
     protected StringBuilder buildMetricPrefix(String metricPrefix) {
         StringBuilder ctrlMetricPrefix = new StringBuilder();
         String tierName = agentEnvResolver.getTierName();
@@ -121,6 +161,7 @@ public class CustomDashboardGenerator {
         return ctrlMetricPrefix;
     }
 
+    // used for old
     public void createDashboard(Collection<String> metrics, String instanceName, String ctrlMetricPrefix) {
         Map<Node, Node> addMap = new IdentityHashMap<Node, Node>();
         Map<Node, Node> removeMap = new IdentityHashMap<Node, Node>();
@@ -171,6 +212,29 @@ public class CustomDashboardGenerator {
         }
     }
 
+    private String getDashboardContents(){
+        logger.debug("Sim Enabled: {}", controllerInfo.getSimEnabled());
+        String dashboardTemplate = "";
+        String pathToFile ;
+        if(controllerInfo.getSimEnabled() == false){
+            pathToFile = dashboardConfig.get("pathToNormalDashboard").toString();
+        }else {
+            pathToFile = dashboardConfig.get("pathToSIMDashboard").toString();
+        }
+
+        try {
+            if (pathToFile != null) {
+                dashboardTemplate = FileUtils.readFileToString(new File(pathToFile));
+            } else {
+                logger.error("The path to your dashboardFile is empty in your config.yml file.");
+            }
+        } catch (IOException e){
+            logger.error("Unable to read the contents of the dashboard file: {}", e.getMessage());
+        }
+        return dashboardTemplate;
+    }
+
+    // used for old
     protected InputStream getDashboardTemplate() {
         String template = (String) dashboardConfig.get("templateFile");
         if (template != null) {
@@ -199,6 +263,7 @@ public class CustomDashboardGenerator {
         return dashBoardName;
     }
 
+    // used for old
     protected void persistDashboard(String dashboardName, Xml xml) {
         if (getBoolean(dashboardConfig, "uploadDashboard")) {
             Map<String, ? super Object> argsMap = getArgsMap();
@@ -255,6 +320,7 @@ public class CustomDashboardGenerator {
         return argsMap;
     }
 
+    // used for old
     private String getUserName() {
         String accountName = agentEnvResolver.getAccountName();
         String username = agentEnvResolver.getUsername();
@@ -263,7 +329,7 @@ public class CustomDashboardGenerator {
         }
         return "";
     }
-
+    // used for old
     private void writeDashboardToFile(String dashboardName, Xml xml) {
         File file = PathResolver.resolveDirectory(AManagedMonitor.class);
         File dir = new File(file, "logs");
@@ -279,7 +345,7 @@ public class CustomDashboardGenerator {
             logger.error("", e);
         }
     }
-
+    // used for old
     private boolean getBoolean(Map map, String key) {
         Object o = map.get(key);
         if (o instanceof Boolean) {
@@ -288,17 +354,17 @@ public class CustomDashboardGenerator {
         }
         return false;
     }
-
+    // used for old
     private void setApplicationName(Node widgetSeriesData, String applicationName) {
         addAttribute(widgetSeriesData, "application-name", applicationName);
     }
-
+    // used for old
     private void setSeriesName(int seriesNameCount, Node widgetClone) {
         String nodeName = "name";
         String nodeValue = "Series " + (seriesNameCount);
         addAttribute(widgetClone, nodeName, nodeValue);
     }
-
+    // used for old
     private void addAttribute(Node node, String attrName, String attrValue) {
         NamedNodeMap attributes = node.getAttributes();
         boolean attrAdded = false;
@@ -317,7 +383,7 @@ public class CustomDashboardGenerator {
             node.appendChild(name);
         }
     }
-
+    // used for old
     protected String replacePrefixAndInstanceName(String metricTemplate, String ctrlMetricPrefix, String instanceName) {
         metricTemplate = metricTemplate.replace("${METRIC_PREFIX}", ctrlMetricPrefix);
         if (StringUtils.hasText(instanceName)) {
@@ -329,7 +395,7 @@ public class CustomDashboardGenerator {
         }
         return metricTemplate;
     }
-
+    // used for old
     public List<String> getMatchingMetrics(Collection<String> metrics, String template) {
         int segments = StringUtils.countMatches(template, "|");
         List<String> matches = new ArrayList<String>();
@@ -358,6 +424,7 @@ public class CustomDashboardGenerator {
         return matches;
     }
 
+    // used for old
     private String replaceSegment(String template, int itemStart, String replacement) {
         int endIndex = template.indexOf("|", itemStart);
         if (endIndex != -1) {
@@ -369,7 +436,7 @@ public class CustomDashboardGenerator {
         }
         return null;
     }
-
+    // used for old
     private String extractSegment(String metric, int itemStart) {
         int endIndex = metric.indexOf("|", itemStart);
         if (endIndex != -1) {
@@ -377,7 +444,7 @@ public class CustomDashboardGenerator {
         }
         return null;
     }
-
+    // used for old
     protected void setAgentEnvResolver(AgentEnvironmentResolver agentEnvResolver) {
         this.agentEnvResolver = agentEnvResolver;
     }

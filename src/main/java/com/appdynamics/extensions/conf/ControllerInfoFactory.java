@@ -12,18 +12,24 @@ public class ControllerInfoFactory {
 
     /*
        This controllerInfo is currently being called in a single threaded environment
+       1st priority : System Properties
+       2nd priority : Controller Info xml
+       3rd priority : config.yml
        yml's controllerInfo overrides system properties which in turn overrides controller-info.xml
      */
     public static ControllerInfo getControllerInfo(Map config){
         if(controllerInfo == null){
+            ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
+            logger.debug("The resolved properties from system props are {}", controllerInfoFromSystemProps);
+
+            ControllerInfo controllerInfoFromXml = ControllerInfo.getControllerInfoFromXml();
+            logger.debug("The resolved properties from Xml are {}", controllerInfoFromXml);
+
             Map ymlConfig = (Map)config.get("controllerInfo");
             ControllerInfo controllerInfoFromYml = ControllerInfo.fromYml(ymlConfig);
             logger.debug("The resolved properties from yml are {}", controllerInfoFromYml);
-            ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
-            logger.debug("The resolved properties from system props are {}", controllerInfoFromSystemProps);
-            ControllerInfo controllerInfoFromXml = ControllerInfo.getControllerInfoFromXml();
-            logger.debug("The resolved properties from Xml are {}", controllerInfoFromXml);
-            ControllerInfo mergedInfo = controllerInfoFromXml.merge(controllerInfoFromSystemProps).merge(controllerInfoFromYml);
+
+            ControllerInfo mergedInfo = controllerInfoFromSystemProps.merge(controllerInfoFromXml).merge(controllerInfoFromYml);
             controllerInfo = mergedInfo;
         }
         return controllerInfo;

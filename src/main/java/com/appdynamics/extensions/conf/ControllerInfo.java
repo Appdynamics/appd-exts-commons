@@ -115,17 +115,6 @@ public class ControllerInfo {
         this.nodeName = nodeName;
     }
 
-    public static ControllerInfo fromXml(File file) {
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(XmlControllerInfo.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return (XmlControllerInfo) unmarshaller.unmarshal(file);
-        } catch (JAXBException e) {
-            String msg = "Cannot unmarshall the controller-info.xml from " + file.getAbsolutePath();
-            throw new RuntimeException(msg, e);
-        }
-    }
-
     public static ControllerInfo fromYml(Map config) {
         ControllerInfo info = new ControllerInfo();
         info.controllerHost = (String) config.get("controllerHost");
@@ -329,5 +318,38 @@ public class ControllerInfo {
         }
         return from;
     }
+
+    public static ControllerInfo fromXml(File file) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(XmlControllerInfo.class);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            XmlControllerInfo xmlControllerInfo = (XmlControllerInfo) unmarshaller.unmarshal(file);
+
+            ControllerInfo controllerInfo = mergeValuesFromXML(xmlControllerInfo);
+            return controllerInfo;
+        } catch (JAXBException e) {
+            String msg = "Cannot unmarshall the controller-info.xml from " + file.getAbsolutePath();
+            throw new RuntimeException(msg, e);
+        }
+    }
+
+    private static ControllerInfo mergeValuesFromXML(final XmlControllerInfo xmlControllerInfo){
+        ControllerInfo controllerInfo = new ControllerInfo();
+        controllerInfo.setAccountAccessKey(xmlControllerInfo.getAccountAccessKey());
+        controllerInfo.setAccount(xmlControllerInfo.getAccount());
+        controllerInfo.setControllerHost(xmlControllerInfo.getControllerHost());
+        controllerInfo.setControllerPort(xmlControllerInfo.getControllerPort());
+        controllerInfo.setControllerSslEnabled(xmlControllerInfo.getControllerSslEnabled());
+        controllerInfo.setEnableOrchestration(xmlControllerInfo.getEnableOrchestration());
+        controllerInfo.setMachinePath(xmlControllerInfo.getMachinePath());
+        controllerInfo.setUniqueHostId(xmlControllerInfo.getUniqueHostId());
+        controllerInfo.setNodeName(xmlControllerInfo.getNodeName());
+        controllerInfo.setTierName(xmlControllerInfo.getTierName());
+        controllerInfo.setApplicationName(xmlControllerInfo.getApplicationName());
+        controllerInfo.setSimEnabled(xmlControllerInfo.getSimEnabled());
+        return controllerInfo;
+    }
+
+
 
 }
