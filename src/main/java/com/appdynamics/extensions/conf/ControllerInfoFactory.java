@@ -24,12 +24,16 @@ public class ControllerInfoFactory {
 
             ControllerInfo controllerInfoFromXml = ControllerInfo.getControllerInfoFromXml();
             logger.debug("The resolved properties from Xml are {}", controllerInfoFromXml);
-
+            ControllerInfo mergedInfo = controllerInfoFromSystemProps.merge(controllerInfoFromXml);
             Map ymlConfig = (Map)config.get("controllerInfo");
-            ControllerInfo controllerInfoFromYml = ControllerInfo.fromYml(ymlConfig);
-            logger.debug("The resolved properties from yml are {}", controllerInfoFromYml);
+            if(ymlConfig != null) {
+                ControllerInfo controllerInfoFromYml = ControllerInfo.fromYml(ymlConfig);
+                logger.debug("The resolved properties from yml are {}", controllerInfoFromYml);
+                mergedInfo = mergedInfo.merge(controllerInfoFromYml);
 
-            ControllerInfo mergedInfo = controllerInfoFromSystemProps.merge(controllerInfoFromXml).merge(controllerInfoFromYml);
+            }
+
+            logger.debug("The resolved properties for ControllerInfo are {}", mergedInfo);
             controllerInfo = mergedInfo;
         }
         return controllerInfo;

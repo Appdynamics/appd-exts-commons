@@ -12,14 +12,13 @@ package com.appdynamics.extensions.conf;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.math.BigDecimal;
 
 /**
  * Created by abey.tom on 2/11/16.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "controller-info")
 public class XmlControllerInfo  {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(XmlControllerInfo.class);

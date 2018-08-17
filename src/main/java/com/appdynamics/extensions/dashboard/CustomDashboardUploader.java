@@ -62,16 +62,30 @@ public class CustomDashboardUploader {
                     }
                 }
             }
-            if (isPresent) {
-                if (overwrite) {
-                    //#TODO Eventhough we intend to overwrite, this will actually create a new dashboard.
-                    apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
-                } else {
-                    logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
-                }
-            } else {
+
+            logger.debug("Dashboard present: {}", isPresent);
+            logger.debug("Dashboard overwrite: {}", overwrite);
+            if(!isPresent){
                 apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
+            } else {
+
+                logger.debug("Dashboard {} Already present, can not overwrite. ", dashboardName);
+//                if(overwrite){
+//                    apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
+//                } else {
+//                    logger.debug("The dashboard {} exists and overwriteDashboard = false, not processing dashboard upload", dashboardName);
+//                }
             }
+//            if (isPresent) {
+//                if (overwrite) {
+//                    //#TODO Eventhough we intend to overwrite, this will actually create a new dashboard.
+//                    apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
+//                } else {
+//                    logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
+//                }
+//            } else {
+//                apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
+//            }
         }
         finally {
             try {

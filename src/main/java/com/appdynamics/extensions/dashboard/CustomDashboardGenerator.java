@@ -89,6 +89,11 @@ public class CustomDashboardGenerator {
             String contentType = "application/json";
             boolean overwrite = getBoolean(dashboardConfig, "overwriteDashboard");
 
+            logger.debug("{}: {}",DASHBOARD_NAME ,dashboardName);
+            logger.debug("{}: {}","JSON Extension", jsonExtension);
+            logger.debug("{}: {}","Content Type" , contentType);
+//            logger.debug("{}: {}","ARGS MAP" ,argsMap);
+            logger.debug("{}: {}", "Overwrite",overwrite);
             try{
                 dashboardUploader.uploadDashboard(dashboardName,jsonExtension,dashboardTemplate, contentType, argsMap, overwrite);
             }
@@ -265,17 +270,17 @@ public class CustomDashboardGenerator {
     private Map<String, ? super Object> getServerMap() {
         Map<String, ? super Object> serverMap = new HashMap<>();
         serverMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
-        serverMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.isControllerUseSSL()));
+        serverMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.getControllerPort()));
         serverMap.put(TaskInputArgs.USE_SSL, agentEnvResolver.isControllerUseSSL());
         serverMap.put(TaskInputArgs.USER, getUserName());
         serverMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
 
         logger.debug("Controller Info: ");
-        logger.debug(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
-        logger.debug(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.isControllerUseSSL()));
-        logger.debug(TaskInputArgs.USE_SSL, agentEnvResolver.isControllerUseSSL());
-        logger.debug(TaskInputArgs.USER, getUserName());
-        logger.debug(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
+        logger.debug(TaskInputArgs.HOST + ": {}", agentEnvResolver.getControllerHostName());
+        logger.debug(TaskInputArgs.PORT + ": {}", String.valueOf(agentEnvResolver.getControllerPort()));
+        logger.debug(TaskInputArgs.USE_SSL + ": {}", agentEnvResolver.isControllerUseSSL());
+        logger.debug(TaskInputArgs.USER + ": {}", getUserName());
+        logger.debug(TaskInputArgs.PASSWORD + ": {}", agentEnvResolver.getPassword());
 
         return serverMap;
     }

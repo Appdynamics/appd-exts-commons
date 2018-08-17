@@ -126,7 +126,8 @@ public class ControllerInfo {
         info.uniqueHostId = (String) config.get("uniqueHostId");
         info.account = (String) config.get("account");
         info.username = (String) config.get(TaskInputArgs.USER);
-        info.accountAccessKey = Http4ClientBuilder.getPassword(config, config);
+        info.password = Http4ClientBuilder.getPassword(config, config);
+        info.accountAccessKey = (String) config.get("accountAccessKey");
         info.applicationName = (String) config.get("applicationName");
         info.tierName = (String) config.get("tierName");
         return info;

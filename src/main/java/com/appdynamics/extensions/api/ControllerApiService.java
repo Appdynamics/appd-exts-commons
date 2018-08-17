@@ -39,9 +39,10 @@ public class ControllerApiService {
         HttpGet get = new HttpGet(UrlBuilder.builder(serverMap).path("controller/auth?action=login").build());
         HttpResponse response = null;
         CookiesCsrf cookiesCsrf = new CookiesCsrf();
+        StatusLine statusLine;
         try {
             response = httpClient.execute(get);
-            StatusLine statusLine = response.getStatusLine();
+            statusLine = response.getStatusLine();
             if (statusLine != null && statusLine.getStatusCode() == 200) {
                 Header[] headers = response.getAllHeaders();
                 StringBuilder cookies = new StringBuilder();
@@ -58,13 +59,13 @@ public class ControllerApiService {
                         }
                     }
                 }
+                logger.debug("Setting Cookies to : {}", cookies.toString());
                 cookiesCsrf.setCookies(cookies.toString());
-                if(!Strings.isNullOrEmpty(csrf)){
+                if (!Strings.isNullOrEmpty(csrf)) {
                     cookiesCsrf.setCsrf(csrf);
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
-            }
-            if (statusLine != null) {
+            } else if (statusLine != null) {
                 logger.error("Custom Dashboard Upload Failed. The login to the controller is unsuccessful. The response code is {}"
                         , statusLine.getStatusCode());
                 logger.error("The response headers are {} and content is {}", Arrays.toString(response.getAllHeaders()), response.getEntity());
@@ -73,16 +74,18 @@ public class ControllerApiService {
 
         } catch (IOException e) {
             logger.error("Error in controller login", e);
-            throw new ApiException("Error in controller login",e);
+            throw new ApiException("Error in controller login", e);
         }
     }
 
-    public JsonNode getAllDashboards(CloseableHttpClient httpClient,Map<String,String> serverMap,CookiesCsrf cookiesCsrf) throws ApiException {
+    public JsonNode getAllDashboards(CloseableHttpClient httpClient, Map<String, String> serverMap, CookiesCsrf cookiesCsrf) throws ApiException {
         HttpGet get = new HttpGet(UrlBuilder.builder(serverMap).path("controller/restui/dashboards/getAllDashboardsByType/false").build());
-        if(Strings.isNullOrEmpty(cookiesCsrf.getCookies())){
+        if (!Strings.isNullOrEmpty(cookiesCsrf.getCookies())) {
             get.setHeader("Cookie", cookiesCsrf.getCookies());
         }
-        if(!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())){
+        get.setHeader("Cookie", cookiesCsrf.getCookies());
+
+        if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
             get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
         }
 
@@ -103,19 +106,19 @@ public class ControllerApiService {
             return arrayNode;
         } catch (IOException e) {
             logger.error("Error in getting the auth token", e);
-            throw new ApiException("Error in getting all dashboards",e);
+            throw new ApiException("Error in getting all dashboards", e);
         }
     }
 
-    public void uploadDashboard(Map<String,String> serverMap,Map<String, ?> argsMap,CookiesCsrf cookiesCsrf,String dashboardName,String fileExtension, String fileContent, String contentType) throws ApiException {
-        String filename = dashboardName + fileExtension;
+    public void uploadDashboard(Map<String, String> serverMap, Map<String, ?> argsMap, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String contentType) throws ApiException {
+        String filename = dashboardName + "." + fileExtension;
         String twoHyphens = "--";
         String boundary = "*****";
         String lineEnd = "\r\n";
         String urlStr = new UrlBuilder(serverMap).path("controller/CustomDashboardImportExportServlet").build();
         logger.info("Uploading the custom Dashboard {} to {}", filename, urlStr);
         HttpURLConnection connection = null;
-        try{
+        try {
             URL url = new URL(urlStr);
             if (argsMap.containsKey("proxy")) {
                 Map<String, ?> proxyMap = (Map<String, ?>) argsMap.get("proxy");
@@ -185,16 +188,15 @@ public class ControllerApiService {
                 }
                 logger.error("The error response headers are {} and content is [{}]",
                         connection.getHeaderFields(), content);
-                throw new ApiException("Error while uploading the dashboard",e);
+                throw new ApiException("Error while uploading the dashboard", e);
             } finally {
                 if (inputStream != null) {
                     inputStream.close();
                 }
             }
-        }
-        catch(IOException e){
-            logger.error("Error in uploading dashboard",e);
-            throw new ApiException("Error in uploading dashboard",e);
+        } catch (IOException e) {
+            logger.error("Error in uploading dashboard", e);
+            throw new ApiException("Error in uploading dashboard", e);
         }
 
     }
@@ -218,9 +220,9 @@ public class ControllerApiService {
             }, new SecureRandom());
             return context.getSocketFactory();
         } catch (NoSuchAlgorithmException e) {
-            throw new ApiException("Unsupported algorithm",e);
+            throw new ApiException("Unsupported algorithm", e);
         } catch (KeyManagementException e) {
-            throw new ApiException("Key Management exception",e);
+            throw new ApiException("Key Management exception", e);
         }
     }
 
