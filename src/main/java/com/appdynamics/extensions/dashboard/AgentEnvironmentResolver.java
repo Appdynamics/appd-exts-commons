@@ -45,6 +45,7 @@ public class AgentEnvironmentResolver {
     public String getNodeName() {
         return cInfo.getNodeName();
     }
+
     public String getApplicationName() {
         return cInfo.getApplicationName();
     }

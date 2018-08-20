@@ -68,8 +68,8 @@ public class MonitorContext {
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
-            healthCheckModule.initMATroubleshootChecks(controllerInfo,monitorName, config);
-            dashboardModule.initCustomDashboard(controllerInfo,config);
+            healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
+            dashboardModule.initCustomDashboard(config);
 
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);

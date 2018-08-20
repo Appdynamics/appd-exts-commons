@@ -12,15 +12,17 @@ package com.appdynamics.extensions.conf;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
-import javax.xml.bind.annotation.*;
-import java.math.BigDecimal;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Created by abey.tom on 2/11/16.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "controller-info")
-public class XmlControllerInfo  {
+public class XmlControllerInfo {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(XmlControllerInfo.class);
 
     @XmlElement(name = "account-access-key")
@@ -58,7 +60,6 @@ public class XmlControllerInfo  {
 
     @XmlElement(name = "node-name")
     private String nodeName;
-
 
 
     public String getAccountAccessKey() {
@@ -161,64 +162,4 @@ public class XmlControllerInfo  {
         this.nodeName = nodeName;
     }
 
-
-//    @Override
-//    public void setAccount(String account) {
-//        super.setAccount(account);
-//    }
-//
-//    @Override
-//    public void setApplicationName(String applicationName) {
-//        super.setApplicationName(applicationName);
-//    }
-//
-//    @Override
-//    public void setControllerHost(String controllerHost) {
-//        super.setControllerHost(controllerHost);
-//    }
-//
-//    @Override
-//    public void setControllerPort(Integer controllerPort) {
-//        super.setControllerPort(controllerPort);
-//    }
-//
-//    @Override
-//    public void setControllerSslEnabled(Boolean controllerSslEnabled) {
-//        super.setControllerSslEnabled(controllerSslEnabled);
-//    }
-//
-//    @Override
-//    public void setEnableOrchestration(Boolean enableOrchestration) {
-//        super.setEnableOrchestration(enableOrchestration);
-//    }
-//
-//    @Override
-//    public void setMachinePath(String machinePath) {
-//        super.setMachinePath(machinePath);
-//    }
-//
-//    @Override
-//    public void setAccountAccessKey(String accountAccessKey) {
-//        super.setAccountAccessKey(accountAccessKey);
-//    }
-//
-//    @Override
-//    public void setSimEnabled(Boolean simEnabled) {
-//        super.setSimEnabled(simEnabled);
-//    }
-//
-//    @Override
-//    public void setTierName(String tierName) {
-//        super.setTierName(tierName);
-//    }
-//
-//    @Override
-//    public void setNodeName(String nodeName) {
-//        super.setNodeName(nodeName);
-//    }
-//
-//    @Override
-//    public void setUniqueHostId(String uniqueHostId) {
-//        super.setUniqueHostId(uniqueHostId);
-//    }
 }

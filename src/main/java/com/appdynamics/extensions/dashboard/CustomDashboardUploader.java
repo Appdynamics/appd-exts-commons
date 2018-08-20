@@ -40,10 +40,10 @@ public class CustomDashboardUploader {
 
     private ControllerApiService apiService = new ControllerApiService();
 
-    public void uploadDashboard(String dashboardName, String fileExtension,String fileContents,String contentType, Map<String, ? super Object> argsMap, boolean overwrite) throws ApiException {
+    public void uploadDashboard(String dashboardName, String fileExtension, String fileContents, String contentType, Map<String, ? super Object> argsMap, boolean overwrite) throws ApiException {
         setProxyIfApplicable(argsMap);
         CloseableHttpClient client = null;
-        try{
+        try {
             client = Http4ClientBuilder.getBuilder(argsMap).build();
             List<Map<String, ?>> serversList = (List<Map<String, ?>>) argsMap.get("servers");
             Map<String, ?> serverMap = (Map) serversList.iterator().next();
@@ -51,8 +51,8 @@ public class CustomDashboardUploader {
             serverStringMap.put(TaskInputArgs.HOST, (String) serverMap.get(TaskInputArgs.HOST));
             serverStringMap.put(TaskInputArgs.PORT, (String) serverMap.get(TaskInputArgs.PORT));
             serverStringMap.put(TaskInputArgs.USE_SSL, String.valueOf(serverMap.get(TaskInputArgs.USE_SSL)));
-            CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client,serverStringMap);
-            JsonNode arrayNode = apiService.getAllDashboards(client,serverStringMap,cookiesCsrf);
+            CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client, serverStringMap);
+            JsonNode arrayNode = apiService.getAllDashboards(client, serverStringMap, cookiesCsrf);
             boolean isPresent = false;
             if (arrayNode != null) {
                 for (JsonNode jsonNode : arrayNode) {
@@ -62,32 +62,15 @@ public class CustomDashboardUploader {
                     }
                 }
             }
-
             logger.debug("Dashboard present: {}", isPresent);
             logger.debug("Dashboard overwrite: {}", overwrite);
-            if(!isPresent){
-                apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
+            if (!isPresent) {
+                apiService.uploadDashboard(serverStringMap, argsMap, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);
             } else {
 
                 logger.debug("Dashboard {} Already present, can not overwrite. ", dashboardName);
-//                if(overwrite){
-//                    apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
-//                } else {
-//                    logger.debug("The dashboard {} exists and overwriteDashboard = false, not processing dashboard upload", dashboardName);
-//                }
             }
-//            if (isPresent) {
-//                if (overwrite) {
-//                    //#TODO Eventhough we intend to overwrite, this will actually create a new dashboard.
-//                    apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
-//                } else {
-//                    logger.debug("The dashboard {} exists or API has been changed, not processing dashboard upload", dashboardName);
-//                }
-//            } else {
-//                apiService.uploadDashboard(serverStringMap,argsMap,cookiesCsrf,dashboardName,fileExtension,fileContents,contentType);
-//            }
-        }
-        finally {
+        } finally {
             try {
                 client.close();
             } catch (Exception e) {

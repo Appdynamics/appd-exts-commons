@@ -83,7 +83,6 @@ public class ControllerApiService {
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCookies())) {
             get.setHeader("Cookie", cookiesCsrf.getCookies());
         }
-        get.setHeader("Cookie", cookiesCsrf.getCookies());
 
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
             get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());

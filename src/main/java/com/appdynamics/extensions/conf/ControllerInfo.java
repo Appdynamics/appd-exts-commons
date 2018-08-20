@@ -13,7 +13,6 @@ import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.NumberUtils;
 import com.appdynamics.extensions.util.PathResolver;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
@@ -48,7 +47,7 @@ public class ControllerInfo {
     protected String nodeName;
 
 
-    private ControllerInfo(){
+    private ControllerInfo() {
     }
 
     public void setUsername(String username) {
@@ -334,7 +333,7 @@ public class ControllerInfo {
         }
     }
 
-    private static ControllerInfo mergeValuesFromXML(final XmlControllerInfo xmlControllerInfo){
+    private static ControllerInfo mergeValuesFromXML(final XmlControllerInfo xmlControllerInfo) {
         ControllerInfo controllerInfo = new ControllerInfo();
         controllerInfo.setAccountAccessKey(xmlControllerInfo.getAccountAccessKey());
         controllerInfo.setAccount(xmlControllerInfo.getAccount());
@@ -350,7 +349,6 @@ public class ControllerInfo {
         controllerInfo.setSimEnabled(xmlControllerInfo.getSimEnabled());
         return controllerInfo;
     }
-
 
 
 }

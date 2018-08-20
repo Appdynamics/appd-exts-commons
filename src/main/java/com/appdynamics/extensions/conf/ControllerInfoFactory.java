@@ -17,16 +17,16 @@ public class ControllerInfoFactory {
        3rd priority : config.yml
        yml's controllerInfo overrides system properties which in turn overrides controller-info.xml
      */
-    public static ControllerInfo getControllerInfo(Map config){
-        if(controllerInfo == null){
+    public static ControllerInfo getControllerInfo(Map config) {
+        if (controllerInfo == null) {
             ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
             logger.debug("The resolved properties from system props are {}", controllerInfoFromSystemProps);
 
             ControllerInfo controllerInfoFromXml = ControllerInfo.getControllerInfoFromXml();
             logger.debug("The resolved properties from Xml are {}", controllerInfoFromXml);
             ControllerInfo mergedInfo = controllerInfoFromSystemProps.merge(controllerInfoFromXml);
-            Map ymlConfig = (Map)config.get("controllerInfo");
-            if(ymlConfig != null) {
+            Map ymlConfig = (Map) config.get("controllerInfo");
+            if (ymlConfig != null) {
                 ControllerInfo controllerInfoFromYml = ControllerInfo.fromYml(ymlConfig);
                 logger.debug("The resolved properties from yml are {}", controllerInfoFromYml);
                 mergedInfo = mergedInfo.merge(controllerInfoFromYml);
