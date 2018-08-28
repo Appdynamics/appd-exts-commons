@@ -18,6 +18,7 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
@@ -60,7 +61,11 @@ public class MonitorContext {
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
         this.config = config;
         this.metricPrefix = metricPrefix;
-        controllerInfo = ControllerInfoFactory.getControllerInfo(config);
+        Map controllerInfoMap = new HashMap();
+        if(config.get("controllerInfo") != null){
+         controllerInfoMap = (Map)config.get("controllerInfo") ;
+        }
+        controllerInfo = ControllerInfoFactory.getControllerInfo(controllerInfoMap);
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
             workBenchModule.initWorkBenchStore(config, metricPrefix);

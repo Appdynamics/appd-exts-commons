@@ -46,9 +46,8 @@ public class CustomDashboardGenerator {
     private Map dashboardConfig;
     private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
-//    private ControllerInfo controllerInfo;
 
-    public CustomDashboardGenerator(Map dashboardConfig, Map controllerInformation) {
+    public CustomDashboardGenerator(Map dashboardConfig, Map controllerInformation, String metricPrefix) {
         if (dashboardConfig == null) {
             logger.info("Custom Dashboard config is null");
             return;
@@ -58,11 +57,10 @@ public class CustomDashboardGenerator {
             logger.info("Custom Dashboard creation is not enabled");
             return;
         }
-        this.dashboardUploader = new CustomDashboardUploader();
         this.dashboardConfig = dashboardConfig;
         this.dashboardUploader = new CustomDashboardUploader();
         this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation);
-
+        this.metricPrefix = metricPrefix;
     }
 
     public void createDashboard() {
@@ -91,129 +89,11 @@ public class CustomDashboardGenerator {
 
     }
 
-    // TODO    used for old
-    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
-        if (dashboardConfig == null) {
-            logger.info("Custom Dashboard config is null");
-            return;
-        }
-        Boolean enabled = (Boolean) dashboardConfig.get("enabled");
-        if (enabled == null || !enabled) {
-            logger.info("Custom Dashboard creation is not enabled");
-            return;
-        }
-        this.instanceNames = instanceNames;
-        this.metricPrefix = StringUtils.trim(metricPrefix, "|");
-        this.dashboardConfig = dashboardConfig;
-        this.dashboardUploader = new CustomDashboardUploader();
-        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig);
-
-    }
-
     protected boolean isResolved() {
         return agentEnvResolver != null && agentEnvResolver.isResolved();
     }
 
-    //TODO used for old
-    public void createDashboards(Collection<String> metrics) {
-        if (isResolved()) {
-            StringBuilder ctrlMetricPrefix = buildMetricPrefix(metricPrefix);
-            metrics = replaceMetricPrefix(metrics, metricPrefix, ctrlMetricPrefix);
-            if (logger.isDebugEnabled()) {
-                logger.debug("The metrics are {}", metrics);
-            }
-            for (String instanceName : instanceNames) {
-                createDashboard(metrics, instanceName, ctrlMetricPrefix.toString());
-            }
-        } else {
-            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
-        }
-    }
-
-
-    //TODO used for old
-    private Collection<String> replaceMetricPrefix(Collection<String> metrics, String metricPrefix, StringBuilder ctrlMetricPrefix) {
-        Collection<String> list = new ArrayList<String>();
-        for (String metric : metrics) {
-            list.add(metric.replace(metricPrefix, ctrlMetricPrefix));
-        }
-        return list;
-    }
-
-    //TODO used for old
-    protected StringBuilder buildMetricPrefix(String metricPrefix) {
-        StringBuilder ctrlMetricPrefix = new StringBuilder();
-        String tierName = agentEnvResolver.getTierName();
-        if (metricPrefix.startsWith(TIER_METRIC_PREFIX)) {
-            int endIndex = metricPrefix.indexOf("|", 17);
-            if (endIndex == -1) {
-                endIndex = metricPrefix.length();
-            }
-            ctrlMetricPrefix.append("Application Infrastructure Performance|").append(tierName);
-            if (metricPrefix.length() - 1 > endIndex) {
-                ctrlMetricPrefix.append("|")
-                        .append(StringUtils.trim(metricPrefix.substring(endIndex), "|"));
-            }
-        } else {
-            ctrlMetricPrefix.append("Application Infrastructure Performance|")
-                    .append(tierName)
-                    .append("|").append(StringUtils.trim(metricPrefix, "|"));
-        }
-        logger.info("The Controller Metric prefix is {}", ctrlMetricPrefix);
-        return ctrlMetricPrefix;
-    }
-
-    //TODO used for old
-    public void createDashboard(Collection<String> metrics, String instanceName, String ctrlMetricPrefix) {
-        Map<Node, Node> addMap = new IdentityHashMap<Node, Node>();
-        Map<Node, Node> removeMap = new IdentityHashMap<Node, Node>();
-        Xml xml = new Xml(getDashboardTemplate());
-        String dashboardName = setDashboardName(xml.getSource(), instanceName);
-        NodeList widgets = xml.getElementsByTagName("widget-series");
-        int seriesNameCount = 0;
-        if (widgets != null) {
-            for (int i = 0; i < widgets.getLength(); i++) {
-                Node widget = widgets.item(i);
-                Node node = Xml.getFirstDescendant(widget, "metric-name");
-                if (node != null) {
-                    String metricTemplate = node.getTextContent();
-                    metricTemplate = replacePrefixAndInstanceName(metricTemplate, ctrlMetricPrefix, instanceName);
-                    Node widgetSeriesList = widget.getParentNode();
-                    removeMap.put(widget, widgetSeriesList);
-                    logger.debug("Checking the match for {}", metricTemplate);
-                    List<String> matches = getMatchingMetrics(metrics, metricTemplate);
-                    if (matches != null && !matches.isEmpty()) {
-                        for (String match : matches) {
-                            Node widgetClone = widget.cloneNode(true);
-                            Node cloneMetricNameNode = Xml.getFirstDescendant(widgetClone, "metric-name");
-                            cloneMetricNameNode.setTextContent(match);
-                            addMap.put(widgetClone, widgetSeriesList);
-                            ++seriesNameCount;
-                            setSeriesName(seriesNameCount, widgetClone);
-                            Node firstNode = Xml.getFirstChild(widgetClone, "widget-series-data");
-                            setApplicationName(firstNode, agentEnvResolver.getApplicationName());
-                        }
-                    } else {
-                        logger.error("No Match found for {}", metricTemplate);
-                    }
-                } else {
-                    removeMap.put(widget, widget.getParentNode());
-                }
-            }
-        }
-        for (Map.Entry<Node, Node> entry : removeMap.entrySet()) {
-            entry.getValue().removeChild(entry.getKey());
-        }
-        for (Map.Entry<Node, Node> entry : addMap.entrySet()) {
-            entry.getValue().appendChild(entry.getKey());
-        }
-        if (!addMap.isEmpty()) {
-            persistDashboard(dashboardName, xml);
-        } else {
-            logger.error("Dashboard cannot be created, all of the metric path resolution failed. Check previous logs for details");
-        }
-    }
-
+    //TODO getDashboardTemplate
     private String getDashboardContents() {
         logger.debug("Sim Enabled: {}", agentEnvResolver.getSimEnabled());
         String dashboardTemplate = "";
@@ -264,6 +144,8 @@ public class CustomDashboardGenerator {
         logger.debug(TaskInputArgs.PORT + ": {}", String.valueOf(agentEnvResolver.getControllerPort()));
         logger.debug(TaskInputArgs.USE_SSL + ": {}", agentEnvResolver.isControllerUseSSL());
         logger.debug(TaskInputArgs.USER + ": {}", getUserName());
+
+        //TODO never leak passwords
         logger.debug(TaskInputArgs.PASSWORD + ": {}", agentEnvResolver.getPassword());
 
         return serverMap;
@@ -292,8 +174,8 @@ public class CustomDashboardGenerator {
         }
         return "";
     }
-
-    private String setDefaultDashboardInfo(String dashboardString) {
+    public String setDefaultDashboardInfo(String dashboardString) {
+        dashboardString = setMetricPrefix(dashboardString);
         dashboardString = setApplicationName(dashboardString);
         dashboardString = setSimApplicationName(dashboardString);
         dashboardString = setTierName(dashboardString);
@@ -304,6 +186,13 @@ public class CustomDashboardGenerator {
 
         return dashboardString;
 
+    }
+    private String setMetricPrefix(String dashboardString) {
+        if (dashboardString.contains(REPLACE_METRIC_PREFIX)) {
+            dashboardString = dashboardString.replace(REPLACE_METRIC_PREFIX, metricPrefix);
+            logger.debug(REPLACE_METRIC_PREFIX + ": " + metricPrefix);
+        }
+        return dashboardString;
     }
 
     private String setApplicationName(String dashboardString) {
@@ -375,8 +264,130 @@ public class CustomDashboardGenerator {
         return dashboardString;
     }
 
+    private String setDashboardName(Node source, String instanceName) {
+        String dashBoardName = (String) dashboardConfig.get("namePrefix");
+        if (!StringUtils.hasText(dashBoardName)) {
+            dashBoardName = "Custom Dashboard";
+        }
+        if (StringUtils.hasText(instanceName)) {
+            dashBoardName += "-" + instanceName;
+        }
+        addAttribute(source.getFirstChild(), "name", dashBoardName);
+        return dashBoardName;
+    }
 
-    //TODO used for old
+    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
+        if (dashboardConfig == null) {
+            logger.info("Custom Dashboard config is null");
+            return;
+        }
+        Boolean enabled = (Boolean) dashboardConfig.get("enabled");
+        if (enabled == null || !enabled) {
+            logger.info("Custom Dashboard creation is not enabled");
+            return;
+        }
+        this.instanceNames = instanceNames;
+        this.metricPrefix = StringUtils.trim(metricPrefix, "|");
+        this.dashboardConfig = dashboardConfig;
+        this.dashboardUploader = new CustomDashboardUploader();
+        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig);
+    }
+
+    public void createDashboards(Collection<String> metrics) {
+        if (isResolved()) {
+            StringBuilder ctrlMetricPrefix = buildMetricPrefix(metricPrefix);
+            metrics = replaceMetricPrefix(metrics, metricPrefix, ctrlMetricPrefix);
+            if (logger.isDebugEnabled()) {
+                logger.debug("The metrics are {}", metrics);
+            }
+            for (String instanceName : instanceNames) {
+                createDashboard(metrics, instanceName, ctrlMetricPrefix.toString());
+            }
+        } else {
+            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
+        }
+    }
+
+    private Collection<String> replaceMetricPrefix(Collection<String> metrics, String metricPrefix, StringBuilder ctrlMetricPrefix) {
+        Collection<String> list = new ArrayList<String>();
+        for (String metric : metrics) {
+            list.add(metric.replace(metricPrefix, ctrlMetricPrefix));
+        }
+        return list;
+    }
+
+    protected StringBuilder buildMetricPrefix(String metricPrefix) {
+        StringBuilder ctrlMetricPrefix = new StringBuilder();
+        String tierName = agentEnvResolver.getTierName();
+        if (metricPrefix.startsWith(TIER_METRIC_PREFIX)) {
+            int endIndex = metricPrefix.indexOf("|", 17);
+            if (endIndex == -1) {
+                endIndex = metricPrefix.length();
+            }
+            ctrlMetricPrefix.append("Application Infrastructure Performance|").append(tierName);
+            if (metricPrefix.length() - 1 > endIndex) {
+                ctrlMetricPrefix.append("|")
+                        .append(StringUtils.trim(metricPrefix.substring(endIndex), "|"));
+            }
+        } else {
+            ctrlMetricPrefix.append("Application Infrastructure Performance|")
+                    .append(tierName)
+                    .append("|").append(StringUtils.trim(metricPrefix, "|"));
+        }
+        logger.info("The Controller Metric prefix is {}", ctrlMetricPrefix);
+        return ctrlMetricPrefix;
+    }
+
+    public void createDashboard(Collection<String> metrics, String instanceName, String ctrlMetricPrefix) {
+        Map<Node, Node> addMap = new IdentityHashMap<Node, Node>();
+        Map<Node, Node> removeMap = new IdentityHashMap<Node, Node>();
+        Xml xml = new Xml(getDashboardTemplate());
+        String dashboardName = setDashboardName(xml.getSource(), instanceName);
+        NodeList widgets = xml.getElementsByTagName("widget-series");
+        int seriesNameCount = 0;
+        if (widgets != null) {
+            for (int i = 0; i < widgets.getLength(); i++) {
+                Node widget = widgets.item(i);
+                Node node = Xml.getFirstDescendant(widget, "metric-name");
+                if (node != null) {
+                    String metricTemplate = node.getTextContent();
+                    metricTemplate = replacePrefixAndInstanceName(metricTemplate, ctrlMetricPrefix, instanceName);
+                    Node widgetSeriesList = widget.getParentNode();
+                    removeMap.put(widget, widgetSeriesList);
+                    logger.debug("Checking the match for {}", metricTemplate);
+                    List<String> matches = getMatchingMetrics(metrics, metricTemplate);
+                    if (matches != null && !matches.isEmpty()) {
+                        for (String match : matches) {
+                            Node widgetClone = widget.cloneNode(true);
+                            Node cloneMetricNameNode = Xml.getFirstDescendant(widgetClone, "metric-name");
+                            cloneMetricNameNode.setTextContent(match);
+                            addMap.put(widgetClone, widgetSeriesList);
+                            ++seriesNameCount;
+                            setSeriesName(seriesNameCount, widgetClone);
+                            Node firstNode = Xml.getFirstChild(widgetClone, "widget-series-data");
+                            setApplicationName(firstNode, agentEnvResolver.getApplicationName());
+                        }
+                    } else {
+                        logger.error("No Match found for {}", metricTemplate);
+                    }
+                } else {
+                    removeMap.put(widget, widget.getParentNode());
+                }
+            }
+        }
+        for (Map.Entry<Node, Node> entry : removeMap.entrySet()) {
+            entry.getValue().removeChild(entry.getKey());
+        }
+        for (Map.Entry<Node, Node> entry : addMap.entrySet()) {
+            entry.getValue().appendChild(entry.getKey());
+        }
+        if (!addMap.isEmpty()) {
+            persistDashboard(dashboardName, xml);
+        } else {
+            logger.error("Dashboard cannot be created, all of the metric path resolution failed. Check previous logs for details");
+        }
+    }
+
     protected InputStream getDashboardTemplate() {
         String template = (String) dashboardConfig.get("templateFile");
         if (template != null) {
@@ -393,19 +404,6 @@ public class CustomDashboardGenerator {
         return getClass().getResourceAsStream("/dashboard/custom-dashboard-template.xml");
     }
 
-    private String setDashboardName(Node source, String instanceName) {
-        String dashBoardName = (String) dashboardConfig.get("namePrefix");
-        if (!StringUtils.hasText(dashBoardName)) {
-            dashBoardName = "Custom Dashboard";
-        }
-        if (StringUtils.hasText(instanceName)) {
-            dashBoardName += "-" + instanceName;
-        }
-        addAttribute(source.getFirstChild(), "name", dashBoardName);
-        return dashBoardName;
-    }
-
-    //TODO used for old
     protected void persistDashboard(String dashboardName, Xml xml) {
         if (getBoolean(dashboardConfig, "uploadDashboard")) {
             Map<String, ? super Object> argsMap = getArgsMap();
@@ -419,8 +417,6 @@ public class CustomDashboardGenerator {
         writeDashboardToFile(dashboardName, xml);
     }
 
-
-    //TODO used for old
     private void writeDashboardToFile(String dashboardName, Xml xml) {
         File file = PathResolver.resolveDirectory(AManagedMonitor.class);
         File dir = new File(file, "logs");
@@ -437,7 +433,6 @@ public class CustomDashboardGenerator {
         }
     }
 
-    //TODO used for old
     private boolean getBoolean(Map map, String key) {
         Object o = map.get(key);
         if (o instanceof Boolean) {
@@ -447,19 +442,16 @@ public class CustomDashboardGenerator {
         return false;
     }
 
-    //TODO used for old
     private void setApplicationName(Node widgetSeriesData, String applicationName) {
         addAttribute(widgetSeriesData, "application-name", applicationName);
     }
 
-    //TODO used for old
     private void setSeriesName(int seriesNameCount, Node widgetClone) {
         String nodeName = "name";
         String nodeValue = "Series " + (seriesNameCount);
         addAttribute(widgetClone, nodeName, nodeValue);
     }
 
-    //TODO used for old
     private void addAttribute(Node node, String attrName, String attrValue) {
         NamedNodeMap attributes = node.getAttributes();
         boolean attrAdded = false;
@@ -479,7 +471,6 @@ public class CustomDashboardGenerator {
         }
     }
 
-    //TODO used for old
     protected String replacePrefixAndInstanceName(String metricTemplate, String ctrlMetricPrefix, String instanceName) {
         metricTemplate = metricTemplate.replace("${METRIC_PREFIX}", ctrlMetricPrefix);
         if (StringUtils.hasText(instanceName)) {
@@ -492,7 +483,6 @@ public class CustomDashboardGenerator {
         return metricTemplate;
     }
 
-    //TODO used for old
     public List<String> getMatchingMetrics(Collection<String> metrics, String template) {
         int segments = StringUtils.countMatches(template, "|");
         List<String> matches = new ArrayList<String>();
@@ -521,7 +511,6 @@ public class CustomDashboardGenerator {
         return matches;
     }
 
-    //TODO used for old
     private String replaceSegment(String template, int itemStart, String replacement) {
         int endIndex = template.indexOf("|", itemStart);
         if (endIndex != -1) {
@@ -534,7 +523,6 @@ public class CustomDashboardGenerator {
         return null;
     }
 
-    //TODO used for old
     private String extractSegment(String metric, int itemStart) {
         int endIndex = metric.indexOf("|", itemStart);
         if (endIndex != -1) {
@@ -543,7 +531,6 @@ public class CustomDashboardGenerator {
         return null;
     }
 
-    //TODO used for old
     protected void setAgentEnvResolver(AgentEnvironmentResolver agentEnvResolver) {
         this.agentEnvResolver = agentEnvResolver;
     }

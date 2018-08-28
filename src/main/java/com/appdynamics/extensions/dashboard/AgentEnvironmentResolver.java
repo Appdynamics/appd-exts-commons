@@ -41,7 +41,6 @@ public class AgentEnvironmentResolver {
         return cInfo.getTierName();
     }
 
-
     public String getNodeName() {
         return cInfo.getNodeName();
     }
@@ -114,6 +113,5 @@ public class AgentEnvironmentResolver {
         }
         return null;
     }
-
 
 }

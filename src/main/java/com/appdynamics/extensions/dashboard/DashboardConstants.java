@@ -19,6 +19,7 @@ public class DashboardConstants {
     public static final String CONNECTION = "connection";
     public static final String TLSV_12 = "TLSv1.2";
     public static final String REPLACE_MACHINE_PATH = "replaceMachinePath";
+    public static final String REPLACE_METRIC_PREFIX = "${METRIC_PREFIX}";
     public static final String REPLACE_APPLICATION_NAME = "replaceApplicationName";
     public static final String REPLACE_TIER_NAME = "replaceTierName";
     public static final String REPLACE_NODE_NAME = "replaceNodeName";

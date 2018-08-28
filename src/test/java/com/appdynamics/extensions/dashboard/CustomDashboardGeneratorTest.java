@@ -21,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -213,5 +214,40 @@ public class CustomDashboardGeneratorTest {
 //        docker.persistDashboard("Test",new Xml("<xml/>"));
 //
 //    }
+
+    // TODO Test for replacing metric prefix
+    // TODO test for replacing the metric values
+    // TODO Test to verify the correct controllerInfo properties
+    // TODO test to verify the correct ControllerInfoFactory properties
+    @Test
+    public void testCreateDashboard(){
+        Map dashboardConfig = new HashMap();
+        dashboardConfig.put("namePrefix", "Docker");
+        dashboardConfig.put("enabled", true);
+        dashboardConfig.put("uploadDashboard", true);
+
+        Map controllerConfig = new HashMap();
+        controllerConfig.put("host", "192.168.11.02");
+        controllerConfig.put("port", "1100");
+
+
+
+        CustomDashboardGenerator customDashboardGen;
+        customDashboardGen = Mockito.spy(new CustomDashboardGenerator(dashboardConfig,controllerConfig, "" ));
+
+    }
+
+//    @Test
+//    public void testMetricPrefix (){
+//        Map dashboardConfig = new HashMap();
+//        dashboardConfig.put("namePrefix", "Docker");
+//        dashboardConfig.put("enabled", true);
+//        dashboardConfig.put("uploadDashboard", true);
+//        dashboardConfig.put("metricPrefix", "Server|Component:21|Custom Metrics|Amazon ELB|");
+//
+//        String metric = buildMetricPrefixForDashboard(dashboardConfig);
+//
+//    }
+
 
 }
