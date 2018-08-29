@@ -47,7 +47,7 @@ public class CustomDashboardGenerator {
     private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
 
-    public CustomDashboardGenerator(Map dashboardConfig, Map controllerInformation, String metricPrefix) {
+    public CustomDashboardGenerator(Map dashboardConfig, Map controllerInformation, String metricPrefix, CustomDashboardUploader uploader) {
         if (dashboardConfig == null) {
             logger.info("Custom Dashboard config is null");
             return;
@@ -58,7 +58,7 @@ public class CustomDashboardGenerator {
             return;
         }
         this.dashboardConfig = dashboardConfig;
-        this.dashboardUploader = new CustomDashboardUploader();
+        this.dashboardUploader = uploader;
         this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation);
         this.metricPrefix = metricPrefix;
     }
@@ -73,27 +73,30 @@ public class CustomDashboardGenerator {
             String contentType = "application/json";
             boolean overwrite = getBoolean(dashboardConfig, "overwriteDashboard");
 
-            logger.debug("{}: {}", DASHBOARD_NAME, dashboardName);
-            logger.debug("{}: {}", "JSON Extension", jsonExtension);
-            logger.debug("{}: {}", "Content Type", contentType);
-            logger.debug("{}: {}", "Overwrite", overwrite);
-            try {
-                dashboardUploader.uploadDashboard(dashboardName, jsonExtension, dashboardTemplate, contentType, argsMap, overwrite);
-            } catch (ApiException e) {
-                logger.error("No overwriteDashboard present in config, please add it.");
-            }
+            sendToUploader(argsMap, dashboardTemplate, dashboardName, jsonExtension, contentType, overwrite);
 
         } else {
-            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
+            logger.error("Unable to establish connection, please make sure you have provided all necessary values.");
         }
 
+    }
+
+    protected void sendToUploader(Map<String, ? super Object> argsMap, String dashboardTemplate, String dashboardName, String jsonExtension, String contentType, boolean overwrite) {
+        logger.debug("{}: {}", DASHBOARD_NAME, dashboardName);
+        logger.debug("{}: {}", "JSON Extension", jsonExtension);
+        logger.debug("{}: {}", "Content Type", contentType);
+        logger.debug("{}: {}", "Overwrite", overwrite);
+        try {
+            dashboardUploader.uploadDashboard(dashboardName, jsonExtension, dashboardTemplate, contentType, argsMap, overwrite);
+        } catch (ApiException e) {
+            logger.error("Unable to establish connection, not uploading dashboard.");
+        }
     }
 
     protected boolean isResolved() {
         return agentEnvResolver != null && agentEnvResolver.isResolved();
     }
 
-    //TODO getDashboardTemplate
     private String getDashboardContents() {
         logger.debug("Sim Enabled: {}", agentEnvResolver.getSimEnabled());
         String dashboardTemplate = "";
@@ -174,6 +177,7 @@ public class CustomDashboardGenerator {
         }
         return "";
     }
+
     public String setDefaultDashboardInfo(String dashboardString) {
         dashboardString = setMetricPrefix(dashboardString);
         dashboardString = setApplicationName(dashboardString);
@@ -183,7 +187,6 @@ public class CustomDashboardGenerator {
         dashboardString = setHostName(dashboardString);
         dashboardString = setDashboardName(dashboardString);
         dashboardString = setMachinePath(dashboardString);
-
         return dashboardString;
 
     }
@@ -264,6 +267,8 @@ public class CustomDashboardGenerator {
         return dashboardString;
     }
 
+    /////////////////////// XML Support ///////////////////////
+
     private String setDashboardName(Node source, String instanceName) {
         String dashBoardName = (String) dashboardConfig.get("namePrefix");
         if (!StringUtils.hasText(dashBoardName)) {
@@ -275,6 +280,7 @@ public class CustomDashboardGenerator {
         addAttribute(source.getFirstChild(), "name", dashBoardName);
         return dashBoardName;
     }
+
 
     public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
         if (dashboardConfig == null) {

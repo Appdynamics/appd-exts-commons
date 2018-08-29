@@ -26,7 +26,6 @@ import java.util.Set;
  * Created by abey.tom on 4/11/15.
  */
 
-//TODO not using this class at all.
 public class CustomDashboardTask {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardTask.class);
 

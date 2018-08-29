@@ -1,7 +1,7 @@
 {
     "schemaVersion": null,
     "dashboardFormatVersion": "4.0",
-    "name": "replaceDashboardName",
+    "name": "${DASHBOARD_NAME}",
     "description": null,
     "properties": null,
     "templateEntityType": "APPLICATION_COMPONENT_NODE",
@@ -70,9 +70,9 @@
                             "agentTypes": null,
                             "entityNames": [
                                 {
-                                    "applicationName": "replaceApplicationName",
+                                    "applicationName": "${APPLICATION_NAME}",
                                     "entityType": "APPLICATION_COMPONENT",
-                                    "entityName": "replaceTierName",
+                                    "entityName": "${TIER_NAME}",
                                     "scopingEntityType": null,
                                     "scopingEntityName": null,
                                     "subtype": null
@@ -86,7 +86,7 @@
                             "displayName": "null",
                             "inputMetricText": false,
                             "inputMetricPath": null,
-                            "relativeMetricPath": "Custom Metrics|Amazon ELB|AWS API Calls"
+                            "relativeMetricPath": "${METRIC_PREFIX}AWS API Calls"
                         },
                         "rollupMetricData": true,
                         "expressionString": "",
@@ -95,7 +95,7 @@
                         "maxResults": 20,
                         "evaluationScopeType": null,
                         "baselineName": null,
-                        "applicationName": "replaceApplicationName",
+                        "applicationName": "${APPLICATION_NAME}",
                         "metricDisplayNameStyle": "DISPLAY_STYLE_AUTO",
                         "metricDisplayNameCustomFormat": null
                     },
@@ -166,7 +166,7 @@
                             "displayName": "null",
                             "inputMetricText": false,
                             "inputMetricPath": null,
-                            "relativeMetricPath": "Custom Metrics|Amazon ELB|*|*|LoadBalancer Name|*|Availability Zone|*|Healthy Host Count"
+                            "relativeMetricPath": "${METRIC_PREFIX}*|*|LoadBalancer Name|*|Availability Zone|*|Healthy Host Count"
                         },
                         "rollupMetricData": true,
                         "expressionString": "",
@@ -175,7 +175,7 @@
                         "maxResults": 20,
                         "evaluationScopeType": null,
                         "baselineName": null,
-                        "applicationName": "replaceApplicationName",
+                        "applicationName": "${APPLICATION_NAME}",
                         "metricDisplayNameStyle": "DISPLAY_STYLE_AUTO",
                         "metricDisplayNameCustomFormat": null
                     },
@@ -244,7 +244,7 @@
                             "displayName": "null",
                             "inputMetricText": false,
                             "inputMetricPath": null,
-                            "relativeMetricPath": "Custom Metrics|Amazon ELB|*|*|LoadBalancer Name|*|Availability Zone|*|Request Count"
+                            "relativeMetricPath": "${METRIC_PREFIX}*|*|LoadBalancer Name|*|Availability Zone|*|Request Count"
                         },
                         "rollupMetricData": false,
                         "expressionString": "",
@@ -253,7 +253,7 @@
                         "maxResults": 20,
                         "evaluationScopeType": null,
                         "baselineName": null,
-                        "applicationName": "replaceApplicationName",
+                        "applicationName": "${APPLICATION_NAME}",
                         "metricDisplayNameStyle": "DISPLAY_STYLE_AUTO",
                         "metricDisplayNameCustomFormat": null
                     },
@@ -333,7 +333,7 @@
                             "displayName": "null",
                             "inputMetricText": false,
                             "inputMetricPath": null,
-                            "relativeMetricPath": "Custom Metrics|Amazon ELB|*|*|LoadBalancer Name|*|Availability Zone|*|HTTPCode_Backend_4XX"
+                            "relativeMetricPath": "${METRIC_PREFIX}*|*|LoadBalancer Name|*|Availability Zone|*|HTTPCode_Backend_4XX"
                         },
                         "rollupMetricData": false,
                         "expressionString": "",
@@ -342,7 +342,7 @@
                         "maxResults": 20,
                         "evaluationScopeType": null,
                         "baselineName": null,
-                        "applicationName": "replaceApplicationName",
+                        "applicationName": "${APPLICATION_NAME}",
                         "metricDisplayNameStyle": "DISPLAY_STYLE_AUTO",
                         "metricDisplayNameCustomFormat": null
                     },
@@ -422,7 +422,7 @@
                             "displayName": "null",
                             "inputMetricText": false,
                             "inputMetricPath": null,
-                            "relativeMetricPath": "Custom Metrics|Amazon ELB|*|*|LoadBalancer Name|*|Availability Zone|*|Latency"
+                            "relativeMetricPath": "${METRIC_PREFIX}*|*|LoadBalancer Name|*|Availability Zone|*|Latency"
                         },
                         "rollupMetricData": false,
                         "expressionString": "",
@@ -431,7 +431,7 @@
                         "maxResults": 20,
                         "evaluationScopeType": null,
                         "baselineName": null,
-                        "applicationName": "replaceApplicationName",
+                        "applicationName": "${APPLICATION_NAME}",
                         "metricDisplayNameStyle": "DISPLAY_STYLE_AUTO",
                         "metricDisplayNameCustomFormat": null
                     },
@@ -511,7 +511,7 @@
                             "displayName": "null",
                             "inputMetricText": false,
                             "inputMetricPath": null,
-                            "relativeMetricPath": "Custom Metrics|Amazon ELB|*|*|LoadBalancer Name|*|Availability Zone|*|HTTPCode_Backend_2XX"
+                            "relativeMetricPath": "${METRIC_PREFIX}*|*|LoadBalancer Name|*|Availability Zone|*|HTTPCode_Backend_2XX"
                         },
                         "rollupMetricData": false,
                         "expressionString": "",
@@ -520,7 +520,7 @@
                         "maxResults": 20,
                         "evaluationScopeType": null,
                         "baselineName": null,
-                        "applicationName": "replaceApplicationName",
+                        "applicationName": "${APPLICATION_NAME}",
                         "metricDisplayNameStyle": "DISPLAY_STYLE_AUTO",
                         "metricDisplayNameCustomFormat": null
                     },
@@ -600,7 +600,7 @@
                             "displayName": "null",
                             "inputMetricText": false,
                             "inputMetricPath": null,
-                            "relativeMetricPath": "Custom Metrics|Amazon ELB|*|*|LoadBalancer Name|*|Availability Zone|*|HTTPCode_Backend_3XX"
+                            "relativeMetricPath": "${METRIC_PREFIX}*|*|LoadBalancer Name|*|Availability Zone|*|HTTPCode_Backend_3XX"
                         },
                         "rollupMetricData": false,
                         "expressionString": "",
@@ -609,7 +609,7 @@
                         "maxResults": 20,
                         "evaluationScopeType": null,
                         "baselineName": null,
-                        "applicationName": "replaceApplicationName",
+                        "applicationName": "${APPLICATION_NAME}",
                         "metricDisplayNameStyle": "DISPLAY_STYLE_AUTO",
                         "metricDisplayNameCustomFormat": null
                     },

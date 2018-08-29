@@ -16,8 +16,10 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.api.ApiException;
 import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.io.FileUtils;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import com.appdynamics.extensions.dashboard.DashboardConstants;
 public class CustomDashboardGeneratorTest {
 
     private CustomDashboardGenerator customDashboardGenerator;
@@ -215,39 +217,156 @@ public class CustomDashboardGeneratorTest {
 //
 //    }
 
-    // TODO Test for replacing metric prefix
-    // TODO test for replacing the metric values
     // TODO Test to verify the correct controllerInfo properties
     // TODO test to verify the correct ControllerInfoFactory properties
+
     @Test
-    public void testCreateDashboard(){
+    public void replaceDefaultValuesInTheNormalDashboard() throws Exception{
         Map dashboardConfig = new HashMap();
-        dashboardConfig.put("namePrefix", "Docker");
+        dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
         dashboardConfig.put("uploadDashboard", true);
 
         Map controllerConfig = new HashMap();
         controllerConfig.put("host", "192.168.11.02");
         controllerConfig.put("port", "1100");
-
-
+        String metricPrefix = "Custom Metrics|Extension|";
+        CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
 
         CustomDashboardGenerator customDashboardGen;
-        customDashboardGen = Mockito.spy(new CustomDashboardGenerator(dashboardConfig,controllerConfig, "" ));
+        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerConfig,metricPrefix, uploader );
+
+        AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
+        Mockito.when(agentEnvironmentResolver.getApplicationName()).thenReturn("Application");
+        Mockito.when(agentEnvironmentResolver.getTierName()).thenReturn("Tier");
+        Mockito.when(agentEnvironmentResolver.getNodeName()).thenReturn("Node");
+        Mockito.when(agentEnvironmentResolver.getControllerHostName()).thenReturn("ControllerHost");
+        Mockito.when(agentEnvironmentResolver.getMachinePath()).thenReturn("MachinePath");
+        customDashboardGen.setAgentEnvResolver(agentEnvironmentResolver);
+
+        String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/normalDashboard.json"));
+        String updatedDashboardString = customDashboardGen.setDefaultDashboardInfo(dashboardString);
+
+        Assert.assertFalse(dashboardString.equals(updatedDashboardString));
+
+        if(dashboardString.contains(DashboardConstants.REPLACE_APPLICATION_NAME)){
+            Assert.assertTrue(updatedDashboardString.contains("Application"));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)){
+            Assert.assertTrue(updatedDashboardString.contains(DashboardConstants.SIM_APPLICATION_NAME));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)){
+            Assert.assertTrue(updatedDashboardString.contains("MachinePath"));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_TIER_NAME)){
+            Assert.assertTrue(updatedDashboardString.contains("Tier"));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_NODE_NAME)){
+            Assert.assertTrue(updatedDashboardString.contains("Node"));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)){
+            Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
+        }
 
     }
 
-//    @Test
-//    public void testMetricPrefix (){
-//        Map dashboardConfig = new HashMap();
-//        dashboardConfig.put("namePrefix", "Docker");
-//        dashboardConfig.put("enabled", true);
-//        dashboardConfig.put("uploadDashboard", true);
-//        dashboardConfig.put("metricPrefix", "Server|Component:21|Custom Metrics|Amazon ELB|");
-//
-//        String metric = buildMetricPrefixForDashboard(dashboardConfig);
-//
-//    }
+    @Test
+    public void replaceDefaultValuesInTheSIMDashboard() throws Exception{
+        Map dashboardConfig = new HashMap();
+        dashboardConfig.put("dashboardName", "Dashboard Test");
+        dashboardConfig.put("enabled", true);
+        dashboardConfig.put("uploadDashboard", true);
 
+        Map controllerConfig = new HashMap();
+        controllerConfig.put("host", "192.168.11.02");
+        controllerConfig.put("port", "1100");
+        String metricPrefix = "Custom Metrics|Extension|";
+        CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
 
+        CustomDashboardGenerator customDashboardGen;
+        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerConfig,metricPrefix, uploader );
+
+        customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithSim());
+
+        String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
+        String updatedDashboardString = customDashboardGen.setDefaultDashboardInfo(dashboardString);
+
+        Assert.assertFalse(dashboardString.equals(updatedDashboardString));
+
+        if(dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)){
+            Assert.assertTrue(updatedDashboardString.contains(DashboardConstants.SIM_APPLICATION_NAME));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)){
+            Assert.assertTrue(updatedDashboardString.contains("Root"));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)){
+            Assert.assertTrue(updatedDashboardString.contains("ControllerHostName"));
+        }
+        if(dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)){
+            Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
+        }
+
+    }
+
+    @Test
+    public void testCreateDashboard(){
+        Map dashboardConfig = new HashMap();
+        dashboardConfig.put("dashboardName", "Dashboard Test");
+        dashboardConfig.put("enabled", true);
+        dashboardConfig.put("uploadDashboard", true);
+        dashboardConfig.put("pathToNormalDashboard","src/test/resources/dashboard/normalDashboard.json");
+
+        Map controllerConfig = new HashMap();
+        controllerConfig.put("host", "192.168.11.02");
+        controllerConfig.put("port", "1100");
+        String metricPrefix = "Custom Metrics|Extension|";
+
+        CustomDashboardGenerator customDashboardGen;
+        CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
+
+        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerConfig,metricPrefix, uploader );
+
+        customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithoutSim());
+
+        customDashboardGen.createDashboard();
+        try{
+            Mockito.verify(uploader, Mockito.times(1)).uploadDashboard( Mockito.anyString(),Mockito.anyString(),Mockito.anyString(),Mockito.anyString(),Mockito.anyMap(),Mockito.anyBoolean());
+
+        } catch (ApiException e){
+            Assert.assertFalse(true);
+        }
+    }
+
+    public AgentEnvironmentResolver getAgentEnvResolverWithoutSim(){
+        AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
+        Mockito.when(agentEnvironmentResolver.getApplicationName()).thenReturn("Application");
+        Mockito.when(agentEnvironmentResolver.getTierName()).thenReturn("Tier");
+        Mockito.when(agentEnvironmentResolver.getNodeName()).thenReturn("Node");
+        Mockito.when(agentEnvironmentResolver.getControllerHostName()).thenReturn("ControllerHostName");
+        Mockito.when(agentEnvironmentResolver.getControllerPort()).thenReturn(9090);
+        Mockito.when(agentEnvironmentResolver.getMachinePath()).thenReturn("MachinePath");
+        Mockito.when(agentEnvironmentResolver.isControllerUseSSL()).thenReturn(false);
+        Mockito.when(agentEnvironmentResolver.getAccountName()).thenReturn("Account");
+        Mockito.when(agentEnvironmentResolver.getUsername()).thenReturn("UserName");
+        Mockito.when(agentEnvironmentResolver.getPassword()).thenReturn("PassWord");
+        Mockito.when(agentEnvironmentResolver.getSimEnabled()).thenReturn(false);
+        Mockito.when(agentEnvironmentResolver.isResolved()).thenReturn(true);
+
+        return agentEnvironmentResolver;
+    }
+
+    public AgentEnvironmentResolver getAgentEnvResolverWithSim(){
+        AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
+        Mockito.when(agentEnvironmentResolver.getControllerHostName()).thenReturn("ControllerHostName");
+        Mockito.when(agentEnvironmentResolver.getControllerPort()).thenReturn(9090);
+        Mockito.when(agentEnvironmentResolver.getMachinePath()).thenReturn("MachinePath");
+        Mockito.when(agentEnvironmentResolver.isControllerUseSSL()).thenReturn(false);
+        Mockito.when(agentEnvironmentResolver.getAccountName()).thenReturn("Account");
+        Mockito.when(agentEnvironmentResolver.getUsername()).thenReturn("UserName");
+        Mockito.when(agentEnvironmentResolver.getPassword()).thenReturn("PassWord");
+        Mockito.when(agentEnvironmentResolver.getSimEnabled()).thenReturn(true);
+        Mockito.when(agentEnvironmentResolver.isResolved()).thenReturn(true);
+
+        return agentEnvironmentResolver;
+    }
 }

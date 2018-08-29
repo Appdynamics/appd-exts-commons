@@ -20,12 +20,11 @@ public class ControllerInfoValidator {
         check(TaskInputArgs.USER, cInfo.getUsername());
         check(TaskInputArgs.PASSWORD, cInfo.getPassword());
         check("account", cInfo.getAccount());
-        check("applicationName", cInfo.getApplicationName());
         check("controllerHost", cInfo.getControllerHost());
         check("controllerPort", cInfo.getControllerPort());
         check("controllerSslEnabled", cInfo.getControllerSslEnabled());
-        check("tierName", cInfo.getTierName());
-        check("nodeName", cInfo.getNodeName());
+
+        simEnabledOrNot("simEnabled", cInfo.getSimEnabled(), cInfo);
         if (unresolvedProps != null) {
             logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
             return false;
@@ -33,12 +32,29 @@ public class ControllerInfoValidator {
         return true;
     }
 
+    public void simEnabledOrNot(String propName, Object propVal, ControllerInfo cInfo){
+        if (propVal != null) {
+            if (propVal instanceof Boolean) {
+                if(((Boolean) propVal).booleanValue() == false){
+                    check("applicationName", cInfo.getApplicationName());
+                    check("tierName", cInfo.getTierName());
+                    check("nodeName", cInfo.getNodeName());
+                }
+            }
+        } else {
+            markUnresolved(propName);
+        }
+    }
+
+
     public void check(String propName, Object propVal) {
         if (propVal != null) {
             if (propVal instanceof String) {
                 if (Strings.isNullOrEmpty((String) propVal)) {
                     markUnresolved(propName);
                 }
+            } else if(propVal instanceof Boolean){
+
             }
         } else {
             markUnresolved(propName);

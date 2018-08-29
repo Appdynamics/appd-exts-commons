@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.dashboard.CustomDashboardGenerator;
+import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
@@ -23,36 +24,48 @@ public class CustomDashboardModule {
 
         String metricPrefix = buildMetricPrefixForDashboard(config);
 
-
-        if (customDashboardConfig != null) {
-            long timestamp1 = System.currentTimeMillis();
-            CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInformation, metricPrefix);
-            dashboardGenerator.createDashboard();
-            long timestamp2 = System.currentTimeMillis();
-            logger.debug("Time to complete customDashboardModule in :" + (timestamp2 - timestamp1) + " ms");
+        if(!metricPrefix.equals("") ){
+            if (customDashboardConfig != null) {
+                long timestamp1 = System.currentTimeMillis();
+                CustomDashboardUploader uploader = new CustomDashboardUploader();
+                CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInformation, metricPrefix,uploader);
+                dashboardGenerator.createDashboard();
+                long timestamp2 = System.currentTimeMillis();
+                logger.debug("Time to complete customDashboardModule in :" + (timestamp2 - timestamp1) + " ms");
+            } else {
+                logger.info("No customDashboard Info in config.yml, not uploading dashboard.");
+            }
         } else {
-            logger.info("No customDashboard Info in config.yml, not uploading dashboard.");
+            logger.info("No metricPrefix Info in config.yml, not uploading dashboard.");
         }
     }
 
-    private String buildMetricPrefixForDashboard(Map<String, ?> config) {
+    public String buildMetricPrefixForDashboard(Map<String, ?> config) {
         String metricPrefix = "";
         if(config.get("metricPrefix") != null){
             metricPrefix = config.get("metricPrefix").toString();
         }
-        String text = "";
+        String dashboardMetricPath = "";
         if(metricPrefix.contains("Server")){
             String[] metricPath = metricPrefix.split("\\|");
             int count = 0;
             for(String str: metricPath){
                 count++;
                 if (count > 2){
-                    text += str+ "|";
+                    dashboardMetricPath += str+ "|";
                 }
             }
+        } else {
+            dashboardMetricPath = metricPrefix;
         }
-        logger.debug("Dashboard Metric Prefix = " + metricPrefix);
-        return text;
+
+        if(!dashboardMetricPath.endsWith("|")){
+            dashboardMetricPath += "|";
+        }
+
+        logger.debug("Dashboard Metric Prefix = " + dashboardMetricPath);
+
+        return dashboardMetricPath;
     }
 
 
