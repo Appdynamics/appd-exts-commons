@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~   Copyright 2018 . AppDynamics LLC and its affiliates.
+  ~   All Rights Reserved.
+  ~   This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+  ~   The copyright notice above does not evidence any actual or intended publication of such source code.
+  ~
+  -->
+
+<controller-info>
+
+
+    <controller-host>bkumar-mac.local</controller-host>
+    <account-access-key>bdb749d2-1b58-4083-95e6-f6ee104b19b6</account-access-key>
+
+    <controller-port>8090</controller-port>
+    <controller-ssl-enabled>false</controller-ssl-enabled>
+
+    <enable-orchestration>false</enable-orchestration>
+    <unique-host-id>name</unique-host-id>
+        <account-name>customer1</account-name>
+
+    <sim-enabled>false</sim-enabled>
+
+    <application-name>kind</application-name>
+    <tier-name>bars</tier-name>
+    <node-name>node</node-name>
+    
+    <machine-path>Bhuv|Kumar</machine-path>
+
+</controller-info>

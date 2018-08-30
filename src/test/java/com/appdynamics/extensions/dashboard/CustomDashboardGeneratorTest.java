@@ -217,8 +217,6 @@ public class CustomDashboardGeneratorTest {
 //
 //    }
 
-    // TODO Test to verify the correct controllerInfo properties
-    // TODO test to verify the correct ControllerInfoFactory properties
 
     @Test
     public void replaceDefaultValuesInTheNormalDashboard() throws Exception{

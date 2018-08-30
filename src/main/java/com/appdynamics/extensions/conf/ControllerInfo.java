@@ -37,7 +37,7 @@ public class ControllerInfo {
     protected String username;
     protected String password;
     protected String encryptedPassword;
-    protected String encryptedKey;
+    protected String encryptionKey;
     protected String accountAccessKey;
     protected String account;
     protected String machinePath;
@@ -62,8 +62,8 @@ public class ControllerInfo {
         this.encryptedPassword = encryptedPassword;
     }
 
-    public void setEncryptedKey(String encryptedKey) {
-        this.encryptedKey = encryptedKey;
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
     }
 
     public void setAccountAccessKey(String accountAccessKey) {
@@ -129,6 +129,10 @@ public class ControllerInfo {
         info.accountAccessKey = (String) config.get("accountAccessKey");
         info.applicationName = (String) config.get("applicationName");
         info.tierName = (String) config.get("tierName");
+        info.nodeName = (String) config.get("nodeName");
+        info.encryptedPassword = (String) config.get("encryptedPassword");
+        info.encryptionKey = (String) config.get("encryptionKey");
+
         return info;
     }
 
@@ -142,7 +146,7 @@ public class ControllerInfo {
         info.controllerHost = System.getProperty("appdynamics.controller.hostName");
         info.username = System.getProperty("appdynamics.agent.monitors.controller.username");
         info.password = System.getProperty("appdynamics.agent.monitors.controller.password");
-        info.encryptedKey = System.getProperty("appdynamics.agent.monitors.controller.encryptedKey");
+        info.encryptionKey = System.getProperty("appdynamics.agent.monitors.controller.encryptionKey");
         info.encryptedPassword = System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword");
 
 
@@ -272,8 +276,8 @@ public class ControllerInfo {
         return encryptedPassword;
     }
 
-    public String getEncryptedKey() {
-        return encryptedKey;
+    public String getEncryptionKey() {
+        return encryptionKey;
     }
 
     public String getPassword() {
@@ -319,7 +323,7 @@ public class ControllerInfo {
         return from;
     }
 
-    public static ControllerInfo fromXml(File file) {
+    private static ControllerInfo fromXml(File file) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(XmlControllerInfo.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();

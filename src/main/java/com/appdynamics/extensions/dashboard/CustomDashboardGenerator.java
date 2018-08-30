@@ -147,10 +147,6 @@ public class CustomDashboardGenerator {
         logger.debug(TaskInputArgs.PORT + ": {}", String.valueOf(agentEnvResolver.getControllerPort()));
         logger.debug(TaskInputArgs.USE_SSL + ": {}", agentEnvResolver.isControllerUseSSL());
         logger.debug(TaskInputArgs.USER + ": {}", getUserName());
-
-        //TODO never leak passwords
-        logger.debug(TaskInputArgs.PASSWORD + ": {}", agentEnvResolver.getPassword());
-
         return serverMap;
     }
 

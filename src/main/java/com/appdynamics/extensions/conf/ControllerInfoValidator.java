@@ -53,12 +53,19 @@ public class ControllerInfoValidator {
                 if (Strings.isNullOrEmpty((String) propVal)) {
                     markUnresolved(propName);
                 }
+            } else if(propVal instanceof Integer){
+                if (propVal == null) {
+                    markUnresolved(propName);
+                }
             } else if(propVal instanceof Boolean){
-
+                if (propVal == null) {
+                    markUnresolved(propName);
+                }
             }
-        } else {
+        }else {
             markUnresolved(propName);
         }
+
     }
 
     private void markUnresolved(String propName) {
