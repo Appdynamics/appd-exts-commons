@@ -31,32 +31,25 @@ import java.util.Map;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ControllerInfo.class)
-// TODO Test to verify the correct controllerInfo properties
 
 public class ControllerInfoTest {
 
 
-//    @Mock
-//    private AMonitorJob aMonitorJob;
-//
-//    @Before
-//    private void setup(){
-//    }
-
     @Test
-    public void fromXmlTest() throws Exception {
-        MonitorContextConfiguration monitorContextConfiguration;
-//
-//        monitorContextConfiguration = new MonitorContextConfiguration("ExtName", "Custom Metrics|Ext name|", PathResolver.resolveDirectory(AManagedMonitor.class),aMonitorJob);
-        PathResolver pathResolver = Mockito.mock(PathResolver.class);
-        File file = Mockito.mock(File.class);
-        Mockito.when(new File(Mockito.anyString())).thenReturn(file);
-        Mockito.when(pathResolver.resolveDirectory(Any.class)).thenReturn(Mockito.any(File.class));
-        Mockito.when(new File(new File(Mockito.any(File.class), "conf"), "controller-info.xml")).thenReturn(new File("src/test/resources/dashboard/controller-info.xml"));
+    public void fromXMLTest(){
+        File file = new File("src/test/resources/dashboard/");
+        ControllerInfo controllerInfo = ControllerInfo.getControllerInfoFromXml(file);
 
-        ControllerInfo controllerInfo = ControllerInfo.getControllerInfoFromXml();
-        Assert.assertTrue(true);
-
+        Assert.assertTrue(controllerInfo.getAccount().equals("xmlAccountName"));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("xmlAccessKey"));
+        Assert.assertTrue(controllerInfo.getApplicationName().equals("xmlApplicationName"));
+        Assert.assertTrue(controllerInfo.getTierName().equals("xmlTierName"));
+        Assert.assertTrue(controllerInfo.getNodeName().equals("xmlNodeName"));
+        Assert.assertTrue(controllerInfo.getControllerHost().equals("xmlHost"));
+        Assert.assertTrue(controllerInfo.getControllerPort().equals(8090));
+        Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
+        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("xmlUniqueHostId"));
+        Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
     }
 
     @Test

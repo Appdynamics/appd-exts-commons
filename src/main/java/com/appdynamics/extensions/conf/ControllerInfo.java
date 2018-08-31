@@ -170,6 +170,7 @@ public class ControllerInfo {
 
 
     public ControllerInfo merge(ControllerInfo info) {
+
         if (!Strings.isNullOrEmpty(info.controllerHost)) {
             this.controllerHost = info.controllerHost;
         }
@@ -185,29 +186,30 @@ public class ControllerInfo {
         if (!Strings.isNullOrEmpty(info.uniqueHostId)) {
             this.uniqueHostId = info.uniqueHostId;
         }
-
         if (!Strings.isNullOrEmpty(info.username)) {
             this.username = info.username;
         }
-
         if (!Strings.isNullOrEmpty(info.password)) {
             this.password = info.password;
         }
-
+        if (!Strings.isNullOrEmpty(info.encryptedPassword)) {
+            this.encryptedPassword = info.encryptedPassword;
+        }
+        if (!Strings.isNullOrEmpty(info.encryptionKey)) {
+            this.encryptionKey = info.encryptionKey;
+        }
         if (!Strings.isNullOrEmpty(info.accountAccessKey)) {
             this.accountAccessKey = info.accountAccessKey;
         }
         if (!Strings.isNullOrEmpty(info.account)) {
             this.account = info.account;
         }
-
         if (info.simEnabled != null) {
             this.simEnabled = info.simEnabled;
         }
         if (!Strings.isNullOrEmpty(info.machinePath)) {
             this.machinePath = info.machinePath;
         }
-
         if (!Strings.isNullOrEmpty(info.applicationName)) {
             this.applicationName = info.applicationName;
         }
@@ -292,7 +294,7 @@ public class ControllerInfo {
         } else {
             tmpPass = null;
         }
-        return "CustomDashboardControllerProps{" +
+        return "ControllerProps{" +
                 "controllerHost='" + controllerHost + '\'' +
                 ", controllerPort=" + controllerPort +
                 ", controllerSslEnabled=" + controllerSslEnabled +
@@ -307,8 +309,8 @@ public class ControllerInfo {
                 '}';
     }
 
-    public static ControllerInfo getControllerInfoFromXml() {
-        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
+    public static ControllerInfo getControllerInfoFromXml(File directory) {
+//        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
         ControllerInfo from = null;
         if (directory.exists()) {

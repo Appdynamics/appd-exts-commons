@@ -38,6 +38,8 @@ public class CustomDashboardGeneratorTest {
 
     private CustomDashboardGenerator customDashboardGenerator;
 
+    private File file = Mockito.mock(File.class);
+
     @Before
     public void before() throws IOException {
         File tmpDir = new File(System.getProperty("java.io.tmpdir"));
@@ -54,7 +56,7 @@ public class CustomDashboardGeneratorTest {
         config.put("namePrefix", "Docker");
         config.put("enabled", true);
         config.put("uploadDashboard", true);
-        customDashboardGenerator = Mockito.spy(new CustomDashboardGenerator(instances, metricPrefix, config));
+        customDashboardGenerator = Mockito.spy(new CustomDashboardGenerator(instances, metricPrefix, config, file));
         Mockito.doReturn(getClass()
                 .getResourceAsStream("/dashboard/test-custom-dashboard-template.xml")).when(customDashboardGenerator)
                 .getDashboardTemplate();
@@ -232,7 +234,8 @@ public class CustomDashboardGeneratorTest {
         CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
 
         CustomDashboardGenerator customDashboardGen;
-        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerConfig,metricPrefix, uploader );
+
+        customDashboardGen = new CustomDashboardGenerator(file, dashboardConfig, controllerConfig,metricPrefix, uploader );
 
         AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
         Mockito.when(agentEnvironmentResolver.getApplicationName()).thenReturn("Application");
@@ -282,7 +285,7 @@ public class CustomDashboardGeneratorTest {
         CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
 
         CustomDashboardGenerator customDashboardGen;
-        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerConfig,metricPrefix, uploader );
+        customDashboardGen = new CustomDashboardGenerator(file, dashboardConfig, controllerConfig,metricPrefix, uploader );
 
         customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithSim());
 
@@ -322,7 +325,7 @@ public class CustomDashboardGeneratorTest {
         CustomDashboardGenerator customDashboardGen;
         CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
 
-        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerConfig,metricPrefix, uploader );
+        customDashboardGen = new CustomDashboardGenerator(file, dashboardConfig, controllerConfig,metricPrefix, uploader );
 
         customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithoutSim());
 

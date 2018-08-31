@@ -47,7 +47,14 @@ public class CustomDashboardGenerator {
     private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
 
-    public CustomDashboardGenerator(Map dashboardConfig, Map controllerInformation, String metricPrefix, CustomDashboardUploader uploader) {
+    public File getInstallDir() {
+        return installDir;
+    }
+
+    private File installDir;
+
+    public CustomDashboardGenerator(File file, Map dashboardConfig, Map controllerInformation, String metricPrefix, CustomDashboardUploader uploader) {
+        this.installDir = file;
         if (dashboardConfig == null) {
             logger.info("Custom Dashboard config is null");
             return;
@@ -59,7 +66,7 @@ public class CustomDashboardGenerator {
         }
         this.dashboardConfig = dashboardConfig;
         this.dashboardUploader = uploader;
-        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation);
+        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation, installDir);
         this.metricPrefix = metricPrefix;
     }
 
@@ -278,7 +285,8 @@ public class CustomDashboardGenerator {
     }
 
 
-    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
+    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig, File file) {
+        this.installDir = file;
         if (dashboardConfig == null) {
             logger.info("Custom Dashboard config is null");
             return;
@@ -292,7 +300,7 @@ public class CustomDashboardGenerator {
         this.metricPrefix = StringUtils.trim(metricPrefix, "|");
         this.dashboardConfig = dashboardConfig;
         this.dashboardUploader = new CustomDashboardUploader();
-        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig);
+        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig, installDir);
     }
 
     public void createDashboards(Collection<String> metrics) {

@@ -47,7 +47,7 @@ public class MonitorContextConfiguration {
         this.installDir = installDir;
         this.aMonitorJob = aMonitorJob;
         this.fileWatchListenerModule = new FileWatchListenerModule();
-        this.context = new MonitorContext(monitorName);
+        this.context = new MonitorContext(monitorName, installDir);
     }
 
     public void setConfigYml(String path) {

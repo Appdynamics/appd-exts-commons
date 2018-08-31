@@ -18,6 +18,7 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -32,6 +33,7 @@ public class MonitorContext {
     private String monitorName;
     private Map<String, ?> config;
     private String metricPrefix;
+    private File installDir;
     private ControllerInfo controllerInfo;
 
     private WorkBenchModule workBenchModule;
@@ -45,7 +47,8 @@ public class MonitorContext {
     private CustomDashboardModule dashboardModule;
 
 
-    MonitorContext(String monitorName) {
+    MonitorContext(String monitorName, File installDir) {
+        this.installDir = installDir;
         this.monitorName = monitorName;
         workBenchModule = new WorkBenchModule();
         httpClientModule = new HttpClientModule();
@@ -55,7 +58,7 @@ public class MonitorContext {
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
         healthCheckModule = new HealthCheckModule();
-        dashboardModule = new CustomDashboardModule();
+        dashboardModule = new CustomDashboardModule(installDir);
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
@@ -65,7 +68,7 @@ public class MonitorContext {
         if(config.get("controllerInfo") != null){
          controllerInfoMap = (Map)config.get("controllerInfo") ;
         }
-        controllerInfo = ControllerInfoFactory.getControllerInfo(controllerInfoMap);
+        controllerInfo = ControllerInfoFactory.getControllerInfo(controllerInfoMap, installDir);
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
             workBenchModule.initWorkBenchStore(config, metricPrefix);

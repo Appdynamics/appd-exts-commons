@@ -5,12 +5,18 @@ import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CustomDashboardModule {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardModule.class);
+    private File installDir;
+
+    public CustomDashboardModule(File file) {
+    this.installDir = file;
+    }
 
     public void initCustomDashboard(Map<String, ?> config) {
         Map customDashboardConfig = new HashMap();
@@ -28,7 +34,7 @@ public class CustomDashboardModule {
             if (customDashboardConfig != null) {
                 long timestamp1 = System.currentTimeMillis();
                 CustomDashboardUploader uploader = new CustomDashboardUploader();
-                CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInformation, metricPrefix,uploader);
+                CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(installDir, customDashboardConfig, controllerInformation, metricPrefix,uploader);
                 dashboardGenerator.createDashboard();
                 long timestamp2 = System.currentTimeMillis();
                 logger.debug("Time to complete customDashboardModule in :" + (timestamp2 - timestamp1) + " ms");

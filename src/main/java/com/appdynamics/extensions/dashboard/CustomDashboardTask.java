@@ -34,7 +34,7 @@ public class CustomDashboardTask {
     private long frequency = 5 * 60 * 1000;
 
     public void updateConfig(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
-        dashboardGenerator = new CustomDashboardGenerator(instanceNames, metricPrefix, dashboardConfig);
+        dashboardGenerator = new CustomDashboardGenerator(instanceNames, metricPrefix, dashboardConfig, dashboardGenerator.getInstallDir());
         if (dashboardConfig != null) {
             Integer freqStr = (Integer) dashboardConfig.get("executionFrequencyMinutes");
             if (freqStr != null) {

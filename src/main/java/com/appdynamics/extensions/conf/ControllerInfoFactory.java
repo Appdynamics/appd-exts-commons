@@ -3,6 +3,7 @@ package com.appdynamics.extensions.conf;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.util.Map;
 
 public class ControllerInfoFactory {
@@ -17,18 +18,18 @@ public class ControllerInfoFactory {
        3rd priority : config.yml
        yml's controllerInfo overrides system properties which in turn overrides controller-info.xml
      */
-    public static ControllerInfo getControllerInfo(Map config) {
+    public static ControllerInfo getControllerInfo(Map config, File installDir) {
         if (controllerInfo == null) {
             ControllerInfo controllerInfoFromSystemProps = ControllerInfo.fromSystemProperties();
             logger.debug("The resolved properties from system props are {}", controllerInfoFromSystemProps);
 
-            ControllerInfo controllerInfoFromXml = ControllerInfo.getControllerInfoFromXml();
+            ControllerInfo controllerInfoFromXml = ControllerInfo.getControllerInfoFromXml(installDir);
             logger.debug("The resolved properties from Xml are {}", controllerInfoFromXml);
-            ControllerInfo mergedInfo = controllerInfoFromSystemProps.merge(controllerInfoFromXml);
+            ControllerInfo mergedInfo = controllerInfoFromXml.merge(controllerInfoFromSystemProps);
             if (config != null) {
                 ControllerInfo controllerInfoFromYml = ControllerInfo.fromYml(config);
                 logger.debug("The resolved properties from yml are {}", controllerInfoFromYml);
-                mergedInfo = mergedInfo.merge(controllerInfoFromYml);
+                mergedInfo = controllerInfoFromYml.merge(mergedInfo);
             }
 
             logger.debug("The resolved properties for ControllerInfo are {}", mergedInfo);

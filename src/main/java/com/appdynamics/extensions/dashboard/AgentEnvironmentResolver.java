@@ -21,6 +21,7 @@ import com.appdynamics.extensions.conf.ControllerInfoValidator;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -31,8 +32,9 @@ public class AgentEnvironmentResolver {
     private ControllerInfo cInfo;
     private boolean resolved;
 
-    AgentEnvironmentResolver(Map dashboardConfig) {
-        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig);
+    AgentEnvironmentResolver(Map dashboardConfig, File installDir) {
+
+        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, installDir);
         ControllerInfoValidator validator = new ControllerInfoValidator();
         resolved = validator.validateAndCheckIfResolved(cInfo);
     }
