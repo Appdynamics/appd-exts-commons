@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -140,6 +141,38 @@ public class MetricWriteHelperTest {
         metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|sample1", null,MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
         MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
         verify(metricWriter, times(0)).printMetric(stringArgumentCaptor.capture());
+    }
+
+    @Test
+    public void whenDoneThenCheckTotalNumberOfMetrics(){
+        ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        configuration.setConfigYml("src/test/resources/conf/config_WithMultipleServersDisplayNameCheck.yml");
+
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
+        when(configuration.getContext()).thenReturn(context);
+
+        MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
+        List<Metric> metricList = Lists.newArrayList();
+        Metric metric1 = new Metric("sample1", "10", "Custom Metrics|Sample Monitor|sample1");
+        Metric metric2 = new Metric("sample2", "20", "Custom Metrics|Sample Monitor|sample");
+        Metric metric3 = new Metric("sample3", "30", "Custom Metrics|Sample Monitor|sample");
+        metricList.add(metric1);
+        metricList.add(metric2);
+        metricList.add(metric3);
+        MetricWriter metricWriter = mock(MetricWriter.class);
+        when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
+        metricWriteHelper.transformAndPrintMetrics(metricList);
+        metricWriteHelper.onComplete();
+
+        verify(metricWriter, times(4)).printMetric(argumentCaptor.capture());
+        List<String> metrics = argumentCaptor.getAllValues();
+        Assert.assertTrue("true", Integer.valueOf(metrics.get(3) ) == 2);
+
+
     }
 }
 
