@@ -71,7 +71,7 @@ public class ABaseMonitorAndAMonitorJobTest {
 
         @Override
         protected int getTaskCount() {
-            return 2;
+            return 1;
         }
     }
 
@@ -94,5 +94,85 @@ public class ABaseMonitorAndAMonitorJobTest {
         ConcurrentMap<String, Metric> cache = sampleMonitor.getContextConfiguration().getContext().getCachedMetrics();
         Assert.assertTrue(cache.get("Custom Metric|Sample|sample value").getMetricValue().equals("3") || cache.get("Custom Metric|Sample|sample value").getMetricValue().equals("4"));
     }
+
+    public class TestMonitorWithFanOut extends ABaseMonitor{
+
+        @Override
+        protected String getDefaultMetricPrefix() {
+            return "Custom Metrics|TestMonitorWithFanOut";
+        }
+
+        @Override
+        public String getMonitorName() {
+            return "Test Monitor With FanOut";
+        }
+
+        @Override
+        protected void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider) { }
+
+        @Override
+        protected int getTaskCount() {
+            return 2;
+        }
+    }
+
+
+    @Test
+    public void whenMultipleServersThenCheckDisplayNamePresent() throws TaskExecutionException, InterruptedException{
+        TestMonitorWithFanOut testMonitor = new TestMonitorWithFanOut();
+        Map<String, String> args = Maps.newHashMap();
+        args.put("config-file", "src/test/resources/conf/config_WithMultipleServersDisplayNameCheck.yml");
+        testMonitor.execute(args, null);
+        Thread.sleep(1000);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void whenMultipleServersThenAssertOnDisplayNameNotPresent() throws TaskExecutionException, InterruptedException{
+        TestMonitorWithFanOut testMonitorWithFanOut = new TestMonitorWithFanOut();
+        Map<String, String> args = Maps.newHashMap();
+        args.put("config-file", "src/test/resources/conf/config_WithMultipleServersDisplayNameAbsent.yml");
+        testMonitorWithFanOut.execute(args, null);
+        Thread.sleep(1000);
+    }
+
+    public class TestMonitorWithoutFanOut extends ABaseMonitor{
+
+        @Override
+        protected String getDefaultMetricPrefix() {
+            return "Custom Metrics|TestMonitorWithoutFanOut";
+        }
+
+        @Override
+        public String getMonitorName() {
+            return "Test Monitor Without FanOut";
+        }
+
+        @Override
+        protected void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider) { }
+
+        @Override
+        protected int getTaskCount() {
+            return 1;
+        }
+    }
+
+    @Test
+    public void whenOneServerThenCheckDisplayNameNotPresent() throws TaskExecutionException, InterruptedException{
+        TestMonitorWithoutFanOut testMonitorWithoutFanOut = new TestMonitorWithoutFanOut();
+        Map<String, String> args = Maps.newHashMap();
+        args.put("config-file", "src/test/resources/conf/config_WithOneServerDisplayNameCheck.yml");
+        testMonitorWithoutFanOut.execute(args, null);
+        Thread.sleep(1000);
+    }
+
+    @Test(expected= java.lang.AssertionError.class)
+    public void whenOneServerThenAssertOnDisplayNamePresent() throws TaskExecutionException, InterruptedException{
+        TestMonitorWithoutFanOut testMonitorWithoutFanOut = new TestMonitorWithoutFanOut();
+        Map<String, String> args = Maps.newHashMap();
+        args.put("config-file", "src/test/resources/conf/config_WithOneServerDisplayNamePresent.yml");
+        testMonitorWithoutFanOut.execute(args, null);
+        Thread.sleep(1000);
+    }
+
 
 }
