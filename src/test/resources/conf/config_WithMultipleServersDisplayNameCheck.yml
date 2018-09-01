@@ -1,0 +1,22 @@
+#This will populate the metrics in all the tiers, under this path(not recommended)
+#metricPrefix: "Custom Metrics|Redis"
+
+#The following prefix will populate the metrics under one tier
+metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
+assertDisplayNameCheck: true
+
+#Add your list of Redis servers here.
+servers:
+  - displayName: "Server1"
+    host: "localhost"
+    port: "6379"
+    password: ""
+
+  - displayName: "Server2"
+    host: "localhost"
+    port: "6370"
+    password: ""
+
+
+
+
