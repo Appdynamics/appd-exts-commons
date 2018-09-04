@@ -16,7 +16,7 @@ public class ControllerInfoFactory {
        1st priority : System Properties
        2nd priority : Controller Info xml
        3rd priority : config.yml
-       yml's controllerInfo overrides system properties which in turn overrides controller-info.xml
+
      */
     public static ControllerInfo getControllerInfo(Map config, File installDir) {
         if (controllerInfo == null) {
@@ -37,5 +37,6 @@ public class ControllerInfoFactory {
         }
         return controllerInfo;
     }
+
 
 }

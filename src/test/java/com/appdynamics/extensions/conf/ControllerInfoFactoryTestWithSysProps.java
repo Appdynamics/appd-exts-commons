@@ -8,34 +8,131 @@
 
 package com.appdynamics.extensions.conf;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
+import org.testng.annotations.AfterMethod;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by bhuvnesh.kumar on 8/29/18.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ControllerInfo.class)
 
 public class ControllerInfoFactoryTestWithSysProps {
 
+    @Before
+    public void resetSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        Field instance = ControllerInfoFactory.class.getDeclaredField("controllerInfo");
+        instance.setAccessible(true);
+        instance.set(null, null);
+    }
+
+    @AfterMethod
+    public void resetSystemProperties(){
+        removeSystemProperties();
+    }
+
+
+
+    @Test
+    public void testGetControllerInfoWithNoProps() {
+        Map config = new HashMap();
+        File file = Mockito.mock(File.class);
+        ControllerInfo  controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+        Assert.assertTrue(controllerInfo.getAccount() == (null));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey()==(null));
+        Assert.assertTrue(controllerInfo.getApplicationName()==(null));
+        Assert.assertTrue(controllerInfo.getTierName()==(null));
+        Assert.assertTrue(controllerInfo.getNodeName()==(null));
+        Assert.assertTrue(controllerInfo.getControllerHost()==(null));
+        Assert.assertTrue(controllerInfo.getControllerPort()==(null));
+        Assert.assertTrue(controllerInfo.getUsername()==(null));
+        Assert.assertTrue(controllerInfo.getPassword().equals(""));
+        Assert.assertTrue(controllerInfo.getEncryptionKey()==(null));
+        Assert.assertTrue(controllerInfo.getEncryptedPassword()==(null));
+        Assert.assertTrue(controllerInfo.getControllerSslEnabled()==(null));
+        Assert.assertTrue(controllerInfo.getUniqueHostId()==(null));
+        Assert.assertTrue(controllerInfo.getSimEnabled()==(null));
+
+    }
+
+    @Test
+    public void testGetControllerInfoWithConfigMap() {
+        File file = Mockito.mock(File.class);
+        Map mapForConfig = getConfigMap();
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
+
+        Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
+        Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationNameYML"));
+        Assert.assertTrue(controllerInfo.getTierName().equals("tierNameYML"));
+        Assert.assertTrue(controllerInfo.getNodeName().equals("nodeNameYML"));
+        Assert.assertTrue(controllerInfo.getControllerHost().equals("hostNameYML"));
+        Assert.assertTrue(controllerInfo.getControllerPort().equals(9999));
+        Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
+        Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
+        Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
+        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
+
+    }
+
+
+    @Test
+    public void testGetControllerInfoWithXML() {
+        Map mapForConfig = new HashMap();
+        File file = new File("src/test/resources/dashboard/");
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
+
+        Assert.assertTrue(controllerInfo.getAccount().equals("xmlAccountName"));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("xmlAccessKey"));
+        Assert.assertTrue(controllerInfo.getApplicationName().equals("xmlApplicationName"));
+        Assert.assertTrue(controllerInfo.getTierName().equals("xmlTierName"));
+        Assert.assertTrue(controllerInfo.getNodeName().equals("xmlNodeName"));
+        Assert.assertTrue(controllerInfo.getControllerHost().equals("xmlHost"));
+        Assert.assertTrue(controllerInfo.getControllerPort().equals(8090));
+        Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
+        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("xmlUniqueHostId"));
+        Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
+
+    }
+
+
+    @Test
+    public void testGetControllerInfoWithXMLandConfig() {
+        Map config = getConfigMap();
+
+        File file = new File("src/test/resources/dashboard/");
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+
+        Assert.assertTrue(controllerInfo.getAccount().equals("xmlAccountName"));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("xmlAccessKey"));
+        Assert.assertTrue(controllerInfo.getApplicationName().equals("xmlApplicationName"));
+        Assert.assertTrue(controllerInfo.getTierName().equals("xmlTierName"));
+        Assert.assertTrue(controllerInfo.getNodeName().equals("xmlNodeName"));
+        Assert.assertTrue(controllerInfo.getControllerHost().equals("xmlHost"));
+        Assert.assertTrue(controllerInfo.getControllerPort().equals(8090));
+        Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
+        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("xmlUniqueHostId"));
+        Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
+
+    }
 
     @Test
     public void testGetControllerInfoWithSystemProps() {
 
         setupSystemProps();
-        File cxml = new File("");
-        Map maping = new HashMap();
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(maping, cxml);
-        removeSystemProperties();
+        Map mapForConfig = null;
+        File file =  Mockito.mock(File.class);
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -53,16 +150,14 @@ public class ControllerInfoFactoryTestWithSysProps {
 
     }
 
-
     @Test
     public void testGetControllerInfoWithSystemPropsAndConfig() {
 
         setupSystemProps();
         Map config = getConfigMap();
-
         File file = Mockito.mock(File.class);
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
-        removeSystemProperties();
+
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -86,7 +181,6 @@ public class ControllerInfoFactoryTestWithSysProps {
         Map mapForConfig = new HashMap();
         File file = new File("src/test/resources/dashboard/");
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
-        removeSystemProperties();
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -100,7 +194,6 @@ public class ControllerInfoFactoryTestWithSysProps {
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostID"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
 
-
     }
 
     @Test
@@ -108,11 +201,9 @@ public class ControllerInfoFactoryTestWithSysProps {
 
         setupSystemProps();
         Map config = getConfigMap();
-
         File file = new File("src/test/resources/dashboard/");
-
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
-        removeSystemProperties();
+
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -184,10 +275,7 @@ public class ControllerInfoFactoryTestWithSysProps {
         System.clearProperty("appdynamics.agent.uniqueHostId");
         System.clearProperty("appdynamics.sim.enabled");
 
-
     }
-
-
 
 
 }
