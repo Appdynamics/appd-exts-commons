@@ -105,7 +105,8 @@ public class MetricWriteHelper {
             String clusterRollUpType = metricProperties.getClusterRollUpType();
             printMetric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
         }
-        printMetric(baseMonitor.getContextConfiguration().getMetricPrefix()+"TotalMetricsReported", String.valueOf(metricsMap.size()),"AVERAGE", "AVERAGE","INDIVIDUAL" );
+        printMetric(baseMonitor.getContextConfiguration().getMetricPrefix()+"|"+"TotalMetricsReportedInThisRun",
+                String.valueOf(metricsMap.size()),"OBSERVATION", "CURRENT","COLLECTIVE" );
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
