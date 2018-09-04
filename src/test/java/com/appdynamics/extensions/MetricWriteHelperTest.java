@@ -52,6 +52,7 @@ public class MetricWriteHelperTest {
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample", "2.04", "Custom Metrics|Sample Monitor|sample");
         metricList.add(metric1);
@@ -59,10 +60,10 @@ public class MetricWriteHelperTest {
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         metricWriteHelper.transformAndPrintMetrics(metricList);
-        verify(metricWriter, times(1)).printMetric(stringArgumentCaptor.capture());
+        verify(metricWriter, times(2)).printMetric(stringArgumentCaptor.capture());
 
-        String stringArgs = stringArgumentCaptor.getValue();
-        Assert.assertTrue(stringArgs.equals("2"));
+        List<String> stringArgs = stringArgumentCaptor.getAllValues();
+        Assert.assertTrue(stringArgs.get(0).equals("2"));
     }
 
     @Test
@@ -72,6 +73,7 @@ public class MetricWriteHelperTest {
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/DerivedSample.yml"));
@@ -89,10 +91,10 @@ public class MetricWriteHelperTest {
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         metricWriteHelper.transformAndPrintMetrics(metricList);
         metricWriteHelper.onComplete();
-        verify(metricWriter, times(4)).printMetric(stringArgumentCaptor.capture());
+        verify(metricWriter, times(6)).printMetric(stringArgumentCaptor.capture());
         List<String> stringArgs = stringArgumentCaptor.getAllValues();
         for(String value : stringArgs){
-            Assert.assertTrue(value.equals("2") || value.equals("4") || value.equals("1"));
+            Assert.assertTrue(value.equals("2") || value.equals("4") || value.equals("1") || value.equals("5"));
         }
 
     }
