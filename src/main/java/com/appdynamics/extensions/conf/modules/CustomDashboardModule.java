@@ -65,13 +65,20 @@ public class CustomDashboardModule {
             dashboardMetricPath = metricPrefix;
         }
 
-        if (!dashboardMetricPath.endsWith("|")) {
-            dashboardMetricPath += "|";
+        if (dashboardMetricPath.endsWith("|")) {
+            dashboardMetricPath = removeSeparator(dashboardMetricPath);
         }
 
         logger.debug("Dashboard Metric Prefix = " + dashboardMetricPath);
 
         return dashboardMetricPath;
+    }
+
+    public String removeSeparator(String str) {
+        if (str != null && str.length() > 0 && str.charAt(str.length() - 1) == '|') {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
     }
 
 

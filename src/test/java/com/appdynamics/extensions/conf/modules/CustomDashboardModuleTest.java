@@ -30,7 +30,7 @@ public class CustomDashboardModuleTest {
 
         CustomDashboardModule customDashboardModule = new CustomDashboardModule(file);
         String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(dashboardConfig);
-        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB|"));
+        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
     @Test
@@ -39,16 +39,16 @@ public class CustomDashboardModuleTest {
         dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB|");
         CustomDashboardModule customDashboardModule = new CustomDashboardModule(file);
         String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(dashboardConfig);
-        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB|"));
+        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
     @Test
-    public void addPipeToMetricPrefixWhereMissing() {
+    public void verifyMetricPrefixWherePipeIsMissing() {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB");
         CustomDashboardModule customDashboardModule = new CustomDashboardModule(file);
         String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(dashboardConfig);
-        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB|"));
+        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
 }
