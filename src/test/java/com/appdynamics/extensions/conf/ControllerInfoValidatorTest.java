@@ -10,12 +10,7 @@ package com.appdynamics.extensions.conf;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by bhuvnesh.kumar on 8/29/18.

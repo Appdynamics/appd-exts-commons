@@ -12,9 +12,7 @@ import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.NumberUtils;
-import com.appdynamics.extensions.util.PathResolver;
 import com.google.common.base.Strings;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -355,7 +353,6 @@ public class ControllerInfo {
         controllerInfo.setSimEnabled(xmlControllerInfo.getSimEnabled());
         return controllerInfo;
     }
-
 
 
 }

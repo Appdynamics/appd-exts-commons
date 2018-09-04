@@ -8,16 +8,9 @@
 
 package com.appdynamics.extensions.conf;
 
-import com.appdynamics.extensions.AMonitorJob;
-import com.appdynamics.extensions.util.PathResolver;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.omg.CORBA.Any;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -36,7 +29,7 @@ public class ControllerInfoTest {
 
 
     @Test
-    public void fromXMLTest(){
+    public void fromXMLTest() {
         File file = new File("src/test/resources/dashboard/");
         ControllerInfo controllerInfo = ControllerInfo.getControllerInfoFromXml(file);
 
@@ -90,19 +83,19 @@ public class ControllerInfoTest {
     }
 
     @Test
-    public void testFromYml(){
+    public void testFromYml() {
         Map config = new HashMap<>();
-        config.put("controllerHost","hostName");
-        config.put("controllerPort",9090);
-        config.put("controllerSslEnabled",false);
-        config.put("uniqueHostId","uniqueHostID");
-        config.put("account","accountName");
-        config.put("username","username");
-        config.put("password","password");
-        config.put("accountAccessKey","accessKey");
-        config.put("applicationName","applicationName");
-        config.put("tierName","tierName");
-        config.put("nodeName","nodeName");
+        config.put("controllerHost", "hostName");
+        config.put("controllerPort", 9090);
+        config.put("controllerSslEnabled", false);
+        config.put("uniqueHostId", "uniqueHostID");
+        config.put("account", "accountName");
+        config.put("username", "username");
+        config.put("password", "password");
+        config.put("accountAccessKey", "accessKey");
+        config.put("applicationName", "applicationName");
+        config.put("tierName", "tierName");
+        config.put("nodeName", "nodeName");
 
         ControllerInfo controllerInfo = ControllerInfo.fromYml(config);
 
@@ -142,17 +135,17 @@ public class ControllerInfoTest {
         ControllerInfo systemProperties = ControllerInfo.fromSystemProperties();
 
         Map configMap = new HashMap();
-        configMap.put("controllerHost","hostNameYML");
-        configMap.put("controllerPort",9999);
-        configMap.put("controllerSslEnabled",true);
-        configMap.put("uniqueHostId","uniqueHostIDYML");
-        configMap.put("account","accountNameYML");
-        configMap.put("username","usernameYML");
-        configMap.put("password","passwordYML");
-        configMap.put("accountAccessKey","accessKeyYML");
-        configMap.put("applicationName","applicationNameYML");
-        configMap.put("tierName","tierNameYML");
-        configMap.put("nodeName","nodeNameYML");
+        configMap.put("controllerHost", "hostNameYML");
+        configMap.put("controllerPort", 9999);
+        configMap.put("controllerSslEnabled", true);
+        configMap.put("uniqueHostId", "uniqueHostIDYML");
+        configMap.put("account", "accountNameYML");
+        configMap.put("username", "usernameYML");
+        configMap.put("password", "passwordYML");
+        configMap.put("accountAccessKey", "accessKeyYML");
+        configMap.put("applicationName", "applicationNameYML");
+        configMap.put("tierName", "tierNameYML");
+        configMap.put("nodeName", "nodeNameYML");
 
         ControllerInfo configProperties = ControllerInfo.fromYml(configMap);
 
@@ -171,8 +164,6 @@ public class ControllerInfoTest {
         Assert.assertTrue(mergeTest.getPassword().equals("password"));
         Assert.assertTrue(mergeTest.getControllerSslEnabled().equals(false));
         Assert.assertTrue(mergeTest.getUniqueHostId().equals("uniqueHostID"));
-
-
 
 
     }

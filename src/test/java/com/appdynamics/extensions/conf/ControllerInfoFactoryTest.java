@@ -8,14 +8,14 @@
 
 package com.appdynamics.extensions.conf;
 
-import org.junit.*;
-import org.junit.rules.TestRule;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.testng.annotations.AfterMethod;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import java.util.Map;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ControllerInfo.class)
 
-public class ControllerInfoFactoryTestWithSysProps {
+public class ControllerInfoFactoryTest {
 
     @Before
     public void resetSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
@@ -36,32 +36,26 @@ public class ControllerInfoFactoryTestWithSysProps {
         instance.set(null, null);
     }
 
-    @AfterMethod
-    public void resetSystemProperties(){
-        removeSystemProperties();
-    }
-
-
 
     @Test
     public void testGetControllerInfoWithNoProps() {
         Map config = new HashMap();
         File file = Mockito.mock(File.class);
-        ControllerInfo  controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
         Assert.assertTrue(controllerInfo.getAccount() == (null));
-        Assert.assertTrue(controllerInfo.getAccountAccessKey()==(null));
-        Assert.assertTrue(controllerInfo.getApplicationName()==(null));
-        Assert.assertTrue(controllerInfo.getTierName()==(null));
-        Assert.assertTrue(controllerInfo.getNodeName()==(null));
-        Assert.assertTrue(controllerInfo.getControllerHost()==(null));
-        Assert.assertTrue(controllerInfo.getControllerPort()==(null));
-        Assert.assertTrue(controllerInfo.getUsername()==(null));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey() == (null));
+        Assert.assertTrue(controllerInfo.getApplicationName() == (null));
+        Assert.assertTrue(controllerInfo.getTierName() == (null));
+        Assert.assertTrue(controllerInfo.getNodeName() == (null));
+        Assert.assertTrue(controllerInfo.getControllerHost() == (null));
+        Assert.assertTrue(controllerInfo.getControllerPort() == (null));
+        Assert.assertTrue(controllerInfo.getUsername() == (null));
         Assert.assertTrue(controllerInfo.getPassword().equals(""));
-        Assert.assertTrue(controllerInfo.getEncryptionKey()==(null));
-        Assert.assertTrue(controllerInfo.getEncryptedPassword()==(null));
-        Assert.assertTrue(controllerInfo.getControllerSslEnabled()==(null));
-        Assert.assertTrue(controllerInfo.getUniqueHostId()==(null));
-        Assert.assertTrue(controllerInfo.getSimEnabled()==(null));
+        Assert.assertTrue(controllerInfo.getEncryptionKey() == (null));
+        Assert.assertTrue(controllerInfo.getEncryptedPassword() == (null));
+        Assert.assertTrue(controllerInfo.getControllerSslEnabled() == (null));
+        Assert.assertTrue(controllerInfo.getUniqueHostId() == (null));
+        Assert.assertTrue(controllerInfo.getSimEnabled() == (null));
 
     }
 
@@ -131,7 +125,7 @@ public class ControllerInfoFactoryTestWithSysProps {
 
         setupSystemProps();
         Map mapForConfig = null;
-        File file =  Mockito.mock(File.class);
+        File file = Mockito.mock(File.class);
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
@@ -176,7 +170,7 @@ public class ControllerInfoFactoryTestWithSysProps {
     }
 
     @Test
-    public void testGetControllerInfoWithSystemPropsAndXML(){
+    public void testGetControllerInfoWithSystemPropsAndXML() {
         setupSystemProps();
         Map mapForConfig = new HashMap();
         File file = new File("src/test/resources/dashboard/");
@@ -240,20 +234,20 @@ public class ControllerInfoFactoryTestWithSysProps {
 
     public void setupSystemProps() {
 
-        System.setProperty("appdynamics.agent.accountAccessKey","accessKey");
-        System.setProperty("appdynamics.agent.accountName","accountName");
-        System.setProperty("appdynamics.agent.applicationName","applicationName");
-        System.setProperty("appdynamics.agent.tierName","tierName");
-        System.setProperty("appdynamics.agent.nodeName","nodeName");
-        System.setProperty("appdynamics.controller.hostName","hostName");
-        System.setProperty("appdynamics.agent.monitors.controller.username","username");
-        System.setProperty("appdynamics.agent.monitors.controller.password","password");
-        System.setProperty("appdynamics.agent.monitors.controller.encryptionKey","encryptionKey");
-        System.setProperty("appdynamics.agent.monitors.controller.encryptedPassword","encryptedPassword");
-        System.setProperty("appdynamics.controller.port","9090");
-        System.setProperty("appdynamics.controller.ssl.enabled","false");
-        System.setProperty("appdynamics.agent.uniqueHostId","uniqueHostID");
-        System.setProperty("appdynamics.sim.enabled","false");
+        System.setProperty("appdynamics.agent.accountAccessKey", "accessKey");
+        System.setProperty("appdynamics.agent.accountName", "accountName");
+        System.setProperty("appdynamics.agent.applicationName", "applicationName");
+        System.setProperty("appdynamics.agent.tierName", "tierName");
+        System.setProperty("appdynamics.agent.nodeName", "nodeName");
+        System.setProperty("appdynamics.controller.hostName", "hostName");
+        System.setProperty("appdynamics.agent.monitors.controller.username", "username");
+        System.setProperty("appdynamics.agent.monitors.controller.password", "password");
+        System.setProperty("appdynamics.agent.monitors.controller.encryptionKey", "encryptionKey");
+        System.setProperty("appdynamics.agent.monitors.controller.encryptedPassword", "encryptedPassword");
+        System.setProperty("appdynamics.controller.port", "9090");
+        System.setProperty("appdynamics.controller.ssl.enabled", "false");
+        System.setProperty("appdynamics.agent.uniqueHostId", "uniqueHostID");
+        System.setProperty("appdynamics.sim.enabled", "false");
 
     }
 

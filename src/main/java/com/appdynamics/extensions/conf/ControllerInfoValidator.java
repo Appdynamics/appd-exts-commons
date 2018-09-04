@@ -32,10 +32,10 @@ public class ControllerInfoValidator {
         return true;
     }
 
-    public void simEnabledOrNot(String propName, Object propVal, ControllerInfo cInfo){
+    public void simEnabledOrNot(String propName, Object propVal, ControllerInfo cInfo) {
         if (propVal != null) {
             if (propVal instanceof Boolean) {
-                if(((Boolean) propVal).booleanValue() == false){
+                if (((Boolean) propVal).booleanValue() == false) {
                     check("applicationName", cInfo.getApplicationName());
                     check("tierName", cInfo.getTierName());
                     check("nodeName", cInfo.getNodeName());
@@ -53,16 +53,16 @@ public class ControllerInfoValidator {
                 if (Strings.isNullOrEmpty((String) propVal)) {
                     markUnresolved(propName);
                 }
-            } else if(propVal instanceof Integer){
+            } else if (propVal instanceof Integer) {
                 if (propVal == null) {
                     markUnresolved(propName);
                 }
-            } else if(propVal instanceof Boolean){
+            } else if (propVal instanceof Boolean) {
                 if (propVal == null) {
                     markUnresolved(propName);
                 }
             }
-        }else {
+        } else {
             markUnresolved(propName);
         }
 

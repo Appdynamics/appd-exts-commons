@@ -15,26 +15,26 @@ public class CustomDashboardModule {
     private File installDir;
 
     public CustomDashboardModule(File file) {
-    this.installDir = file;
+        this.installDir = file;
     }
 
     public void initCustomDashboard(Map<String, ?> config) {
         Map customDashboardConfig = new HashMap();
         Map controllerInformation = new HashMap();
-        if(config.get("customDashboard") != null){
+        if (config.get("customDashboard") != null) {
             customDashboardConfig = (Map) config.get("customDashboard");
         }
-        if (config.get("controllerInfo") != null){
+        if (config.get("controllerInfo") != null) {
             controllerInformation = (Map) config.get("controllerInfo");
         }
 
         String metricPrefix = buildMetricPrefixForDashboard(config);
 
-        if(!metricPrefix.equals("") ){
+        if (!metricPrefix.equals("")) {
             if (customDashboardConfig != null) {
                 long timestamp1 = System.currentTimeMillis();
                 CustomDashboardUploader uploader = new CustomDashboardUploader();
-                CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(installDir, customDashboardConfig, controllerInformation, metricPrefix,uploader);
+                CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(installDir, customDashboardConfig, controllerInformation, metricPrefix, uploader);
                 dashboardGenerator.createDashboard();
                 long timestamp2 = System.currentTimeMillis();
                 logger.debug("Time to complete customDashboardModule in :" + (timestamp2 - timestamp1) + " ms");
@@ -48,24 +48,24 @@ public class CustomDashboardModule {
 
     public String buildMetricPrefixForDashboard(Map<String, ?> config) {
         String metricPrefix = "";
-        if(config.get("metricPrefix") != null){
+        if (config.get("metricPrefix") != null) {
             metricPrefix = config.get("metricPrefix").toString();
         }
         String dashboardMetricPath = "";
-        if(metricPrefix.contains("Server")){
+        if (metricPrefix.contains("Server")) {
             String[] metricPath = metricPrefix.split("\\|");
             int count = 0;
-            for(String str: metricPath){
+            for (String str : metricPath) {
                 count++;
-                if (count > 2){
-                    dashboardMetricPath += str+ "|";
+                if (count > 2) {
+                    dashboardMetricPath += str + "|";
                 }
             }
         } else {
             dashboardMetricPath = metricPrefix;
         }
 
-        if(!dashboardMetricPath.endsWith("|")){
+        if (!dashboardMetricPath.endsWith("|")) {
             dashboardMetricPath += "|";
         }
 
