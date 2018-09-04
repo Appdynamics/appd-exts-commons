@@ -105,8 +105,7 @@ public class MetricWriteHelper {
             String clusterRollUpType = metricProperties.getClusterRollUpType();
             printMetric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
         }
-        printMetric(baseMonitor.getContextConfiguration().getMetricPrefix()+"|"+"TotalMetricsReportedInThisRun",
-                String.valueOf(metricsMap.size()),"OBSERVATION", "CURRENT","COLLECTIVE" );
+
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
@@ -138,6 +137,8 @@ public class MetricWriteHelper {
             logger.debug("Total number of derived metrics reported in this job run are : {}", metricsMap.size() - baseMetricsSize);
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
+        printMetric(baseMonitor.getContextConfiguration().getMetricPrefix()+"|"+"Metrics Uploaded",
+                String.valueOf(metricsMap.size()),"AVERAGE", "AVERAGE","COLLECTIVE" );
         logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
     }
 
