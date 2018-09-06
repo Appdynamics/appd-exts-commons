@@ -63,6 +63,9 @@ public class ControllerInfoFactory {
         if ((Boolean) config.get("controllerSslEnabled") != null) {
             controllerInfo.setControllerSslEnabled((Boolean) config.get("controllerSslEnabled"));
         }
+        if ((Boolean) config.get("simEnabled") != null) {
+            controllerInfo.setSimEnabled((Boolean) config.get("simEnabled"));
+        }
         if (!Strings.isNullOrEmpty((String) config.get("uniqueHostId"))) {
             controllerInfo.setUniqueHostId(config.get("uniqueHostId").toString());
         }

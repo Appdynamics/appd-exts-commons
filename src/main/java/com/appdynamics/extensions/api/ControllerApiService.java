@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.api;
 
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
@@ -34,13 +35,22 @@ import java.util.Map;
 public class ControllerApiService {
 
     public static final org.slf4j.Logger logger = ExtensionsLoggerFactory.getLogger(ControllerApiService.class);
-// TODO pass controller info object here
-// TODO add it to the constructor
-// TODO maintain the state  pass this controller api service from the init module
+    ControllerInfo controllerInfo;
+    UrlBuilder urlBuilder;
 
-    public CookiesCsrf getCookiesAndAuthToken(CloseableHttpClient httpClient, Map<String, String> serverMap) throws ApiException {
-// TODO        UrlBuilder.builder().host(controllerinfo.host)
-        HttpGet get = new HttpGet(UrlBuilder.builder(serverMap).path("controller/auth?action=login").build());
+    public ControllerApiService(ControllerInfo controllerInfo) {
+        this.controllerInfo = controllerInfo;
+
+        this.urlBuilder = new UrlBuilder();
+        urlBuilder.host(controllerInfo.getControllerHost());
+        urlBuilder.port(controllerInfo.getControllerPort());
+        urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
+
+    }
+
+    public CookiesCsrf getCookiesAndAuthToken(CloseableHttpClient httpClient) throws ApiException {
+
+        HttpGet get = new HttpGet(urlBuilder.path("controller/auth?action=login").build());
         HttpResponse response = null;
         CookiesCsrf cookiesCsrf = new CookiesCsrf();
         StatusLine statusLine;
@@ -82,8 +92,8 @@ public class ControllerApiService {
         }
     }
 
-    public JsonNode getAllDashboards(CloseableHttpClient httpClient, Map<String, String> serverMap, CookiesCsrf cookiesCsrf) throws ApiException {
-        HttpGet get = new HttpGet(UrlBuilder.builder(serverMap).path("controller/restui/dashboards/getAllDashboardsByType/false").build());
+    public JsonNode getAllDashboards(CloseableHttpClient httpClient, CookiesCsrf cookiesCsrf) throws ApiException {
+        HttpGet get = new HttpGet(urlBuilder.path("controller/restui/dashboards/getAllDashboardsByType/false").build());
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCookies())) {
             get.setHeader("Cookie", cookiesCsrf.getCookies());
         }
@@ -113,19 +123,18 @@ public class ControllerApiService {
         }
     }
 
-    // todo change args map to http properties
-    public void uploadDashboard(Map<String, String> serverMap, Map<String, ?> argsMap, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String contentType) throws ApiException {
+    public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String contentType) throws ApiException {
         String filename = dashboardName + "." + fileExtension;
         String twoHyphens = "--";
         String boundary = "*****";
         String lineEnd = "\r\n";
-        String urlStr = new UrlBuilder(serverMap).path("controller/CustomDashboardImportExportServlet").build();
+        String urlStr = urlBuilder.path("controller/CustomDashboardImportExportServlet").build();
         logger.info("Uploading the custom Dashboard {} to {}", filename, urlStr);
         HttpURLConnection connection = null;
         try {
             URL url = new URL(urlStr);
-            if (argsMap.containsKey("proxy")) {
-                Map<String, ?> proxyMap = (Map<String, ?>) argsMap.get("proxy");
+            if (httpProperties.containsKey("proxy")) {
+                Map<String, ?> proxyMap = (Map<String, ?>) httpProperties.get("proxy");
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String) proxyMap.get(TaskInputArgs.HOST)
                         , Integer.parseInt((String) proxyMap.get(TaskInputArgs.PORT))));
                 connection = (HttpURLConnection) url.openConnection(proxy);

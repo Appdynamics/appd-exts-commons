@@ -17,7 +17,10 @@ package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.api.ApiException;
+import com.appdynamics.extensions.api.ControllerApiService;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfoValidator;
+import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
@@ -26,6 +29,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
@@ -46,15 +50,27 @@ public class CustomDashboardGenerator {
     private Set<String> instanceNames;
     private String metricPrefix;
     private Map dashboardConfig;
-    private AgentEnvironmentResolver agentEnvResolver;
+    private ControllerInfo controllerInfo;
+//    private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
 
+    public Map getHttpArgs() {
+        return httpArgs;
+    }
+    public String getDashboardContent() {
+        return dashboardContent;
+    }
+    public String getDashboardName() {
+        return dashboardName;
+    }
 
-    public CustomDashboardGenerator( Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix, CustomDashboardUploader uploader) {
+    private String dashboardContent;
+    private Map httpArgs;
+    private String dashboardName;
+
+    public CustomDashboardGenerator( Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix) {
         this.dashboardConfig = dashboardConfig;
-        this.dashboardUploader = uploader;
-        // TODO just use the contorllerInfo validator
-        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation);
+        this.controllerInfo = controllerInformation;
         this.metricPrefix = metricPrefix;
     }
 
@@ -67,21 +83,12 @@ public class CustomDashboardGenerator {
                 return;
             }
 
-            String dashboardName ;
-            if(!Strings.isNullOrEmpty((String)dashboardConfig.get("dashboardName"))){
-                dashboardName = dashboardConfig.get("dashboardName").toString();
-            } else {
-                dashboardName = "Custom Dashboard";
-            }
-            dashboardConfig.put("dashboardName", dashboardName);
-
-
+            setDashboardName();
             dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
-            String jsonExtension = "json";
-            String contentType = "application/json";
-            boolean overwrite = getBoolean(dashboardConfig, "overwriteDashboard");
 
-            sendToUploader(argsMap, dashboardTemplate, dashboardName, jsonExtension, contentType, overwrite);
+            this.dashboardContent = dashboardTemplate;
+            this.httpArgs = argsMap;
+
 
         } else {
             logger.error("Unable to establish connection, please make sure you have provided all necessary values.");
@@ -89,29 +96,29 @@ public class CustomDashboardGenerator {
 
     }
 
-    // TODO to upload or not upload from this class
-
-    protected void sendToUploader(Map<String, ? super Object> argsMap, String dashboardTemplate, String dashboardName, String jsonExtension, String contentType, boolean overwrite) {
-        logger.debug("{}: {}", DASHBOARD_NAME, dashboardName);
-        logger.debug("{}: {}", "JSON Extension", jsonExtension);
-        logger.debug("{}: {}", "Content Type", contentType);
-        logger.debug("{}: {}", "Overwrite", overwrite);
-        try {
-            dashboardUploader.uploadDashboard(dashboardName, jsonExtension, dashboardTemplate, contentType, argsMap, overwrite);
-        } catch (ApiException e) {
-            logger.error("Unable to establish connection, not uploading dashboard.");
+    private void setDashboardName() {
+        String dashboardName  ;
+        if(!Strings.isNullOrEmpty((String)dashboardConfig.get("dashboardName"))){
+            dashboardName = dashboardConfig.get("dashboardName").toString();
+        } else {
+            dashboardName = "Custom Dashboard";
         }
+        dashboardConfig.put("dashboardName", dashboardName);
+        this.dashboardName = dashboardName;
     }
 
+
     protected boolean isResolved() {
-        return agentEnvResolver != null && agentEnvResolver.isResolved();
+        ControllerInfoValidator validator = new ControllerInfoValidator();
+
+        return validator.validateAndCheckIfResolved(controllerInfo);
     }
 
     private String getDashboardContents() {
-        logger.debug("Sim Enabled: {}", agentEnvResolver.getSimEnabled());
+        logger.debug("Sim Enabled: {}", controllerInfo.getSimEnabled());
         String dashboardTemplate = "";
         String pathToFile;
-        if (agentEnvResolver.getSimEnabled() == false) {
+        if (controllerInfo.getSimEnabled() == false) {
             pathToFile = dashboardConfig.get("pathToNormalDashboard").toString();
         } else {
             pathToFile = dashboardConfig.get("pathToSIMDashboard").toString();
@@ -151,20 +158,17 @@ public class CustomDashboardGenerator {
     }
 
     private Map<String, ? super Object> getServerMap() {
-        // TODO can use direct controller info fields or agent resolver fields
-        // TODO Agent resolver should not have these fields and increases redundancy
-        // TODO initally we did not have a controller info object in this class and we were using agent env resolver.
         Map<String, ? super Object> serverMap = new HashMap<>();
-        serverMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName().toString());
-        serverMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.getControllerPort()));
-        serverMap.put(TaskInputArgs.USE_SSL, String.valueOf(agentEnvResolver.isControllerUseSSL()));
+        serverMap.put(TaskInputArgs.HOST, controllerInfo.getControllerHost());
+        serverMap.put(TaskInputArgs.PORT, String.valueOf(controllerInfo.getControllerPort()));
+        serverMap.put(TaskInputArgs.USE_SSL, String.valueOf(controllerInfo.getControllerSslEnabled()));
         serverMap.put(TaskInputArgs.USER, getUserName());
-        serverMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
+        serverMap.put(TaskInputArgs.PASSWORD, controllerInfo.getPassword());
 
         logger.debug("Controller Info: ");
-        logger.debug(TaskInputArgs.HOST + ": {}", agentEnvResolver.getControllerHostName());
-        logger.debug(TaskInputArgs.PORT + ": {}", String.valueOf(agentEnvResolver.getControllerPort()));
-        logger.debug(TaskInputArgs.USE_SSL + ": {}", agentEnvResolver.isControllerUseSSL());
+        logger.debug(TaskInputArgs.HOST + ": {}", controllerInfo.getControllerHost());
+        logger.debug(TaskInputArgs.PORT + ": {}", String.valueOf(controllerInfo.getControllerPort()));
+        logger.debug(TaskInputArgs.USE_SSL + ": {}", controllerInfo.getControllerSslEnabled());
         logger.debug(TaskInputArgs.USER + ": {}", getUserName());
         return serverMap;
     }
@@ -185,8 +189,8 @@ public class CustomDashboardGenerator {
     }
 
     private String getUserName() {
-        String accountName = agentEnvResolver.getAccountName();
-        String username = agentEnvResolver.getUsername();
+        String accountName = controllerInfo.getAccount();
+        String username = controllerInfo.getUsername();
         if (accountName != null && username != null) {
             return username + AT + accountName;
         }
@@ -216,8 +220,8 @@ public class CustomDashboardGenerator {
 
     private String setApplicationName(String dashboardString) {
         if (dashboardString.contains(REPLACE_APPLICATION_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_APPLICATION_NAME, agentEnvResolver.getApplicationName());
-            logger.debug(REPLACE_APPLICATION_NAME + ": " + agentEnvResolver.getApplicationName());
+            dashboardString = dashboardString.replace(REPLACE_APPLICATION_NAME, controllerInfo.getApplicationName());
+            logger.debug(REPLACE_APPLICATION_NAME + ": " + controllerInfo.getApplicationName());
         }
         return dashboardString;
     }
@@ -232,24 +236,24 @@ public class CustomDashboardGenerator {
 
     private String setTierName(String dashboardString) {
         if (dashboardString.contains(REPLACE_TIER_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_TIER_NAME, agentEnvResolver.getTierName());
-            logger.debug(REPLACE_TIER_NAME + ": " + agentEnvResolver.getTierName());
+            dashboardString = dashboardString.replace(REPLACE_TIER_NAME, controllerInfo.getTierName());
+            logger.debug(REPLACE_TIER_NAME + ": " + controllerInfo.getTierName());
         }
         return dashboardString;
     }
 
     private String setNodeName(String dashboardString) {
         if (dashboardString.contains(REPLACE_NODE_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_NODE_NAME, agentEnvResolver.getNodeName());
-            logger.debug(REPLACE_NODE_NAME + ": " + agentEnvResolver.getNodeName());
+            dashboardString = dashboardString.replace(REPLACE_NODE_NAME, controllerInfo.getNodeName());
+            logger.debug(REPLACE_NODE_NAME + ": " + controllerInfo.getNodeName());
         }
         return dashboardString;
     }
 
     private String setHostName(String dashboardString) {
         if (dashboardString.contains(REPLACE_HOST_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_HOST_NAME, agentEnvResolver.getControllerHostName());
-            logger.debug(REPLACE_HOST_NAME + ": " + agentEnvResolver.getControllerHostName());
+            dashboardString = dashboardString.replace(REPLACE_HOST_NAME, controllerInfo.getControllerHost());
+            logger.debug(REPLACE_HOST_NAME + ": " + controllerInfo.getControllerHost());
         }
         return dashboardString;
     }
@@ -270,8 +274,8 @@ public class CustomDashboardGenerator {
 
     private String setMachinePath(String dashboardString) {
         if (dashboardString.contains(REPLACE_MACHINE_PATH)) {
-            if (agentEnvResolver.getMachinePath() != null) {
-                String machinePath = ROOT + METRICS_SEPARATOR + agentEnvResolver.getMachinePath();
+            if (controllerInfo.getMachinePath() != null) {
+                String machinePath = ROOT + METRICS_SEPARATOR + controllerInfo.getMachinePath();
                 machinePath = machinePath.substring(0, machinePath.lastIndexOf(METRICS_SEPARATOR));
                 dashboardString = dashboardString.replace(REPLACE_MACHINE_PATH, machinePath);
                 logger.debug(REPLACE_MACHINE_PATH + ": " + machinePath);
@@ -309,11 +313,12 @@ public class CustomDashboardGenerator {
             return;
         }
 
+        this.controllerInfo = controllerInfo;
         this.instanceNames = instanceNames;
         this.metricPrefix = StringUtils.trim(metricPrefix, "|");
         this.dashboardConfig = dashboardConfig;
-        this.dashboardUploader = new CustomDashboardUploader();
-        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInfo);
+        ControllerApiService controllerApiService = new ControllerApiService(controllerInfo);
+        this.dashboardUploader = new CustomDashboardUploader(controllerApiService);
     }
 
     public void createDashboards(Collection<String> metrics) {
@@ -341,7 +346,7 @@ public class CustomDashboardGenerator {
 
     protected StringBuilder buildMetricPrefix(String metricPrefix) {
         StringBuilder ctrlMetricPrefix = new StringBuilder();
-        String tierName = agentEnvResolver.getTierName();
+        String tierName = controllerInfo.getTierName();
         if (metricPrefix.startsWith(TIER_METRIC_PREFIX)) {
             int endIndex = metricPrefix.indexOf("|", 17);
             if (endIndex == -1) {
@@ -388,7 +393,7 @@ public class CustomDashboardGenerator {
                             ++seriesNameCount;
                             setSeriesName(seriesNameCount, widgetClone);
                             Node firstNode = Xml.getFirstChild(widgetClone, "widget-series-data");
-                            setApplicationName(firstNode, agentEnvResolver.getApplicationName());
+                            setApplicationName(firstNode, controllerInfo.getApplicationName());
                         }
                     } else {
                         logger.error("No Match found for {}", metricTemplate);
@@ -430,8 +435,10 @@ public class CustomDashboardGenerator {
     protected void persistDashboard(String dashboardName, Xml xml) {
         if (getBoolean(dashboardConfig, "uploadDashboard")) {
             Map<String, ? super Object> argsMap = getArgsMap();
+            CloseableHttpClient httpClient = getHttpClient(argsMap);
+
             try {
-                dashboardUploader.uploadDashboard(dashboardName, ".xml", xml.toString(), "text/xml", argsMap,
+                dashboardUploader.uploadDashboard(httpClient,dashboardName, ".xml", xml.toString(), "text/xml", argsMap,
                         getBoolean(dashboardConfig, "overwriteDashboard"));
             } catch (ApiException e) {
                 logger.error("Failed to upload dashboard", e);
@@ -439,7 +446,37 @@ public class CustomDashboardGenerator {
         }
         writeDashboardToFile(dashboardName, xml);
     }
+    private CloseableHttpClient getHttpClient(Map<String, ? super Object> argsMap) {
 
+        setProxyIfApplicable(argsMap);
+        CloseableHttpClient client = null;
+
+        try {
+            client = Http4ClientBuilder.getBuilder(argsMap).build();
+            return client;
+        } finally {
+            try {
+                client.close();
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+        }
+    }
+
+    private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {
+        String proxyHost = System.getProperty("appdynamics.http.proxyHost");
+        String proxyPort = System.getProperty("appdynamics.http.proxyPort");
+        if (StringUtils.hasText(proxyHost) && StringUtils.hasText(proxyPort)) {
+            Map<String, ? super Object> proxyMap = new HashMap<>();
+            proxyMap.put(TaskInputArgs.HOST, proxyHost);
+            proxyMap.put(TaskInputArgs.PORT, proxyPort);
+            argsMap.put("proxy", proxyMap);
+            logger.debug("Using the proxy {}:{} to upload the dashboard", proxyHost, proxyPort);
+        } else {
+            logger.debug("Not using proxy for dashboard upload appdynamics.http.proxyHost={} and appdynamics.http.proxyPort={}"
+                    , proxyHost, proxyPort);
+        }
+    }
     private void writeDashboardToFile(String dashboardName, Xml xml) {
         File file = PathResolver.resolveDirectory(AManagedMonitor.class);
         File dir = new File(file, "logs");
@@ -554,7 +591,4 @@ public class CustomDashboardGenerator {
         return null;
     }
 
-    protected void setAgentEnvResolver(AgentEnvironmentResolver agentEnvResolver) {
-        this.agentEnvResolver = agentEnvResolver;
-    }
 }
