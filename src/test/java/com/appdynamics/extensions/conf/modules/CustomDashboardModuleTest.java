@@ -8,13 +8,12 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.conf.ControllerInfo;
-import com.appdynamics.extensions.conf.ControllerInfoFactory;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.print.DocFlavor;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;

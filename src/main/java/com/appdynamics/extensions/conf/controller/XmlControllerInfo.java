@@ -6,7 +6,7 @@
  *
  */
 
-package com.appdynamics.extensions.conf;
+package com.appdynamics.extensions.conf.controller;
 
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;

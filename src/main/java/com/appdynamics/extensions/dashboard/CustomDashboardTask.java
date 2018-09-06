@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 

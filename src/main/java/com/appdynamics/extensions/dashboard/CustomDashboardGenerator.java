@@ -17,7 +17,7 @@ package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.api.ApiException;
-import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;

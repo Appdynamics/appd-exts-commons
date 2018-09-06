@@ -17,15 +17,13 @@ package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.api.ApiException;
-import com.appdynamics.extensions.conf.ControllerInfo;
-import com.appdynamics.extensions.conf.ControllerInfoFactory;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.io.FileUtils;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -35,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.appdynamics.extensions.dashboard.DashboardConstants;
+
 public class CustomDashboardGeneratorTest {
 
     private CustomDashboardGenerator customDashboardGenerator;

@@ -15,14 +15,10 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.conf.ControllerInfo;
-import com.appdynamics.extensions.conf.ControllerInfoFactory;
-import com.appdynamics.extensions.conf.ControllerInfoValidator;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfoValidator;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-
-import java.io.File;
-import java.util.Map;
 
 /**
  * Created by abey.tom on 4/10/15.

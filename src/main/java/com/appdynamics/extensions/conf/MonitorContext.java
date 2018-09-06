@@ -9,6 +9,8 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;

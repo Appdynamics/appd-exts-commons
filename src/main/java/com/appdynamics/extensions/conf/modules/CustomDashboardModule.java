@@ -1,14 +1,11 @@
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.dashboard.CustomDashboardGenerator;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 public class CustomDashboardModule {
