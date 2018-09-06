@@ -44,6 +44,9 @@ public class ControllerInfo {
     protected String tierName;
     protected String nodeName;
 
+// todo move to controller package
+// todo get instance method
+
 
     private ControllerInfo() {
     }

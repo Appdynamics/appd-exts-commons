@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.dashboard;
 
+import com.appdynamics.extensions.conf.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
@@ -33,8 +34,8 @@ public class CustomDashboardTask {
     private long nextRunTime;
     private long frequency = 5 * 60 * 1000;
 
-    public void updateConfig(Set<String> instanceNames, String metricPrefix, Map dashboardConfig) {
-        dashboardGenerator = new CustomDashboardGenerator(instanceNames, metricPrefix, dashboardConfig, dashboardGenerator.getInstallDir());
+    public void updateConfig(Set<String> instanceNames, String metricPrefix, Map dashboardConfig, ControllerInfo controllerInfo) {
+        dashboardGenerator = new CustomDashboardGenerator(instanceNames, metricPrefix, dashboardConfig, controllerInfo);
         if (dashboardConfig != null) {
             Integer freqStr = (Integer) dashboardConfig.get("executionFrequencyMinutes");
             if (freqStr != null) {

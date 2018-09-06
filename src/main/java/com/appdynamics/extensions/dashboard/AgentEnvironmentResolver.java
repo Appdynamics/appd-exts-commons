@@ -32,9 +32,11 @@ public class AgentEnvironmentResolver {
     private ControllerInfo cInfo;
     private boolean resolved;
 
-    AgentEnvironmentResolver(Map dashboardConfig, File installDir) {
+    // TODO Find a good name for this class, remove the getters
+    // create a new class and extend from the base agent env class
+    AgentEnvironmentResolver(ControllerInfo controllerInfo) {
 
-        this.cInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, installDir);
+        this.cInfo = controllerInfo;
         ControllerInfoValidator validator = new ControllerInfoValidator();
         resolved = validator.validateAndCheckIfResolved(cInfo);
     }

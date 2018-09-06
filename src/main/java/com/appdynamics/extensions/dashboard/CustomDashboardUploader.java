@@ -44,24 +44,22 @@ public class CustomDashboardUploader {
         setProxyIfApplicable(argsMap);
         CloseableHttpClient client = null;
         try {
+
+            // TODO create a map of server info here and you dont need to do that in the generator class
+            // TODO the creation of the client can be moved in the initCustomDashboard in the module class
+            // TODO pass controllerInformation -> serversMap -> get this information from the module
+            // TODO replace serverstringmap by controllerInfo object in api service
             client = Http4ClientBuilder.getBuilder(argsMap).build();
             List<Map<String, ?>> serversList = (List<Map<String, ?>>) argsMap.get("servers");
-            Map<String, ?> serverMap = (Map) serversList.iterator().next();
-            Map<String, String> serverStringMap = new HashMap<>();
-            serverStringMap.put(TaskInputArgs.HOST, (String) serverMap.get(TaskInputArgs.HOST));
-            serverStringMap.put(TaskInputArgs.PORT, (String) serverMap.get(TaskInputArgs.PORT));
-            serverStringMap.put(TaskInputArgs.USE_SSL, String.valueOf(serverMap.get(TaskInputArgs.USE_SSL)));
+            Map<String, String> serverStringMap = (Map<String, String>) serversList.iterator().next();
+//            Map<String, String> serverStringMap = new HashMap<>();
+//            serverStringMap.put(TaskInputArgs.HOST, (String) serverMap.get(TaskInputArgs.HOST));
+//            serverStringMap.put(TaskInputArgs.PORT, (String) serverMap.get(TaskInputArgs.PORT));
+//            serverStringMap.put(TaskInputArgs.USE_SSL, String.valueOf(serverMap.get(TaskInputArgs.USE_SSL)));
             CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client, serverStringMap);
             JsonNode arrayNode = apiService.getAllDashboards(client, serverStringMap, cookiesCsrf);
-            boolean isPresent = false;
-            if (arrayNode != null) {
-                for (JsonNode jsonNode : arrayNode) {
-                    String name = getTextValue(jsonNode.get("name"));
-                    if (dashboardName.equals(name)) {
-                        isPresent = true;
-                    }
-                }
-            }
+
+            boolean isPresent = isDashboardPresent(dashboardName, arrayNode);
             logger.debug("Dashboard present: {}", isPresent);
             logger.debug("Dashboard overwrite: {}", overwrite);
             if (isPresent) {
@@ -85,6 +83,20 @@ public class CustomDashboardUploader {
         }
     }
 
+    private boolean isDashboardPresent(String dashboardName, JsonNode arrayNode) {
+        boolean isPresent = false;
+        if (arrayNode != null) {
+            for (JsonNode jsonNode : arrayNode) {
+                String name = getTextValue(jsonNode.get("name"));
+                if (dashboardName.equals(name)) {
+                    isPresent = true;
+                }
+            }
+        }
+        return isPresent;
+    }
+
+    // TODO this will go with where we create the http client
     private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {
         String proxyHost = System.getProperty("appdynamics.http.proxyHost");
         String proxyPort = System.getProperty("appdynamics.http.proxyPort");

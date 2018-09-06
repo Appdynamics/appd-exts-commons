@@ -58,7 +58,7 @@ public class MonitorContext {
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
         healthCheckModule = new HealthCheckModule();
-        dashboardModule = new CustomDashboardModule(installDir);
+        dashboardModule = new CustomDashboardModule( metricPrefix, controllerInfo);
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {

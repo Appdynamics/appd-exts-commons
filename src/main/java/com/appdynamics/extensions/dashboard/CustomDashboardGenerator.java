@@ -17,10 +17,12 @@ package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.api.ApiException;
+import com.appdynamics.extensions.conf.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.xml.Xml;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.io.FileUtils;
@@ -47,26 +49,12 @@ public class CustomDashboardGenerator {
     private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
 
-    public File getInstallDir() {
-        return installDir;
-    }
 
-    private File installDir;
-
-    public CustomDashboardGenerator(File file, Map dashboardConfig, Map controllerInformation, String metricPrefix, CustomDashboardUploader uploader) {
-        this.installDir = file;
-        if (dashboardConfig == null) {
-            logger.info("Custom Dashboard config is null");
-            return;
-        }
-        Boolean enabled = (Boolean) dashboardConfig.get("enabled");
-        if (enabled == null || !enabled) {
-            logger.info("Custom Dashboard creation is not enabled");
-            return;
-        }
+    public CustomDashboardGenerator( Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix, CustomDashboardUploader uploader) {
         this.dashboardConfig = dashboardConfig;
         this.dashboardUploader = uploader;
-        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation, installDir);
+        // TODO just use the contorllerInfo validator
+        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInformation);
         this.metricPrefix = metricPrefix;
     }
 
@@ -74,8 +62,21 @@ public class CustomDashboardGenerator {
         if (isResolved()) {
             Map<String, ? super Object> argsMap = getArgsMap();
             String dashboardTemplate = getDashboardContents();
+            if(Strings.isNullOrEmpty(dashboardTemplate)){
+                logger.error("Dashboard file is empty");
+                return;
+            }
+
+            String dashboardName ;
+            if(!Strings.isNullOrEmpty((String)dashboardConfig.get("dashboardName"))){
+                dashboardName = dashboardConfig.get("dashboardName").toString();
+            } else {
+                dashboardName = "Custom Dashboard";
+            }
+            dashboardConfig.put("dashboardName", dashboardName);
+
+
             dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
-            String dashboardName = dashboardConfig.get("dashboardName").toString();
             String jsonExtension = "json";
             String contentType = "application/json";
             boolean overwrite = getBoolean(dashboardConfig, "overwriteDashboard");
@@ -87,6 +88,8 @@ public class CustomDashboardGenerator {
         }
 
     }
+
+    // TODO to upload or not upload from this class
 
     protected void sendToUploader(Map<String, ? super Object> argsMap, String dashboardTemplate, String dashboardName, String jsonExtension, String contentType, boolean overwrite) {
         logger.debug("{}: {}", DASHBOARD_NAME, dashboardName);
@@ -115,8 +118,14 @@ public class CustomDashboardGenerator {
         }
 
         try {
-            if (pathToFile != null) {
-                dashboardTemplate = FileUtils.readFileToString(new File(pathToFile));
+            if (!Strings.isNullOrEmpty(pathToFile)) {
+                File file = new File(pathToFile);
+                if(file.exists()){
+                    dashboardTemplate = FileUtils.readFileToString(file);
+                } else {
+                    logger.error("Unable to read the contents of the dashboard file: {}", pathToFile);
+
+                }
             } else {
                 logger.error("The path to your dashboardFile is empty in your config.yml file.");
             }
@@ -142,10 +151,13 @@ public class CustomDashboardGenerator {
     }
 
     private Map<String, ? super Object> getServerMap() {
+        // TODO can use direct controller info fields or agent resolver fields
+        // TODO Agent resolver should not have these fields and increases redundancy
+        // TODO initally we did not have a controller info object in this class and we were using agent env resolver.
         Map<String, ? super Object> serverMap = new HashMap<>();
-        serverMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName());
+        serverMap.put(TaskInputArgs.HOST, agentEnvResolver.getControllerHostName().toString());
         serverMap.put(TaskInputArgs.PORT, String.valueOf(agentEnvResolver.getControllerPort()));
-        serverMap.put(TaskInputArgs.USE_SSL, agentEnvResolver.isControllerUseSSL());
+        serverMap.put(TaskInputArgs.USE_SSL, String.valueOf(agentEnvResolver.isControllerUseSSL()));
         serverMap.put(TaskInputArgs.USER, getUserName());
         serverMap.put(TaskInputArgs.PASSWORD, agentEnvResolver.getPassword());
 
@@ -181,6 +193,7 @@ public class CustomDashboardGenerator {
         return "";
     }
 
+    // TODO String builder
     public String setDefaultDashboardInfo(String dashboardString) {
         dashboardString = setMetricPrefix(dashboardString);
         dashboardString = setApplicationName(dashboardString);
@@ -285,8 +298,7 @@ public class CustomDashboardGenerator {
     }
 
 
-    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig, File file) {
-        this.installDir = file;
+    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig,  ControllerInfo controllerInfo) {
         if (dashboardConfig == null) {
             logger.info("Custom Dashboard config is null");
             return;
@@ -296,11 +308,12 @@ public class CustomDashboardGenerator {
             logger.info("Custom Dashboard creation is not enabled");
             return;
         }
+
         this.instanceNames = instanceNames;
         this.metricPrefix = StringUtils.trim(metricPrefix, "|");
         this.dashboardConfig = dashboardConfig;
         this.dashboardUploader = new CustomDashboardUploader();
-        this.agentEnvResolver = new AgentEnvironmentResolver(dashboardConfig, installDir);
+        this.agentEnvResolver = new AgentEnvironmentResolver(controllerInfo);
     }
 
     public void createDashboards(Collection<String> metrics) {

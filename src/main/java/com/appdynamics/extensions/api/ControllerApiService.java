@@ -34,8 +34,12 @@ import java.util.Map;
 public class ControllerApiService {
 
     public static final org.slf4j.Logger logger = ExtensionsLoggerFactory.getLogger(ControllerApiService.class);
+// TODO pass controller info object here
+// TODO add it to the constructor
+// TODO maintain the state  pass this controller api service from the init module
 
     public CookiesCsrf getCookiesAndAuthToken(CloseableHttpClient httpClient, Map<String, String> serverMap) throws ApiException {
+// TODO        UrlBuilder.builder().host(controllerinfo.host)
         HttpGet get = new HttpGet(UrlBuilder.builder(serverMap).path("controller/auth?action=login").build());
         HttpResponse response = null;
         CookiesCsrf cookiesCsrf = new CookiesCsrf();
@@ -109,6 +113,7 @@ public class ControllerApiService {
         }
     }
 
+    // todo change args map to http properties
     public void uploadDashboard(Map<String, String> serverMap, Map<String, ?> argsMap, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String contentType) throws ApiException {
         String filename = dashboardName + "." + fileExtension;
         String twoHyphens = "--";

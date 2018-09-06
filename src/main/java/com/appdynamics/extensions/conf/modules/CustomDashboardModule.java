@@ -1,8 +1,10 @@
 package com.appdynamics.extensions.conf.modules;
 
+import com.appdynamics.extensions.conf.ControllerInfo;
 import com.appdynamics.extensions.dashboard.CustomDashboardGenerator;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -12,74 +14,67 @@ import java.util.Map;
 public class CustomDashboardModule {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardModule.class);
-    private File installDir;
+    private String metricPrefix;
+    private ControllerInfo controllerInfo;
 
-    public CustomDashboardModule(File file) {
-        this.installDir = file;
+    public CustomDashboardModule( String metricPrefix, ControllerInfo controllerInfo) {
+        this.metricPrefix = metricPrefix;
+        this.controllerInfo = controllerInfo;
     }
 
+    // todo generator should generate, uploader should upload
+    // todo create a client here and send that client to that uploader instead of doing it in the uploader
+    // todo send a map of string string to the uploader and also the client from here
+
+    // get data from generator
+    // get client from httpclient
+    // send both to uploader
     public void initCustomDashboard(Map<String, ?> config) {
-        Map customDashboardConfig = new HashMap();
-        Map controllerInformation = new HashMap();
-        if (config.get("customDashboard") != null) {
-            customDashboardConfig = (Map) config.get("customDashboard");
-        }
-        if (config.get("controllerInfo") != null) {
-            controllerInformation = (Map) config.get("controllerInfo");
-        }
+        String dashboardMetricPrefix;
+        Map customDashboardConfig = (Map) config.get("customDashboard");
+        if(metricPrefix != null){
+            dashboardMetricPrefix = buildMetricPrefixForDashboard();
 
-        String metricPrefix = buildMetricPrefixForDashboard(config);
-
-        if (!metricPrefix.equals("")) {
-            if (customDashboardConfig != null) {
-                long timestamp1 = System.currentTimeMillis();
-                CustomDashboardUploader uploader = new CustomDashboardUploader();
-                CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(installDir, customDashboardConfig, controllerInformation, metricPrefix, uploader);
-                dashboardGenerator.createDashboard();
-                long timestamp2 = System.currentTimeMillis();
-                logger.debug("Time to complete customDashboardModule in :" + (timestamp2 - timestamp1) + " ms");
+            if ((customDashboardConfig != null && !customDashboardConfig.isEmpty())) {
+                if ((Boolean)customDashboardConfig.get("enabled")  ) {
+                    long startTime = System.currentTimeMillis();
+                    CustomDashboardUploader uploader = new CustomDashboardUploader();
+                    CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInfo, dashboardMetricPrefix, uploader);
+                    dashboardGenerator.createDashboard();
+                    long endTime = System.currentTimeMillis();
+                    logger.debug("Time to complete customDashboardModule in :" + (endTime - startTime) + " ms");
+                } else {
+                    logger.info("customDashboard is not enabled in config.yml, not uploading dashboard.");
+                }
             } else {
                 logger.info("No customDashboard Info in config.yml, not uploading dashboard.");
             }
         } else {
-            logger.info("No metricPrefix Info in config.yml, not uploading dashboard.");
+            logger.info("No metricPrefix in config.yml, not uploading dashboard.");
+
         }
     }
 
-    public String buildMetricPrefixForDashboard(Map<String, ?> config) {
-        String metricPrefix = "";
-        if (config.get("metricPrefix") != null) {
-            metricPrefix = config.get("metricPrefix").toString();
-        }
-        String dashboardMetricPath = "";
+    public String buildMetricPrefixForDashboard() {
+
+        StringBuilder buildMetricPath = new StringBuilder();
         if (metricPrefix.contains("Server")) {
             String[] metricPath = metricPrefix.split("\\|");
             int count = 0;
             for (String str : metricPath) {
                 count++;
                 if (count > 2) {
-                    dashboardMetricPath += str + "|";
+                    buildMetricPath.append(str).append("|");
                 }
             }
+            buildMetricPath.deleteCharAt(buildMetricPath.length() -1);
         } else {
-            dashboardMetricPath = metricPrefix;
+            buildMetricPath.append(metricPrefix);
         }
 
-        if (dashboardMetricPath.endsWith("|")) {
-            dashboardMetricPath = removeSeparator(dashboardMetricPath);
-        }
+        logger.debug("Dashboard Metric Prefix = " + buildMetricPath.toString());
 
-        logger.debug("Dashboard Metric Prefix = " + dashboardMetricPath);
-
-        return dashboardMetricPath;
+        return buildMetricPath.toString();
     }
-
-    public String removeSeparator(String str) {
-        if (str != null && str.length() > 0 && str.charAt(str.length() - 1) == '|') {
-            str = str.substring(0, str.length() - 1);
-        }
-        return str;
-    }
-
 
 }

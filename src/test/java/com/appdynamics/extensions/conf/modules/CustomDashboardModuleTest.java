@@ -8,10 +8,13 @@
 
 package com.appdynamics.extensions.conf.modules;
 
+import com.appdynamics.extensions.conf.ControllerInfo;
+import com.appdynamics.extensions.conf.ControllerInfoFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import javax.print.DocFlavor;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,9 +30,11 @@ public class CustomDashboardModuleTest {
     public void getMetricPrefixFromTierInMetricPrefix() {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("metricPrefix", "Server|Component:21|Custom Metrics|Amazon ELB|");
+        String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule(file);
-        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(dashboardConfig);
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule(metric, controllerInfo);
+        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard();
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
@@ -37,8 +42,11 @@ public class CustomDashboardModuleTest {
     public void getMetricPrefixFromNormalMetricPrefix() {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB|");
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule(file);
-        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(dashboardConfig);
+        String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
+
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule( metric, controllerInfo);
+        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard();
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
@@ -46,8 +54,11 @@ public class CustomDashboardModuleTest {
     public void verifyMetricPrefixWherePipeIsMissing() {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB");
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule(file);
-        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(dashboardConfig);
+        String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
+        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
+
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule( metric, controllerInfo);
+        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard();
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
