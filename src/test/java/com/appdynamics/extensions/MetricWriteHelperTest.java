@@ -172,7 +172,7 @@ public class MetricWriteHelperTest {
 
         verify(metricWriter, times(4)).printMetric(argumentCaptor.capture());
         List<String> metrics = argumentCaptor.getAllValues();
-        Assert.assertTrue("Total number of metrics reported is correct", Integer.valueOf(metrics.get(3) ) == 2);
+        Assert.assertTrue("Total number of metrics reported is not correct", Integer.valueOf(metrics.get(3) ) == 3);
 
 
     }

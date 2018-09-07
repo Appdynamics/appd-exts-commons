@@ -138,7 +138,7 @@ public class MetricWriteHelper {
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
         printMetric(baseMonitor.getContextConfiguration().getMetricPrefix()+"|"+"Metrics Uploaded",
-                String.valueOf(metricsMap.size()),"AVERAGE", "AVERAGE","COLLECTIVE" );
+                String.valueOf(metricsMap.size() + 1 ),"AVERAGE", "AVERAGE","COLLECTIVE" );
         logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
     }
 
