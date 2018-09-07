@@ -32,8 +32,8 @@ public class CustomDashboardModuleTest {
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule(metric, controllerInfo);
-        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard();
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule( );
+        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
@@ -44,8 +44,8 @@ public class CustomDashboardModuleTest {
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule( metric, controllerInfo);
-        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard();
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule(  );
+        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
@@ -56,8 +56,8 @@ public class CustomDashboardModuleTest {
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule( metric, controllerInfo);
-        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard();
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule(  );
+        String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 

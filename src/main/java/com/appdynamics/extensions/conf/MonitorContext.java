@@ -60,7 +60,7 @@ public class MonitorContext {
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
         healthCheckModule = new HealthCheckModule();
-        dashboardModule = new CustomDashboardModule( metricPrefix, controllerInfo);
+        dashboardModule = new CustomDashboardModule();
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
@@ -79,7 +79,7 @@ public class MonitorContext {
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
             healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
-            dashboardModule.initCustomDashboard(config);
+            dashboardModule.initCustomDashboard(config, metricPrefix, controllerInfo);
 
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);

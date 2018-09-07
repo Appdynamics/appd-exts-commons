@@ -18,20 +18,21 @@ import java.util.Map;
 public class CustomDashboardModule {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardModule.class);
-    private String metricPrefix;
     private ControllerInfo controllerInfo;
 
-    public CustomDashboardModule(String metricPrefix, ControllerInfo controllerInfo) {
-        this.metricPrefix = metricPrefix;
-        this.controllerInfo = controllerInfo;
+    public CustomDashboardModule() {
     }
 
 
-    public void initCustomDashboard(Map<String, ?> config) {
+    public void initCustomDashboard(Map<String, ?> config, String metricPrefix, ControllerInfo controllerInfo) {
+        logger.debug("Metric Prefix : {}", metricPrefix);
+        this.controllerInfo = controllerInfo;
+        logger.debug("Custom Dashboard Module controllerInfo : {}", controllerInfo);
+
         String dashboardMetricPrefix;
         Map customDashboardConfig = (Map) config.get("customDashboard");
         if (metricPrefix != null) {
-            dashboardMetricPrefix = buildMetricPrefixForDashboard();
+            dashboardMetricPrefix = buildMetricPrefixForDashboard(metricPrefix);
 
             if ((customDashboardConfig != null && !customDashboardConfig.isEmpty())) {
                 if ((Boolean) customDashboardConfig.get("enabled")) {
@@ -43,10 +44,14 @@ public class CustomDashboardModule {
                     dashboardGenerator.createDashboard();
                     String jsonExtension = "json";
                     String contentType = "application/json";
-                    boolean overwrite = (Boolean) customDashboardConfig.get("overwriteDashboard");
-
+                    boolean overwrite ;
+                    if(customDashboardConfig.get("overwriteDashboard") != null){
+                        overwrite = (Boolean) customDashboardConfig.get("overwriteDashboard");
+                    } else {
+                        overwrite = false;
+                    }
                     // get client from httpclient
-                    CloseableHttpClient httpClient = getHttpClient(dashboardGenerator.getHttpArgs());
+//                    CloseableHttpClient httpClient = getHttpClient(dashboardGenerator.getHttpArgs());
 
                     // Sending API service from module to maintain state
                     ControllerApiService apiService = new ControllerApiService(controllerInfo);
@@ -54,7 +59,23 @@ public class CustomDashboardModule {
                     // send data and client to uploader
                     CustomDashboardUploader dashboardUploader = new CustomDashboardUploader(apiService);
                     try {
-                        dashboardUploader.uploadDashboard(httpClient, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
+
+                        ////////////////////
+                        setProxyIfApplicable(dashboardGenerator.getHttpArgs());
+                        CloseableHttpClient client = null;
+
+                        try {
+                            client = Http4ClientBuilder.getBuilder(dashboardGenerator.getHttpArgs()).build();
+                            dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
+                        } finally {
+                            try {
+                                client.close();
+                            } catch (Exception e) {
+                                logger.error(e.getMessage());
+                            }
+                        }
+                        ////////////////////
+//                        dashboardUploader.uploadDashboard(httpClient, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
                     } catch (ApiException e) {
                         logger.error("Unable to establish connection, not uploading dashboard.");
                     }
@@ -106,7 +127,7 @@ public class CustomDashboardModule {
         }
     }
 
-    public String buildMetricPrefixForDashboard() {
+    public String buildMetricPrefixForDashboard(String metricPrefix) {
 
         StringBuilder buildMetricPath = new StringBuilder();
         if (metricPrefix.contains("Server")) {

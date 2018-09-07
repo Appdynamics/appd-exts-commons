@@ -36,19 +36,18 @@ public class ControllerApiService {
 
     public static final org.slf4j.Logger logger = ExtensionsLoggerFactory.getLogger(ControllerApiService.class);
     ControllerInfo controllerInfo;
-    UrlBuilder urlBuilder;
 
     public ControllerApiService(ControllerInfo controllerInfo) {
         this.controllerInfo = controllerInfo;
 
-        this.urlBuilder = new UrlBuilder();
-        urlBuilder.host(controllerInfo.getControllerHost());
-        urlBuilder.port(controllerInfo.getControllerPort());
-        urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
 
     }
 
     public CookiesCsrf getCookiesAndAuthToken(CloseableHttpClient httpClient) throws ApiException {
+        UrlBuilder urlBuilder = new UrlBuilder();
+        urlBuilder.host(controllerInfo.getControllerHost());
+        urlBuilder.port(controllerInfo.getControllerPort());
+        urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
 
         HttpGet get = new HttpGet(urlBuilder.path("controller/auth?action=login").build());
         HttpResponse response = null;
@@ -93,6 +92,11 @@ public class ControllerApiService {
     }
 
     public JsonNode getAllDashboards(CloseableHttpClient httpClient, CookiesCsrf cookiesCsrf) throws ApiException {
+        UrlBuilder urlBuilder = new UrlBuilder();
+        urlBuilder.host(controllerInfo.getControllerHost());
+        urlBuilder.port(controllerInfo.getControllerPort());
+        urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
+
         HttpGet get = new HttpGet(urlBuilder.path("controller/restui/dashboards/getAllDashboardsByType/false").build());
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCookies())) {
             get.setHeader("Cookie", cookiesCsrf.getCookies());
@@ -124,6 +128,12 @@ public class ControllerApiService {
     }
 
     public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String contentType) throws ApiException {
+        UrlBuilder urlBuilder = new UrlBuilder();
+        urlBuilder.host(controllerInfo.getControllerHost());
+        urlBuilder.port(controllerInfo.getControllerPort());
+        urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
+
+
         String filename = dashboardName + "." + fileExtension;
         String twoHyphens = "--";
         String boundary = "*****";

@@ -22,6 +22,7 @@ public class ControllerInfoValidator {
     private List<String> unresolvedProps;
 
     public boolean validateAndCheckIfResolved(ControllerInfo cInfo) {
+        logger.debug("Validator Check CINFO : {}", cInfo);
         if (cInfo.getAccount() == null) {
             cInfo.setAccount("customer1");
         }
