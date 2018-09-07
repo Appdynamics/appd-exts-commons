@@ -17,6 +17,9 @@ package com.appdynamics.extensions.util;
 
 import com.google.common.base.Strings;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Created by abey.tom on 3/15/16.
  */
@@ -45,6 +48,13 @@ public class AssertUtils {
                 throw new ValidationException(str);
             }
         }
+        else if(o instanceof Collection){
+            Collection c = (Collection)o;
+            if(!c.isEmpty()){
+                throw new ValidationException(message);
+            }
+        }
+
     }
 
 }

@@ -3,7 +3,7 @@
 
 #The following prefix will populate the metrics under one tier
 metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
-displayNameCheckEnabled: # value is nul intentionally, for test case
+#displayNameCheckEnabled: # value is nul intentionally, for test case
 
 #Add your list of Redis servers here.
 servers:

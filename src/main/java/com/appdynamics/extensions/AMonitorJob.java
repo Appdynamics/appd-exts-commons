@@ -45,11 +45,11 @@ public class AMonitorJob implements Runnable {
     @Override
     public void run() {
         logger.debug("Monitor {} Task Runner invoked", baseMonitor.getMonitorName());
+        List<Map<String, ?>> servers =  baseMonitor.getServers();
+        AssertUtils.assertNotNull(servers, "getServers() cannot return null");
         TasksExecutionServiceProvider obj = new TasksExecutionServiceProvider(baseMonitor, MetricWriteHelperFactory.create(baseMonitor));
         Map<String, ?> configMap = baseMonitor.getContextConfiguration().getConfigYml();
-        List<Map<String, ?>> servers =  baseMonitor.getServers();
-        AssertUtils.assertNotNull(servers, "getServers() cannot return empty or null");
-        boolean displayNameCheckEnabled = (YmlUtils.getBoolean(configMap.get("displayNameCheckEnabled"))==null)?
+        boolean displayNameCheckEnabled = (configMap.get("displayNameCheckEnabled")==null)?
                 true : YmlUtils.getBoolean(configMap.get("displayNameCheckEnabled"));
 
         if(displayNameCheckEnabled) {
@@ -75,18 +75,16 @@ public class AMonitorJob implements Runnable {
 
     private void checkDisplayName(List<Map<String, ?>> servers){
         if(baseMonitor.getServers().size() > 1){
-            logger.debug("Multiple Servers found in the config.yml");
             for(Map<String, ?> server : servers){
                 AssertUtils.assertNotNull(server.get("displayName"), "[displayName] of server cannot be " +
-                        "null ");
+                        "null when multiple servers are present ");
             }
         }
         else if(baseMonitor.getServers().size() == 1){
-            logger.debug("Single Server found in the config.yml");
             Map<String, ?> server = servers.get(0);
             if(server.containsKey("displayName")){
                AssertUtils.assertEmpty(server.get("displayName"),"[displayName] of server cannot be " +
-                "present" );
+                "present when one server is present" );
             }
         }
     }

@@ -163,7 +163,7 @@ public class ABaseMonitorAndAMonitorJobTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void whenMultipleServersThenAssertOnDisplayNameNotPresent() throws TaskExecutionException, InterruptedException{
+    public void whenMultipleServersAndDisplayNameNotPresentThenThrowException() throws TaskExecutionException, InterruptedException{
         TestMonitorWithFanOut testMonitorWithFanOut = new TestMonitorWithFanOut();
         Map<String, String> args = Maps.newHashMap();
         configuration.setConfigYml("src/test/resources/conf/config_WithMultipleServersDisplayNameAbsent.yml");
@@ -216,7 +216,7 @@ public class ABaseMonitorAndAMonitorJobTest {
     }
 
     @Test(expected = RuntimeException.class )
-    public void whenOneServerThenAssertOnDisplayNamePresent() throws TaskExecutionException, InterruptedException{
+    public void whenOneServerAndDisplayNamePresentThenThrowException() throws TaskExecutionException, InterruptedException{
         TestMonitorWithoutFanOut testMonitorWithoutFanOut = new TestMonitorWithoutFanOut();
         Map<String, String> args = Maps.newHashMap();
         configuration.setConfigYml("src/test/resources/conf/config_WithOneServerDisplayNamePresent.yml");
