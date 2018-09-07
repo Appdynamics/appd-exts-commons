@@ -51,7 +51,6 @@ public class CustomDashboardGenerator {
     private String metricPrefix;
     private Map dashboardConfig;
     private ControllerInfo controllerInfo;
-//    private AgentEnvironmentResolver agentEnvResolver;
     protected CustomDashboardUploader dashboardUploader;
 
     public Map getHttpArgs() {
@@ -88,7 +87,7 @@ public class CustomDashboardGenerator {
 
             this.dashboardContent = dashboardTemplate;
             this.httpArgs = argsMap;
-
+            logger.debug("Dashboard values resolved. Ready for uploader");
 
         } else {
             logger.error("Unable to establish connection, please make sure you have provided all necessary values.");

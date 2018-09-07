@@ -16,9 +16,18 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.api.ApiException;
+import com.appdynamics.extensions.api.ControllerApiService;
+import com.appdynamics.extensions.api.CookiesCsrf;
 import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
+import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,10 +35,42 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
+import static org.mockito.Matchers.isA;
+
 /**
  * Created by abey.tom on 10/13/15.
  */
 public class CustomDashboardUploaderTest {
+
+    @Test
+    public void testUploader(){
+        ControllerApiService apiService = Mockito.mock(ControllerApiService.class);
+        CloseableHttpClient client = Mockito.mock(CloseableHttpClient.class);
+        CookiesCsrf cookiesCsrf =  Mockito.mock(CookiesCsrf.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.createObjectNode();
+
+        JsonNode childNode1 = mapper.createObjectNode();
+        ((ObjectNode) childNode1).put("name", "DashboardName");
+        ((ObjectNode) childNode1).put("name2", "val2");
+        ((ObjectNode) rootNode).put("obj1", childNode1);
+
+        try {
+            Mockito.when(apiService.getCookiesAndAuthToken(client)).thenReturn(cookiesCsrf);
+            Mockito.when(apiService.getAllDashboards(client,cookiesCsrf)).thenReturn(rootNode);
+
+            Map map = new HashMap();
+            String stringing = "";
+            Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
+            apiService.uploadDashboard(map, cookiesCsrf, stringing, stringing, stringing,stringing);
+            Mockito.verify(apiService, Mockito.times(1)).uploadDashboard(map, cookiesCsrf,  stringing, stringing, stringing,stringing);
+
+        } catch (ApiException e){
+            Assert.assertFalse(true);
+        }
+
+    }
 
     @Test
     public void testUploadDashboard() throws Exception {

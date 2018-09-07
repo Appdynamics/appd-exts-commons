@@ -16,10 +16,12 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.api.ApiException;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +35,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CustomDashboardGeneratorTest {
 
@@ -356,45 +360,23 @@ public class CustomDashboardGeneratorTest {
 //        customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithoutSim());
 
         customDashboardGen.createDashboard();
-//        try{
+        Assert.assertTrue(customDashboardGen.getDashboardName().equals("Dashboard Test"));
+        Map httpArgs = (Map) customDashboardGen.getHttpArgs();
+        ArrayList servers = (ArrayList) httpArgs.get("servers");
+        Map server = (Map) servers.iterator().next();
+        Map connectionProps = (Map) httpArgs.get("connection");
+        Assert.assertTrue(server.get("password").toString().equals("passwordYML"));
+        Assert.assertTrue(server.get("username").toString().equals("usernameYML@accountNameYML"));
+        Assert.assertTrue((Boolean) connectionProps.get("sslCertCheckEnabled") == true);
+
+
+        //        try{
 //            CloseableHttpClient closeableHttpClient = Mockito.mock(CloseableHttpClient.class);
 //            Mockito.verify(uploader, Mockito.times(1)).uploadDashboard(closeableHttpClient ,Mockito.anyString(),Mockito.anyString(),Mockito.anyString(),Mockito.anyString(),Mockito.anyMap(),Mockito.anyBoolean());
 //
 //        } catch (ApiException e){
 //            Assert.assertFalse(true);
 //        }
-    }
+  }
 
-//    public AgentEnvironmentResolver getAgentEnvResolverWithoutSim(){
-//        AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
-//        Mockito.when(agentEnvironmentResolver.getApplicationName()).thenReturn("Application");
-//        Mockito.when(agentEnvironmentResolver.getTierName()).thenReturn("Tier");
-//        Mockito.when(agentEnvironmentResolver.getNodeName()).thenReturn("Node");
-//        Mockito.when(agentEnvironmentResolver.getControllerHostName()).thenReturn("ControllerHostName");
-//        Mockito.when(agentEnvironmentResolver.getControllerPort()).thenReturn(9090);
-//        Mockito.when(agentEnvironmentResolver.getMachinePath()).thenReturn("MachinePath");
-//        Mockito.when(agentEnvironmentResolver.isControllerUseSSL()).thenReturn(false);
-//        Mockito.when(agentEnvironmentResolver.getAccountName()).thenReturn("Account");
-//        Mockito.when(agentEnvironmentResolver.getUsername()).thenReturn("UserName");
-//        Mockito.when(agentEnvironmentResolver.getPassword()).thenReturn("PassWord");
-//        Mockito.when(agentEnvironmentResolver.getSimEnabled()).thenReturn(false);
-//        Mockito.when(agentEnvironmentResolver.isResolved()).thenReturn(true);
-//
-//        return agentEnvironmentResolver;
-//    }
-
-//    public AgentEnvironmentResolver getAgentEnvResolverWithSim(){
-//        AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
-//        Mockito.when(agentEnvironmentResolver.getControllerHostName()).thenReturn("ControllerHostName");
-//        Mockito.when(agentEnvironmentResolver.getControllerPort()).thenReturn(9090);
-//        Mockito.when(agentEnvironmentResolver.getMachinePath()).thenReturn("MachinePath");
-//        Mockito.when(agentEnvironmentResolver.isControllerUseSSL()).thenReturn(false);
-//        Mockito.when(agentEnvironmentResolver.getAccountName()).thenReturn("Account");
-//        Mockito.when(agentEnvironmentResolver.getUsername()).thenReturn("UserName");
-//        Mockito.when(agentEnvironmentResolver.getPassword()).thenReturn("PassWord");
-//        Mockito.when(agentEnvironmentResolver.getSimEnabled()).thenReturn(true);
-//        Mockito.when(agentEnvironmentResolver.isResolved()).thenReturn(true);
-//
-//        return agentEnvironmentResolver;
-//    }
 }

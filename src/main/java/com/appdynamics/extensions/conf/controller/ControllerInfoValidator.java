@@ -41,7 +41,7 @@ public class ControllerInfoValidator {
         return true;
     }
 
-    public void simEnabledOrNot(String propName, Object propVal, ControllerInfo cInfo) {
+    private void simEnabledOrNot(String propName, Object propVal, ControllerInfo cInfo) {
         if (propVal != null) {
             if (propVal instanceof Boolean) {
                 if (((Boolean) propVal).booleanValue() == false) {
@@ -56,7 +56,7 @@ public class ControllerInfoValidator {
     }
 
 
-    public void check(String propName, Object propVal) {
+    private void check(String propName, Object propVal) {
         if (propVal != null) {
             if (propVal instanceof String) {
                 if (Strings.isNullOrEmpty((String) propVal)) {

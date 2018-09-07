@@ -34,14 +34,14 @@ public class ControllerInfo {
     protected String tierName;
     protected String nodeName;
 
+    private static ControllerInfo controllerInfo = new ControllerInfo();
+
     private ControllerInfo() {
     }
-    private static ControllerInfo controllerInfo = new ControllerInfo();
 
     public static ControllerInfo getControllerInfo() {
         return controllerInfo;
     }
-
 
     public void setUsername(String username) {
         this.username = username;

@@ -8,8 +8,6 @@
 
 package com.appdynamics.extensions.conf.controller;
 
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
-import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -217,7 +215,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
-
 
 
     }

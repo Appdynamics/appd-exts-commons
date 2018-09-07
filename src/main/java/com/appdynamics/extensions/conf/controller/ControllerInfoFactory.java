@@ -60,10 +60,10 @@ public class ControllerInfoFactory {
         if (port != null) {
             controllerInfo.setControllerPort(port.intValue());
         }
-        if ((Boolean) config.get("controllerSslEnabled") != null) {
+        if (config.get("controllerSslEnabled") != null) {
             controllerInfo.setControllerSslEnabled((Boolean) config.get("controllerSslEnabled"));
         }
-        if ((Boolean) config.get("simEnabled") != null) {
+        if (config.get("simEnabled") != null) {
             controllerInfo.setSimEnabled((Boolean) config.get("simEnabled"));
         }
         if (!Strings.isNullOrEmpty((String) config.get("uniqueHostId"))) {
@@ -100,39 +100,39 @@ public class ControllerInfoFactory {
 
     }
 
-    public static void getSystemProperties() {
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.accountAccessKey"))) {
-            controllerInfo.setAccountAccessKey(System.getProperty("appdynamics.agent.accountAccessKey").toString());
+    private static void getSystemProperties() {
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.accountAccessKey"))) {
+            controllerInfo.setAccountAccessKey(System.getProperty("appdynamics.agent.accountAccessKey"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.accountName"))) {
-            controllerInfo.setAccount(System.getProperty("appdynamics.agent.accountName").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.accountName"))) {
+            controllerInfo.setAccount(System.getProperty("appdynamics.agent.accountName"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.applicationName"))) {
-            controllerInfo.setApplicationName(System.getProperty("appdynamics.agent.applicationName").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.applicationName"))) {
+            controllerInfo.setApplicationName(System.getProperty("appdynamics.agent.applicationName"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.tierName"))) {
-            controllerInfo.setTierName(System.getProperty("appdynamics.agent.tierName").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.tierName"))) {
+            controllerInfo.setTierName(System.getProperty("appdynamics.agent.tierName"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.nodeName"))) {
-            controllerInfo.setNodeName(System.getProperty("appdynamics.agent.nodeName").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.nodeName"))) {
+            controllerInfo.setNodeName(System.getProperty("appdynamics.agent.nodeName"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.controller.hostName"))) {
-            controllerInfo.setControllerHost(System.getProperty("appdynamics.controller.hostName").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.controller.hostName"))) {
+            controllerInfo.setControllerHost(System.getProperty("appdynamics.controller.hostName"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.monitors.controller.username"))) {
-            controllerInfo.setUsername(System.getProperty("appdynamics.agent.monitors.controller.username").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.username"))) {
+            controllerInfo.setUsername(System.getProperty("appdynamics.agent.monitors.controller.username"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.monitors.controller.password"))) {
-            controllerInfo.setPassword(System.getProperty("appdynamics.agent.monitors.controller.password").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.password"))) {
+            controllerInfo.setPassword(System.getProperty("appdynamics.agent.monitors.controller.password"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"))) {
-            controllerInfo.setEncryptionKey(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey").toString());
+        if (!Strings.isNullOrEmpty( System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"))) {
+            controllerInfo.setEncryptionKey(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"))) {
-            controllerInfo.setEncryptedPassword(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"))) {
+            controllerInfo.setEncryptedPassword(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"));
         }
-        if (!Strings.isNullOrEmpty((String) System.getProperty("appdynamics.agent.uniqueHostId"))) {
-            controllerInfo.setUniqueHostId(System.getProperty("appdynamics.agent.uniqueHostId").toString());
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.uniqueHostId"))) {
+            controllerInfo.setUniqueHostId(System.getProperty("appdynamics.agent.uniqueHostId"));
         }
 
         String port = System.getProperty("appdynamics.controller.port");
@@ -152,7 +152,7 @@ public class ControllerInfoFactory {
 
     // Getting data from controller-info.xml
 
-    public static ControllerInfo getControllerInfoFromXml(File directory) {
+    private static ControllerInfo getControllerInfoFromXml(File directory) {
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
         ControllerInfo from = null;
         if (directory.exists()) {
@@ -173,8 +173,7 @@ public class ControllerInfoFactory {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             XmlControllerInfo xmlControllerInfo = (XmlControllerInfo) unmarshaller.unmarshal(file);
 
-            ControllerInfo controllerInfo = mergeValuesFromXML(xmlControllerInfo);
-            return controllerInfo;
+            return mergeValuesFromXML(xmlControllerInfo);
         } catch (JAXBException e) {
             String msg = "Cannot unmarshall the controller-info.xml from " + file.getAbsolutePath();
             throw new RuntimeException(msg, e);

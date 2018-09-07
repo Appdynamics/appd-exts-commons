@@ -23,7 +23,6 @@ public class CustomDashboardModule {
     public CustomDashboardModule() {
     }
 
-
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, ControllerInfo controllerInfo) {
         logger.debug("Metric Prefix : {}", metricPrefix);
         this.controllerInfo = controllerInfo;
@@ -44,8 +43,8 @@ public class CustomDashboardModule {
                     dashboardGenerator.createDashboard();
                     String jsonExtension = "json";
                     String contentType = "application/json";
-                    boolean overwrite ;
-                    if(customDashboardConfig.get("overwriteDashboard") != null){
+                    boolean overwrite;
+                    if (customDashboardConfig.get("overwriteDashboard") != null) {
                         overwrite = (Boolean) customDashboardConfig.get("overwriteDashboard");
                     } else {
                         overwrite = false;
@@ -58,26 +57,21 @@ public class CustomDashboardModule {
 
                     // send data and client to uploader
                     CustomDashboardUploader dashboardUploader = new CustomDashboardUploader(apiService);
+
+                    CloseableHttpClient client = null;
                     try {
 
-                        ////////////////////
                         setProxyIfApplicable(dashboardGenerator.getHttpArgs());
-                        CloseableHttpClient client = null;
-
-                        try {
-                            client = Http4ClientBuilder.getBuilder(dashboardGenerator.getHttpArgs()).build();
-                            dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
-                        } finally {
-                            try {
-                                client.close();
-                            } catch (Exception e) {
-                                logger.error(e.getMessage());
-                            }
-                        }
-                        ////////////////////
-//                        dashboardUploader.uploadDashboard(httpClient, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
+                        client = Http4ClientBuilder.getBuilder(dashboardGenerator.getHttpArgs()).build();
+                        dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
                     } catch (ApiException e) {
                         logger.error("Unable to establish connection, not uploading dashboard.");
+                    } finally {
+                        try {
+                            client.close();
+                        } catch (Exception e) {
+                            logger.error(e.getMessage());
+                        }
                     }
 
                     long endTime = System.currentTimeMillis();
@@ -90,27 +84,8 @@ public class CustomDashboardModule {
             }
         } else {
             logger.info("No metricPrefix in config.yml, not uploading dashboard.");
-
         }
     }
-
-    private CloseableHttpClient getHttpClient(Map<String, ? super Object> argsMap) {
-
-        setProxyIfApplicable(argsMap);
-        CloseableHttpClient client = null;
-
-        try {
-            client = Http4ClientBuilder.getBuilder(argsMap).build();
-            return client;
-        } finally {
-            try {
-                client.close();
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-            }
-        }
-    }
-
 
     private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {
         String proxyHost = System.getProperty("appdynamics.http.proxyHost");
