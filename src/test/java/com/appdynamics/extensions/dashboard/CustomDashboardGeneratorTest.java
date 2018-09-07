@@ -16,12 +16,10 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
-import com.appdynamics.extensions.api.ApiException;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.xml.Xml;
 import org.apache.commons.io.FileUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,14 +33,13 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CustomDashboardGeneratorTest {
 
     private CustomDashboardGenerator customDashboardGenerator;
 
     private File file = Mockito.mock(File.class);
+
     @Before
     public void resetSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         Field instance = ControllerInfoFactory.class.getDeclaredField("controllerInfo");
@@ -235,7 +232,7 @@ public class CustomDashboardGeneratorTest {
 
 
     @Test
-    public void replaceDefaultValuesInTheNormalDashboard() throws Exception{
+    public void replaceDefaultValuesInTheNormalDashboard() throws Exception {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
@@ -249,7 +246,7 @@ public class CustomDashboardGeneratorTest {
 
         CustomDashboardGenerator customDashboardGen;
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(controllerConfig, file);
-        customDashboardGen = new CustomDashboardGenerator( dashboardConfig, controllerInfo,metricPrefix );
+        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix);
 
         AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
         Mockito.when(agentEnvironmentResolver.getApplicationName()).thenReturn("Application");
@@ -264,29 +261,29 @@ public class CustomDashboardGeneratorTest {
 
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
 
-        if(dashboardString.contains(DashboardConstants.REPLACE_APPLICATION_NAME)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_APPLICATION_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains("applicationNameYML"));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains(DashboardConstants.SIM_APPLICATION_NAME));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)) {
             Assert.assertTrue(updatedDashboardString.contains("MachinePath"));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_TIER_NAME)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_TIER_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains("tierNameYML"));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_NODE_NAME)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_NODE_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains("Node"));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
         }
 
     }
 
     @Test
-    public void replaceDefaultValuesInTheSIMDashboard() throws Exception{
+    public void replaceDefaultValuesInTheSIMDashboard() throws Exception {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
@@ -301,7 +298,7 @@ public class CustomDashboardGeneratorTest {
         CustomDashboardGenerator customDashboardGen;
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(controllerConfig, file);
 
-        customDashboardGen = new CustomDashboardGenerator( dashboardConfig, controllerInfo,metricPrefix );
+        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix);
 
 //        customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithSim());
 
@@ -310,20 +307,21 @@ public class CustomDashboardGeneratorTest {
 
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
 
-        if(dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains(DashboardConstants.SIM_APPLICATION_NAME));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)) {
             Assert.assertTrue(updatedDashboardString.contains("Root"));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains("hostNameYML"));
         }
-        if(dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)){
+        if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
         }
 
     }
+
     private Map getConfigMap() {
         Map config = new HashMap<>();
         config.put("controllerHost", "hostNameYML");
@@ -340,13 +338,14 @@ public class CustomDashboardGeneratorTest {
         config.put("simEnabled", false);
         return config;
     }
+
     @Test
-    public void testCreateDashboard(){
+    public void testCreateDashboard() {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
         dashboardConfig.put("uploadDashboard", true);
-        dashboardConfig.put("pathToNormalDashboard","src/test/resources/dashboard/normalDashboard.json");
+        dashboardConfig.put("pathToNormalDashboard", "src/test/resources/dashboard/normalDashboard.json");
 
         Map controllerConfig = getConfigMap();
         String metricPrefix = "Custom Metrics|Extension|";
@@ -355,7 +354,7 @@ public class CustomDashboardGeneratorTest {
         CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(controllerConfig, file);
 
-        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo,metricPrefix );
+        customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix);
 
 //        customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithoutSim());
 
@@ -377,6 +376,6 @@ public class CustomDashboardGeneratorTest {
 //        } catch (ApiException e){
 //            Assert.assertFalse(true);
 //        }
-  }
+    }
 
 }

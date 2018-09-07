@@ -8,8 +8,6 @@
 
 package com.appdynamics.extensions.conf.controller;
 
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
-import com.appdynamics.extensions.conf.controller.ControllerInfoValidator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

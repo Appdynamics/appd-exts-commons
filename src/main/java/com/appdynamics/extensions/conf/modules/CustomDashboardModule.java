@@ -49,20 +49,20 @@ public class CustomDashboardModule {
                     } else {
                         overwrite = false;
                     }
-                    // get client from httpclient
-//                    CloseableHttpClient httpClient = getHttpClient(dashboardGenerator.getHttpArgs());
 
                     // Sending API service from module to maintain state
                     ControllerApiService apiService = new ControllerApiService(controllerInfo);
 
-                    // send data and client to uploader
                     CustomDashboardUploader dashboardUploader = new CustomDashboardUploader(apiService);
 
                     CloseableHttpClient client = null;
                     try {
 
                         setProxyIfApplicable(dashboardGenerator.getHttpArgs());
+                        // get client from httpclient
                         client = Http4ClientBuilder.getBuilder(dashboardGenerator.getHttpArgs()).build();
+
+                        // send data and client to uploader
                         dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
                     } catch (ApiException e) {
                         logger.error("Unable to establish connection, not uploading dashboard.");

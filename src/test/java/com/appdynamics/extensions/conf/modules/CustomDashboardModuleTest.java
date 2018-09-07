@@ -10,21 +10,13 @@ package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
-import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created by bhuvnesh.kumar on 8/28/18.
@@ -48,7 +40,7 @@ public class CustomDashboardModuleTest {
         dashboardConfig.put("metricPrefix", "Server|Component:21|Custom Metrics|Amazon ELB|");
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule( );
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule();
         String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
@@ -59,7 +51,7 @@ public class CustomDashboardModuleTest {
         dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB|");
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule(  );
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule();
         String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
@@ -71,13 +63,13 @@ public class CustomDashboardModuleTest {
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule(  );
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule();
         String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
     @Test
-    public void testInitCustomDashboard(){
+    public void testInitCustomDashboard() {
         String metricPrefix = "Server|Component:21|Custom Metrics|Amazon ELB|";
         setupSystemProps();
         Map config = getConfigMap();
