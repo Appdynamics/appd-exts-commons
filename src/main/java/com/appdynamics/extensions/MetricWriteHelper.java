@@ -79,6 +79,7 @@ public class MetricWriteHelper {
         } else {
             logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
         }
+
     }
 
     protected void addForDerivedMetricsCalculation(String metricPath, String metricValue) {
@@ -104,6 +105,8 @@ public class MetricWriteHelper {
             String clusterRollUpType = metricProperties.getClusterRollUpType();
             printMetric(metricPath, metricValue, aggregationType, timeRollUpType, clusterRollUpType);
         }
+        printMetric(baseMonitor.getContextConfiguration().getMetricPrefix()+"|"+"TotalMetricsReportedInThisRun",
+                String.valueOf(metricsMap.size()),"OBSERVATION", "CURRENT","COLLECTIVE" );
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
