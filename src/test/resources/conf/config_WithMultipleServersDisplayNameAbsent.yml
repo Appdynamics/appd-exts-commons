@@ -3,7 +3,7 @@
 
 #The following prefix will populate the metrics under one tier
 metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
-assertDisplayNameCheck: true
+displayNameCheckEnabled: true
 
 #Add your list of Redis servers here.
 servers:

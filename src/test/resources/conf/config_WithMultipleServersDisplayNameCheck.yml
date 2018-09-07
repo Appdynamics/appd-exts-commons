@@ -3,7 +3,7 @@
 
 #The following prefix will populate the metrics under one tier
 metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
-assertDisplayNameCheck: true
+displayNameCheckEnabled: # value is nul intentionally, for test case
 
 #Add your list of Redis servers here.
 servers:
@@ -16,6 +16,7 @@ servers:
     host: "localhost"
     port: "6370"
     password: ""
+
 
 
 

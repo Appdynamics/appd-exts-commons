@@ -28,6 +28,7 @@ import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -209,7 +210,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
 
     protected abstract void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider);
 
-    protected abstract int getTaskCount();
+    protected abstract List<Map<String, ?>> getServers();
 
     protected void onComplete() {
         logger.info("Finished processing all tasks in the job for {}", getMonitorName());

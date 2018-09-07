@@ -27,9 +27,9 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +60,7 @@ public class MetricWriteHelperTest {
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         metricWriteHelper.transformAndPrintMetrics(metricList);
-        verify(metricWriter, times(2)).printMetric(stringArgumentCaptor.capture());
+        verify(metricWriter, times(1)).printMetric(stringArgumentCaptor.capture());
 
         List<String> stringArgs = stringArgumentCaptor.getAllValues();
         Assert.assertTrue(stringArgs.get(0).equals("2"));
@@ -91,7 +91,7 @@ public class MetricWriteHelperTest {
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         metricWriteHelper.transformAndPrintMetrics(metricList);
         metricWriteHelper.onComplete();
-        verify(metricWriter, times(6)).printMetric(stringArgumentCaptor.capture());
+        verify(metricWriter, times(5)).printMetric(stringArgumentCaptor.capture());
         List<String> stringArgs = stringArgumentCaptor.getAllValues();
         for(String value : stringArgs){
             Assert.assertTrue(value.equals("2") || value.equals("4") || value.equals("1") || value.equals("5"));

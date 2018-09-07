@@ -37,4 +37,14 @@ public class AssertUtils {
             super(message);
         }
     }
+
+    public static void assertEmpty(Object o, String message) {
+        if (o instanceof String) {
+            String str = (String) o;
+            if (str != null && !str.equals("")) {
+                throw new ValidationException(str);
+            }
+        }
+    }
+
 }

@@ -20,12 +20,7 @@ import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.YmlUtils;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import com.sun.tools.javac.util.Assert;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -52,9 +47,12 @@ public class AMonitorJob implements Runnable {
         logger.debug("Monitor {} Task Runner invoked", baseMonitor.getMonitorName());
         TasksExecutionServiceProvider obj = new TasksExecutionServiceProvider(baseMonitor, MetricWriteHelperFactory.create(baseMonitor));
         Map<String, ?> configMap = baseMonitor.getContextConfiguration().getConfigYml();
-        List<Map<String, String>> servers =  (List<Map<String, String>> )configMap.get("servers");
-        boolean displayCheckFlag = YmlUtils.getBoolean(configMap.get("assertDisplayNameCheck"));
-        if(displayCheckFlag) {
+        List<Map<String, ?>> servers =  baseMonitor.getServers();
+        AssertUtils.assertNotNull(servers, "getServers() cannot return empty or null");
+        boolean displayNameCheckEnabled = (YmlUtils.getBoolean(configMap.get("displayNameCheckEnabled"))==null)?
+                true : YmlUtils.getBoolean(configMap.get("displayNameCheckEnabled"));
+
+        if(displayNameCheckEnabled) {
             checkDisplayName(servers);
         }
         baseMonitor.doRun(obj);
@@ -75,20 +73,20 @@ public class AMonitorJob implements Runnable {
         }
     }
 
-    private void checkDisplayName(List<Map<String, String>> servers){
-        AssertUtils.assertNotNull(servers, "[servers] section is not initialized");
-        if(baseMonitor.getTaskCount()>1){
-            logger.debug("Multiple Servers found in the [servers] section");
-            for(Map<String, String> server : servers){
+    private void checkDisplayName(List<Map<String, ?>> servers){
+        if(baseMonitor.getServers().size() > 1){
+            logger.debug("Multiple Servers found in the config.yml");
+            for(Map<String, ?> server : servers){
                 AssertUtils.assertNotNull(server.get("displayName"), "[displayName] of server cannot be " +
-                        "null or empty");
+                        "null ");
             }
         }
-        else if(baseMonitor.getTaskCount() == 1){
-            logger.debug("Single Server found in the [servers] section");
-            Map<String, String> server = servers.get(0);
+        else if(baseMonitor.getServers().size() == 1){
+            logger.debug("Single Server found in the config.yml");
+            Map<String, ?> server = servers.get(0);
             if(server.containsKey("displayName")){
-               Assert.error("[displayName] cannot be present in the config.yml");
+               AssertUtils.assertEmpty(server.get("displayName"),"[displayName] of server cannot be " +
+                "present" );
             }
         }
     }

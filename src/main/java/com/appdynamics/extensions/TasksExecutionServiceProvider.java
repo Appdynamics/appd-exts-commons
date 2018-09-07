@@ -36,7 +36,7 @@ public class TasksExecutionServiceProvider {
     public TasksExecutionServiceProvider(ABaseMonitor aBaseMonitor, MetricWriteHelper metricWriteHelper) {
         this.aBaseMonitor = aBaseMonitor;
         this.metricWriteHelper = metricWriteHelper;
-        taskCounter = new AtomicInteger(this.aBaseMonitor.getTaskCount());
+        taskCounter = new AtomicInteger(this.aBaseMonitor.getServers().size());
     }
 
 
