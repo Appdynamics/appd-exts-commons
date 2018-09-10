@@ -16,18 +16,18 @@
 
 package com.appdynamics.extensions;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
 import com.google.common.collect.Maps;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -52,9 +52,21 @@ public class TasksExecutionServiceProviderTest {
     @Test
     public void checkIfOnCompleteMethodsAreCalledAfterTasksSubmittedTest() throws InterruptedException {
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        when(aBaseMonitor.getTaskCount()).thenReturn(2);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        List<Map<String, ?>> servers = new ArrayList<Map<String, ?>>();
+        Map<String, Object> server1 = new HashMap<>();
+        server1.put("host","localhost");
+        server1.put("port", 8090);
+
+        Map<String, Object> server2 = new HashMap<>();
+        server2.put("host","localhost");
+        server2.put("port", 8090);
+
+        servers.add(server1);
+        servers.add(server2);
+
+        when(aBaseMonitor.getServers()).thenReturn(servers);
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
         Map<String, ? super Object> conf = Maps.newHashMap();
         conf.put("numberOfThreads", "10");
@@ -76,7 +88,25 @@ public class TasksExecutionServiceProviderTest {
     @Test
     public void checkIfOnCompleteMethodsAreNotCalledAfterTasksSubmittedAreLessThanTaskCountTest() throws InterruptedException {
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
-        when(aBaseMonitor.getTaskCount()).thenReturn(3);
+
+        List<Map<String, ?>> servers = new ArrayList<Map<String, ?>>();
+        Map<String, Object> server1 = new HashMap<>();
+        server1.put("host","localhost");
+        server1.put("port", 8090);
+
+        Map<String, Object> server2 = new HashMap<>();
+        server2.put("host","localhost");
+        server2.put("port", 8090);
+
+        Map<String, Object> server3 = new HashMap<>();
+        server2.put("host","localhost");
+        server2.put("port", 8090);
+
+        servers.add(server1);
+        servers.add(server2);
+        servers.add(server3);
+
+        when(aBaseMonitor.getServers()).thenReturn(servers);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         MonitorExecutorServiceModule monitorExecutorServiceModule = new MonitorExecutorServiceModule();
@@ -96,6 +126,8 @@ public class TasksExecutionServiceProviderTest {
         verify(metricWriteHelper, times(0)).onComplete();
         verify(aBaseMonitor, times(0)).onComplete();
     }
+
+
 
 }
 
