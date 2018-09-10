@@ -6,6 +6,7 @@ import com.appdynamics.extensions.api.ControllerApiService;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.dashboard.CustomDashboardGenerator;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
+import com.appdynamics.extensions.dashboard.DashboardConstants;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
@@ -34,21 +35,14 @@ public class CustomDashboardModule {
             dashboardMetricPrefix = buildMetricPrefixForDashboard(metricPrefix);
 
             if ((customDashboardConfig != null && !customDashboardConfig.isEmpty())) {
-                if ((Boolean) customDashboardConfig.get("enabled")) {
+                if ((Boolean) customDashboardConfig.get(DashboardConstants.ENALBED)) {
 
                     long startTime = System.currentTimeMillis();
 
                     // get data from generator
                     CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInfo, dashboardMetricPrefix);
                     dashboardGenerator.createDashboard();
-                    String jsonExtension = "json";
-                    String contentType = "application/json";
-                    boolean overwrite;
-                    if (customDashboardConfig.get("overwriteDashboard") != null) {
-                        overwrite = (Boolean) customDashboardConfig.get("overwriteDashboard");
-                    } else {
-                        overwrite = false;
-                    }
+                    boolean overwrite = getOverwrite(customDashboardConfig);
 
                     // Sending API service from module to maintain state
                     ControllerApiService apiService = new ControllerApiService(controllerInfo);
@@ -63,7 +57,7 @@ public class CustomDashboardModule {
                         client = Http4ClientBuilder.getBuilder(dashboardGenerator.getHttpArgs()).build();
 
                         // send data and client to uploader
-                        dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), jsonExtension, dashboardGenerator.getDashboardContent(), contentType, dashboardGenerator.getHttpArgs(), overwrite);
+                        dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), dashboardGenerator.getFileExtension(), dashboardGenerator.getDashboardContent(), dashboardGenerator.getContentType(), dashboardGenerator.getHttpArgs(), overwrite);
                     } catch (ApiException e) {
                         logger.error("Unable to establish connection, not uploading dashboard.");
                     } finally {
@@ -85,6 +79,16 @@ public class CustomDashboardModule {
         } else {
             logger.info("No metricPrefix in config.yml, not uploading dashboard.");
         }
+    }
+
+    private boolean getOverwrite(Map customDashboardConfig) {
+        boolean overwrite;
+        if (customDashboardConfig.get("overwriteDashboard") != null) {
+            overwrite = (Boolean) customDashboardConfig.get("overwriteDashboard");
+        } else {
+            overwrite = false;
+        }
+        return overwrite;
     }
 
     private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {

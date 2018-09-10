@@ -50,7 +50,7 @@ public class CustomDashboardUploader {
             logger.debug("Dashboard overwrite: {}", overwrite);
             if (isPresent) {
                 if (overwrite) {
-                    //#TODO Eventhough we intend to overwrite, this will actually create a new dashboard.
+                    //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
                     // This will not be present in the config.yml so it will never override.
                     // Keeping this here for when override will be supported
                     apiService.uploadDashboard(argsMap, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);

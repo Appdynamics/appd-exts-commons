@@ -52,7 +52,17 @@ public class CustomDashboardGenerator {
     private Map dashboardConfig;
     private ControllerInfo controllerInfo;
     protected CustomDashboardUploader dashboardUploader;
+    private String fileExtension ;
 
+
+    private String contentType ;
+
+    public String getFileExtension() {
+        return fileExtension;
+    }
+    public String getContentType() {
+        return contentType;
+    }
     public Map getHttpArgs() {
         return httpArgs;
     }
@@ -81,6 +91,8 @@ public class CustomDashboardGenerator {
                 logger.error("Dashboard file is empty");
                 return;
             }
+            fileExtension = "json";
+            contentType = "application/json";
 
             setDashboardName();
             dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
@@ -196,7 +208,6 @@ public class CustomDashboardGenerator {
         return "";
     }
 
-    // TODO String builder
     public String setDefaultDashboardInfo(String dashboardString) {
         dashboardString = setMetricPrefix(dashboardString);
         dashboardString = setApplicationName(dashboardString);
@@ -211,7 +222,8 @@ public class CustomDashboardGenerator {
     }
     private String setMetricPrefix(String dashboardString) {
         if (dashboardString.contains(REPLACE_METRIC_PREFIX)) {
-            dashboardString = dashboardString.replace(REPLACE_METRIC_PREFIX, metricPrefix);
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_METRIC_PREFIX, metricPrefix);
+
             logger.debug(REPLACE_METRIC_PREFIX + ": " + metricPrefix);
         }
         return dashboardString;
@@ -219,7 +231,8 @@ public class CustomDashboardGenerator {
 
     private String setApplicationName(String dashboardString) {
         if (dashboardString.contains(REPLACE_APPLICATION_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_APPLICATION_NAME, controllerInfo.getApplicationName());
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_APPLICATION_NAME, controllerInfo.getApplicationName());
+
             logger.debug(REPLACE_APPLICATION_NAME + ": " + controllerInfo.getApplicationName());
         }
         return dashboardString;
@@ -227,15 +240,17 @@ public class CustomDashboardGenerator {
 
     private String setSimApplicationName(String dashboardString) {
         if (dashboardString.contains(REPLACE_SIM_APPLICATION_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_SIM_APPLICATION_NAME, SIM_APPLICATION_NAME);
-            logger.debug(REPLACE_SIM_APPLICATION_NAME + ": " + REPLACE_SIM_APPLICATION_NAME);
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_SIM_APPLICATION_NAME, SIM_APPLICATION_NAME);
+
+            logger.debug(REPLACE_SIM_APPLICATION_NAME + ": " + SIM_APPLICATION_NAME);
         }
         return dashboardString;
     }
 
     private String setTierName(String dashboardString) {
         if (dashboardString.contains(REPLACE_TIER_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_TIER_NAME, controllerInfo.getTierName());
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_TIER_NAME, controllerInfo.getTierName());
+
             logger.debug(REPLACE_TIER_NAME + ": " + controllerInfo.getTierName());
         }
         return dashboardString;
@@ -243,7 +258,8 @@ public class CustomDashboardGenerator {
 
     private String setNodeName(String dashboardString) {
         if (dashboardString.contains(REPLACE_NODE_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_NODE_NAME, controllerInfo.getNodeName());
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_NODE_NAME, controllerInfo.getNodeName());
+
             logger.debug(REPLACE_NODE_NAME + ": " + controllerInfo.getNodeName());
         }
         return dashboardString;
@@ -251,7 +267,8 @@ public class CustomDashboardGenerator {
 
     private String setHostName(String dashboardString) {
         if (dashboardString.contains(REPLACE_HOST_NAME)) {
-            dashboardString = dashboardString.replace(REPLACE_HOST_NAME, controllerInfo.getControllerHost());
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_HOST_NAME, controllerInfo.getControllerHost());
+
             logger.debug(REPLACE_HOST_NAME + ": " + controllerInfo.getControllerHost());
         }
         return dashboardString;
@@ -265,7 +282,8 @@ public class CustomDashboardGenerator {
 
         if (dashboardString.contains(REPLACE_DASHBOARD_NAME)) {
             if (dashboardConfig.get("dashboardName") != null)
-                dashboardString = dashboardString.replace(REPLACE_DASHBOARD_NAME, dashBoardName);
+                dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_DASHBOARD_NAME, dashBoardName);
+
             logger.debug(REPLACE_DASHBOARD_NAME + ": " + dashBoardName);
         }
         return dashboardString;
@@ -276,10 +294,12 @@ public class CustomDashboardGenerator {
             if (controllerInfo.getMachinePath() != null) {
                 String machinePath = ROOT + METRICS_SEPARATOR + controllerInfo.getMachinePath();
                 machinePath = machinePath.substring(0, machinePath.lastIndexOf(METRICS_SEPARATOR));
-                dashboardString = dashboardString.replace(REPLACE_MACHINE_PATH, machinePath);
+                dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_MACHINE_PATH, machinePath);
+
                 logger.debug(REPLACE_MACHINE_PATH + ": " + machinePath);
             } else {
-                dashboardString = dashboardString.replace(REPLACE_MACHINE_PATH, ROOT);
+                dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_MACHINE_PATH, ROOT);
+
                 logger.debug(REPLACE_MACHINE_PATH + ": " + ROOT);
             }
         }
@@ -371,6 +391,9 @@ public class CustomDashboardGenerator {
         Xml xml = new Xml(getDashboardTemplate());
         String dashboardName = setDashboardName(xml.getSource(), instanceName);
         NodeList widgets = xml.getElementsByTagName("widget-series");
+        fileExtension = "xml";
+        contentType = "text/xml";
+
         int seriesNameCount = 0;
         if (widgets != null) {
             for (int i = 0; i < widgets.getLength(); i++) {

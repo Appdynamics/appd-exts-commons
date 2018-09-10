@@ -28,25 +28,11 @@ public class AgentEnvironmentResolver {
     private ControllerInfo cInfo;
     private boolean resolved;
 
-    // TODO Find a good name for this class, remove the getters
-    // create a new class and extend from the base agent env class
     AgentEnvironmentResolver(ControllerInfo controllerInfo) {
 
         this.cInfo = controllerInfo;
         ControllerInfoValidator validator = new ControllerInfoValidator();
         resolved = validator.validateAndCheckIfResolved(cInfo);
-    }
-
-    public String getTierName() {
-        return cInfo.getTierName();
-    }
-
-    public String getNodeName() {
-        return cInfo.getNodeName();
-    }
-
-    public String getApplicationName() {
-        return cInfo.getApplicationName();
     }
 
     public boolean isResolved() {
@@ -58,60 +44,5 @@ public class AgentEnvironmentResolver {
         return resolved;
     }
 
-    public String getControllerHostName() {
-        if (resolved) {
-            return cInfo.getControllerHost();
-        }
-        return null;
-    }
-
-    public int getControllerPort() {
-        if (resolved) {
-            return cInfo.getControllerPort();
-        }
-        return isControllerUseSSL() ? 443 : 80;
-    }
-
-    public boolean isControllerUseSSL() {
-        if (resolved) {
-            return cInfo.getControllerSslEnabled();
-        }
-        return false;
-    }
-
-    public String getAccountName() {
-        if (resolved) {
-            return cInfo.getAccount();
-        }
-        return null;
-    }
-
-    public String getUsername() {
-        if (resolved) {
-            return cInfo.getUsername();
-        }
-        return null;
-    }
-
-    public String getPassword() {
-        if (resolved) {
-            return CryptoUtil.encode(cInfo.getPassword());
-        }
-        return null;
-    }
-
-    public Boolean getSimEnabled() {
-        if (resolved) {
-            return cInfo.getSimEnabled();
-        }
-        return null;
-    }
-
-    public String getMachinePath() {
-        if (resolved) {
-            return cInfo.getMachinePath();
-        }
-        return null;
-    }
 
 }

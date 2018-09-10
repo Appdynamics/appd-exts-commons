@@ -171,9 +171,6 @@ public class CustomDashboardGeneratorTest {
 
     @Test
     public void buildMetricPrefix() {
-        AgentEnvironmentResolver resolver = Mockito.mock(AgentEnvironmentResolver.class);
-//        customDashboardGenerator.setAgentEnvResolver(resolver);
-        Mockito.doReturn("Tier1").when(resolver).getTierName();
 
         String metricPrefix = "Server|Component:Tier1|Custom Metrics|Docker";
         String ctrlMetricPrefix = customDashboardGenerator.buildMetricPrefix(metricPrefix).toString();
@@ -242,19 +239,10 @@ public class CustomDashboardGeneratorTest {
         controllerConfig.put("host", "192.168.11.02");
         controllerConfig.put("port", "1100");
         String metricPrefix = "Custom Metrics|Extension|";
-        CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
 
         CustomDashboardGenerator customDashboardGen;
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(controllerConfig, file);
         customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix);
-
-        AgentEnvironmentResolver agentEnvironmentResolver = Mockito.mock(AgentEnvironmentResolver.class);
-        Mockito.when(agentEnvironmentResolver.getApplicationName()).thenReturn("Application");
-        Mockito.when(agentEnvironmentResolver.getTierName()).thenReturn("Tier");
-        Mockito.when(agentEnvironmentResolver.getNodeName()).thenReturn("Node");
-        Mockito.when(agentEnvironmentResolver.getControllerHostName()).thenReturn("ControllerHost");
-        Mockito.when(agentEnvironmentResolver.getMachinePath()).thenReturn("MachinePath");
-//        customDashboardGen.setAgentEnvResolver(agentEnvironmentResolver);
 
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/normalDashboard.json"));
         String updatedDashboardString = customDashboardGen.setDefaultDashboardInfo(dashboardString);
@@ -293,14 +281,11 @@ public class CustomDashboardGeneratorTest {
         controllerConfig.put("host", "192.168.11.02");
         controllerConfig.put("port", "1100");
         String metricPrefix = "Custom Metrics|Extension|";
-        CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
 
         CustomDashboardGenerator customDashboardGen;
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(controllerConfig, file);
 
         customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix);
-
-//        customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithSim());
 
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
         String updatedDashboardString = customDashboardGen.setDefaultDashboardInfo(dashboardString);
@@ -351,12 +336,9 @@ public class CustomDashboardGeneratorTest {
         String metricPrefix = "Custom Metrics|Extension|";
 
         CustomDashboardGenerator customDashboardGen;
-        CustomDashboardUploader uploader = Mockito.mock(CustomDashboardUploader.class);
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(controllerConfig, file);
 
         customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix);
-
-//        customDashboardGen.setAgentEnvResolver(getAgentEnvResolverWithoutSim());
 
         customDashboardGen.createDashboard();
         Assert.assertTrue(customDashboardGen.getDashboardName().equals("Dashboard Test"));
@@ -368,14 +350,7 @@ public class CustomDashboardGeneratorTest {
         Assert.assertTrue(server.get("username").toString().equals("usernameYML@accountNameYML"));
         Assert.assertTrue((Boolean) connectionProps.get("sslCertCheckEnabled") == true);
 
-
-        //        try{
-//            CloseableHttpClient closeableHttpClient = Mockito.mock(CloseableHttpClient.class);
-//            Mockito.verify(uploader, Mockito.times(1)).uploadDashboard(closeableHttpClient ,Mockito.anyString(),Mockito.anyString(),Mockito.anyString(),Mockito.anyString(),Mockito.anyMap(),Mockito.anyBoolean());
-//
-//        } catch (ApiException e){
-//            Assert.assertFalse(true);
-//        }
     }
+
 
 }

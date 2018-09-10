@@ -57,6 +57,15 @@ public class CustomDashboardUploaderTest {
             String stringing = "";
             Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
             apiService.uploadDashboard(map, cookiesCsrf, stringing, stringing, stringing, stringing);
+
+            CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(apiService);
+            String dashboardName = "DashboardName";
+            String fileExtension = "json";
+            String fileContents = "contents";
+            String contentType = "application/json";
+            Map<String, ? super Object> argsMap = new HashMap<>();
+            boolean overwrite = false;
+            customDashboardUploader.uploadDashboard(client,dashboardName, fileExtension, fileContents, contentType, argsMap, overwrite );
             Mockito.verify(apiService, Mockito.times(1)).uploadDashboard(map, cookiesCsrf, stringing, stringing, stringing, stringing);
 
         } catch (ApiException e) {
