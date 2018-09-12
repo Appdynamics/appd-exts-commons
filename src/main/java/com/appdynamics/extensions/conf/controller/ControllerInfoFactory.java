@@ -34,25 +34,27 @@ public class ControllerInfoFactory {
        This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
 
      */
-    public static ControllerInfo getControllerInfo(Map config, File installDir) {
 
+    //
 
-        if (controllerInfo == null) {
-            controllerInfo = getControllerInfoFromXml(installDir);
-            logger.debug("The resolved properties from controller-info.xml are {}", controllerInfo);
-            getSystemProperties();
-            logger.debug("The resolved properties after controller-info.xml and system properties are {}", controllerInfo);
-            if (config != null) {
-                getConfigProps(config);
-                logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", controllerInfo);
-            }
-        }
-
+    public static ControllerInfo getControllerInfo() {
         return controllerInfo;
     }
 
+    public static void initialize(Map config, File installDir) {
+        ControllerInfo localControllerInfo = getControllerInfoFromXml(installDir);
+        logger.debug("The resolved properties from controller-info.xml are {}", localControllerInfo);
+        getSystemProperties(localControllerInfo);
+        logger.debug("The resolved properties after controller-info.xml and system properties are {}", localControllerInfo);
+        if (config != null) {
+            getConfigProps(config, localControllerInfo);
+            logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", localControllerInfo);
+        }
+        controllerInfo = localControllerInfo;
+    }
 
-    public static void getConfigProps(Map config) {
+
+    public static void getConfigProps(Map config, ControllerInfo controllerInfo) {
         if (!Strings.isNullOrEmpty((String) config.get("controllerHost"))) {
             controllerInfo.setControllerHost(config.get("controllerHost").toString());
         }
@@ -100,7 +102,7 @@ public class ControllerInfoFactory {
 
     }
 
-    private static void getSystemProperties() {
+    private static void getSystemProperties(ControllerInfo controllerInfo) {
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.accountAccessKey"))) {
             controllerInfo.setAccountAccessKey(System.getProperty("appdynamics.agent.accountAccessKey"));
         }
@@ -125,7 +127,7 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.password"))) {
             controllerInfo.setPassword(System.getProperty("appdynamics.agent.monitors.controller.password"));
         }
-        if (!Strings.isNullOrEmpty( System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"))) {
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"))) {
             controllerInfo.setEncryptionKey(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"));
         }
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"))) {
@@ -162,7 +164,7 @@ public class ControllerInfoFactory {
             }
         }
         if (from == null) {
-            from = ControllerInfo.getControllerInfo();
+            from = ControllerInfo.getInstance();
         }
         return from;
     }
@@ -181,7 +183,7 @@ public class ControllerInfoFactory {
     }
 
     private static ControllerInfo mergeValuesFromXML(final XmlControllerInfo xmlControllerInfo) {
-        ControllerInfo controllerInfo = ControllerInfo.getControllerInfo();
+        ControllerInfo controllerInfo = ControllerInfo.getInstance();
         controllerInfo.setAccountAccessKey(xmlControllerInfo.getAccountAccessKey());
         controllerInfo.setAccount(xmlControllerInfo.getAccount());
         controllerInfo.setControllerHost(xmlControllerInfo.getControllerHost());

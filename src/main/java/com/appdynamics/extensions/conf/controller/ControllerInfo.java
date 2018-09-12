@@ -39,7 +39,8 @@ public class ControllerInfo {
     private ControllerInfo() {
     }
 
-    public static ControllerInfo getControllerInfo() {
+
+    public static ControllerInfo getInstance() {
         return controllerInfo;
     }
 

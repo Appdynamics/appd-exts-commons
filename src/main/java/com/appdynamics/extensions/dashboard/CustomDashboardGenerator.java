@@ -53,9 +53,16 @@ public class CustomDashboardGenerator {
     private ControllerInfo controllerInfo;
     protected CustomDashboardUploader dashboardUploader;
     private String fileExtension ;
-
-
     private String contentType ;
+    private String dashboardContent;
+    private Map httpArgs;
+    private String dashboardName;
+
+    public CustomDashboardGenerator( Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix) {
+        this.dashboardConfig = dashboardConfig;
+        this.controllerInfo = controllerInformation;
+        this.metricPrefix = metricPrefix;
+    }
 
     public String getFileExtension() {
         return fileExtension;
@@ -73,15 +80,6 @@ public class CustomDashboardGenerator {
         return dashboardName;
     }
 
-    private String dashboardContent;
-    private Map httpArgs;
-    private String dashboardName;
-
-    public CustomDashboardGenerator( Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix) {
-        this.dashboardConfig = dashboardConfig;
-        this.controllerInfo = controllerInformation;
-        this.metricPrefix = metricPrefix;
-    }
 
     public void createDashboard() {
         if (isResolved()) {
@@ -106,7 +104,7 @@ public class CustomDashboardGenerator {
         }
 
     }
-
+// todo pass the dashboard name from module
     private void setDashboardName() {
         String dashboardName  ;
         if(!Strings.isNullOrEmpty((String)dashboardConfig.get("dashboardName"))){
@@ -118,10 +116,9 @@ public class CustomDashboardGenerator {
         this.dashboardName = dashboardName;
     }
 
-
+    // todo send to module
     protected boolean isResolved() {
         ControllerInfoValidator validator = new ControllerInfoValidator();
-
         return validator.validateAndCheckIfResolved(controllerInfo);
     }
 
@@ -153,6 +150,7 @@ public class CustomDashboardGenerator {
         return dashboardTemplate;
     }
 
+    // todo change to httpProperties
     protected Map<String, ? super Object> getArgsMap() {
 
         Map<String, ? super Object> argsMap = new HashMap<>();

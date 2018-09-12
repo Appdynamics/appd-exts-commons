@@ -36,7 +36,7 @@ public class DashboardConstants {
     public static final String SINGULARITY_AGENT = "singularity-agent";
     public static final String AT = "@";
     public static final String USERNAME = "username";
-    public static final String ENALBED = "enabled";
+    public static final String ENABLED = "enabled";
     public static final String TRUE = "true";
     public static final String FALSE = "false";
     public static final String ROOT = "Root";

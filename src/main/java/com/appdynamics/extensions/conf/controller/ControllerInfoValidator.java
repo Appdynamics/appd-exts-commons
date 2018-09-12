@@ -33,6 +33,7 @@ public class ControllerInfoValidator {
         check("controllerPort", cInfo.getControllerPort());
         check("controllerSslEnabled", cInfo.getControllerSslEnabled());
 
+        // TODO remove extra getSimEnabled
         simEnabledOrNot("simEnabled", cInfo.getSimEnabled(), cInfo);
         if (unresolvedProps != null) {
             logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
@@ -40,7 +41,8 @@ public class ControllerInfoValidator {
         }
         return true;
     }
-
+//TODO write test case if controllerinfo.xml does not have sim enabled field at all, does it return null/empty?
+    // TODO if not present then check if all three of app tier node are present or not
     private void simEnabledOrNot(String propName, Object propVal, ControllerInfo cInfo) {
         if (propVal != null) {
             if (propVal instanceof Boolean) {

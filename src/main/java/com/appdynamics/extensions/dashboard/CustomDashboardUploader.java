@@ -39,7 +39,7 @@ public class CustomDashboardUploader {
         this.apiService = apiService;
     }
 
-    public void uploadDashboard(CloseableHttpClient client, String dashboardName, String fileExtension, String fileContents, String contentType, Map<String, ? super Object> argsMap, boolean overwrite) throws ApiException {
+    public void uploadDashboard(CloseableHttpClient client, String dashboardName, String fileExtension, String fileContents, String contentType, Map<String, ? super Object> httpProperties, boolean overwrite) throws ApiException {
         try {
 
             CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client);
@@ -53,12 +53,12 @@ public class CustomDashboardUploader {
                     //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
                     // This will not be present in the config.yml so it will never override.
                     // Keeping this here for when override will be supported
-                    apiService.uploadDashboard(argsMap, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);
+                    apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);
                 } else {
                     logger.debug("Dashboard {} Already present, can not overwrite. ", dashboardName);
                 }
             } else {
-                apiService.uploadDashboard(argsMap, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);
+                apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);
             }
         } finally {
             try {

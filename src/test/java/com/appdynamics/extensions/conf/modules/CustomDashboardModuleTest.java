@@ -61,7 +61,6 @@ public class CustomDashboardModuleTest {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB");
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(dashboardConfig, file);
 
         CustomDashboardModule customDashboardModule = new CustomDashboardModule();
         String metricPrefix = customDashboardModule.buildMetricPrefixForDashboard(metric);

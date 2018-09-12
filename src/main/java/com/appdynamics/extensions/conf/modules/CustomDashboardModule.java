@@ -19,66 +19,60 @@ import java.util.Map;
 public class CustomDashboardModule {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardModule.class);
-    private ControllerInfo controllerInfo;
 
     public CustomDashboardModule() {
     }
 
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, ControllerInfo controllerInfo) {
-        logger.debug("Metric Prefix : {}", metricPrefix);
-        this.controllerInfo = controllerInfo;
         logger.debug("Custom Dashboard Module controllerInfo : {}", controllerInfo);
-
         String dashboardMetricPrefix;
         Map customDashboardConfig = (Map) config.get("customDashboard");
-        if (metricPrefix != null) {
-            dashboardMetricPrefix = buildMetricPrefixForDashboard(metricPrefix);
+        dashboardMetricPrefix = buildMetricPrefixForDashboard(metricPrefix);
 
-            if ((customDashboardConfig != null && !customDashboardConfig.isEmpty())) {
-                if ((Boolean) customDashboardConfig.get(DashboardConstants.ENALBED)) {
+        if ((customDashboardConfig != null && !customDashboardConfig.isEmpty())) {
+            if ((Boolean) customDashboardConfig.get(DashboardConstants.ENABLED)) {
+                long startTime = System.currentTimeMillis();
 
-                    long startTime = System.currentTimeMillis();
+                // TODO move the isresolved to this class and only create constructor if everything is resolved
 
-                    // get data from generator
-                    CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInfo, dashboardMetricPrefix);
-                    dashboardGenerator.createDashboard();
-                    boolean overwrite = getOverwrite(customDashboardConfig);
+                // get data from generator
+                CustomDashboardGenerator dashboardGenerator = new CustomDashboardGenerator(customDashboardConfig, controllerInfo, dashboardMetricPrefix);
+                dashboardGenerator.createDashboard();
+                boolean overwrite = getOverwrite(customDashboardConfig);
 
-                    // Sending API service from module to maintain state
-                    ControllerApiService apiService = new ControllerApiService(controllerInfo);
+                // Sending API service from module to maintain state
+                ControllerApiService apiService = new ControllerApiService(controllerInfo);
 
-                    CustomDashboardUploader dashboardUploader = new CustomDashboardUploader(apiService);
+                CustomDashboardUploader dashboardUploader = new CustomDashboardUploader(apiService);
 
-                    CloseableHttpClient client = null;
+                CloseableHttpClient client = null;
+                try {
+
+                    setProxyIfApplicable(dashboardGenerator.getHttpArgs());
+                    // get client from httpclient
+                    client = Http4ClientBuilder.getBuilder(dashboardGenerator.getHttpArgs()).build();
+
+                    // send data and client to uploader
+                    dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), dashboardGenerator.getFileExtension(), dashboardGenerator.getDashboardContent(), dashboardGenerator.getContentType(), dashboardGenerator.getHttpArgs(), overwrite);
+                } catch (ApiException e) {
+                    logger.error("Unable to establish connection, not uploading dashboard.");
+                } finally {
                     try {
-
-                        setProxyIfApplicable(dashboardGenerator.getHttpArgs());
-                        // get client from httpclient
-                        client = Http4ClientBuilder.getBuilder(dashboardGenerator.getHttpArgs()).build();
-
-                        // send data and client to uploader
-                        dashboardUploader.uploadDashboard(client, dashboardGenerator.getDashboardName(), dashboardGenerator.getFileExtension(), dashboardGenerator.getDashboardContent(), dashboardGenerator.getContentType(), dashboardGenerator.getHttpArgs(), overwrite);
-                    } catch (ApiException e) {
-                        logger.error("Unable to establish connection, not uploading dashboard.");
-                    } finally {
-                        try {
-                            client.close();
-                        } catch (Exception e) {
-                            logger.error(e.getMessage());
-                        }
+                        client.close();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
                     }
-
-                    long endTime = System.currentTimeMillis();
-                    logger.debug("Time to complete customDashboardModule in :" + (endTime - startTime) + " ms");
-                } else {
-                    logger.info("customDashboard is not enabled in config.yml, not uploading dashboard.");
                 }
+
+                long endTime = System.currentTimeMillis();
+                logger.debug("Time to complete customDashboardModule in :" + (endTime - startTime) + " ms");
             } else {
-                logger.info("No customDashboard Info in config.yml, not uploading dashboard.");
+                logger.info("customDashboard is not enabled in config.yml, not uploading dashboard.");
             }
         } else {
-            logger.info("No metricPrefix in config.yml, not uploading dashboard.");
+            logger.info("No customDashboard Info in config.yml, not uploading dashboard.");
         }
+
     }
 
     private boolean getOverwrite(Map customDashboardConfig) {
@@ -91,6 +85,7 @@ public class CustomDashboardModule {
         return overwrite;
     }
 
+    // todo add proxy support from config
     private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {
         String proxyHost = System.getProperty("appdynamics.http.proxyHost");
         String proxyPort = System.getProperty("appdynamics.http.proxyPort");
@@ -100,7 +95,8 @@ public class CustomDashboardModule {
             proxyMap.put(TaskInputArgs.PORT, proxyPort);
             argsMap.put("proxy", proxyMap);
             logger.debug("Using the proxy {}:{} to upload the dashboard", proxyHost, proxyPort);
-        } else {
+        }
+        else {
             logger.debug("Not using proxy for dashboard upload appdynamics.http.proxyHost={} and appdynamics.http.proxyPort={}"
                     , proxyHost, proxyPort);
         }
@@ -119,7 +115,8 @@ public class CustomDashboardModule {
                 }
             }
             buildMetricPath.deleteCharAt(buildMetricPath.length() - 1);
-        } else {
+        }
+        else {
             buildMetricPath.append(metricPrefix);
         }
 
