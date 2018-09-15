@@ -33,28 +33,34 @@ public class ControllerInfoValidator {
         check("controllerPort", cInfo.getControllerPort());
         check("controllerSslEnabled", cInfo.getControllerSslEnabled());
 
-        // TODO remove extra getSimEnabled
-        simEnabledOrNot("simEnabled", cInfo.getSimEnabled(), cInfo);
+        simEnabledOrNot(cInfo);
         if (unresolvedProps != null) {
             logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
             return false;
         }
         return true;
     }
-//TODO write test case if controllerinfo.xml does not have sim enabled field at all, does it return null/empty?
-    // TODO if not present then check if all three of app tier node are present or not
-    private void simEnabledOrNot(String propName, Object propVal, ControllerInfo cInfo) {
+
+    //TODO write test case if controllerinfo.xml does not have sim enabled field at all, does it return null/empty?
+    private void simEnabledOrNot(ControllerInfo cInfo) {
+        Object propVal = cInfo.getSimEnabled();
         if (propVal != null) {
             if (propVal instanceof Boolean) {
                 if (((Boolean) propVal).booleanValue() == false) {
-                    check("applicationName", cInfo.getApplicationName());
-                    check("tierName", cInfo.getTierName());
-                    check("nodeName", cInfo.getNodeName());
+                    checkAppTierNode(cInfo);
                 }
             }
+        } else if (cInfo.getApplicationName() != null && cInfo.getTierName() != null && cInfo.getNodeName() != null) {
+            checkAppTierNode(cInfo);
         } else {
-            markUnresolved(propName);
+            markUnresolved("controllerSslEnabled");
         }
+    }
+
+    private void checkAppTierNode(ControllerInfo cInfo) {
+        check("applicationName", cInfo.getApplicationName());
+        check("tierName", cInfo.getTierName());
+        check("nodeName", cInfo.getNodeName());
     }
 
 

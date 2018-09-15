@@ -16,25 +16,14 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
-import com.appdynamics.extensions.api.ApiException;
-import com.appdynamics.extensions.api.ControllerApiService;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoValidator;
-import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
-import com.appdynamics.extensions.xml.Xml;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.commons.io.FileUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
-import org.w3c.dom.Attr;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.io.*;
 import java.util.*;
@@ -46,16 +35,13 @@ import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
  */
 public class CustomDashboardGenerator {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardGenerator.class);
-    public static final String TIER_METRIC_PREFIX = "Server|Component:";
-    private Set<String> instanceNames;
+//    public static final String TIER_METRIC_PREFIX = "Server|Component:";
+//    private Set<String> instanceNames;
     private String metricPrefix;
     private Map dashboardConfig;
     private ControllerInfo controllerInfo;
-    protected CustomDashboardUploader dashboardUploader;
-    private String fileExtension ;
-    private String contentType ;
+//    protected CustomDashboardUploader dashboardUploader;
     private String dashboardContent;
-    private Map httpArgs;
     private String dashboardName;
 
     public CustomDashboardGenerator( Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix) {
@@ -64,15 +50,6 @@ public class CustomDashboardGenerator {
         this.metricPrefix = metricPrefix;
     }
 
-    public String getFileExtension() {
-        return fileExtension;
-    }
-    public String getContentType() {
-        return contentType;
-    }
-    public Map getHttpArgs() {
-        return httpArgs;
-    }
     public String getDashboardContent() {
         return dashboardContent;
     }
@@ -83,20 +60,16 @@ public class CustomDashboardGenerator {
 
     public void createDashboard() {
         if (isResolved()) {
-            Map<String, ? super Object> argsMap = getArgsMap();
             String dashboardTemplate = getDashboardContents();
             if(Strings.isNullOrEmpty(dashboardTemplate)){
                 logger.error("Dashboard file is empty");
                 return;
             }
-            fileExtension = "json";
-            contentType = "application/json";
 
             setDashboardName();
             dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
 
             this.dashboardContent = dashboardTemplate;
-            this.httpArgs = argsMap;
             logger.debug("Dashboard values resolved. Ready for uploader");
 
         } else {
@@ -150,61 +123,6 @@ public class CustomDashboardGenerator {
         return dashboardTemplate;
     }
 
-    // todo change to httpProperties
-    protected Map<String, ? super Object> getArgsMap() {
-
-        Map<String, ? super Object> argsMap = new HashMap<>();
-
-        List<Map<String, ? super Object>> serverList = Lists.newArrayList();
-        Map<String, ? super Object> serverMap = getServerMap();
-        serverList.add(serverMap);
-        argsMap.put("servers", serverList);
-
-        Map<String, ? super Object> connectionMap = getConnectionMap();
-        argsMap.put("connection", connectionMap);
-
-        return argsMap;
-    }
-
-    private Map<String, ? super Object> getServerMap() {
-        Map<String, ? super Object> serverMap = new HashMap<>();
-        serverMap.put(TaskInputArgs.HOST, controllerInfo.getControllerHost());
-        serverMap.put(TaskInputArgs.PORT, String.valueOf(controllerInfo.getControllerPort()));
-        serverMap.put(TaskInputArgs.USE_SSL, String.valueOf(controllerInfo.getControllerSslEnabled()));
-        serverMap.put(TaskInputArgs.USER, getUserName());
-        serverMap.put(TaskInputArgs.PASSWORD, controllerInfo.getPassword());
-
-        logger.debug("Controller Info: ");
-        logger.debug(TaskInputArgs.HOST + ": {}", controllerInfo.getControllerHost());
-        logger.debug(TaskInputArgs.PORT + ": {}", String.valueOf(controllerInfo.getControllerPort()));
-        logger.debug(TaskInputArgs.USE_SSL + ": {}", controllerInfo.getControllerSslEnabled());
-        logger.debug(TaskInputArgs.USER + ": {}", getUserName());
-        return serverMap;
-    }
-
-    private Map<String, ? super Object> getConnectionMap() {
-        Map<String, ? super Object> connectionMap = new HashMap<>();
-        String[] sslProtocols = {TLSV_12};
-        connectionMap.put(TaskInputArgs.SSL_PROTOCOL, sslProtocols);
-        Object sslCertCheckEnabled = dashboardConfig.get(SSL_CERT_CHECK_ENABLED);
-        if (sslCertCheckEnabled != null) {
-            connectionMap.put(SSL_CERT_CHECK_ENABLED, Boolean.valueOf(sslCertCheckEnabled.toString()));
-        } else {
-            connectionMap.put(SSL_CERT_CHECK_ENABLED, true);
-        }
-        connectionMap.put(CONNECT_TIMEOUT, 10000);
-        connectionMap.put(SOCKET_TIMEOUT, 15000);
-        return connectionMap;
-    }
-
-    private String getUserName() {
-        String accountName = controllerInfo.getAccount();
-        String username = controllerInfo.getUsername();
-        if (accountName != null && username != null) {
-            return username + AT + accountName;
-        }
-        return "";
-    }
 
     public String setDefaultDashboardInfo(String dashboardString) {
         dashboardString = setMetricPrefix(dashboardString);
@@ -305,310 +223,310 @@ public class CustomDashboardGenerator {
     }
 
     /////////////////////// XML Support ///////////////////////
-
-    private String setDashboardName(Node source, String instanceName) {
-        String dashBoardName = (String) dashboardConfig.get("namePrefix");
-        if (!StringUtils.hasText(dashBoardName)) {
-            dashBoardName = "Custom Dashboard";
-        }
-        if (StringUtils.hasText(instanceName)) {
-            dashBoardName += "-" + instanceName;
-        }
-        addAttribute(source.getFirstChild(), "name", dashBoardName);
-        return dashBoardName;
-    }
-
-
-    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig,  ControllerInfo controllerInfo) {
-        if (dashboardConfig == null) {
-            logger.info("Custom Dashboard config is null");
-            return;
-        }
-        Boolean enabled = (Boolean) dashboardConfig.get("enabled");
-        if (enabled == null || !enabled) {
-            logger.info("Custom Dashboard creation is not enabled");
-            return;
-        }
-
-        this.controllerInfo = controllerInfo;
-        this.instanceNames = instanceNames;
-        this.metricPrefix = StringUtils.trim(metricPrefix, "|");
-        this.dashboardConfig = dashboardConfig;
-        ControllerApiService controllerApiService = new ControllerApiService(controllerInfo);
-        this.dashboardUploader = new CustomDashboardUploader(controllerApiService);
-    }
-
-    public void createDashboards(Collection<String> metrics) {
-        if (isResolved()) {
-            StringBuilder ctrlMetricPrefix = buildMetricPrefix(metricPrefix);
-            metrics = replaceMetricPrefix(metrics, metricPrefix, ctrlMetricPrefix);
-            if (logger.isDebugEnabled()) {
-                logger.debug("The metrics are {}", metrics);
-            }
-            for (String instanceName : instanceNames) {
-                createDashboard(metrics, instanceName, ctrlMetricPrefix.toString());
-            }
-        } else {
-            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
-        }
-    }
-
-    private Collection<String> replaceMetricPrefix(Collection<String> metrics, String metricPrefix, StringBuilder ctrlMetricPrefix) {
-        Collection<String> list = new ArrayList<String>();
-        for (String metric : metrics) {
-            list.add(metric.replace(metricPrefix, ctrlMetricPrefix));
-        }
-        return list;
-    }
-
-    protected StringBuilder buildMetricPrefix(String metricPrefix) {
-        StringBuilder ctrlMetricPrefix = new StringBuilder();
-        String tierName = controllerInfo.getTierName();
-        if (metricPrefix.startsWith(TIER_METRIC_PREFIX)) {
-            int endIndex = metricPrefix.indexOf("|", 17);
-            if (endIndex == -1) {
-                endIndex = metricPrefix.length();
-            }
-            ctrlMetricPrefix.append("Application Infrastructure Performance|").append(tierName);
-            if (metricPrefix.length() - 1 > endIndex) {
-                ctrlMetricPrefix.append("|")
-                        .append(StringUtils.trim(metricPrefix.substring(endIndex), "|"));
-            }
-        } else {
-            ctrlMetricPrefix.append("Application Infrastructure Performance|")
-                    .append(tierName)
-                    .append("|").append(StringUtils.trim(metricPrefix, "|"));
-        }
-        logger.info("The Controller Metric prefix is {}", ctrlMetricPrefix);
-        return ctrlMetricPrefix;
-    }
-
-    public void createDashboard(Collection<String> metrics, String instanceName, String ctrlMetricPrefix) {
-        Map<Node, Node> addMap = new IdentityHashMap<Node, Node>();
-        Map<Node, Node> removeMap = new IdentityHashMap<Node, Node>();
-        Xml xml = new Xml(getDashboardTemplate());
-        String dashboardName = setDashboardName(xml.getSource(), instanceName);
-        NodeList widgets = xml.getElementsByTagName("widget-series");
-        fileExtension = "xml";
-        contentType = "text/xml";
-
-        int seriesNameCount = 0;
-        if (widgets != null) {
-            for (int i = 0; i < widgets.getLength(); i++) {
-                Node widget = widgets.item(i);
-                Node node = Xml.getFirstDescendant(widget, "metric-name");
-                if (node != null) {
-                    String metricTemplate = node.getTextContent();
-                    metricTemplate = replacePrefixAndInstanceName(metricTemplate, ctrlMetricPrefix, instanceName);
-                    Node widgetSeriesList = widget.getParentNode();
-                    removeMap.put(widget, widgetSeriesList);
-                    logger.debug("Checking the match for {}", metricTemplate);
-                    List<String> matches = getMatchingMetrics(metrics, metricTemplate);
-                    if (matches != null && !matches.isEmpty()) {
-                        for (String match : matches) {
-                            Node widgetClone = widget.cloneNode(true);
-                            Node cloneMetricNameNode = Xml.getFirstDescendant(widgetClone, "metric-name");
-                            cloneMetricNameNode.setTextContent(match);
-                            addMap.put(widgetClone, widgetSeriesList);
-                            ++seriesNameCount;
-                            setSeriesName(seriesNameCount, widgetClone);
-                            Node firstNode = Xml.getFirstChild(widgetClone, "widget-series-data");
-                            setApplicationName(firstNode, controllerInfo.getApplicationName());
-                        }
-                    } else {
-                        logger.error("No Match found for {}", metricTemplate);
-                    }
-                } else {
-                    removeMap.put(widget, widget.getParentNode());
-                }
-            }
-        }
-        for (Map.Entry<Node, Node> entry : removeMap.entrySet()) {
-            entry.getValue().removeChild(entry.getKey());
-        }
-        for (Map.Entry<Node, Node> entry : addMap.entrySet()) {
-            entry.getValue().appendChild(entry.getKey());
-        }
-        if (!addMap.isEmpty()) {
-            persistDashboard(dashboardName, xml);
-        } else {
-            logger.error("Dashboard cannot be created, all of the metric path resolution failed. Check previous logs for details");
-        }
-    }
-
-    protected InputStream getDashboardTemplate() {
-        String template = (String) dashboardConfig.get("templateFile");
-        if (template != null) {
-            File file = PathResolver.getFile(template, AManagedMonitor.class);
-            if (file != null && file.exists()) {
-                try {
-                    return new FileInputStream(file);
-                } catch (FileNotFoundException e) {
-                }
-            } else {
-                logger.error("Cannot resolve template file {}", file != null ? file.getAbsolutePath() : template);
-            }
-        }
-        return getClass().getResourceAsStream("/dashboard/custom-dashboard-template.xml");
-    }
-
-    protected void persistDashboard(String dashboardName, Xml xml) {
-        if (getBoolean(dashboardConfig, "uploadDashboard")) {
-            Map<String, ? super Object> argsMap = getArgsMap();
-            CloseableHttpClient httpClient = getHttpClient(argsMap);
-
-            try {
-                dashboardUploader.uploadDashboard(httpClient,dashboardName, ".xml", xml.toString(), "text/xml", argsMap,
-                        getBoolean(dashboardConfig, "overwriteDashboard"));
-            } catch (ApiException e) {
-                logger.error("Failed to upload dashboard", e);
-            }
-        }
-        writeDashboardToFile(dashboardName, xml);
-    }
-    private CloseableHttpClient getHttpClient(Map<String, ? super Object> argsMap) {
-
-        setProxyIfApplicable(argsMap);
-        CloseableHttpClient client = null;
-
-        try {
-            client = Http4ClientBuilder.getBuilder(argsMap).build();
-            return client;
-        } finally {
-            try {
-                client.close();
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-            }
-        }
-    }
-
-    private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {
-        String proxyHost = System.getProperty("appdynamics.http.proxyHost");
-        String proxyPort = System.getProperty("appdynamics.http.proxyPort");
-        if (StringUtils.hasText(proxyHost) && StringUtils.hasText(proxyPort)) {
-            Map<String, ? super Object> proxyMap = new HashMap<>();
-            proxyMap.put(TaskInputArgs.HOST, proxyHost);
-            proxyMap.put(TaskInputArgs.PORT, proxyPort);
-            argsMap.put("proxy", proxyMap);
-            logger.debug("Using the proxy {}:{} to upload the dashboard", proxyHost, proxyPort);
-        } else {
-            logger.debug("Not using proxy for dashboard upload appdynamics.http.proxyHost={} and appdynamics.http.proxyPort={}"
-                    , proxyHost, proxyPort);
-        }
-    }
-    private void writeDashboardToFile(String dashboardName, Xml xml) {
-        File file = PathResolver.resolveDirectory(AManagedMonitor.class);
-        File dir = new File(file, "logs");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        try {
-            FileWriter writer = new FileWriter(new File(dir, dashboardName + ".xml"));
-            writer.write(xml.toString());
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            logger.error("", e);
-        }
-    }
-
-    private boolean getBoolean(Map map, String key) {
-        Object o = map.get(key);
-        if (o instanceof Boolean) {
-            return (Boolean) o;
-
-        }
-        return false;
-    }
-
-    private void setApplicationName(Node widgetSeriesData, String applicationName) {
-        addAttribute(widgetSeriesData, "application-name", applicationName);
-    }
-
-    private void setSeriesName(int seriesNameCount, Node widgetClone) {
-        String nodeName = "name";
-        String nodeValue = "Series " + (seriesNameCount);
-        addAttribute(widgetClone, nodeName, nodeValue);
-    }
-
-    private void addAttribute(Node node, String attrName, String attrValue) {
-        NamedNodeMap attributes = node.getAttributes();
-        boolean attrAdded = false;
-        if (attributes != null) {
-            for (int j = 0; j < attributes.getLength(); j++) {
-                Node item = attributes.item(j);
-                if (item.getNodeName().equals(attrName)) {
-                    item.setNodeValue(attrValue);
-                    attrAdded = true;
-                }
-            }
-        }
-        if (!attrAdded) {
-            Attr name = node.getOwnerDocument().createAttribute(attrName);
-            name.setNodeValue(attrValue);
-            node.appendChild(name);
-        }
-    }
-
-    protected String replacePrefixAndInstanceName(String metricTemplate, String ctrlMetricPrefix, String instanceName) {
-        metricTemplate = metricTemplate.replace("${METRIC_PREFIX}", ctrlMetricPrefix);
-        if (StringUtils.hasText(instanceName)) {
-            metricTemplate = metricTemplate.replace("${INSTANCE_NAME}", instanceName);
-        } else {
-            if (metricTemplate.contains("${INSTANCE_NAME}")) {
-                metricTemplate = metricTemplate.replace("|${INSTANCE_NAME}|", "|");
-            }
-        }
-        return metricTemplate;
-    }
-
-    public List<String> getMatchingMetrics(Collection<String> metrics, String template) {
-        int segments = StringUtils.countMatches(template, "|");
-        List<String> matches = new ArrayList<String>();
-        for (String metric : metrics) {
-            if (template.equals(metric)) {
-                matches.add(metric);
-            } else if (StringUtils.countMatches(metric, "|") == segments) {
-                String replacedTemplate = template;
-                int itemStart;
-                while ((itemStart = replacedTemplate.indexOf("${ITEM")) != -1) {
-                    String substring = replacedTemplate.substring(0, itemStart);
-                    if (metric.startsWith(substring)) {
-                        String replacement = extractSegment(metric, itemStart);
-                        replacedTemplate = replaceSegment(replacedTemplate, itemStart, replacement);
-                    } else {
-                        break;
-                    }
-                }
-                if (metric.equals(replacedTemplate)) {
-                    matches.add(metric);
-                }
-            } else {
-                //logger.debug("No match metric = {}, template = {}", metric, template);
-            }
-        }
-        return matches;
-    }
-
-    private String replaceSegment(String template, int itemStart, String replacement) {
-        int endIndex = template.indexOf("|", itemStart);
-        if (endIndex != -1) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(template.substring(0, itemStart));
-            sb.append(replacement);
-            sb.append(template.substring(endIndex));
-            return sb.toString();
-        }
-        return null;
-    }
-
-    private String extractSegment(String metric, int itemStart) {
-        int endIndex = metric.indexOf("|", itemStart);
-        if (endIndex != -1) {
-            return metric.substring(itemStart, endIndex);
-        }
-        return null;
-    }
+//
+//    private String setDashboardName(Node source, String instanceName) {
+//        String dashBoardName = (String) dashboardConfig.get("namePrefix");
+//        if (!StringUtils.hasText(dashBoardName)) {
+//            dashBoardName = "Custom Dashboard";
+//        }
+//        if (StringUtils.hasText(instanceName)) {
+//            dashBoardName += "-" + instanceName;
+//        }
+//        addAttribute(source.getFirstChild(), "name", dashBoardName);
+//        return dashBoardName;
+//    }
+//
+//
+//    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig,  ControllerInfo controllerInfo) {
+//        if (dashboardConfig == null) {
+//            logger.info("Custom Dashboard config is null");
+//            return;
+//        }
+//        Boolean enabled = (Boolean) dashboardConfig.get("enabled");
+//        if (enabled == null || !enabled) {
+//            logger.info("Custom Dashboard creation is not enabled");
+//            return;
+//        }
+//
+//        this.controllerInfo = controllerInfo;
+//        this.instanceNames = instanceNames;
+//        this.metricPrefix = StringUtils.trim(metricPrefix, "|");
+//        this.dashboardConfig = dashboardConfig;
+//        ControllerApiService controllerApiService = new ControllerApiService(controllerInfo);
+//        this.dashboardUploader = new CustomDashboardUploader(controllerApiService);
+//    }
+//
+//    public void createDashboards(Collection<String> metrics) {
+//        if (isResolved()) {
+//            StringBuilder ctrlMetricPrefix = buildMetricPrefix(metricPrefix);
+//            metrics = replaceMetricPrefix(metrics, metricPrefix, ctrlMetricPrefix);
+//            if (logger.isDebugEnabled()) {
+//                logger.debug("The metrics are {}", metrics);
+//            }
+//            for (String instanceName : instanceNames) {
+//                createDashboard(metrics, instanceName, ctrlMetricPrefix.toString());
+//            }
+//        } else {
+//            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
+//        }
+//    }
+//
+//    private Collection<String> replaceMetricPrefix(Collection<String> metrics, String metricPrefix, StringBuilder ctrlMetricPrefix) {
+//        Collection<String> list = new ArrayList<String>();
+//        for (String metric : metrics) {
+//            list.add(metric.replace(metricPrefix, ctrlMetricPrefix));
+//        }
+//        return list;
+//    }
+//
+//    protected StringBuilder buildMetricPrefix(String metricPrefix) {
+//        StringBuilder ctrlMetricPrefix = new StringBuilder();
+//        String tierName = controllerInfo.getTierName();
+//        if (metricPrefix.startsWith(TIER_METRIC_PREFIX)) {
+//            int endIndex = metricPrefix.indexOf("|", 17);
+//            if (endIndex == -1) {
+//                endIndex = metricPrefix.length();
+//            }
+//            ctrlMetricPrefix.append("Application Infrastructure Performance|").append(tierName);
+//            if (metricPrefix.length() - 1 > endIndex) {
+//                ctrlMetricPrefix.append("|")
+//                        .append(StringUtils.trim(metricPrefix.substring(endIndex), "|"));
+//            }
+//        } else {
+//            ctrlMetricPrefix.append("Application Infrastructure Performance|")
+//                    .append(tierName)
+//                    .append("|").append(StringUtils.trim(metricPrefix, "|"));
+//        }
+//        logger.info("The Controller Metric prefix is {}", ctrlMetricPrefix);
+//        return ctrlMetricPrefix;
+//    }
+//
+//    public void createDashboard(Collection<String> metrics, String instanceName, String ctrlMetricPrefix) {
+//        Map<Node, Node> addMap = new IdentityHashMap<Node, Node>();
+//        Map<Node, Node> removeMap = new IdentityHashMap<Node, Node>();
+//        Xml xml = new Xml(getDashboardTemplate());
+//        String dashboardName = setDashboardName(xml.getSource(), instanceName);
+//        NodeList widgets = xml.getElementsByTagName("widget-series");
+//        fileExtension = "xml";
+//        contentType = "text/xml";
+//
+//        int seriesNameCount = 0;
+//        if (widgets != null) {
+//            for (int i = 0; i < widgets.getLength(); i++) {
+//                Node widget = widgets.item(i);
+//                Node node = Xml.getFirstDescendant(widget, "metric-name");
+//                if (node != null) {
+//                    String metricTemplate = node.getTextContent();
+//                    metricTemplate = replacePrefixAndInstanceName(metricTemplate, ctrlMetricPrefix, instanceName);
+//                    Node widgetSeriesList = widget.getParentNode();
+//                    removeMap.put(widget, widgetSeriesList);
+//                    logger.debug("Checking the match for {}", metricTemplate);
+//                    List<String> matches = getMatchingMetrics(metrics, metricTemplate);
+//                    if (matches != null && !matches.isEmpty()) {
+//                        for (String match : matches) {
+//                            Node widgetClone = widget.cloneNode(true);
+//                            Node cloneMetricNameNode = Xml.getFirstDescendant(widgetClone, "metric-name");
+//                            cloneMetricNameNode.setTextContent(match);
+//                            addMap.put(widgetClone, widgetSeriesList);
+//                            ++seriesNameCount;
+//                            setSeriesName(seriesNameCount, widgetClone);
+//                            Node firstNode = Xml.getFirstChild(widgetClone, "widget-series-data");
+//                            setApplicationName(firstNode, controllerInfo.getApplicationName());
+//                        }
+//                    } else {
+//                        logger.error("No Match found for {}", metricTemplate);
+//                    }
+//                } else {
+//                    removeMap.put(widget, widget.getParentNode());
+//                }
+//            }
+//        }
+//        for (Map.Entry<Node, Node> entry : removeMap.entrySet()) {
+//            entry.getValue().removeChild(entry.getKey());
+//        }
+//        for (Map.Entry<Node, Node> entry : addMap.entrySet()) {
+//            entry.getValue().appendChild(entry.getKey());
+//        }
+//        if (!addMap.isEmpty()) {
+//            persistDashboard(dashboardName, xml);
+//        } else {
+//            logger.error("Dashboard cannot be created, all of the metric path resolution failed. Check previous logs for details");
+//        }
+//    }
+//
+//    protected InputStream getDashboardTemplate() {
+//        String template = (String) dashboardConfig.get("templateFile");
+//        if (template != null) {
+//            File file = PathResolver.getFile(template, AManagedMonitor.class);
+//            if (file != null && file.exists()) {
+//                try {
+//                    return new FileInputStream(file);
+//                } catch (FileNotFoundException e) {
+//                }
+//            } else {
+//                logger.error("Cannot resolve template file {}", file != null ? file.getAbsolutePath() : template);
+//            }
+//        }
+//        return getClass().getResourceAsStream("/dashboard/custom-dashboard-template.xml");
+//    }
+//
+//    protected void persistDashboard(String dashboardName, Xml xml) {
+//        if (getBoolean(dashboardConfig, "uploadDashboard")) {
+//            Map<String, ? super Object> argsMap = httpProperties();
+//            CloseableHttpClient httpClient = getHttpClient(argsMap);
+//
+//            try {
+//                dashboardUploader.uploadDashboard(httpClient,dashboardName, ".xml", xml.toString(), "text/xml", argsMap,
+//                        getBoolean(dashboardConfig, "overwriteDashboard"));
+//            } catch (ApiException e) {
+//                logger.error("Failed to upload dashboard", e);
+//            }
+//        }
+//        writeDashboardToFile(dashboardName, xml);
+//    }
+//    private CloseableHttpClient getHttpClient(Map<String, ? super Object> argsMap) {
+//
+//        setProxyIfApplicable(argsMap);
+//        CloseableHttpClient client = null;
+//
+//        try {
+//            client = Http4ClientBuilder.getBuilder(argsMap).build();
+//            return client;
+//        } finally {
+//            try {
+//                client.close();
+//            } catch (Exception e) {
+//                logger.error(e.getMessage());
+//            }
+//        }
+//    }
+//
+//    private void setProxyIfApplicable(Map<String, ? super Object> argsMap) {
+//        String proxyHost = System.getProperty("appdynamics.http.proxyHost");
+//        String proxyPort = System.getProperty("appdynamics.http.proxyPort");
+//        if (StringUtils.hasText(proxyHost) && StringUtils.hasText(proxyPort)) {
+//            Map<String, ? super Object> proxyMap = new HashMap<>();
+//            proxyMap.put(TaskInputArgs.HOST, proxyHost);
+//            proxyMap.put(TaskInputArgs.PORT, proxyPort);
+//            argsMap.put("proxy", proxyMap);
+//            logger.debug("Using the proxy {}:{} to upload the dashboard", proxyHost, proxyPort);
+//        } else {
+//            logger.debug("Not using proxy for dashboard upload appdynamics.http.proxyHost={} and appdynamics.http.proxyPort={}"
+//                    , proxyHost, proxyPort);
+//        }
+//    }
+//    private void writeDashboardToFile(String dashboardName, Xml xml) {
+//        File file = PathResolver.resolveDirectory(AManagedMonitor.class);
+//        File dir = new File(file, "logs");
+//        if (!dir.exists()) {
+//            dir.mkdirs();
+//        }
+//        try {
+//            FileWriter writer = new FileWriter(new File(dir, dashboardName + ".xml"));
+//            writer.write(xml.toString());
+//            writer.flush();
+//            writer.close();
+//        } catch (IOException e) {
+//            logger.error("", e);
+//        }
+//    }
+//
+//    private boolean getBoolean(Map map, String key) {
+//        Object o = map.get(key);
+//        if (o instanceof Boolean) {
+//            return (Boolean) o;
+//
+//        }
+//        return false;
+//    }
+//
+//    private void setApplicationName(Node widgetSeriesData, String applicationName) {
+//        addAttribute(widgetSeriesData, "application-name", applicationName);
+//    }
+//
+//    private void setSeriesName(int seriesNameCount, Node widgetClone) {
+//        String nodeName = "name";
+//        String nodeValue = "Series " + (seriesNameCount);
+//        addAttribute(widgetClone, nodeName, nodeValue);
+//    }
+//
+//    private void addAttribute(Node node, String attrName, String attrValue) {
+//        NamedNodeMap attributes = node.getAttributes();
+//        boolean attrAdded = false;
+//        if (attributes != null) {
+//            for (int j = 0; j < attributes.getLength(); j++) {
+//                Node item = attributes.item(j);
+//                if (item.getNodeName().equals(attrName)) {
+//                    item.setNodeValue(attrValue);
+//                    attrAdded = true;
+//                }
+//            }
+//        }
+//        if (!attrAdded) {
+//            Attr name = node.getOwnerDocument().createAttribute(attrName);
+//            name.setNodeValue(attrValue);
+//            node.appendChild(name);
+//        }
+//    }
+//
+//    protected String replacePrefixAndInstanceName(String metricTemplate, String ctrlMetricPrefix, String instanceName) {
+//        metricTemplate = metricTemplate.replace("${METRIC_PREFIX}", ctrlMetricPrefix);
+//        if (StringUtils.hasText(instanceName)) {
+//            metricTemplate = metricTemplate.replace("${INSTANCE_NAME}", instanceName);
+//        } else {
+//            if (metricTemplate.contains("${INSTANCE_NAME}")) {
+//                metricTemplate = metricTemplate.replace("|${INSTANCE_NAME}|", "|");
+//            }
+//        }
+//        return metricTemplate;
+//    }
+//
+//    public List<String> getMatchingMetrics(Collection<String> metrics, String template) {
+//        int segments = StringUtils.countMatches(template, "|");
+//        List<String> matches = new ArrayList<String>();
+//        for (String metric : metrics) {
+//            if (template.equals(metric)) {
+//                matches.add(metric);
+//            } else if (StringUtils.countMatches(metric, "|") == segments) {
+//                String replacedTemplate = template;
+//                int itemStart;
+//                while ((itemStart = replacedTemplate.indexOf("${ITEM")) != -1) {
+//                    String substring = replacedTemplate.substring(0, itemStart);
+//                    if (metric.startsWith(substring)) {
+//                        String replacement = extractSegment(metric, itemStart);
+//                        replacedTemplate = replaceSegment(replacedTemplate, itemStart, replacement);
+//                    } else {
+//                        break;
+//                    }
+//                }
+//                if (metric.equals(replacedTemplate)) {
+//                    matches.add(metric);
+//                }
+//            } else {
+//                //logger.debug("No match metric = {}, template = {}", metric, template);
+//            }
+//        }
+//        return matches;
+//    }
+//
+//    private String replaceSegment(String template, int itemStart, String replacement) {
+//        int endIndex = template.indexOf("|", itemStart);
+//        if (endIndex != -1) {
+//            StringBuilder sb = new StringBuilder();
+//            sb.append(template.substring(0, itemStart));
+//            sb.append(replacement);
+//            sb.append(template.substring(endIndex));
+//            return sb.toString();
+//        }
+//        return null;
+//    }
+//
+//    private String extractSegment(String metric, int itemStart) {
+//        int endIndex = metric.indexOf("|", itemStart);
+//        if (endIndex != -1) {
+//            return metric.substring(itemStart, endIndex);
+//        }
+//        return null;
+//    }
 
 }

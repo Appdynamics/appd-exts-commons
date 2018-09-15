@@ -153,7 +153,7 @@ public class CustomDashboardGeneratorTest {
         argsMap.put(TaskInputArgs.USE_SSL, "false");
         argsMap.put(TaskInputArgs.USER, "singularity-agent@customer1");
         argsMap.put(TaskInputArgs.PASSWORD, "SJ5b2m7d1$354");
-        Mockito.doReturn(argsMap).when(customDashboardGenerator).getArgsMap();
+        Mockito.doReturn(argsMap).when(customDashboardGenerator).httpProperties();
         Mockito.doReturn(true).when(customDashboardGenerator).isResolved();
         final AtomicInteger count = new AtomicInteger();
         Mockito.doAnswer(new Answer() {
