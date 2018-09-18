@@ -41,7 +41,10 @@ public class ControllerInfoFactoryTest {
     public void testGetControllerInfoWithNoProps() {
         Map config = new HashMap();
         File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
+
         Assert.assertTrue(controllerInfo.getAccount() == (null));
         Assert.assertTrue(controllerInfo.getAccountAccessKey() == (null));
         Assert.assertTrue(controllerInfo.getApplicationName() == (null));
@@ -62,8 +65,11 @@ public class ControllerInfoFactoryTest {
     @Test
     public void testGetControllerInfoWithConfigMap() {
         File file = Mockito.mock(File.class);
-        Map mapForConfig = getConfigMap();
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
+        Map config = getConfigMap();
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
+
 
         Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
@@ -82,9 +88,11 @@ public class ControllerInfoFactoryTest {
 
     @Test
     public void testGetControllerInfoWithXML() {
-        Map mapForConfig = new HashMap();
+        Map config = new HashMap();
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
 
         Assert.assertTrue(controllerInfo.getAccount().equals("xmlAccountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("xmlAccessKey"));
@@ -105,7 +113,9 @@ public class ControllerInfoFactoryTest {
         Map config = getConfigMap();
 
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
 
         Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
@@ -124,9 +134,12 @@ public class ControllerInfoFactoryTest {
     public void testGetControllerInfoWithSystemProps() {
 
         setupSystemProps();
-        Map mapForConfig = null;
+        Map config = null;
         File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
+
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -150,7 +163,9 @@ public class ControllerInfoFactoryTest {
         setupSystemProps();
         Map config = getConfigMap();
         File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
 
 
         Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
@@ -174,9 +189,12 @@ public class ControllerInfoFactoryTest {
     @Test
     public void testGetControllerInfoWithSystemPropsAndXML() {
         setupSystemProps();
-        Map mapForConfig = new HashMap();
+        Map config = new HashMap();
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(mapForConfig, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
+
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -198,7 +216,9 @@ public class ControllerInfoFactoryTest {
         setupSystemProps();
         Map config = getConfigMap();
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
 
         Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
         Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));

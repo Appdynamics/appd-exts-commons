@@ -44,17 +44,17 @@ public class ControllerInfoFactory {
     public static void initialize(Map config, File installDir) {
         ControllerInfo localControllerInfo = getControllerInfoFromXml(installDir);
         logger.debug("The resolved properties from controller-info.xml are {}", localControllerInfo);
-        getSystemProperties(localControllerInfo);
+        localControllerInfo = getSystemProperties(localControllerInfo);
         logger.debug("The resolved properties after controller-info.xml and system properties are {}", localControllerInfo);
         if (config != null) {
-            getConfigProps(config, localControllerInfo);
+            localControllerInfo = getYamlProperties(config, localControllerInfo);
             logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", localControllerInfo);
         }
         controllerInfo = localControllerInfo;
     }
 
 
-    public static void getConfigProps(Map config, ControllerInfo controllerInfo) {
+    private static ControllerInfo getYamlProperties(Map config, ControllerInfo controllerInfo) {
         if (!Strings.isNullOrEmpty((String) config.get("controllerHost"))) {
             controllerInfo.setControllerHost(config.get("controllerHost").toString());
         }
@@ -100,9 +100,11 @@ public class ControllerInfoFactory {
             controllerInfo.setEncryptionKey(config.get("encryptionKey").toString());
         }
 
+        return controllerInfo;
+
     }
 
-    private static void getSystemProperties(ControllerInfo controllerInfo) {
+    private static ControllerInfo getSystemProperties(ControllerInfo controllerInfo) {
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.accountAccessKey"))) {
             controllerInfo.setAccountAccessKey(System.getProperty("appdynamics.agent.accountAccessKey"));
         }
@@ -150,6 +152,7 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty(simEnabled)) {
             controllerInfo.setSimEnabled(Boolean.valueOf(simEnabled.trim()));
         }
+        return controllerInfo;
     }
 
     // Getting data from controller-info.xml

@@ -18,11 +18,9 @@ import java.util.List;
 
 public class ControllerInfoValidator {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
-
     private List<String> unresolvedProps;
 
-    public boolean validateAndCheckIfResolved(ControllerInfo cInfo) {
-        logger.debug("Validator Check CINFO : {}", cInfo);
+    public boolean isValidatedAndResolved(ControllerInfo cInfo) {
         if (cInfo.getAccount() == null) {
             cInfo.setAccount("customer1");
         }
@@ -32,8 +30,9 @@ public class ControllerInfoValidator {
         check("controllerHost", cInfo.getControllerHost());
         check("controllerPort", cInfo.getControllerPort());
         check("controllerSslEnabled", cInfo.getControllerSslEnabled());
-
-        simEnabledOrNot(cInfo);
+        if (!simEnabledOrNot(cInfo)) {
+            checkAppTierNode(cInfo);
+        }
         if (unresolvedProps != null) {
             logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
             return false;
@@ -41,28 +40,11 @@ public class ControllerInfoValidator {
         return true;
     }
 
-    //TODO write test case if controllerinfo.xml does not have sim enabled field at all, does it return null/empty?
-    private void simEnabledOrNot(ControllerInfo cInfo) {
-        Object propVal = cInfo.getSimEnabled();
-        if (propVal != null) {
-            if (propVal instanceof Boolean) {
-                if (((Boolean) propVal).booleanValue() == false) {
-                    checkAppTierNode(cInfo);
-                }
-            }
-        } else if (cInfo.getApplicationName() != null && cInfo.getTierName() != null && cInfo.getNodeName() != null) {
-            checkAppTierNode(cInfo);
-        } else {
-            markUnresolved("controllerSslEnabled");
-        }
-    }
-
     private void checkAppTierNode(ControllerInfo cInfo) {
         check("applicationName", cInfo.getApplicationName());
         check("tierName", cInfo.getTierName());
         check("nodeName", cInfo.getNodeName());
     }
-
 
     private void check(String propName, Object propVal) {
         if (propVal != null) {
@@ -74,7 +56,21 @@ public class ControllerInfoValidator {
         } else {
             markUnresolved(propName);
         }
+    }
 
+    private boolean simEnabledOrNot(ControllerInfo cInfo) {
+        Object propVal = cInfo.getSimEnabled();
+        if (propVal != null) {
+            if (!(propVal instanceof Boolean)) {
+                markUnresolved("simEnabled");
+                return false;
+            } else {
+                return (Boolean) propVal;
+            }
+        } else {
+            markUnresolved("simEnabled");
+            return false;
+        }
     }
 
     private void markUnresolved(String propName) {
@@ -83,5 +79,4 @@ public class ControllerInfoValidator {
         }
         unresolvedProps.add(propName);
     }
-
 }

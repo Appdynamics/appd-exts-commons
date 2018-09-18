@@ -58,14 +58,12 @@ public class CustomDashboardUploaderTest {
             Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
             apiService.uploadDashboard(map, cookiesCsrf, stringing, stringing, stringing, stringing);
 
-            CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(apiService);
+            CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader();
             String dashboardName = "DashboardName";
-            String fileExtension = "json";
             String fileContents = "contents";
-            String contentType = "application/json";
             Map<String, ? super Object> argsMap = new HashMap<>();
             boolean overwrite = false;
-            customDashboardUploader.uploadDashboard(client,dashboardName, fileExtension, fileContents, contentType, argsMap, overwrite );
+            customDashboardUploader.gatherDashboardDataToUpload(apiService, client,dashboardName, fileContents,  argsMap, overwrite );
             Mockito.verify(apiService, Mockito.times(1)).uploadDashboard(map, cookiesCsrf, stringing, stringing, stringing, stringing);
 
         } catch (ApiException e) {
@@ -99,6 +97,6 @@ public class CustomDashboardUploaderTest {
         argsMap.put("connection", connectionMap);
 
 
-        new CustomDashboardUploader().uploadDashboard("Test1", Xml.fromString(content),argsMap,false);*/
+        new CustomDashboardUploader().gatherDashboardDataToUpload("Test1", Xml.fromString(content),argsMap,false);*/
     }
 }

@@ -17,7 +17,6 @@ package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoValidator;
-import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 
 /**
@@ -32,7 +31,7 @@ public class AgentEnvironmentResolver {
 
         this.cInfo = controllerInfo;
         ControllerInfoValidator validator = new ControllerInfoValidator();
-        resolved = validator.validateAndCheckIfResolved(cInfo);
+        resolved = validator.isValidatedAndResolved(cInfo);
     }
 
     public boolean isResolved() {

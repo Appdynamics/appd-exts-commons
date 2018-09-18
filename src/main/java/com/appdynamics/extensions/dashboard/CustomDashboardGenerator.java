@@ -15,18 +15,16 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
-import com.appdynamics.extensions.conf.controller.ControllerInfoValidator;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.StringUtils;
+import com.appdynamics.extensions.util.AssertUtils;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
 
@@ -35,65 +33,27 @@ import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
  */
 public class CustomDashboardGenerator {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardGenerator.class);
-//    public static final String TIER_METRIC_PREFIX = "Server|Component:";
-//    private Set<String> instanceNames;
     private String metricPrefix;
     private Map dashboardConfig;
     private ControllerInfo controllerInfo;
-//    protected CustomDashboardUploader dashboardUploader;
-    private String dashboardContent;
     private String dashboardName;
 
-    public CustomDashboardGenerator( Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix) {
+    public CustomDashboardGenerator(Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix, String dashboardName) {
         this.dashboardConfig = dashboardConfig;
         this.controllerInfo = controllerInformation;
         this.metricPrefix = metricPrefix;
-    }
-
-    public String getDashboardContent() {
-        return dashboardContent;
-    }
-    public String getDashboardName() {
-        return dashboardName;
-    }
-
-
-    public void createDashboard() {
-        if (isResolved()) {
-            String dashboardTemplate = getDashboardContents();
-            if(Strings.isNullOrEmpty(dashboardTemplate)){
-                logger.error("Dashboard file is empty");
-                return;
-            }
-
-            setDashboardName();
-            dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
-
-            this.dashboardContent = dashboardTemplate;
-            logger.debug("Dashboard values resolved. Ready for uploader");
-
-        } else {
-            logger.error("Unable to establish connection, please make sure you have provided all necessary values.");
-        }
-
-    }
-// todo pass the dashboard name from module
-    private void setDashboardName() {
-        String dashboardName  ;
-        if(!Strings.isNullOrEmpty((String)dashboardConfig.get("dashboardName"))){
-            dashboardName = dashboardConfig.get("dashboardName").toString();
-        } else {
-            dashboardName = "Custom Dashboard";
-        }
-        dashboardConfig.put("dashboardName", dashboardName);
         this.dashboardName = dashboardName;
     }
 
-    // todo send to module
-    protected boolean isResolved() {
-        ControllerInfoValidator validator = new ControllerInfoValidator();
-        return validator.validateAndCheckIfResolved(controllerInfo);
+
+    public String getDashboardTemplate() {
+        String dashboardTemplate = getDashboardContents();
+        AssertUtils.assertNotNull(dashboardTemplate, "Dashboard template file can not be null or empty.");
+        dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
+        logger.debug("Dashboard values resolved. Ready for uploader");
+        return dashboardTemplate;
     }
+
 
     private String getDashboardContents() {
         logger.debug("Sim Enabled: {}", controllerInfo.getSimEnabled());
@@ -104,15 +64,13 @@ public class CustomDashboardGenerator {
         } else {
             pathToFile = dashboardConfig.get("pathToSIMDashboard").toString();
         }
-
         try {
             if (!Strings.isNullOrEmpty(pathToFile)) {
                 File file = new File(pathToFile);
-                if(file.exists()){
+                if (file.exists()) {
                     dashboardTemplate = FileUtils.readFileToString(file);
                 } else {
                     logger.error("Unable to read the contents of the dashboard file: {}", pathToFile);
-
                 }
             } else {
                 logger.error("The path to your dashboardFile is empty in your config.yml file.");
@@ -124,7 +82,7 @@ public class CustomDashboardGenerator {
     }
 
 
-    public String setDefaultDashboardInfo(String dashboardString) {
+    private String setDefaultDashboardInfo(String dashboardString) {
         dashboardString = setMetricPrefix(dashboardString);
         dashboardString = setApplicationName(dashboardString);
         dashboardString = setSimApplicationName(dashboardString);
@@ -136,6 +94,7 @@ public class CustomDashboardGenerator {
         return dashboardString;
 
     }
+
     private String setMetricPrefix(String dashboardString) {
         if (dashboardString.contains(REPLACE_METRIC_PREFIX)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_METRIC_PREFIX, metricPrefix);
@@ -191,16 +150,12 @@ public class CustomDashboardGenerator {
     }
 
     private String setDashboardName(String dashboardString) {
-        String dashBoardName = dashboardConfig.get("dashboardName").toString();
-        if (!StringUtils.hasText(dashBoardName)) {
-            dashBoardName = "Custom Dashboard";
-        }
 
         if (dashboardString.contains(REPLACE_DASHBOARD_NAME)) {
-            if (dashboardConfig.get("dashboardName") != null)
-                dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_DASHBOARD_NAME, dashBoardName);
+            if (!Strings.isNullOrEmpty(dashboardName))
+                dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_DASHBOARD_NAME, dashboardName);
 
-            logger.debug(REPLACE_DASHBOARD_NAME + ": " + dashBoardName);
+            logger.debug(REPLACE_DASHBOARD_NAME + ": " + dashboardName);
         }
         return dashboardString;
     }
@@ -264,7 +219,7 @@ public class CustomDashboardGenerator {
 //                logger.debug("The metrics are {}", metrics);
 //            }
 //            for (String instanceName : instanceNames) {
-//                createDashboard(metrics, instanceName, ctrlMetricPrefix.toString());
+//                getDashboardTemplate(metrics, instanceName, ctrlMetricPrefix.toString());
 //            }
 //        } else {
 //            logger.error("Cannot create the Custom Dashboard, since the agent resolver failed earlier. Please check the log messages at startup for cause");
@@ -301,7 +256,7 @@ public class CustomDashboardGenerator {
 //        return ctrlMetricPrefix;
 //    }
 //
-//    public void createDashboard(Collection<String> metrics, String instanceName, String ctrlMetricPrefix) {
+//    public void getDashboardTemplate(Collection<String> metrics, String instanceName, String ctrlMetricPrefix) {
 //        Map<Node, Node> addMap = new IdentityHashMap<Node, Node>();
 //        Map<Node, Node> removeMap = new IdentityHashMap<Node, Node>();
 //        Xml xml = new Xml(getDashboardTemplate());
@@ -371,12 +326,12 @@ public class CustomDashboardGenerator {
 //    }
 //
 //    protected void persistDashboard(String dashboardName, Xml xml) {
-//        if (getBoolean(dashboardConfig, "uploadDashboard")) {
+//        if (getBoolean(dashboardConfig, "gatherDashboardDataToUpload")) {
 //            Map<String, ? super Object> argsMap = httpProperties();
 //            CloseableHttpClient httpClient = getHttpClient(argsMap);
 //
 //            try {
-//                dashboardUploader.uploadDashboard(httpClient,dashboardName, ".xml", xml.toString(), "text/xml", argsMap,
+//                dashboardUploader.gatherDashboardDataToUpload(httpClient,dashboardName, ".xml", xml.toString(), "text/xml", argsMap,
 //                        getBoolean(dashboardConfig, "overwriteDashboard"));
 //            } catch (ApiException e) {
 //                logger.error("Failed to upload dashboard", e);

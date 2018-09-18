@@ -12,6 +12,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by bhuvnesh.kumar on 8/29/18.
  */
@@ -33,7 +37,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
 
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
-        Boolean check = controllerInfoValidator.validateAndCheckIfResolved(controllerInfo);
+        Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
         Assert.assertTrue(check);
     }
 
@@ -54,7 +58,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
 
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
-        Boolean check = controllerInfoValidator.validateAndCheckIfResolved(controllerInfo);
+        Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
 
         Assert.assertTrue(check);
     }
@@ -75,7 +79,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
 
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
-        Boolean check = controllerInfoValidator.validateAndCheckIfResolved(controllerInfo);
+        Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
         Assert.assertTrue(check);
     }
 
@@ -94,8 +98,41 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
 
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
-        Boolean check = controllerInfoValidator.validateAndCheckIfResolved(controllerInfo);
+        Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
         Assert.assertFalse(check);
     }
+
+    @Test
+    public void checkForNullSimIfEmptyInAllAreas(){
+        Map config = getConfigMap();
+        File file = Mockito.mock(File.class);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(config, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
+
+
+        ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
+        Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
+        Assert.assertTrue(check);
+
+
+    }
+
+    private Map getConfigMap() {
+        Map config = new HashMap<>();
+        config.put("controllerHost", "hostNameYML");
+        config.put("controllerPort", 9999);
+        config.put("controllerSslEnabled", false);
+        config.put("uniqueHostId", "uniqueHostIDYML");
+        config.put("account", "accountNameYML");
+        config.put("username", "usernameYML");
+        config.put("password", "passwordYML");
+        config.put("accountAccessKey", "accessKeyYML");
+        config.put("applicationName", "applicationNameYML");
+        config.put("tierName", "tierNameYML");
+        config.put("nodeName", "nodeNameYML");
+        return config;
+    }
+
 
 }

@@ -39,8 +39,6 @@ public class ControllerApiService {
 
     public ControllerApiService(ControllerInfo controllerInfo) {
         this.controllerInfo = controllerInfo;
-
-
     }
 
     public CookiesCsrf getCookiesAndAuthToken(CloseableHttpClient httpClient) throws ApiException {
@@ -50,7 +48,7 @@ public class ControllerApiService {
         urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
 
         HttpGet get = new HttpGet(urlBuilder.path("controller/auth?action=login").build());
-        HttpResponse response = null;
+        HttpResponse response;
         CookiesCsrf cookiesCsrf = new CookiesCsrf();
         StatusLine statusLine;
         try {
@@ -116,7 +114,7 @@ public class ControllerApiService {
             } else if (statusLine != null) {
                 logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
                         , statusLine.getStatusCode());
-                logger.info("Please change the [uploadDashboard] property in the config.yml to false. " +
+                logger.info("Please change the [gatherDashboardDataToUpload] property in the config.yml to false. " +
                         "The xml will be written to the logs folder. Please import it to controller manually");
                 logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
             }

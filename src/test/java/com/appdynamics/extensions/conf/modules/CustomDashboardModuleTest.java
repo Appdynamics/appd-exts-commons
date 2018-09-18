@@ -73,7 +73,9 @@ public class CustomDashboardModuleTest {
         setupSystemProps();
         Map config = getConfigMap();
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo(config, file);
+        ControllerInfo controllerInfo ;
+        ControllerInfoFactory.initialize(getConfigMap(), file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
 
         CustomDashboardModule customDashboardModule = new CustomDashboardModule();
         customDashboardModule.initCustomDashboard(config, metricPrefix, controllerInfo);

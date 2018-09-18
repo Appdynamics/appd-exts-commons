@@ -15,7 +15,6 @@ import org.slf4j.Logger;
  * Created by abey.tom on 2/11/16.
  */
 public class ControllerInfo {
-    private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfo.class);
 
     protected String controllerHost;
     protected Integer controllerPort;

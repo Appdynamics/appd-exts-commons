@@ -67,10 +67,11 @@ public class MonitorContext {
         this.config = config;
         this.metricPrefix = metricPrefix;
         Map controllerInfoMap = new HashMap();
-        if(config.get("controllerInfo") != null){
-         controllerInfoMap = (Map)config.get("controllerInfo") ;
+        if (config.get("controllerInfo") != null) {
+            controllerInfoMap = (Map) config.get("controllerInfo");
         }
         ControllerInfoFactory.initialize(controllerInfoMap, installDir);
+        controllerInfo = ControllerInfo.getInstance();
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
             workBenchModule.initWorkBenchStore(config, metricPrefix);
