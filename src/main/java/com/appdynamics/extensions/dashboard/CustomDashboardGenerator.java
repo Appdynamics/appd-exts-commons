@@ -45,7 +45,6 @@ public class CustomDashboardGenerator {
         this.dashboardName = dashboardName;
     }
 
-
     public String getDashboardTemplate() {
         String dashboardTemplate = getDashboardContents();
         AssertUtils.assertNotNull(dashboardTemplate, "Dashboard template file can not be null or empty.");
@@ -53,7 +52,6 @@ public class CustomDashboardGenerator {
         logger.debug("Dashboard values resolved. Ready for uploader");
         return dashboardTemplate;
     }
-
 
     private String getDashboardContents() {
         logger.debug("Sim Enabled: {}", controllerInfo.getSimEnabled());
@@ -98,7 +96,6 @@ public class CustomDashboardGenerator {
     private String setMetricPrefix(String dashboardString) {
         if (dashboardString.contains(REPLACE_METRIC_PREFIX)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_METRIC_PREFIX, metricPrefix);
-
             logger.debug(REPLACE_METRIC_PREFIX + ": " + metricPrefix);
         }
         return dashboardString;
@@ -107,7 +104,6 @@ public class CustomDashboardGenerator {
     private String setApplicationName(String dashboardString) {
         if (dashboardString.contains(REPLACE_APPLICATION_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_APPLICATION_NAME, controllerInfo.getApplicationName());
-
             logger.debug(REPLACE_APPLICATION_NAME + ": " + controllerInfo.getApplicationName());
         }
         return dashboardString;
@@ -116,7 +112,6 @@ public class CustomDashboardGenerator {
     private String setSimApplicationName(String dashboardString) {
         if (dashboardString.contains(REPLACE_SIM_APPLICATION_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_SIM_APPLICATION_NAME, SIM_APPLICATION_NAME);
-
             logger.debug(REPLACE_SIM_APPLICATION_NAME + ": " + SIM_APPLICATION_NAME);
         }
         return dashboardString;
@@ -125,7 +120,6 @@ public class CustomDashboardGenerator {
     private String setTierName(String dashboardString) {
         if (dashboardString.contains(REPLACE_TIER_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_TIER_NAME, controllerInfo.getTierName());
-
             logger.debug(REPLACE_TIER_NAME + ": " + controllerInfo.getTierName());
         }
         return dashboardString;
@@ -134,7 +128,6 @@ public class CustomDashboardGenerator {
     private String setNodeName(String dashboardString) {
         if (dashboardString.contains(REPLACE_NODE_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_NODE_NAME, controllerInfo.getNodeName());
-
             logger.debug(REPLACE_NODE_NAME + ": " + controllerInfo.getNodeName());
         }
         return dashboardString;
@@ -143,18 +136,15 @@ public class CustomDashboardGenerator {
     private String setHostName(String dashboardString) {
         if (dashboardString.contains(REPLACE_HOST_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_HOST_NAME, controllerInfo.getControllerHost());
-
             logger.debug(REPLACE_HOST_NAME + ": " + controllerInfo.getControllerHost());
         }
         return dashboardString;
     }
 
     private String setDashboardName(String dashboardString) {
-
         if (dashboardString.contains(REPLACE_DASHBOARD_NAME)) {
             if (!Strings.isNullOrEmpty(dashboardName))
                 dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_DASHBOARD_NAME, dashboardName);
-
             logger.debug(REPLACE_DASHBOARD_NAME + ": " + dashboardName);
         }
         return dashboardString;
@@ -166,11 +156,9 @@ public class CustomDashboardGenerator {
                 String machinePath = ROOT + METRICS_SEPARATOR + controllerInfo.getMachinePath();
                 machinePath = machinePath.substring(0, machinePath.lastIndexOf(METRICS_SEPARATOR));
                 dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_MACHINE_PATH, machinePath);
-
                 logger.debug(REPLACE_MACHINE_PATH + ": " + machinePath);
             } else {
                 dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_MACHINE_PATH, ROOT);
-
                 logger.debug(REPLACE_MACHINE_PATH + ": " + ROOT);
             }
         }

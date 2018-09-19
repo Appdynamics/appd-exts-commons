@@ -36,12 +36,11 @@ public class ControllerInfoFactoryTest {
         instance.set(null, null);
     }
 
-
     @Test
     public void testGetControllerInfoWithNoProps() {
         Map config = new HashMap();
         File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
 
@@ -59,17 +58,15 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getControllerSslEnabled() == (null));
         Assert.assertTrue(controllerInfo.getUniqueHostId() == (null));
         Assert.assertTrue(controllerInfo.getSimEnabled() == (null));
-
     }
 
     @Test
     public void testGetControllerInfoWithConfigMap() {
         File file = Mockito.mock(File.class);
         Map config = getConfigMap();
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
 
         Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
@@ -82,7 +79,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
-
     }
 
 
@@ -90,7 +86,7 @@ public class ControllerInfoFactoryTest {
     public void testGetControllerInfoWithXML() {
         Map config = new HashMap();
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
 
@@ -104,16 +100,14 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("xmlUniqueHostId"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
-
     }
 
 
     @Test
     public void testGetControllerInfoWithXMLandConfig() {
         Map config = getConfigMap();
-
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
 
@@ -127,16 +121,14 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
-
     }
 
     @Test
     public void testGetControllerInfoWithSystemProps() {
-
         setupSystemProps();
         Map config = null;
         File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
 
@@ -154,25 +146,21 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostID"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
-
     }
 
     @Test
     public void testGetControllerInfoWithSystemPropsAndConfig() {
-
         setupSystemProps();
         Map config = getConfigMap();
         File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
 
         Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
         Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
         Assert.assertTrue(controllerInfo.getEncryptionKey().equals("encryptionKey"));
         Assert.assertTrue(controllerInfo.getEncryptedPassword().equals("encryptedPassword"));
-
         Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationNameYML"));
@@ -191,7 +179,7 @@ public class ControllerInfoFactoryTest {
         setupSystemProps();
         Map config = new HashMap();
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
 
@@ -212,11 +200,10 @@ public class ControllerInfoFactoryTest {
 
     @Test
     public void testGetControllerInfoWithSystemPropsXmlConfig() {
-
         setupSystemProps();
         Map config = getConfigMap();
         File file = new File("src/test/resources/dashboard/");
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
 
@@ -224,7 +211,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
         Assert.assertTrue(controllerInfo.getEncryptionKey().equals("encryptionKey"));
         Assert.assertTrue(controllerInfo.getEncryptedPassword().equals("encryptedPassword"));
-
         Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationNameYML"));
@@ -235,8 +221,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
-
-
     }
 
 
@@ -257,7 +241,6 @@ public class ControllerInfoFactoryTest {
     }
 
     public void setupSystemProps() {
-
         System.setProperty("appdynamics.agent.accountAccessKey", "accessKey");
         System.setProperty("appdynamics.agent.accountName", "accountName");
         System.setProperty("appdynamics.agent.applicationName", "applicationName");
@@ -272,12 +255,10 @@ public class ControllerInfoFactoryTest {
         System.setProperty("appdynamics.controller.ssl.enabled", "false");
         System.setProperty("appdynamics.agent.uniqueHostId", "uniqueHostID");
         System.setProperty("appdynamics.sim.enabled", "false");
-
     }
 
 
     public void removeSystemProperties() {
-
         System.clearProperty("appdynamics.agent.accountAccessKey");
         System.clearProperty("appdynamics.agent.accountName");
         System.clearProperty("appdynamics.agent.applicationName");
@@ -292,8 +273,5 @@ public class ControllerInfoFactoryTest {
         System.clearProperty("appdynamics.controller.ssl.enabled");
         System.clearProperty("appdynamics.agent.uniqueHostId");
         System.clearProperty("appdynamics.sim.enabled");
-
     }
-
-
 }

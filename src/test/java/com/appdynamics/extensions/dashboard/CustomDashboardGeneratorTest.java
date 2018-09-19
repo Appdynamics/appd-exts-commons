@@ -231,20 +231,15 @@ public class CustomDashboardGeneratorTest {
         controllerInfo = ControllerInfoFactory.getControllerInfo();
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
-
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
         dashboardConfig.put("gatherDashboardDataToUpload", true);
         dashboardConfig.put("pathToNormalDashboard", "src/test/resources/dashboard/normalDashboard.json");
-
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/normalDashboard.json"));
-
         CustomDashboardGenerator customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
         String updatedDashboardString = customDashboardGen.getDashboardTemplate();
-
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
-
         if (dashboardString.contains(DashboardConstants.REPLACE_APPLICATION_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains("applicationNameYML"));
         }
@@ -263,34 +258,24 @@ public class CustomDashboardGeneratorTest {
         if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
         }
-
     }
 
     @Test
     public void replaceDefaultValuesInTheSIMDashboard() throws Exception {
-
         ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(getConfigMapForSim(), file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
-
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
         dashboardConfig.put("gatherDashboardDataToUpload", true);
         dashboardConfig.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
-
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
-
         CustomDashboardGenerator customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
         String updatedDashboardString = customDashboardGen.getDashboardTemplate();
-
-
-
-
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
-
         if (dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains(DashboardConstants.SIM_APPLICATION_NAME));
         }
@@ -303,7 +288,6 @@ public class CustomDashboardGeneratorTest {
         if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
         }
-
     }
 
     private Map getConfigMap() {

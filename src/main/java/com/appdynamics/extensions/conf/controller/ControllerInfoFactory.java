@@ -21,7 +21,6 @@ import java.io.File;
 import java.util.Map;
 
 public class ControllerInfoFactory {
-
     private static ControllerInfo controllerInfo;
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
 
@@ -34,8 +33,6 @@ public class ControllerInfoFactory {
        This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
 
      */
-
-    //
 
     public static ControllerInfo getControllerInfo() {
         return controllerInfo;
@@ -52,7 +49,6 @@ public class ControllerInfoFactory {
         }
         controllerInfo = localControllerInfo;
     }
-
 
     private static ControllerInfo getYamlProperties(Map config, ControllerInfo controllerInfo) {
         if (!Strings.isNullOrEmpty((String) config.get("controllerHost"))) {
@@ -99,9 +95,7 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty((String) config.get("encryptionKey"))) {
             controllerInfo.setEncryptionKey(config.get("encryptionKey").toString());
         }
-
         return controllerInfo;
-
     }
 
     private static ControllerInfo getSystemProperties(ControllerInfo controllerInfo) {
@@ -138,7 +132,6 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.uniqueHostId"))) {
             controllerInfo.setUniqueHostId(System.getProperty("appdynamics.agent.uniqueHostId"));
         }
-
         String port = System.getProperty("appdynamics.controller.port");
         if (NumberUtils.isNumber(port)) {
             controllerInfo.setControllerPort(Integer.parseInt(port));
@@ -147,15 +140,12 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty(sslEnabled)) {
             controllerInfo.setControllerSslEnabled(Boolean.valueOf(sslEnabled.trim()));
         }
-
         String simEnabled = System.getProperty("appdynamics.sim.enabled");
         if (!Strings.isNullOrEmpty(simEnabled)) {
             controllerInfo.setSimEnabled(Boolean.valueOf(simEnabled.trim()));
         }
         return controllerInfo;
     }
-
-    // Getting data from controller-info.xml
 
     private static ControllerInfo getControllerInfoFromXml(File directory) {
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());

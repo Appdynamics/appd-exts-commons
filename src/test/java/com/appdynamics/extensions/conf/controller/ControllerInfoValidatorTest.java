@@ -23,7 +23,6 @@ import java.util.Map;
 public class ControllerInfoValidatorTest {
     @Test
     public void validateAndCheckIfResolvedTestWithAppTierNode() throws Exception {
-
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getUsername()).thenReturn("username");
         Mockito.when(controllerInfo.getPassword()).thenReturn("password");
@@ -35,7 +34,6 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("tier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("node");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
-
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
         Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
         Assert.assertTrue(check);
@@ -44,7 +42,6 @@ public class ControllerInfoValidatorTest {
 
     @Test
     public void validateAndCheckIfResolvedTestWithOnlySim() throws Exception {
-
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getUsername()).thenReturn("username");
         Mockito.when(controllerInfo.getPassword()).thenReturn("password");
@@ -56,16 +53,13 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("tier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("node");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
-
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
         Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
-
         Assert.assertTrue(check);
     }
 
     @Test
     public void validateAndCheckIfResolvedTestWithSimAndAppTierNode() throws Exception {
-
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getUsername()).thenReturn("username");
         Mockito.when(controllerInfo.getPassword()).thenReturn("password");
@@ -77,7 +71,6 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("tier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("node");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
-
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
         Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
         Assert.assertTrue(check);
@@ -85,7 +78,6 @@ public class ControllerInfoValidatorTest {
 
     @Test
     public void validateAndCheckIfResolvedTestWithoutSimAndNode() throws Exception {
-
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getUsername()).thenReturn("username");
         Mockito.when(controllerInfo.getPassword()).thenReturn("password");
@@ -96,7 +88,6 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getApplicationName()).thenReturn("application");
         Mockito.when(controllerInfo.getTierName()).thenReturn("tier");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
-
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
         Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
         Assert.assertFalse(check);
@@ -109,13 +100,9 @@ public class ControllerInfoValidatorTest {
         ControllerInfo controllerInfo ;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
-
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();
         Boolean check = controllerInfoValidator.isValidatedAndResolved(controllerInfo);
         Assert.assertTrue(check);
-
-
     }
 
     private Map getConfigMap() {
