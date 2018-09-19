@@ -30,7 +30,6 @@ import java.util.Map;
 
 public class CustomDashboardGeneratorTest {
 
-
     private File file = Mockito.mock(File.class);
 
     @Before
@@ -40,8 +39,7 @@ public class CustomDashboardGeneratorTest {
         instance.set(null, null);
     }
 
-
-    //    @Before
+//    @Before
 //    public void before() throws IOException {
 //        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 //        File confDir = new File(tmpDir, "conf");
@@ -221,7 +219,6 @@ public class CustomDashboardGeneratorTest {
 //        docker.persistDashboard("Test",new Xml("<xml/>"));
 //
 //    }
-
 
 
     @Test

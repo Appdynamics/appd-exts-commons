@@ -31,7 +31,6 @@ public class ControllerInfoFactory {
        3rd priority : Controller Info xml
 
        This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
-
      */
 
     public static ControllerInfo getControllerInfo() {
@@ -151,9 +150,9 @@ public class ControllerInfoFactory {
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
         ControllerInfo from = null;
         if (directory.exists()) {
-            File cinfo = new File(new File(directory, "conf"), "controller-info.xml");
-            if (cinfo.exists()) {
-                from = fromXml(cinfo);
+            File xmlControllerInfo = new File(new File(directory, "conf"), "controller-info.xml");
+            if (xmlControllerInfo.exists()) {
+                from = fromXml(xmlControllerInfo);
             }
         }
         if (from == null) {
@@ -167,7 +166,6 @@ public class ControllerInfoFactory {
             JAXBContext jaxbContext = JAXBContext.newInstance(XmlControllerInfo.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             XmlControllerInfo xmlControllerInfo = (XmlControllerInfo) unmarshaller.unmarshal(file);
-
             return mergeValuesFromXML(xmlControllerInfo);
         } catch (JAXBException e) {
             String msg = "Cannot unmarshall the controller-info.xml from " + file.getAbsolutePath();

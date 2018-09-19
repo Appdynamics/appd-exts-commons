@@ -125,7 +125,7 @@ public class ControllerApiService {
         }
     }
 
-    public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String contentType) throws ApiException {
+    public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ApiException {
         UrlBuilder urlBuilder = new UrlBuilder();
         urlBuilder.host(controllerInfo.getControllerHost());
         urlBuilder.port(controllerInfo.getControllerPort());
@@ -166,7 +166,7 @@ public class ControllerApiService {
             DataOutputStream request = new DataOutputStream(connection.getOutputStream());
             request.writeBytes(twoHyphens + boundary + lineEnd);
             request.writeBytes("Content-Disposition: form-data; name=\"" + dashboardName + "\";filename=\"" + filename + "\"" + lineEnd);
-            request.writeBytes("Content-Type: " + contentType + lineEnd);
+            request.writeBytes("Content-Type: " + fileContentType + lineEnd);
             request.writeBytes(lineEnd);
             request.write(fileContent.getBytes());
             request.writeBytes(lineEnd + lineEnd);

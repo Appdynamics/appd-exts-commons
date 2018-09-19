@@ -20,18 +20,18 @@ public class ControllerInfoValidator {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
     private List<String> unresolvedProps;
 
-    public boolean isValidatedAndResolved(ControllerInfo cInfo) {
-        if (cInfo.getAccount() == null) {
-            cInfo.setAccount("customer1");
+    public boolean isValidatedAndResolved(ControllerInfo controllerInfo) {
+        if (controllerInfo.getAccount() == null) {
+            controllerInfo.setAccount("customer1");
         }
-        check(TaskInputArgs.USER, cInfo.getUsername());
-        check(TaskInputArgs.PASSWORD, cInfo.getPassword());
-        check("account", cInfo.getAccount());
-        check("controllerHost", cInfo.getControllerHost());
-        check("controllerPort", cInfo.getControllerPort());
-        check("controllerSslEnabled", cInfo.getControllerSslEnabled());
-        if (!simEnabledOrNot(cInfo)) {
-            checkAppTierNode(cInfo);
+        check(TaskInputArgs.USER, controllerInfo.getUsername());
+        check(TaskInputArgs.PASSWORD, controllerInfo.getPassword());
+        check("account", controllerInfo.getAccount());
+        check("controllerHost", controllerInfo.getControllerHost());
+        check("controllerPort", controllerInfo.getControllerPort());
+        check("controllerSslEnabled", controllerInfo.getControllerSslEnabled());
+        if (!simEnabledOrNot(controllerInfo)) {
+            checkAppTierNode(controllerInfo);
         }
         if (unresolvedProps != null) {
             logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
@@ -40,10 +40,10 @@ public class ControllerInfoValidator {
         return true;
     }
 
-    private void checkAppTierNode(ControllerInfo cInfo) {
-        check("applicationName", cInfo.getApplicationName());
-        check("tierName", cInfo.getTierName());
-        check("nodeName", cInfo.getNodeName());
+    private void checkAppTierNode(ControllerInfo controllerInfo) {
+        check("applicationName", controllerInfo.getApplicationName());
+        check("tierName", controllerInfo.getTierName());
+        check("nodeName", controllerInfo.getNodeName());
     }
 
     private void check(String propName, Object propVal) {
@@ -58,8 +58,8 @@ public class ControllerInfoValidator {
         }
     }
 
-    private boolean simEnabledOrNot(ControllerInfo cInfo) {
-        Object propVal = cInfo.getSimEnabled();
+    private boolean simEnabledOrNot(ControllerInfo controllerInfo) {
+        Object propVal = controllerInfo.getSimEnabled();
         if (propVal != null) {
             if (!(propVal instanceof Boolean)) {
                 markUnresolved("simEnabled");

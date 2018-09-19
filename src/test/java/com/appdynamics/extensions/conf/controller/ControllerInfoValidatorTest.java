@@ -39,7 +39,6 @@ public class ControllerInfoValidatorTest {
         Assert.assertTrue(check);
     }
 
-
     @Test
     public void validateAndCheckIfResolvedTestWithOnlySim() throws Exception {
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -94,10 +93,10 @@ public class ControllerInfoValidatorTest {
     }
 
     @Test
-    public void checkForNullSimIfEmptyInAllAreas(){
+    public void checkForNullSimIfEmptyInAllAreas() {
         Map config = getConfigMap();
         File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo ;
+        ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator();

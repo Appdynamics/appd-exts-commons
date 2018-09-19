@@ -81,7 +81,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
     }
 
-
     @Test
     public void testGetControllerInfoWithXML() {
         Map config = new HashMap();
@@ -101,7 +100,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("xmlUniqueHostId"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
     }
-
 
     @Test
     public void testGetControllerInfoWithXMLandConfig() {
@@ -223,7 +221,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
     }
 
-
     private Map getConfigMap() {
         Map config = new HashMap<>();
         config.put("controllerHost", "hostNameYML");
@@ -256,7 +253,6 @@ public class ControllerInfoFactoryTest {
         System.setProperty("appdynamics.agent.uniqueHostId", "uniqueHostID");
         System.setProperty("appdynamics.sim.enabled", "false");
     }
-
 
     public void removeSystemProperties() {
         System.clearProperty("appdynamics.agent.accountAccessKey");

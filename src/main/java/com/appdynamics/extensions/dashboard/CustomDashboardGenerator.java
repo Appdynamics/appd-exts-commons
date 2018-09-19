@@ -18,7 +18,6 @@ package com.appdynamics.extensions.dashboard;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
-import com.google.common.base.Strings;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
@@ -34,12 +33,12 @@ import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
 public class CustomDashboardGenerator {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardGenerator.class);
     private String metricPrefix;
-    private Map dashboardConfig;
+    private Map customDashboardConfig;
     private ControllerInfo controllerInfo;
     private String dashboardName;
 
-    public CustomDashboardGenerator(Map dashboardConfig, ControllerInfo controllerInformation, String metricPrefix, String dashboardName) {
-        this.dashboardConfig = dashboardConfig;
+    public CustomDashboardGenerator(Map customDashboardConfig, ControllerInfo controllerInformation, String metricPrefix, String dashboardName) {
+        this.customDashboardConfig = customDashboardConfig;
         this.controllerInfo = controllerInformation;
         this.metricPrefix = metricPrefix;
         this.dashboardName = dashboardName;
@@ -58,27 +57,23 @@ public class CustomDashboardGenerator {
         String dashboardTemplate = "";
         String pathToFile;
         if (controllerInfo.getSimEnabled() == false) {
-            pathToFile = dashboardConfig.get("pathToNormalDashboard").toString();
+            pathToFile = customDashboardConfig.get("pathToNormalDashboard").toString();
         } else {
-            pathToFile = dashboardConfig.get("pathToSIMDashboard").toString();
+            pathToFile = customDashboardConfig.get("pathToSIMDashboard").toString();
         }
         try {
-            if (!Strings.isNullOrEmpty(pathToFile)) {
-                File file = new File(pathToFile);
-                if (file.exists()) {
-                    dashboardTemplate = FileUtils.readFileToString(file);
-                } else {
-                    logger.error("Unable to read the contents of the dashboard file: {}", pathToFile);
-                }
+            AssertUtils.assertNotNull(pathToFile, "The path to your dashboardFile is empty in your config.yml file");
+            File file = new File(pathToFile);
+            if (file.exists()) {
+                dashboardTemplate = FileUtils.readFileToString(file);
             } else {
-                logger.error("The path to your dashboardFile is empty in your config.yml file.");
+                logger.error("Unable to read the contents of the dashboard file: {}", pathToFile);
             }
         } catch (IOException e) {
             logger.error("Unable to read the contents of the dashboard file: {}", e.getMessage());
         }
         return dashboardTemplate;
     }
-
 
     private String setDefaultDashboardInfo(String dashboardString) {
         dashboardString = setMetricPrefix(dashboardString);
@@ -90,7 +85,6 @@ public class CustomDashboardGenerator {
         dashboardString = setDashboardName(dashboardString);
         dashboardString = setMachinePath(dashboardString);
         return dashboardString;
-
     }
 
     private String setMetricPrefix(String dashboardString) {
@@ -143,8 +137,8 @@ public class CustomDashboardGenerator {
 
     private String setDashboardName(String dashboardString) {
         if (dashboardString.contains(REPLACE_DASHBOARD_NAME)) {
-            if (!Strings.isNullOrEmpty(dashboardName))
-                dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_DASHBOARD_NAME, dashboardName);
+            AssertUtils.assertNotNull(dashboardName, "dashboardName can not be empty in config.yml");
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_DASHBOARD_NAME, dashboardName);
             logger.debug(REPLACE_DASHBOARD_NAME + ": " + dashboardName);
         }
         return dashboardString;
@@ -168,7 +162,7 @@ public class CustomDashboardGenerator {
     /////////////////////// XML Support ///////////////////////
 //
 //    private String setDashboardName(Node source, String instanceName) {
-//        String dashBoardName = (String) dashboardConfig.get("namePrefix");
+//        String dashBoardName = (String) customDashboardConfig.get("namePrefix");
 //        if (!StringUtils.hasText(dashBoardName)) {
 //            dashBoardName = "Custom Dashboard";
 //        }
@@ -180,12 +174,12 @@ public class CustomDashboardGenerator {
 //    }
 //
 //
-//    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map dashboardConfig,  ControllerInfo controllerInfo) {
-//        if (dashboardConfig == null) {
+//    public CustomDashboardGenerator(Set<String> instanceNames, String metricPrefix, Map customDashboardConfig,  ControllerInfo controllerInfo) {
+//        if (customDashboardConfig == null) {
 //            logger.info("Custom Dashboard config is null");
 //            return;
 //        }
-//        Boolean enabled = (Boolean) dashboardConfig.get("enabled");
+//        Boolean enabled = (Boolean) customDashboardConfig.get("enabled");
 //        if (enabled == null || !enabled) {
 //            logger.info("Custom Dashboard creation is not enabled");
 //            return;
@@ -194,7 +188,7 @@ public class CustomDashboardGenerator {
 //        this.controllerInfo = controllerInfo;
 //        this.instanceNames = instanceNames;
 //        this.metricPrefix = StringUtils.trim(metricPrefix, "|");
-//        this.dashboardConfig = dashboardConfig;
+//        this.customDashboardConfig = customDashboardConfig;
 //        ControllerApiService controllerApiService = new ControllerApiService(controllerInfo);
 //        this.dashboardUploader = new CustomDashboardUploader(controllerApiService);
 //    }
@@ -298,7 +292,7 @@ public class CustomDashboardGenerator {
 //    }
 //
 //    protected InputStream getDashboardTemplate() {
-//        String template = (String) dashboardConfig.get("templateFile");
+//        String template = (String) customDashboardConfig.get("templateFile");
 //        if (template != null) {
 //            File file = PathResolver.getFile(template, AManagedMonitor.class);
 //            if (file != null && file.exists()) {
@@ -314,13 +308,13 @@ public class CustomDashboardGenerator {
 //    }
 //
 //    protected void persistDashboard(String dashboardName, Xml xml) {
-//        if (getBoolean(dashboardConfig, "gatherDashboardDataToUpload")) {
+//        if (getBoolean(customDashboardConfig, "gatherDashboardDataToUpload")) {
 //            Map<String, ? super Object> argsMap = httpProperties();
 //            CloseableHttpClient httpClient = getHttpClient(argsMap);
 //
 //            try {
 //                dashboardUploader.gatherDashboardDataToUpload(httpClient,dashboardName, ".xml", xml.toString(), "text/xml", argsMap,
-//                        getBoolean(dashboardConfig, "overwriteDashboard"));
+//                        getBoolean(customDashboardConfig, "overwriteDashboard"));
 //            } catch (ApiException e) {
 //                logger.error("Failed to upload dashboard", e);
 //            }

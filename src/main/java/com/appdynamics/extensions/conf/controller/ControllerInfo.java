@@ -8,9 +8,6 @@
 
 package com.appdynamics.extensions.conf.controller;
 
-import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import org.slf4j.Logger;
-
 /**
  * Created by abey.tom on 2/11/16.
  */
@@ -37,7 +34,6 @@ public class ControllerInfo {
 
     private ControllerInfo() {
     }
-
 
     public static ControllerInfo getInstance() {
         return controllerInfo;
@@ -193,6 +189,5 @@ public class ControllerInfo {
                 ", machinePath='" + machinePath + '\'' +
                 '}';
     }
-
 
 }

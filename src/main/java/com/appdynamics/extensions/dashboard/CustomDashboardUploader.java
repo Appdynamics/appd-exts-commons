@@ -47,19 +47,19 @@ public class CustomDashboardUploader {
     private void uploadDashboard(ControllerApiService apiService, String dashboardName, String fileContents, boolean overwrite,
                                  Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ApiException {
         String fileExtension = "json";
-        String contentType = "application/json";
+        String fileContentType = "application/json";
         logger.debug("Dashboard overwrite: {}", overwrite);
         if (isDashboardPresent(dashboardName, allDashboards)) {
             if (overwrite) {
                 //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
                 // This will not be present in the config.yml so it will never override.
                 // Keeping this here for when override will be supported
-                apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);
+                apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
             } else {
                 logger.debug("Dashboard {} Already present, can not overwrite. ", dashboardName);
             }
         } else {
-            apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, contentType);
+            apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
         }
     }
 
