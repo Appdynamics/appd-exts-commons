@@ -72,15 +72,17 @@ public class CustomDashboardUtilsTest {
     public void verifyGetDashboardNameWithValue() {
         Map config = new HashMap();
         config.put("dashboardName", "Name");
-        String name = CustomDashboardUtils.getDashboardName(config);
+        String monitor = "Monitor";
+        String name = CustomDashboardUtils.getDashboardName(config, monitor);
         Assert.assertTrue(name.equals("Name"));
     }
 
     @Test
     public void verifyGetDashboardNameWithoutValue() {
         Map config = new HashMap();
-        String name = CustomDashboardUtils.getDashboardName(config);
-        Assert.assertTrue(name.equals("Custom Dashboard"));
+        String monitor = "MonitorName";
+        String name = CustomDashboardUtils.getDashboardName(config, monitor);
+        Assert.assertTrue(name.equals("MonitorName Dashboard"));
     }
 
     @Test

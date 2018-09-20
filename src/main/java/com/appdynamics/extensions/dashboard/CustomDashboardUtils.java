@@ -29,25 +29,21 @@ import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
 public class CustomDashboardUtils {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUtils.class);
 
-    public static String getDashboardName(Map customDashboardConfig) {
+    public static String getDashboardName(Map customDashboardConfig, String monitorName) {
         String dashboardName;
         if (!Strings.isNullOrEmpty((String) customDashboardConfig.get("dashboardName"))) {
             dashboardName = customDashboardConfig.get("dashboardName").toString();
         } else {
-            dashboardName = "Custom Dashboard";
+            dashboardName = monitorName + " Dashboard";
         }
-        customDashboardConfig.put("dashboardName", dashboardName);
         return dashboardName;
     }
 
     public static boolean getOverwrite(Map customDashboardConfig) {
-        boolean overwrite;
         if (customDashboardConfig.get("overwriteDashboard") != null) {
-            overwrite = (Boolean) customDashboardConfig.get("overwriteDashboard");
-        } else {
-            overwrite = false;
+            return (Boolean) customDashboardConfig.get("overwriteDashboard");
         }
-        return overwrite;
+        return false;
     }
 
     public static String buildMetricPrefixForDashboard(String metricPrefix) {
@@ -108,9 +104,12 @@ public class CustomDashboardUtils {
     }
 
     private static String getUserName(ControllerInfo controllerInfo) {
-        AssertUtils.assertNotNull(controllerInfo.getUsername(), "Unable to get a valid Username for uploading Dashboard");
-        AssertUtils.assertNotNull(controllerInfo.getAccount(), "Unable to get a valid Account for uploading Dashboard");
-        return controllerInfo.getUsername() + AT + controllerInfo.getAccount();
+        String accountName = controllerInfo.getAccount();
+        String username = controllerInfo.getUsername();
+        if (accountName != null && username != null) {
+            return username + AT + accountName;
+        }
+        return "";
     }
 
     private static void setProxyIfApplicable(Map<String, ? super Object> argsMap, Map config) {

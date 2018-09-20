@@ -46,9 +46,7 @@ public class CustomDashboardGenerator {
 
     public String getDashboardTemplate() {
         String dashboardTemplate = getDashboardContents();
-        AssertUtils.assertNotNull(dashboardTemplate, "Dashboard template file can not be null or empty.");
         dashboardTemplate = setDefaultDashboardInfo(dashboardTemplate);
-        logger.debug("Dashboard values resolved. Ready for uploader");
         return dashboardTemplate;
     }
 
@@ -56,7 +54,7 @@ public class CustomDashboardGenerator {
         logger.debug("Sim Enabled: {}", controllerInfo.getSimEnabled());
         String dashboardTemplate = "";
         String pathToFile;
-        if (controllerInfo.getSimEnabled() == false) {
+        if (!controllerInfo.getSimEnabled()) {
             pathToFile = customDashboardConfig.get("pathToNormalDashboard").toString();
         } else {
             pathToFile = customDashboardConfig.get("pathToSIMDashboard").toString();
@@ -70,7 +68,7 @@ public class CustomDashboardGenerator {
                 logger.error("Unable to read the contents of the dashboard file: {}", pathToFile);
             }
         } catch (IOException e) {
-            logger.error("Unable to read the contents of the dashboard file: {}", e.getMessage());
+            logger.error("Unable to read the contents of the dashboard file: {}", e);
         }
         return dashboardTemplate;
     }

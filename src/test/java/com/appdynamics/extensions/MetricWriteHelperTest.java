@@ -18,6 +18,7 @@ package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.conf.modules.CustomDashboardModule;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
@@ -27,6 +28,8 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
@@ -71,6 +74,11 @@ public class MetricWriteHelperTest {
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
+        when(aBaseMonitor.getContextConfiguration().getContext()).thenReturn(context);
+        when(aBaseMonitor.getContextConfiguration().getContext().getDashboardModule()).thenReturn(customDashboardModule);
+        Mockito.doNothing().when(customDashboardModule).sendDashboardDataToUploader();
+
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/DerivedSample.yml"));
@@ -86,6 +94,7 @@ public class MetricWriteHelperTest {
         metricList.add(metric2);
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
+
         metricWriteHelper.transformAndPrintMetrics(metricList);
         metricWriteHelper.onComplete();
         verify(metricWriter, times(4)).printMetric(stringArgumentCaptor.capture());

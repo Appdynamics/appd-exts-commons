@@ -135,6 +135,8 @@ public class MetricWriteHelper {
             logger.debug("Total number of derived metrics reported in this job run are : {}", metricsMap.size() - baseMetricsSize);
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
+
+        baseMonitor.getContextConfiguration().getContext().getDashboardModule().sendDashboardDataToUploader();
         logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
     }
 

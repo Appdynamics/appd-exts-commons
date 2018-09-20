@@ -30,11 +30,12 @@ public class ControllerInfoValidator {
         check("controllerHost", controllerInfo.getControllerHost());
         check("controllerPort", controllerInfo.getControllerPort());
         check("controllerSslEnabled", controllerInfo.getControllerSslEnabled());
-        if (!simEnabledOrNot(controllerInfo)) {
+        if (!isSimEnabled(controllerInfo)) {
             checkAppTierNode(controllerInfo);
         }
         if (unresolvedProps != null) {
-            logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' section in config.yml", unresolvedProps);
+            logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' " +
+                    "section in config.yml", unresolvedProps);
             return false;
         }
         return true;
@@ -58,7 +59,7 @@ public class ControllerInfoValidator {
         }
     }
 
-    private boolean simEnabledOrNot(ControllerInfo controllerInfo) {
+    private boolean isSimEnabled(ControllerInfo controllerInfo) {
         Object propVal = controllerInfo.getSimEnabled();
         if (propVal != null) {
             if (!(propVal instanceof Boolean)) {

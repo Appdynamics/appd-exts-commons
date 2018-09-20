@@ -20,18 +20,16 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Map;
 
+/**
+ * This controllerInfo is currently being called in a single threaded environment
+ * 1st priority : config.yml
+ * 2nd priority : System Properties
+ * 3rd priority : Controller Info xml
+ * This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
+ */
 public class ControllerInfoFactory {
     private static ControllerInfo controllerInfo;
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
-
-    /*
-       This controllerInfo is currently being called in a single threaded environment
-       1st priority : config.yml
-       2nd priority : System Properties
-       3rd priority : Controller Info xml
-
-       This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
-     */
 
     public static ControllerInfo getControllerInfo() {
         return controllerInfo;
@@ -148,17 +146,17 @@ public class ControllerInfoFactory {
 
     private static ControllerInfo getControllerInfoFromXml(File directory) {
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
-        ControllerInfo from = null;
+        ControllerInfo controllerInfoFromXML = null;
         if (directory.exists()) {
-            File xmlControllerInfo = new File(new File(directory, "conf"), "controller-info.xml");
-            if (xmlControllerInfo.exists()) {
-                from = fromXml(xmlControllerInfo);
+            File xmlControllerInfoFile = new File(new File(directory, "conf"), "controller-info.xml");
+            if (xmlControllerInfoFile.exists()) {
+                controllerInfoFromXML = fromXml(xmlControllerInfoFile);
             }
         }
-        if (from == null) {
-            from = ControllerInfo.getInstance();
+        if (controllerInfoFromXML == null) {
+            controllerInfoFromXML = ControllerInfo.getInstance();
         }
-        return from;
+        return controllerInfoFromXML;
     }
 
     private static ControllerInfo fromXml(File file) {
