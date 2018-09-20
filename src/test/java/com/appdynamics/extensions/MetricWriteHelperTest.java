@@ -77,7 +77,7 @@ public class MetricWriteHelperTest {
         CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
         when(aBaseMonitor.getContextConfiguration().getContext()).thenReturn(context);
         when(aBaseMonitor.getContextConfiguration().getContext().getDashboardModule()).thenReturn(customDashboardModule);
-        Mockito.doNothing().when(customDashboardModule).sendDashboardDataToUploader();
+        Mockito.doNothing().when(customDashboardModule).uploadDashboard();
 
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 

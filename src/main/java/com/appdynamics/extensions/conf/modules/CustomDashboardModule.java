@@ -26,20 +26,20 @@ public class CustomDashboardModule {
     private String dashboardTemplate;
     private Map config;
 
-    public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName, ControllerInfo controllerInfo) {
+    // todo make this threadsafe
+    private boolean dashboardUploaded = false;
+
+    public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName,
+                                    ControllerInfo controllerInfo) {
         logger.debug("Custom Dashboard Module controllerInfo : {}", controllerInfo);
         this.controllerInfo = controllerInfo;
         this.config = config;
-
         Map customDashboardConfig = (Map) config.get("customDashboard");
         if ((customDashboardConfig != null && !customDashboardConfig.isEmpty())) {
             if ((Boolean) customDashboardConfig.get(DashboardConstants.ENABLED)) {
-                long startTime = System.currentTimeMillis();
                 dashboardName = CustomDashboardUtils.getDashboardName(customDashboardConfig, monitorName);
                 overwrite = CustomDashboardUtils.getOverwrite(customDashboardConfig);
                 dashboardTemplate = getDashboardTemplate(metricPrefix, customDashboardConfig);
-                long endTime = System.currentTimeMillis();
-                logger.debug("Time to complete customDashboardModule in :" + (endTime - startTime) + " ms");
             } else {
                 logger.info("customDashboard is not enabled in config.yml, not uploading dashboard.");
             }
@@ -56,7 +56,6 @@ public class CustomDashboardModule {
                     dashboardMetricPrefix, dashboardName);
             return dashboardGenerator.getDashboardTemplate();
         }
-        logger.error("All required fields not resolved to upload dashboard.");
         return null;
     }
 
@@ -69,20 +68,23 @@ public class CustomDashboardModule {
         return false;
     }
 
-    public void sendDashboardDataToUploader() {
-        if (isValidDashboardTemplate(dashboardTemplate)) {
+    public void uploadDashboard() {
+        if (!dashboardUploaded && isValidDashboardTemplate(dashboardTemplate)) {
+            long startTime = System.currentTimeMillis();
             ControllerApiService apiService = new ControllerApiService(controllerInfo);
             Map httpProperties = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
             try (CloseableHttpClient client = Http4ClientBuilder.getBuilder(httpProperties).build()) {
                 CustomDashboardUploader dashboardUploader = new CustomDashboardUploader();
-                dashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, dashboardTemplate, httpProperties, overwrite);
+                dashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, dashboardTemplate,
+                        httpProperties, overwrite);
+                dashboardUploaded = true;
+                long endTime = System.currentTimeMillis();
+                logger.debug("Time to complete customDashboardModule in :" + (endTime - startTime) + " ms");
             } catch (ApiException e) {
                 logger.error("Unable to establish connection, not uploading dashboard.", e);
             } catch (IOException e) {
                 logger.error("Error while uploading dashboard", e);
             }
-        } else {
-            logger.debug("Dashboard template not valid, not proceeding with dashboard upload");
         }
     }
 }

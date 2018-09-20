@@ -11,7 +11,6 @@ package com.appdynamics.extensions.dashboard;
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;

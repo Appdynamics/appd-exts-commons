@@ -15,9 +15,6 @@
 
 package com.appdynamics.extensions;
 
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
-import static com.appdynamics.extensions.util.StringUtils.validateStrings;
-
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
@@ -34,6 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
+import static com.appdynamics.extensions.util.StringUtils.validateStrings;
 
 
 public class MetricWriteHelper {
@@ -135,8 +135,7 @@ public class MetricWriteHelper {
             logger.debug("Total number of derived metrics reported in this job run are : {}", metricsMap.size() - baseMetricsSize);
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
-
-        baseMonitor.getContextConfiguration().getContext().getDashboardModule().sendDashboardDataToUploader();
+        baseMonitor.getContextConfiguration().getContext().getDashboardModule().uploadDashboard();
         logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
     }
 

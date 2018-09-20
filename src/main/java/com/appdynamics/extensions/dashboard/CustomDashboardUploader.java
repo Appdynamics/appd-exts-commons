@@ -48,9 +48,9 @@ public class CustomDashboardUploader {
                                  Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ApiException {
         String fileExtension = "json";
         String fileContentType = "application/json";
-        logger.debug("Dashboard overwrite: {}", overwrite);
         if (isDashboardPresent(dashboardName, allDashboards)) {
             if (overwrite) {
+                logger.debug("Attempting to overwrite dashboard");
                 //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
                 // This will not be present in the config.yml so it will never override.
                 // Keeping this here for when override will be supported
@@ -67,12 +67,10 @@ public class CustomDashboardUploader {
         if (existingDashboards != null) {
             for (JsonNode existingDashboard : existingDashboards) {
                 if (dashboardName.equals(getTextValue(existingDashboard.get("name")))) {
-                    logger.debug("Dashboard present: {}", true);
                     return true;
                 }
             }
         }
-        logger.debug("Dashboard present: {}", false);
         return false;
     }
 }
