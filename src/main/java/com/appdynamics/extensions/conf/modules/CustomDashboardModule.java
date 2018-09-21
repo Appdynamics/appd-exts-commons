@@ -27,8 +27,7 @@ public class CustomDashboardModule {
     private String dashboardTemplate;
     private Map config;
 
-    // todo use atomic boolean and volatile
-    private AtomicBoolean dashboardUploaded = new AtomicBoolean();
+    private volatile AtomicBoolean dashboardUploaded = new AtomicBoolean();
 
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName,
                                     ControllerInfo controllerInfo) {
