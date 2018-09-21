@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CustomDashboardModule {
 
@@ -26,8 +27,8 @@ public class CustomDashboardModule {
     private String dashboardTemplate;
     private Map config;
 
-    // todo make this threadsafe
-    private boolean dashboardUploaded = false;
+    // todo use atomic boolean and volatile
+    private AtomicBoolean dashboardUploaded = new AtomicBoolean();
 
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName,
                                     ControllerInfo controllerInfo) {
@@ -69,7 +70,7 @@ public class CustomDashboardModule {
     }
 
     public void uploadDashboard() {
-        if (!dashboardUploaded && isValidDashboardTemplate(dashboardTemplate)) {
+        if (!dashboardUploaded.get() && isValidDashboardTemplate(dashboardTemplate)) {
             long startTime = System.currentTimeMillis();
             ControllerApiService apiService = new ControllerApiService(controllerInfo);
             Map httpProperties = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
@@ -77,7 +78,7 @@ public class CustomDashboardModule {
                 CustomDashboardUploader dashboardUploader = new CustomDashboardUploader();
                 dashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, dashboardTemplate,
                         httpProperties, overwrite);
-                dashboardUploaded = true;
+                dashboardUploaded.set(true);
                 long endTime = System.currentTimeMillis();
                 logger.debug("Time to complete customDashboardModule in :" + (endTime - startTime) + " ms");
             } catch (ApiException e) {
@@ -88,3 +89,4 @@ public class CustomDashboardModule {
         }
     }
 }
+

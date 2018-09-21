@@ -22,7 +22,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -37,7 +36,7 @@ import static org.mockito.Matchers.isA;
 public class CustomDashboardUploaderTest {
 
     @Test
-    public void testUploaderWhenDashboardAlreadyPresent() {
+    public void testUploaderWhenDashboardAlreadyPresent() throws ApiException {
         ControllerApiService apiService = Mockito.mock(ControllerApiService.class);
         CloseableHttpClient client = Mockito.mock(CloseableHttpClient.class);
         CookiesCsrf cookiesCsrf = Mockito.mock(CookiesCsrf.class);
@@ -47,27 +46,24 @@ public class CustomDashboardUploaderTest {
         ((ObjectNode) childNode1).put("name", "DashboardName");
         ((ObjectNode) childNode1).put("name2", "val2");
         ((ObjectNode) rootNode).put("obj1", childNode1);
-        try {
-            Mockito.when(apiService.getCookiesAndAuthToken(client)).thenReturn(cookiesCsrf);
-            Mockito.when(apiService.getAllDashboards(client, cookiesCsrf)).thenReturn(rootNode);
-            Map map = new HashMap();
-            String emptyStringForTest = "";
-            Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
-            CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader();
-            String dashboardName = "DashboardName";
-            String fileContents = "contents";
-            Map<String, ? super Object> argsMap = new HashMap<>();
-            boolean overwrite = false;
-            customDashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
-            Mockito.verify(apiService, Mockito.times(0)).uploadDashboard(map, cookiesCsrf, emptyStringForTest,
-                    emptyStringForTest, emptyStringForTest, emptyStringForTest);
-        } catch (ApiException e) {
-            Assert.assertFalse(true);
-        }
+        Mockito.when(apiService.getCookiesAndAuthToken(client)).thenReturn(cookiesCsrf);
+        Mockito.when(apiService.getAllDashboards(client, cookiesCsrf)).thenReturn(rootNode);
+        Map map = new HashMap();
+        String emptyStringForTest = "";
+        Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
+        CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader();
+        String dashboardName = "DashboardName";
+        String fileContents = "contents";
+        Map<String, ? super Object> argsMap = new HashMap<>();
+        boolean overwrite = false;
+        customDashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
+        Mockito.verify(apiService, Mockito.times(0)).uploadDashboard(map, cookiesCsrf, emptyStringForTest,
+                emptyStringForTest, emptyStringForTest, emptyStringForTest);
+
     }
 
     @Test
-    public void testUploaderWhenDashboard() {
+    public void testUploaderWhenDashboardNotPresent() throws ApiException {
         ControllerApiService apiService = Mockito.mock(ControllerApiService.class);
         CloseableHttpClient client = Mockito.mock(CloseableHttpClient.class);
         CookiesCsrf cookiesCsrf = Mockito.mock(CookiesCsrf.class);
@@ -77,50 +73,18 @@ public class CustomDashboardUploaderTest {
         ((ObjectNode) childNode1).put("name", "DashboardName2");
         ((ObjectNode) childNode1).put("name2", "val2");
         ((ObjectNode) rootNode).put("obj1", childNode1);
-        try {
-            Mockito.when(apiService.getCookiesAndAuthToken(client)).thenReturn(cookiesCsrf);
-            Mockito.when(apiService.getAllDashboards(client, cookiesCsrf)).thenReturn(rootNode);
-            Map map = new HashMap();
-            Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
-            CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader();
-            String dashboardName = "DashboardName";
-            String fileContents = "contents";
-            Map<String, ? super Object> argsMap = new HashMap<>();
-            boolean overwrite = false;
-            customDashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
-            Mockito.verify(apiService, Mockito.times(1)).uploadDashboard(map, cookiesCsrf, dashboardName,
-                    "json", fileContents, "application/json");
-        } catch (ApiException e) {
-            Assert.assertFalse(true);
-        }
+        Mockito.when(apiService.getCookiesAndAuthToken(client)).thenReturn(cookiesCsrf);
+        Mockito.when(apiService.getAllDashboards(client, cookiesCsrf)).thenReturn(rootNode);
+        Map map = new HashMap();
+        Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
+        CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader();
+        String dashboardName = "DashboardName";
+        String fileContents = "contents";
+        Map<String, ? super Object> argsMap = new HashMap<>();
+        boolean overwrite = false;
+        customDashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
+        Mockito.verify(apiService, Mockito.times(1)).uploadDashboard(map, cookiesCsrf, dashboardName,
+                "json", fileContents, "application/json");
+
     }
-/*
-    @Test
-    public void testUploadDashboard() throws Exception {
-        String content = FileUtils.readFileToString(new File("src/test/resources/dashboard/test-custom-dashboard-template.xml"));
-
-        Map<String,? super Object> argsMap = new HashMap<>();
-
-        List<Map<String, ?>> serverList = new ArrayList<>();
-        Map<String, ? super Object> serverMap = new HashMap<>();
-        serverMap.put(TaskInputArgs.HOST, "");
-        serverMap.put(TaskInputArgs.PORT, "");
-        serverMap.put(TaskInputArgs.USE_SSL, false);
-        serverMap.put(TaskInputArgs.USER, "");
-        serverMap.put(TaskInputArgs.PASSWORD, "");
-        serverList.add(serverMap);
-        argsMap.put("servers", serverList);
-
-        Map<String, ? super Object> connectionMap = new HashMap<>();
-        String[] sslProtocols = {"TLSv1.2"};
-        connectionMap.put(TaskInputArgs.SSL_PROTOCOL, sslProtocols);
-        connectionMap.put("sslCertCheckEnabled", false);
-        connectionMap.put("connectTimeout", 10000);
-        connectionMap.put("socketTimeout", 15000);
-        argsMap.put("connection", connectionMap);
-
-
-        new CustomDashboardUploader().gatherDashboardDataToUpload("Test1", Xml.fromString(content),argsMap,false);
-    }
-    */
 }

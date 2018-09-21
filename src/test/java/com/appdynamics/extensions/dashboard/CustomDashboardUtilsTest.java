@@ -27,34 +27,22 @@ import static com.appdynamics.extensions.dashboard.DashboardConstants.SSL_CERT_C
 public class CustomDashboardUtilsTest {
 
     @Test
-    public void getMetricPrefixFromTierInMetricPrefix() {
-        Map dashboardConfig = new HashMap();
-        dashboardConfig.put("metricPrefix", "Server|Component:21|Custom Metrics|Amazon ELB|");
+    public void testBuildMetricPrefixForDashboardWithComponentID() {
         String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
         String metricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
     @Test
-    public void getMetricPrefixFromNormalMetricPrefix() {
-        Map dashboardConfig = new HashMap();
-        dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB|");
-        String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
+    public void testBuildMetricPrefixForDashboardWithoutComponentID() {
+        String metric = "Custom Metrics|Amazon ELB|";
         String metricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metric);
         Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
     }
 
-    @Test
-    public void verifyMetricPrefixWherePipeIsMissing() {
-        Map dashboardConfig = new HashMap();
-        dashboardConfig.put("metricPrefix", "Custom Metrics|Amazon ELB");
-        String metric = "Server|Component:21|Custom Metrics|Amazon ELB|";
-        String metricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metric);
-        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
-    }
 
     @Test
-    public void verifyGetOverwriteFalse() {
+    public void testGetOverwriteReturnsFalseWhenSentFalseFromConfig() {
         Map config = new HashMap();
         config.put("overwriteDashboard", false);
         Boolean check = CustomDashboardUtils.getOverwrite(config);
@@ -62,14 +50,13 @@ public class CustomDashboardUtilsTest {
     }
 
     @Test
-    public void verifyGetOverwriteEmptyReturnsFalse() {
+    public void testGetOverwriteReturnsFalseWhenNullInConfig() {
         Map config = new HashMap();
-        Boolean check = CustomDashboardUtils.getOverwrite(config);
-        Assert.assertFalse(check);
+        Assert.assertFalse(CustomDashboardUtils.getOverwrite(config));
     }
 
     @Test
-    public void verifyGetDashboardNameWithValue() {
+    public void testGetDashboardNameWithValuePresentInConfig() {
         Map config = new HashMap();
         config.put("dashboardName", "Name");
         String monitor = "Monitor";
@@ -78,7 +65,7 @@ public class CustomDashboardUtilsTest {
     }
 
     @Test
-    public void verifyGetDashboardNameWithoutValue() {
+    public void testGetDashboardNameWithValueNotPresentInConfig() {
         Map config = new HashMap();
         String monitor = "MonitorName";
         String name = CustomDashboardUtils.getDashboardName(config, monitor);

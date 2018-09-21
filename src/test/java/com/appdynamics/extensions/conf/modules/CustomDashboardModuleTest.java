@@ -21,9 +21,8 @@ import java.util.Map;
  * Created by bhuvnesh.kumar on 9/19/18.
  */
 public class CustomDashboardModuleTest {
-
     @Test
-    public  void testSendDashboard(){
+    public void testInitCustomDashboardForValidDashboardTemplate() {
         CustomDashboardModule customDashboardModule = new CustomDashboardModule();
         Map config = new HashMap<>();
         config.put("customDashboard", getCustomDashboardMap());
@@ -31,23 +30,20 @@ public class CustomDashboardModuleTest {
         String metric = "Custom Metrics|MonitorName";
         String monitorName = "MonitorName";
         File file = Mockito.mock(File.class);
-
         ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(getControllerInfoMap(), file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
         customDashboardModule.initCustomDashboard(config, metric, monitorName, controllerInfo);
-
     }
 
     private Map getCustomDashboardMap() {
         Map config = new HashMap<>();
         config.put("enabled", true);
         config.put("dashboardName", "MonitorName");
-        config.put("pathToSIMDashboard", "monitors/AWSELBMonitor_dash/simDashboard.json");
-        config.put("pathToNormalDashboard", "monitors/AWSELBMonitor_dash/normalDashboard.json");
+        config.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
+        config.put("pathToNormalDashboard", "src/test/resources/dashboard/normalDashboard.json");
         return config;
     }
-
 
     private Map getControllerInfoMap() {
         Map config = new HashMap<>();

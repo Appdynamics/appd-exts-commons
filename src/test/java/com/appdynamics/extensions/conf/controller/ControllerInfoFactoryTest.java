@@ -43,21 +43,20 @@ public class ControllerInfoFactoryTest {
         ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
-        Assert.assertTrue(controllerInfo.getAccount() == (null));
-        Assert.assertTrue(controllerInfo.getAccountAccessKey() == (null));
-        Assert.assertTrue(controllerInfo.getApplicationName() == (null));
-        Assert.assertTrue(controllerInfo.getTierName() == (null));
-        Assert.assertTrue(controllerInfo.getNodeName() == (null));
-        Assert.assertTrue(controllerInfo.getControllerHost() == (null));
-        Assert.assertTrue(controllerInfo.getControllerPort() == (null));
-        Assert.assertTrue(controllerInfo.getUsername() == (null));
-        Assert.assertTrue(controllerInfo.getPassword() == (null));
-        Assert.assertTrue(controllerInfo.getEncryptionKey() == (null));
-        Assert.assertTrue(controllerInfo.getEncryptedPassword() == (null));
-        Assert.assertTrue(controllerInfo.getControllerSslEnabled() == (null));
-        Assert.assertTrue(controllerInfo.getUniqueHostId() == (null));
-        Assert.assertTrue(controllerInfo.getSimEnabled() == (null));
+        Assert.assertNull(controllerInfo.getAccount());
+        Assert.assertNull(controllerInfo.getAccountAccessKey());
+        Assert.assertNull(controllerInfo.getApplicationName());
+        Assert.assertNull(controllerInfo.getTierName());
+        Assert.assertNull(controllerInfo.getNodeName());
+        Assert.assertNull(controllerInfo.getControllerHost());
+        Assert.assertNull(controllerInfo.getControllerPort());
+        Assert.assertNull(controllerInfo.getUsername());
+        Assert.assertNull(controllerInfo.getPassword());
+        Assert.assertNull(controllerInfo.getEncryptionKey());
+        Assert.assertNull(controllerInfo.getEncryptedPassword());
+        Assert.assertNull(controllerInfo.getControllerSslEnabled());
+        Assert.assertNull(controllerInfo.getUniqueHostId());
+        Assert.assertNull(controllerInfo.getSimEnabled());
     }
 
     @Test
@@ -129,7 +128,7 @@ public class ControllerInfoFactoryTest {
         ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
+        removeSystemProperties();
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -154,7 +153,7 @@ public class ControllerInfoFactoryTest {
         ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
+        removeSystemProperties();
         Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
         Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
         Assert.assertTrue(controllerInfo.getEncryptionKey().equals("encryptionKey"));
@@ -180,7 +179,7 @@ public class ControllerInfoFactoryTest {
         ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
+        removeSystemProperties();
         Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
         Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
         Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
@@ -193,7 +192,6 @@ public class ControllerInfoFactoryTest {
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
         Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostID"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
-
     }
 
     @Test
@@ -204,7 +202,7 @@ public class ControllerInfoFactoryTest {
         ControllerInfo controllerInfo;
         ControllerInfoFactory.initialize(config, file);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
-
+        removeSystemProperties();
         Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
         Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
         Assert.assertTrue(controllerInfo.getEncryptionKey().equals("encryptionKey"));
