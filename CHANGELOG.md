@@ -1,5 +1,10 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.1.2 - Sept 21, 2018
+1. Capability to send a custom dashboard to the Controller
+2. Gather information to build a ControllerInfo Object that can be used to get all necessary information required to 
+send Dashboards, Health Rules, etc.
+
 ## 2.1.0 - Apr 5, 2018
 1. Extracted Configuration and Context from the MonitorConfiguration and dissolved it.
 2. onConfigReload(File file) will now have access to configuration and context after the refactoring.

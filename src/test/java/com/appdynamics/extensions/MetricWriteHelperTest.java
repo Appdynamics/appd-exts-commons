@@ -78,7 +78,7 @@ public class MetricWriteHelperTest {
         when(aBaseMonitor.getContextConfiguration().getContext()).thenReturn(context);
         when(aBaseMonitor.getContextConfiguration().getContext().getDashboardModule()).thenReturn(customDashboardModule);
         Mockito.doNothing().when(customDashboardModule).uploadDashboard();
-
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/DerivedSample.yml"));
@@ -97,10 +97,10 @@ public class MetricWriteHelperTest {
 
         metricWriteHelper.transformAndPrintMetrics(metricList);
         metricWriteHelper.onComplete();
-        verify(metricWriter, times(4)).printMetric(stringArgumentCaptor.capture());
+        verify(metricWriter, times(5)).printMetric(stringArgumentCaptor.capture());
         List<String> stringArgs = stringArgumentCaptor.getAllValues();
         for(String value : stringArgs){
-            Assert.assertTrue(value.equals("2") || value.equals("4") || value.equals("1"));
+            Assert.assertTrue(value.equals("2") || value.equals("4") || value.equals("1") || value.equals("5"));
         }
 
     }
