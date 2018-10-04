@@ -43,7 +43,7 @@ public class AMonitorJob implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void run () {
         logger.debug("Monitor {} Task Runner invoked", baseMonitor.getMonitorName());
         List<Map<String, ?>> servers =  baseMonitor.getServers();
         AssertUtils.assertNotNull(servers, "getServers() cannot return null");
