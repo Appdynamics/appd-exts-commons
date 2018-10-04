@@ -8,6 +8,13 @@
 
 package com.appdynamics.extensions.conf.controller;
 
+import com.appdynamics.extensions.crypto.CryptoUtil;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
+
 /**
  * Created by abey.tom on 2/11/16.
  */
@@ -164,8 +171,13 @@ public class ControllerInfo {
     }
 
     public String getPassword() {
-        return password;
+        Map<String, String> passwordMap = new HashMap<>();
+        passwordMap.put(PASSWORD, password);
+        passwordMap.put(ENCRYPTION_KEY, encryptionKey);
+        passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
+        return CryptoUtil.getPassword(passwordMap);
     }
+
 
     @Override
     public String toString() {

@@ -58,7 +58,7 @@ public class CustomDashboardUtils {
             }
             dashboardMetricPrefix.deleteCharAt(dashboardMetricPrefix.length() - 1);
         } else {
-            if ( metricPrefix.length() > 0 && metricPrefix.charAt(metricPrefix.length() - 1) == '|') {
+            if (metricPrefix.length() > 0 && metricPrefix.charAt(metricPrefix.length() - 1) == '|') {
                 metricPrefix = metricPrefix.substring(0, metricPrefix.length() - 1);
             }
             dashboardMetricPrefix.append(metricPrefix);
