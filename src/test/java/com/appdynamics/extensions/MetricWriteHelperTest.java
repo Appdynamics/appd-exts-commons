@@ -28,10 +28,7 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-<<<<<<< HEAD
 import org.mockito.Mockito;
-=======
->>>>>>> master
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -78,13 +75,10 @@ public class MetricWriteHelperTest {
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
-<<<<<<< HEAD
         CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
         when(aBaseMonitor.getContextConfiguration().getContext()).thenReturn(context);
         when(aBaseMonitor.getContextConfiguration().getContext().getDashboardModule()).thenReturn(customDashboardModule);
         Mockito.doNothing().when(customDashboardModule).uploadDashboard();
-=======
->>>>>>> master
         when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
@@ -169,7 +163,10 @@ public class MetricWriteHelperTest {
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         when(configuration.getContext()).thenReturn(context);
-
+        CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
+        when(aBaseMonitor.getContextConfiguration().getContext()).thenReturn(context);
+        when(aBaseMonitor.getContextConfiguration().getContext().getDashboardModule()).thenReturn(customDashboardModule);
+        Mockito.doNothing().when(customDashboardModule).uploadDashboard();
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample1", "10", "Custom Metrics|Sample Monitor|sample1");
