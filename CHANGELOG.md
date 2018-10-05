@@ -1,5 +1,10 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.1.0 - Sep 7th, 2018
+1. Removed getTaskCount()in ABaseMonitor.java and added getServers() to hold the list of servers from config.yml in ABaseMonitor.java and TaskExecutionServiceprovider.java.
+2. In AMonitorJob.java, added flag for displayNameCheckEnabled and checkDisplayName().
+3. In MetricWriteHelper.java, added a new metric "Metrics Uploaded".
+
 ## 2.1.0 - Apr 5, 2018
 1. Extracted Configuration and Context from the MonitorConfiguration and dissolved it.
 2. onConfigReload(File file) will now have access to configuration and context after the refactoring.
