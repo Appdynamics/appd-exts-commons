@@ -1,0 +1,30 @@
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Metric registration blacklist limit reached. Future metrics will not be registered.
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Error in registering following metrics with controller
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Load|Last 1 minute
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|winlogon.exe|Threads|Count
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|Total Process Count
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|sharding: shard.log - rabbit@oakmyqquepp9 - 0consu...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Disks|c-|Avg write time (ms)
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|sharding: shard.hadoop.trafficlog - rabbit@oakmyqq...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|Chamberlain.MyQ.Email.EmailBuilderService.exe|Threads|Count
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Network|vmxnet3-ethernet-adapter|Outgoing packets
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|mfeesp.exe|Memory|Used (KB)
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|sharding: shard.hadoop.trafficlog - rabbit@oakmyqq...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|sharding: shard.log - rabbit@oakmyqquepp9 - 1|Repl...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Summary|Messages|Pending Acknowledgements
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Clusters|rabbit@OAKMYQQUEPP9.CHAMBERLAINWEB.local|Queues|Availabl...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|mcshield.exe|Memory|Virtual (KB)
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|sharding: shard.hadoop.trafficlog - rabbit@oakmyqq...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|dwm.exe|Faults|Minor Faults/sec
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|sharding: shard.log - rabbit@oakmyqquepp9 - 0|Mess...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|lsass.exe|Faults|Minor Faults/sec
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Network|Outgoing Errors/min
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|lsass.exe|Count
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|WmiPrvSE.exe|Threads|Count
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|sharding: shard.trafficlog - rabbit@oakmyqquepp9 -...
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Clusters|rabbit@OAKMYQQUEPP9.CHAMBERLAINWEB.local|Messages|null
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|svchost.exe|Count
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|mfeatp.exe|Faults|Major Faults/sec
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Hardware Resources|Process|vmtoolsd.exe|Faults|Minor Faults/sec
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|aliveness-test|Messages|Delivered Delta
+[AD Thread-Metric Reporter1] 22 Feb 2018 10:31:08,611  WARN ManagedMonitorDelegate - Custom Metrics|RabbitMQ|RabbitLog9|Queues|Default|aliveness-test|Messages|Pending Acknowledgements D...

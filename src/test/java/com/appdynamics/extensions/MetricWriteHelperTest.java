@@ -28,7 +28,10 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+<<<<<<< HEAD
 import org.mockito.Mockito;
+=======
+>>>>>>> master
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -54,6 +57,7 @@ public class MetricWriteHelperTest {
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample", "2.04", "Custom Metrics|Sample Monitor|sample");
         metricList.add(metric1);
@@ -63,8 +67,8 @@ public class MetricWriteHelperTest {
         metricWriteHelper.transformAndPrintMetrics(metricList);
         verify(metricWriter, times(1)).printMetric(stringArgumentCaptor.capture());
 
-        String stringArgs = stringArgumentCaptor.getValue();
-        Assert.assertTrue(stringArgs.equals("2"));
+        List<String> stringArgs = stringArgumentCaptor.getAllValues();
+        Assert.assertTrue(stringArgs.get(0).equals("2"));
     }
 
     @Test
@@ -74,10 +78,13 @@ public class MetricWriteHelperTest {
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+<<<<<<< HEAD
         CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
         when(aBaseMonitor.getContextConfiguration().getContext()).thenReturn(context);
         when(aBaseMonitor.getContextConfiguration().getContext().getDashboardModule()).thenReturn(customDashboardModule);
         Mockito.doNothing().when(customDashboardModule).uploadDashboard();
+=======
+>>>>>>> master
         when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
@@ -149,6 +156,38 @@ public class MetricWriteHelperTest {
         metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|sample1", null,MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
         MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
         verify(metricWriter, times(0)).printMetric(stringArgumentCaptor.capture());
+    }
+
+    @Test
+    public void whenDoneThenCheckTotalNumberOfMetrics(){
+        ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        configuration.setConfigYml("src/test/resources/conf/config_WithMultipleServersDisplayNameCheck.yml");
+
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
+        when(configuration.getContext()).thenReturn(context);
+
+        MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
+        List<Metric> metricList = Lists.newArrayList();
+        Metric metric1 = new Metric("sample1", "10", "Custom Metrics|Sample Monitor|sample1");
+        Metric metric2 = new Metric("sample2", "20", "Custom Metrics|Sample Monitor|sample");
+        Metric metric3 = new Metric("sample3", "30", "Custom Metrics|Sample Monitor|sample");
+        metricList.add(metric1);
+        metricList.add(metric2);
+        metricList.add(metric3);
+        MetricWriter metricWriter = mock(MetricWriter.class);
+        when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
+        metricWriteHelper.transformAndPrintMetrics(metricList);
+        metricWriteHelper.onComplete();
+
+        verify(metricWriter, times(4)).printMetric(argumentCaptor.capture());
+        List<String> metrics = argumentCaptor.getAllValues();
+        Assert.assertTrue("Total number of metrics reported is not correct", Integer.valueOf(metrics.get(3) ) == 3);
+
+
     }
 }
 

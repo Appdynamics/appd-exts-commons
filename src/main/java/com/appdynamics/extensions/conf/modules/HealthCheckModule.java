@@ -14,6 +14,7 @@ import com.appdynamics.extensions.checks.ControllerRequestHandler;
 import com.appdynamics.extensions.checks.ExtensionPathConfigCheck;
 import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
 import com.appdynamics.extensions.checks.MaxMetricLimitCheck;
+import com.appdynamics.extensions.checks.MetricBlacklistLimitCheck;
 import com.appdynamics.extensions.checks.MonitorHealthCheck;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
@@ -100,6 +101,7 @@ public class HealthCheckModule {
 
             healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MaxMetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new MetricBlacklistLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerRequestHandler, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerRequestHandler, MonitorHealthCheck.logger));
 
