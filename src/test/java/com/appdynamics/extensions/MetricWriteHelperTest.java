@@ -19,14 +19,24 @@ package com.appdynamics.extensions;
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
+import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -39,7 +49,6 @@ import static org.mockito.Mockito.*;
 /**
  * Created by venkata.konala on 10/31/17.
  */
-
 public class MetricWriteHelperTest {
 
     @Test
