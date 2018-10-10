@@ -71,9 +71,10 @@ import java.util.Map;
  *     //...logic to add the core logic for the SampleMonitor
  * }
  *
- * protected abstract int getTaskCount(){
- *     //...number of tasks from which metrics can be pulled
- *     //concurrently.
+ * protected abstract List<Map<>> getServers(){
+ *     //list of servers from the config.yml
+ *     // to keep track of tasks to be processed in parallel
+ *
  * }
  *
  * }}
