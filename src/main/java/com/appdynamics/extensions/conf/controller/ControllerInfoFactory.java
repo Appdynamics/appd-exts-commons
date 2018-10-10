@@ -85,7 +85,9 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty((String) config.get("nodeName"))) {
             controllerInfo.setNodeName(config.get("nodeName").toString());
         }
-
+        if (!Strings.isNullOrEmpty((String) config.get("machinePath"))) {
+            controllerInfo.setMachinePath(config.get("machinePath").toString());
+        }
         if (!Strings.isNullOrEmpty((String) config.get("encryptedPassword"))) {
             controllerInfo.setEncryptedPassword(config.get("encryptedPassword").toString());
         }

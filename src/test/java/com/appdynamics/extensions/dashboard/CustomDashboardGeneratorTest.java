@@ -105,6 +105,39 @@ public class CustomDashboardGeneratorTest {
         }
     }
 
+
+    @Test
+    public void verifyTheCorrectMachinePath() throws Exception {
+        ControllerInfo controllerInfo;
+        Map controllerInfoMapWithMachinePath = getConfigMapForSim();
+        controllerInfoMapWithMachinePath.put("machinePath", "Test1|Test2|Test3|Test4");
+        ControllerInfoFactory.initialize(controllerInfoMapWithMachinePath, file);
+        controllerInfo = ControllerInfoFactory.getControllerInfo();
+        String metricPrefix = "Custom Metrics|Extension|";
+        String dashboardName = "DashboardName";
+        Map dashboardConfig = new HashMap();
+        dashboardConfig.put("dashboardName", "Dashboard Test");
+        dashboardConfig.put("enabled", true);
+        dashboardConfig.put("gatherDashboardDataToUpload", true);
+        dashboardConfig.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
+        String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
+        CustomDashboardGenerator customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
+        String updatedDashboardString = customDashboardGen.getDashboardTemplate();
+        Assert.assertFalse(dashboardString.equals(updatedDashboardString));
+        if (dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)) {
+            Assert.assertTrue(updatedDashboardString.contains(DashboardConstants.SIM_APPLICATION_NAME));
+        }
+        if (dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)) {
+            Assert.assertTrue(updatedDashboardString.contains("Root|Test1|Test2|Test3"));
+        }
+        if (dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)) {
+            Assert.assertTrue(updatedDashboardString.contains("hostNameYML"));
+        }
+        if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
+            Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
+        }
+    }
+
     private Map getConfigMap() {
         Map config = new HashMap<>();
         config.put("controllerHost", "hostNameYML");
