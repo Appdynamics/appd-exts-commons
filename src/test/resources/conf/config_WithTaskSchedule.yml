@@ -3,7 +3,7 @@
 
 #The following prefix will populate the metrics under one tier
 metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
-displayNameCheckEnabled: true
+
 
 taskSchedule:
 
