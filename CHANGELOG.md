@@ -5,14 +5,14 @@
 2. Gather information to build a ControllerInfo Object that can be used to get all necessary information required to 
 send Dashboards, Health Rules, etc.
 
-## 2.1.0 - Sep 7th, 2018
+## 2.1.1 - Sep 7th, 2018
 1. Removed getTaskCount()in ABaseMonitor.java and added getServers() to hold the list of servers from config.yml in ABaseMonitor.java and TaskExecutionServiceprovider.java.
-2. In AMonitorJob.java, added flag for displayNameCheckEnabled and checkDisplayName().
-3. In MetricWriteHelper.java, added a new metric "Metrics Uploaded".
+2. In MetricWriteHelper.java, added a new metric "Metrics Uploaded".
 
 ## 2.1.0 - Apr 5, 2018
 1. Extracted Configuration and Context from the MonitorConfiguration and dissolved it.
 2. onConfigReload(File file) will now have access to configuration and context after the refactoring.
+3. Bumped the version to 2.1.1
 
 ## 2.0.4 - Mar 13, 2018
 1. Implemented mutual SSL Authentication

@@ -22,6 +22,7 @@ import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.metrics.transformers.Transformer;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.MetricPathUtils;
+import com.appdynamics.extensions.util.TimeUtils;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
@@ -41,10 +42,14 @@ public class MetricWriteHelper {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricWriteHelper.class);
 
     private ABaseMonitor baseMonitor;
+
+    private Long startTime;
+
     //Used for Dashboard. Cache the current list of metrics.
     private boolean cacheMetrics;
 
     protected DerivedMetricsCalculator derivedMetricsCalculator;
+
     private Map<String, String> metricsMap = Maps.newConcurrentMap();
 
     //used from WorkBench.
@@ -54,6 +59,7 @@ public class MetricWriteHelper {
     public MetricWriteHelper(ABaseMonitor baseMonitor) {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
+        this.startTime = this.baseMonitor.getStartTime();
         derivedMetricsCalculator = baseMonitor.getContextConfiguration().getContext().createDerivedMetricsCalculator();
     }
 
@@ -127,20 +133,49 @@ public class MetricWriteHelper {
         return writer;
     }
 
+    /**
+     * This method is invoked once all the Tasks submitted to the TaskExecutionServiceProvider are done.
+     * Any sub tasks spawned by the tasks in the TaskExecutionServiceProvider needs to be synchronized such that the
+     * task completes its execution only after all its sub tasks are done.
+     * Tasks done by this method:
+     * -------------------------
+     * 1. Triggers the DerivedMetricsCalculator based on all the metrics published from all the tasks in a job
+     *    run.
+     * 2. Prints the total metrics published in the current job run.
+     * 3. Logs the total execution time from the time execute() method is triggered to the time "Metrics uploaded"
+     *    metric is published.
+     *
+     */
     public void onComplete() {
         int baseMetricsSize = 0;
         if (derivedMetricsCalculator != null) {
-            List<com.appdynamics.extensions.metrics.Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
-            baseMetricsSize = metricsMap.size();
-            logger.debug("Total number of base metrics reported in this job run are : {}", baseMetricsSize);
-            transformAndPrintMetrics(metricList);
-            logger.debug("Total number of derived metrics reported in this job run are : {}", metricsMap.size() - baseMetricsSize);
-            derivedMetricsCalculator.clearBaseMetricsMap();
+            triggerDerivedMetrics();
         }
         baseMonitor.getContextConfiguration().getContext().getDashboardModule().uploadDashboard();
+        printMetricsUploaded();
+        logTime();
+    }
+
+    private void triggerDerivedMetrics() {
+        int baseMetricsSize;List<Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+        baseMetricsSize = metricsMap.size();
+        logger.debug("Total number of base metrics reported in this job run are : {}", baseMetricsSize);
+        transformAndPrintMetrics(metricList);
+        logger.debug("Total number of derived metrics reported in this job run are : {}", metricsMap.size() - baseMetricsSize);
+        derivedMetricsCalculator.clearBaseMetricsMap();
+    }
+
+    private void printMetricsUploaded() {
         printMetric(baseMonitor.getContextConfiguration().getMetricPrefix()+"|"+"Metrics Uploaded",
                 String.valueOf(metricsMap.size() + 1 ),"AVERAGE", "AVERAGE","COLLECTIVE" );
         logger.debug("Total number of metrics reported in this job run are : {}", metricsMap.size());
+    }
+
+    private void logTime() {
+        Long endTime = System.currentTimeMillis();
+        logger.info("Finished executing " + baseMonitor.getMonitorName() + " at " + TimeUtils.getFormattedTimestamp(endTime, "yyyy-MM-dd HH:mm:ss z"));
+        Long totalTime = endTime - startTime;
+        logger.info("Total time taken to execute " + baseMonitor.getMonitorName() + " : " + totalTime + " ms");
     }
 
     public boolean isCacheMetrics() {

@@ -20,13 +20,17 @@ import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.CustomDashboardModule;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
+import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.collect.Lists;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -41,7 +45,6 @@ import static org.mockito.Mockito.*;
 /**
  * Created by venkata.konala on 10/31/17.
  */
-
 public class MetricWriteHelperTest {
 
     @Test
