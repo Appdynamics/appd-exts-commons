@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions;
 
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
 import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
 import static com.appdynamics.extensions.util.StringUtils.validateStrings;
 
@@ -64,7 +65,7 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue)) {
+        if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) && isValidMetricPath(metricPath)) {
             if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
                 logger.debug("Scheduled mode is enabled, caching the metric {}", metric);

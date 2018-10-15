@@ -159,4 +159,8 @@ public class StringUtils {
         }
         return false;
     }
+
+    public static boolean isValidMetricPath(String metricPath) {
+        return metricPath.contains(",") || metricPath.contains("||");
+    }
 }

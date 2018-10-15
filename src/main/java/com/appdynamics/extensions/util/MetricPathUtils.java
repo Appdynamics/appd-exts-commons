@@ -15,24 +15,61 @@
 
 package com.appdynamics.extensions.util;
 
-
+import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
 import com.google.common.base.Splitter;
 
 import java.util.List;
 
 public class MetricPathUtils {
+    private static final String DEFAULT_METRIC_SEPARATOR = "|";
 
     public static final Splitter PIPE_SPLITTER = Splitter.on('|')
             .omitEmptyStrings()
             .trimResults();
 
-    public static String getMetricName(String metricPath){
-        if(metricPath != null) {
+    public static String getMetricName(String metricPath) {
+        if (metricPath != null) {
             List<String> splitList = PIPE_SPLITTER.splitToList(metricPath);
             if (splitList.size() > 0) {
                 return splitList.get(splitList.size() - 1);
             }
         }
         return null;
+    }
+
+    /**
+     * Builds the metric path. If the replacer is null then the method appends the metricPrefix and metricName with
+     * default separator "|". If the replacer is not null, all applicable replacements will be done on the metricName
+     * and then appends the metricPrefix and metricName with default separator "|"
+     * @param replacer      {@link MetricCharSequenceReplacer} instance which contains all the configured replacements
+     * @param metricPrefix  metricPrefix for the metric
+     * @param metricName    name of the metric
+     * @return the final metric path
+     */
+    public static String buildMetricPath(final MetricCharSequenceReplacer replacer, final String metricPrefix, final
+    String metricName) {
+        final StringBuilder builder = new StringBuilder(metricPrefix);
+        if (replacer == null) {
+            return builder.append(DEFAULT_METRIC_SEPARATOR).append(metricName).toString();
+        }
+        return builder.append(DEFAULT_METRIC_SEPARATOR).append(replacer.getReplacementFor(metricName)).toString();
+    }
+
+    /**
+     * Builds the metric path. If the replacer is null then the method will append the metricPrefix and metricNames with
+     * default separator "|". If the replacer is not null, all applicable replacements will be done on the metricName
+     * and then appends the metricPrefix and metricName with default separator "|"
+     * @param replacer      {@link MetricCharSequenceReplacer} instance which contains all the configured replacements
+     * @param metricPrefix  metricPrefix for the metric
+     * @param metricNames   individual tokens of the metric path
+     * @return the final metric path
+     */
+    public static String buildMetricPath(final MetricCharSequenceReplacer replacer, final String metricPrefix, final
+    String... metricNames) {
+        String path = metricPrefix;
+        for (String partialPath : metricNames) {
+            path = buildMetricPath(replacer, path, partialPath);
+        }
+        return path;
     }
 }

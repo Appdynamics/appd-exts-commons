@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.metrics;
 
 import com.appdynamics.extensions.util.AssertUtils;
+import com.appdynamics.extensions.util.MetricPathUtils;
 
 import java.util.Map;
 
@@ -49,6 +50,13 @@ public class Metric {
         this(metricName,metricValue,metricPath);
         AssertUtils.assertNotNull(metricProperties,"Metric Properties cannot be null");
         this.metricProperties = buildMetricProperties(metricProperties);
+    }
+
+    public Metric(final String metricName, final String metricValue, Map<String, ?> metricProperties,
+                  final MetricCharSequenceReplacer replacementMap, final String metricPrefix, final String... tokens) {
+        this(metricName, metricValue, "", metricProperties);
+        AssertUtils.assertNotNull(replacementMap,"MetricCharSequencerReplacer cannot be null");
+        this.metricPath = MetricPathUtils.buildMetricPath(replacementMap, metricPrefix, tokens);
     }
 
     private MetricProperties buildMetricProperties(Map<String, ?> metricProperties){
