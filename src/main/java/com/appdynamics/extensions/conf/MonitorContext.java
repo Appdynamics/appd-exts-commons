@@ -80,7 +80,6 @@ public class MonitorContext {
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
             healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
-            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo);
 
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
@@ -150,6 +149,10 @@ public class MonitorContext {
 
     public DerivedMetricsCalculator createDerivedMetricsCalculator() {
         return derivedMetricsModule.initDerivedMetricsCalculator(config, metricPrefix);
+    }
+
+    public void initializeDashboardModule(){
+        dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo);
     }
 
     public PerMinValueCalculator getPerMinValueCalculator() {

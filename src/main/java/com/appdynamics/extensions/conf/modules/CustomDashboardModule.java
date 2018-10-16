@@ -12,11 +12,14 @@ import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
 
 public class CustomDashboardModule {
 

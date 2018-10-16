@@ -151,11 +151,17 @@ public class MetricWriteHelper {
         if (derivedMetricsCalculator != null) {
             triggerDerivedMetrics();
         }
-        baseMonitor.getContextConfiguration().getContext().getDashboardModule().uploadDashboard();
+
+        runDashboardModule();
         printMetricsUploaded();
         logTime();
     }
 
+    private void runDashboardModule(){
+        baseMonitor.getContextConfiguration().getContext().initializeDashboardModule();
+        baseMonitor.getContextConfiguration().getContext().getDashboardModule().uploadDashboard();
+
+    }
     private void triggerDerivedMetrics() {
         int baseMetricsSize;List<Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
         baseMetricsSize = metricsMap.size();
