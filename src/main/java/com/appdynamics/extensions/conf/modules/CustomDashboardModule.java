@@ -11,15 +11,14 @@ import com.appdynamics.extensions.dashboard.DashboardConstants;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.AtomicDouble;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class CustomDashboardModule {
 
@@ -29,7 +28,7 @@ public class CustomDashboardModule {
     private boolean overwrite;
     private String dashboardTemplate;
     private Map config;
-
+    private volatile AtomicLong lastTimeRecorded = new AtomicLong();
     private volatile AtomicBoolean dashboardUploaded = new AtomicBoolean();
 
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName,
@@ -72,8 +71,12 @@ public class CustomDashboardModule {
     }
 
     public void uploadDashboard() {
+        long startTime = System.currentTimeMillis();
+        if(startTime - lastTimeRecorded.get() > 300000){
+            dashboardUploaded.set(false);
+            lastTimeRecorded.set(System.currentTimeMillis());
+        }
         if (!dashboardUploaded.get() && isValidDashboardTemplate(dashboardTemplate)) {
-            long startTime = System.currentTimeMillis();
             ControllerApiService apiService = new ControllerApiService(controllerInfo);
             Map httpProperties = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
             try (CloseableHttpClient client = Http4ClientBuilder.getBuilder(httpProperties).build()) {
