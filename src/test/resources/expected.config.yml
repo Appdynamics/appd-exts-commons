@@ -55,7 +55,7 @@ customDashboard:
     # Update the path to the dashboard file.
     pathToSIMDashboard: "monitors/SampleMonitor/normalDashboard.json"
     pathToNormalDashboard: "monitors/SampleMonitor/normalDashboard.json"
-
+    periodToCheckDashboardPresenceInSeconds: 300
 # To upload the dashboard, please create a user from Controller UI or
 # add the credentials of an existing user.
 
