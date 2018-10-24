@@ -102,6 +102,4 @@ public class CustomDashboardModuleTest {
         Assert.assertTrue(check.get());
 
     }
-
-
 }

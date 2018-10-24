@@ -58,13 +58,12 @@ public class CustomDashboardModule {
         timeDelayInMiliSeconds = getTimeDelay(customDashboardConfig) * ONE_THOUSAND;
         apiService = new ControllerApiService(controllerInfo);
         httpProperties = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
-
     }
 
-    private Integer getTimeDelay(Map customDashboardConfig) {
-        if (customDashboardConfig.get("periodToCheckDashboardPresenceInSeconds") != null) {
-            Integer timeDelay = (Integer) customDashboardConfig.get("periodToCheckDashboardInSeconds");
-            return timeDelay;
+    private int getTimeDelay(Map customDashboardConfig) {
+        Number num = (Number) customDashboardConfig.get("periodToCheckDashboardPresenceInSeconds");
+        if (num != null) {
+            return (int) num;
         }
         return THREE_HUNDRED;
     }
@@ -92,6 +91,7 @@ public class CustomDashboardModule {
     public void uploadDashboard() {
         long startTime = updateAndCheckTimeStamp();
         if (!periodicPresenceCheck.get() && isValidDashboardTemplate(dashboardTemplate)) {
+            logger.debug("Attempting to upload dashboard: {}", dashboardName);
             try (CloseableHttpClient client = Http4ClientBuilder.getBuilder(httpProperties).build()) {
                 dashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, dashboardTemplate,
                         httpProperties, overwrite);
@@ -109,6 +109,7 @@ public class CustomDashboardModule {
     private long updateAndCheckTimeStamp() {
         long startTime = System.currentTimeMillis();
         if (startTime - lastTimeRecorded.get() > timeDelayInMiliSeconds) {
+            logger.debug("Period reset for presence check of dashboard: {}", dashboardName);
             periodicPresenceCheck.set(false);
             lastTimeRecorded.set(System.currentTimeMillis());
         }
