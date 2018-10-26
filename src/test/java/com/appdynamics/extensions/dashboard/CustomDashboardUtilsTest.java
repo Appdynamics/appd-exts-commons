@@ -34,6 +34,21 @@ public class CustomDashboardUtilsTest {
     }
 
     @Test
+    public void whenMetricPrefixWithComponentAndNoTrailingPipeThenReturnWithNoTrailingPipe() {
+        String metric = "Server|Component:21|Custom Metrics|Amazon ELB";
+        String metricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metric);
+        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
+    }
+
+    @Test
+    public void whenMetricPrefixWithNoComponentAndNoTrailingPipeThenReturnWithNoTrailingPipe() {
+        String metric = "Custom Metrics|Amazon ELB";
+        String metricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metric);
+        Assert.assertTrue(metricPrefix.equals("Custom Metrics|Amazon ELB"));
+    }
+
+
+    @Test
     public void testBuildMetricPrefixForDashboardWithoutComponentID() {
         String metric = "Custom Metrics|Amazon ELB|";
         String metricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metric);

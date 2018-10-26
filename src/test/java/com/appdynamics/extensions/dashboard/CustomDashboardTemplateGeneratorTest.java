@@ -28,7 +28,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomDashboardGeneratorTest {
+public class CustomDashboardTemplateGeneratorTest {
 
     private File file = Mockito.mock(File.class);
 
@@ -49,10 +49,10 @@ public class CustomDashboardGeneratorTest {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
-        dashboardConfig.put("gatherDashboardDataToUpload", true);
+        dashboardConfig.put("upload", true);
         dashboardConfig.put("pathToNormalDashboard", "src/test/resources/dashboard/normalDashboard.json");
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/normalDashboard.json"));
-        CustomDashboardGenerator customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
+        CustomDashboardTemplateGenerator customDashboardGen = new CustomDashboardTemplateGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
         String updatedDashboardString = customDashboardGen.getDashboardTemplate();
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
         if (dashboardString.contains(DashboardConstants.REPLACE_APPLICATION_NAME)) {
@@ -85,10 +85,10 @@ public class CustomDashboardGeneratorTest {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
-        dashboardConfig.put("gatherDashboardDataToUpload", true);
+        dashboardConfig.put("upload", true);
         dashboardConfig.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
-        CustomDashboardGenerator customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
+        CustomDashboardTemplateGenerator customDashboardGen = new CustomDashboardTemplateGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
         String updatedDashboardString = customDashboardGen.getDashboardTemplate();
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
         if (dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)) {
@@ -118,10 +118,10 @@ public class CustomDashboardGeneratorTest {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
-        dashboardConfig.put("gatherDashboardDataToUpload", true);
+        dashboardConfig.put("upload", true);
         dashboardConfig.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
-        CustomDashboardGenerator customDashboardGen = new CustomDashboardGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
+        CustomDashboardTemplateGenerator customDashboardGen = new CustomDashboardTemplateGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
         String updatedDashboardString = customDashboardGen.getDashboardTemplate();
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
         if (dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)) {

@@ -84,7 +84,6 @@ public class ControllerApiService {
             return cookiesCsrf;
 
         } catch (IOException e) {
-            logger.error("Error in controller login", e);
             throw new ApiException("Error in controller login", e);
         }
     }
@@ -114,23 +113,22 @@ public class ControllerApiService {
             } else if (statusLine != null) {
                 logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
                         , statusLine.getStatusCode());
-                logger.info("Please change the [gatherDashboardDataToUpload] property in the config.yml to false. " +
-                        "The xml will be written to the logs folder. Please import it to controller manually");
-                logger.error("This API was changed in the controller version 4.3. So for older controllers, upload the dashboard xml file from the logs folder.");
             }
             return arrayNode;
         } catch (IOException e) {
-            logger.error("Error in getting the auth token", e);
             throw new ApiException("Error in getting all dashboards", e);
         }
     }
 
+
+    /*
+      #TODO This uses basic http to do Multi-part form upload. Need to change this by using the apache client once the dependency with MA is resolved.
+     */
     public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ApiException {
         UrlBuilder urlBuilder = new UrlBuilder();
         urlBuilder.host(controllerInfo.getControllerHost());
         urlBuilder.port(controllerInfo.getControllerPort());
         urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
-
 
         String filename = dashboardName + "." + fileExtension;
         String twoHyphens = "--";
@@ -216,7 +214,6 @@ public class ControllerApiService {
                 }
             }
         } catch (IOException e) {
-            logger.error("Error in uploading dashboard", e);
             throw new ApiException("Error in uploading dashboard", e);
         }
 

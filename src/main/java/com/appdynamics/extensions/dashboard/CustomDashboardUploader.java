@@ -33,18 +33,21 @@ import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
 public class CustomDashboardUploader {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUploader.class);
 
-    public void gatherDashboardDataToUpload(ControllerApiService apiService, CloseableHttpClient client, String dashboardName,
-                                            String fileContents, Map httpProperties, boolean overwrite) throws ApiException {
-        try {
-            CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client);
-            JsonNode allDashboards = apiService.getAllDashboards(client, cookiesCsrf);
-            uploadDashboard(apiService, dashboardName, fileContents, overwrite, httpProperties, cookiesCsrf, allDashboards);
-        } catch (Exception e) {
-            logger.error("Unable to send dashboard", e);
-        }
+    private ControllerApiService apiService;
+
+    public CustomDashboardUploader(ControllerApiService apiService){
+        this.apiService = apiService;
     }
 
-    private void uploadDashboard(ControllerApiService apiService, String dashboardName, String fileContents, boolean overwrite,
+    public void checkAndUpload(CloseableHttpClient client, String dashboardName,
+                       String fileContents, Map httpProperties, boolean overwrite) throws ApiException {
+        CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client);
+        JsonNode allDashboards = apiService.getAllDashboards(client, cookiesCsrf);
+        uploadDashboard(dashboardName, fileContents, overwrite, httpProperties, cookiesCsrf, allDashboards);
+
+    }
+
+    private void uploadDashboard(String dashboardName, String fileContents, boolean overwrite,
                                  Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ApiException {
         String fileExtension = "json";
         String fileContentType = "application/json";

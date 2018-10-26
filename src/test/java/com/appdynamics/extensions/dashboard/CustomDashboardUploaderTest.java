@@ -56,7 +56,7 @@ public class CustomDashboardUploaderTest {
         String fileContents = "contents";
         Map<String, ? super Object> argsMap = new HashMap<>();
         boolean overwrite = false;
-        customDashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
+        customDashboardUploader.upload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
         Mockito.verify(apiService, Mockito.times(0)).uploadDashboard(map, cookiesCsrf, emptyStringForTest,
                 emptyStringForTest, emptyStringForTest, emptyStringForTest);
 
@@ -82,7 +82,7 @@ public class CustomDashboardUploaderTest {
         String fileContents = "contents";
         Map<String, ? super Object> argsMap = new HashMap<>();
         boolean overwrite = false;
-        customDashboardUploader.gatherDashboardDataToUpload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
+        customDashboardUploader.upload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
         Mockito.verify(apiService, Mockito.times(1)).uploadDashboard(map, cookiesCsrf, dashboardName,
                 "json", fileContents, "application/json");
 

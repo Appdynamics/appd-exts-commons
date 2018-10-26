@@ -30,14 +30,14 @@ import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
 /**
  * Created by abey.tom on 4/10/15.
  */
-public class CustomDashboardGenerator {
-    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardGenerator.class);
+public class CustomDashboardTemplateGenerator {
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardTemplateGenerator.class);
     private String metricPrefix;
     private Map customDashboardConfig;
     private ControllerInfo controllerInfo;
     private String dashboardName;
 
-    public CustomDashboardGenerator(Map customDashboardConfig, ControllerInfo controllerInformation, String metricPrefix, String dashboardName) {
+    public CustomDashboardTemplateGenerator(Map customDashboardConfig, ControllerInfo controllerInformation, String metricPrefix, String dashboardName) {
         this.customDashboardConfig = customDashboardConfig;
         this.controllerInfo = controllerInformation;
         this.metricPrefix = metricPrefix;

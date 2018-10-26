@@ -43,6 +43,4 @@ public class DashboardConstants {
     public static final String SIM_DASHBOARD = "simDashboard";
     public static final String NORMAL_DASHBOARD = "normalDashboard";
     public static final String METRICS_SEPARATOR = "|";
-    public static final Integer ONE_THOUSAND = 1000;
-    public static final Integer THREE_HUNDRED = 300;
 }
