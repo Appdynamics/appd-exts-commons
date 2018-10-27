@@ -98,11 +98,9 @@ public class ControllerApiService {
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCookies())) {
             get.setHeader("Cookie", cookiesCsrf.getCookies());
         }
-
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
             get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
         }
-
         try {
             HttpResponse response = httpClient.execute(get);
             JsonNode arrayNode = null;
@@ -111,7 +109,7 @@ public class ControllerApiService {
                 HttpEntity entity = response.getEntity();
                 arrayNode = new ObjectMapper().readValue(EntityUtils.toString(entity), JsonNode.class);
             } else if (statusLine != null) {
-                logger.error("The controller API [isDashboardPresent] returned invalid response{}, so cannot upload the dashboard"
+                logger.error("The controller API returned an invalid response {}, so cannot get a list of all dashboards."
                         , statusLine.getStatusCode());
             }
             return arrayNode;
@@ -120,10 +118,10 @@ public class ControllerApiService {
         }
     }
 
-
     /*
       #TODO This uses basic http to do Multi-part form upload. Need to change this by using the apache client once the dependency with MA is resolved.
      */
+
     public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ApiException {
         UrlBuilder urlBuilder = new UrlBuilder();
         urlBuilder.host(controllerInfo.getControllerHost());

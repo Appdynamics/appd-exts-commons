@@ -51,12 +51,12 @@ public class CustomDashboardUploaderTest {
         Map map = new HashMap();
         String emptyStringForTest = "";
         Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
-        CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader();
+        CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(apiService);
         String dashboardName = "DashboardName";
         String fileContents = "contents";
         Map<String, ? super Object> argsMap = new HashMap<>();
         boolean overwrite = false;
-        customDashboardUploader.upload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
+        customDashboardUploader.checkAndUpload(client, dashboardName, fileContents, argsMap, overwrite);
         Mockito.verify(apiService, Mockito.times(0)).uploadDashboard(map, cookiesCsrf, emptyStringForTest,
                 emptyStringForTest, emptyStringForTest, emptyStringForTest);
 
@@ -77,12 +77,12 @@ public class CustomDashboardUploaderTest {
         Mockito.when(apiService.getAllDashboards(client, cookiesCsrf)).thenReturn(rootNode);
         Map map = new HashMap();
         Mockito.doNothing().when(apiService).uploadDashboard(isA(Map.class), isA(CookiesCsrf.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
-        CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader();
+        CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(apiService);
         String dashboardName = "DashboardName";
         String fileContents = "contents";
         Map<String, ? super Object> argsMap = new HashMap<>();
         boolean overwrite = false;
-        customDashboardUploader.upload(apiService, client, dashboardName, fileContents, argsMap, overwrite);
+        customDashboardUploader.checkAndUpload( client, dashboardName, fileContents, argsMap, overwrite);
         Mockito.verify(apiService, Mockito.times(1)).uploadDashboard(map, cookiesCsrf, dashboardName,
                 "json", fileContents, "application/json");
 

@@ -42,5 +42,9 @@ public class DashboardConstants {
     public static final String ROOT = "Root";
     public static final String SIM_DASHBOARD = "simDashboard";
     public static final String NORMAL_DASHBOARD = "normalDashboard";
+    public static final String CUSTOM_DASHBOARD = "customDashboard";
+    public static final String JSON = "json";
+    public static final String APPLICATION_JSON = "application/json";
     public static final String METRICS_SEPARATOR = "|";
+    public static final String OVERWRITE_DASHBOARD = "overwriteDashboard";
 }

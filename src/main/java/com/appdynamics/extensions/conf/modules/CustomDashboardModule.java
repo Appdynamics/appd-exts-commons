@@ -14,14 +14,15 @@ import com.google.common.base.Strings;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.appdynamics.extensions.dashboard.DashboardConstants.CUSTOM_DASHBOARD;
 
 public class CustomDashboardModule {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardModule.class);
-    private static final int DEFAULT_PERIODIC_DASHBOARD_CHECK_IN_SECONDS= 300;
+    private static final int DEFAULT_PERIODIC_DASHBOARD_CHECK_IN_SECONDS = 300;
 
     private boolean initialized;
     private String dashboardName;
@@ -31,33 +32,35 @@ public class CustomDashboardModule {
     private long timeDelayInMilliSeconds;
     private CloseableHttpClient client;
     private volatile AtomicLong lastRecordedTime = new AtomicLong();
+    private Map httpProperties;
 
 
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName,
                                     ControllerInfo controllerInfo) {
         initialized = false;
-        Map customDashboardConfig = (Map) config.get("customDashboard");
+        Map customDashboardConfig = (Map) config.get(CUSTOM_DASHBOARD);
         if (isCustomDashboardEnabled(customDashboardConfig)) {
-            String dashboardTemplate1 = getDashboardTemplate(metricPrefix, customDashboardConfig,controllerInfo);
-            if(isValidDashboardTemplate(dashboardTemplate1)){
+            dashboardName = CustomDashboardUtils.getDashboardName(customDashboardConfig, monitorName);
+            String dashboardTemplate1 = getDashboardTemplate(metricPrefix, customDashboardConfig, controllerInfo);
+            if (isValidDashboardTemplate(dashboardTemplate1)) {
                 dashboardTemplate = dashboardTemplate1;
-                dashboardName = CustomDashboardUtils.getDashboardName(customDashboardConfig, monitorName);
                 overwrite = CustomDashboardUtils.getOverwrite(customDashboardConfig);
                 timeDelayInMilliSeconds = getTimeDelay(customDashboardConfig) * 1000;
                 dashboardUploader = new CustomDashboardUploader(new ControllerApiService(controllerInfo));
-                client = Http4ClientBuilder.getBuilder(CustomDashboardUtils.getHttpProperties(controllerInfo, config)).build();
+                httpProperties = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
+                client = Http4ClientBuilder.getBuilder(httpProperties).build();
                 initialized = true;
             }
         } else {
-            logger.info("Custom Dashboard is not initialized in config.yml.");
+            logger.info("Custom Dashboard is not enabled in config.yml.");
         }
     }
 
-    public void uploadDashboard(){
-        if(initialized){
+    public void uploadDashboard() {
+        if (initialized) {
             long currentTime = System.currentTimeMillis();
-            if(hasTimeElapsed(currentTime,lastRecordedTime.get(),timeDelayInMilliSeconds)){
-                try{
+            if (hasTimeElapsed(currentTime, lastRecordedTime.get(), timeDelayInMilliSeconds)) {
+                try {
                     logger.debug("Attempting to upload dashboard: {}", dashboardName);
                     dashboardUploader.checkAndUpload(client, dashboardName, dashboardTemplate,
                             httpProperties, overwrite);
@@ -66,22 +69,20 @@ public class CustomDashboardModule {
                     logger.debug("Time to complete customDashboardModule  :" + (endTime - currentTime) + " ms");
                 } catch (ApiException e) {
                     logger.error("Unable to establish connection, not uploading dashboard.", e);
-                } catch (IOException e) {
-                    logger.error("Error while uploading dashboard", e);
                 }
             }
-        }
-        else {
+        } else {
             logger.debug("Auto upload of custom dashboard is disabled.");
         }
     }
 
-    private boolean hasTimeElapsed(long curr,long prev, long threshold){
+    private boolean hasTimeElapsed(long curr, long prev, long threshold) {
         return (curr - prev > threshold) ? true : false;
     }
 
     private boolean isCustomDashboardEnabled(Map customDashboardConfig) {
-        return customDashboardConfig != null && !customDashboardConfig.isEmpty() && (Boolean)customDashboardConfig.get(DashboardConstants.ENABLED);
+        return customDashboardConfig != null && !customDashboardConfig.isEmpty() &&
+                (Boolean) customDashboardConfig.get(DashboardConstants.ENABLED);
     }
 
     private int getTimeDelay(Map customDashboardConfig) {

@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 
 import java.util.Map;
 
+import static com.appdynamics.extensions.dashboard.DashboardConstants.APPLICATION_JSON;
+import static com.appdynamics.extensions.dashboard.DashboardConstants.JSON;
 import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
 
 /**
@@ -35,12 +37,12 @@ public class CustomDashboardUploader {
 
     private ControllerApiService apiService;
 
-    public CustomDashboardUploader(ControllerApiService apiService){
+    public CustomDashboardUploader(ControllerApiService apiService) {
         this.apiService = apiService;
     }
 
     public void checkAndUpload(CloseableHttpClient client, String dashboardName,
-                       String fileContents, Map httpProperties, boolean overwrite) throws ApiException {
+                               String fileContents, Map httpProperties, boolean overwrite) throws ApiException {
         CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client);
         JsonNode allDashboards = apiService.getAllDashboards(client, cookiesCsrf);
         uploadDashboard(dashboardName, fileContents, overwrite, httpProperties, cookiesCsrf, allDashboards);
@@ -49,8 +51,8 @@ public class CustomDashboardUploader {
 
     private void uploadDashboard(String dashboardName, String fileContents, boolean overwrite,
                                  Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ApiException {
-        String fileExtension = "json";
-        String fileContentType = "application/json";
+        String fileExtension = JSON;
+        String fileContentType = APPLICATION_JSON;
         if (isDashboardPresent(dashboardName, allDashboards)) {
             if (overwrite) {
                 logger.debug("Attempting to overwrite dashboard");

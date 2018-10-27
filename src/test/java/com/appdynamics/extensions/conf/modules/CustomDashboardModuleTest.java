@@ -8,10 +8,15 @@
 
 package com.appdynamics.extensions.conf.modules;
 
+import com.appdynamics.extensions.api.ApiException;
+import com.appdynamics.extensions.api.ControllerApiService;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
+import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
+import com.appdynamics.extensions.util.PathResolver;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by bhuvnesh.kumar on 9/19/18.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({System.class, HttpClientBuilder.class, CustomDashboardModule.class})
+@PrepareForTest({System.class, HttpClientBuilder.class, CustomDashboardModule.class, CustomDashboardUploader.class})
 @PowerMockIgnore("javax.net.ssl.*")
 
 public class CustomDashboardModuleTest {
@@ -60,46 +65,125 @@ public class CustomDashboardModuleTest {
         config.put("simEnabled", false);
         return config;
     }
+//
+//    @Test
+//    public void testUploadDashboardForCorrectTimeDifference() throws Exception, ApiException {
+//
+//        CustomDashboardModule customDashboardModule = new CustomDashboardModule();
+//        Map config = new HashMap<>();
+//        config.put("customDashboard", getCustomDashboardMap());
+//        config.put("controllerInfo", getControllerInfoMap());
+//        String metric = "Custom Metrics|MonitorName";
+//        String monitorName = "MonitorName";
+//        File file = Mockito.mock(File.class);
+//        ControllerInfo controllerInfo;
+//        ControllerInfoFactory.initialize(getControllerInfoMap(), file);
+//        controllerInfo = ControllerInfoFactory.getControllerInfo();
+//
+//        PowerMockito.mockStatic(HttpClientBuilder.class);
+//        CloseableHttpClient mockHttpClient = PowerMockito.mock(CloseableHttpClient.class);
+//        HttpClientBuilder mockHttpClientBuilder = PowerMockito.mock(HttpClientBuilder.class);
+//        PowerMockito.when(HttpClientBuilder.class, "create").thenReturn(mockHttpClientBuilder);
+//        PowerMockito.when(mockHttpClientBuilder.build()).thenReturn(mockHttpClient);
+//
+//        PowerMockito.mockStatic(System.class);
+//        PowerMockito.when(System.currentTimeMillis()).thenReturn(300001l).thenReturn(300011l).
+//                thenReturn(50000l).thenReturn(50000l).thenReturn(700000l).thenReturn(700000l);
+//        Map httpProps = new HashMap();
+//
+//        ControllerApiService apiService = Mockito.mock(ControllerApiService.class);
+//        CustomDashboardUploader customDashboardUploader = Mockito.mock(CustomDashboardUploader.class);
+//
+//
+//
+//
+//        Boolean check = customDashboardModule.isInitialized();
+//        Assert.assertFalse(check);
+//        customDashboardModule.initCustomDashboard(config, metric, monitorName, controllerInfo);
+//        check = customDashboardModule.isInitialized();
+//        Assert.assertTrue(check);
+//        //first run, normal upload
+//        customDashboardModule.uploadDashboard();
+//        CustomDashboardUploader uploader = customDashboardModule.getDashboardUploader();
+//        Mockito.verify(uploader, Mockito.times(1))
+//                .checkAndUpload(mockHttpClient,monitorName,"", httpProps, false);
 
-    @Test
-    public void testUploadDashboardForCorrectTimeDifference() throws Exception {
+//        AtomicBoolean check = customDashboardModule.getPeriodicPresenceCheck();
+//        Assert.assertFalse(check.get());
+//        customDashboardModule.uploadDashboard();
+//        check = customDashboardModule.getPeriodicPresenceCheck();
+//        Assert.assertTrue(check.get());
+//        // 2nd run, no upload
+//        customDashboardModule.uploadDashboard();
+//        check = customDashboardModule.getPeriodicPresenceCheck();
+//        Assert.assertTrue(check.get());
+//        // 3rd run, greater than 5 mins, upload
+//        customDashboardModule.uploadDashboard();
+//        check = customDashboardModule.getPeriodicPresenceCheck();
+//        Assert.assertTrue(check.get());
+//
+//    }
+//
+//    @Test
+//    public void testUploadDashboardForCorrectTimeDifference1() throws Exception, ApiException {
+//
+//        CustomDashboardModule customDashboardModule = new CustomDashboardModule();
+//        Map config = new HashMap<>();
+//        config.put("customDashboard", getCustomDashboardMap());
+//        config.put("controllerInfo", getControllerInfoMap());
+//        String metric = "Custom Metrics|MonitorName";
+//        String monitorName = "MonitorName";
+//        File file = Mockito.mock(File.class);
+//        ControllerInfo controllerInfo;
+//        ControllerInfoFactory.initialize(getControllerInfoMap(), file);
+//        controllerInfo = ControllerInfoFactory.getControllerInfo();
+//
+//        PowerMockito.mockStatic(HttpClientBuilder.class);
+//        CloseableHttpClient mockHttpClient = PowerMockito.mock(CloseableHttpClient.class);
+//        HttpClientBuilder mockHttpClientBuilder = PowerMockito.mock(HttpClientBuilder.class);
+//        PowerMockito.when(HttpClientBuilder.class, "create").thenReturn(mockHttpClientBuilder);
+//        PowerMockito.when(mockHttpClientBuilder.build()).thenReturn(mockHttpClient);
+//
+//
+//        PowerMockito.mockStatic(System.class);
+//        PowerMockito.when(System.currentTimeMillis()).thenReturn(300001l).thenReturn(300011l).
+//                thenReturn(50000l).thenReturn(50000l).thenReturn(700000l).thenReturn(700000l);
+//        Map httpProps = new HashMap();
+//
+//        ControllerApiService apiService = PowerMockito.mock(ControllerApiService.class);
+////        PowerMockito.whenNew(ControllerApiService.class).withNoArguments().thenReturn(apiService);
+////        CustomDashboardUploader mockCustomUploader = PowerMockito.mock(CustomDashboardUploader.class);
+////        PowerMockito.when(mockCustomUploader.checkAndUpload(mockHttpClient, "","",Mockito.anyMap(), false)).
+//
+//        CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(apiService);
+//        CustomDashboardUploader spyCustomDashboardUploader = Mockito.spy(customDashboardUploader);
+////        PowerMockito.doNothing().when(spyCustomDashboardUploader.checkAndUpload(mockHttpClient, "","",Mockito.anyMap(), false));
+////        PowerMockito.whenNew(CustomDashboardUploader.class).withArguments(apiService).thenReturn(spyCustomDashboardUploader);
+//
+//        customDashboardModule.initCustomDashboard(config, metric, monitorName, controllerInfo);
+//        customDashboardModule.uploadDashboard();
+//
+//
+//    }
 
-        CustomDashboardModule customDashboardModule = new CustomDashboardModule();
-        Map config = new HashMap<>();
-        config.put("customDashboard", getCustomDashboardMap());
-        config.put("controllerInfo", getControllerInfoMap());
-        String metric = "Custom Metrics|MonitorName";
-        String monitorName = "MonitorName";
-        File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo;
-        ControllerInfoFactory.initialize(getControllerInfoMap(), file);
-        controllerInfo = ControllerInfoFactory.getControllerInfo();
-        customDashboardModule.initCustomDashboard(config, metric, monitorName, controllerInfo);
-
-        PowerMockito.mockStatic(HttpClientBuilder.class);
-        CloseableHttpClient mockHttpClient = PowerMockito.mock(CloseableHttpClient.class);
-        HttpClientBuilder mockHttpClientBuilder = PowerMockito.mock(HttpClientBuilder.class);
-        PowerMockito.when(HttpClientBuilder.class, "create").thenReturn(mockHttpClientBuilder);
-        PowerMockito.when(mockHttpClientBuilder.build()).thenReturn(mockHttpClient);
-
-        PowerMockito.mockStatic(System.class);
-        PowerMockito.when(System.currentTimeMillis()).thenReturn(300001l).thenReturn(300011l).
-                thenReturn(50000l).thenReturn(50000l).thenReturn(700000l).thenReturn(700000l);
-
-        //first run, normal upload
-        AtomicBoolean check = customDashboardModule.getPeriodicPresenceCheck();
-        Assert.assertFalse(check.get());
-        customDashboardModule.uploadDashboard();
-        check = customDashboardModule.getPeriodicPresenceCheck();
-        Assert.assertTrue(check.get());
-        // 2nd run, no upload
-        customDashboardModule.uploadDashboard();
-        check = customDashboardModule.getPeriodicPresenceCheck();
-        Assert.assertTrue(check.get());
-        // 3rd run, greater than 5 mins, upload
-        customDashboardModule.uploadDashboard();
-        check = customDashboardModule.getPeriodicPresenceCheck();
-        Assert.assertTrue(check.get());
-
-    }
 }
+//
+//
+//    create a getter for dashboardUploader.
+//        test1:
+//        initCustomDashboard( with timeDelay= 10 seconds say)
+//        upload()
+//        for(i=0;i< 3){
+//        upload()
+//        verify that checkAndUpload is not getting called.
+//        sleep(1sec)
+//        }
+//
+//        test2:
+//        initCustomDashboard( with timeDelay= 2 seconds say)
+//        upload()
+//        for(i=0;i< 3){
+//        upload()
+//        verify that checkAndUpload is  getting called.
+//        sleep(3sec)
+//        }

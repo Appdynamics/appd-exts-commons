@@ -49,7 +49,6 @@ public class CustomDashboardTemplateGeneratorTest {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
-        dashboardConfig.put("upload", true);
         dashboardConfig.put("pathToNormalDashboard", "src/test/resources/dashboard/normalDashboard.json");
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/normalDashboard.json"));
         CustomDashboardTemplateGenerator customDashboardGen = new CustomDashboardTemplateGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
@@ -85,7 +84,6 @@ public class CustomDashboardTemplateGeneratorTest {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
-        dashboardConfig.put("upload", true);
         dashboardConfig.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
         CustomDashboardTemplateGenerator customDashboardGen = new CustomDashboardTemplateGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);
@@ -118,7 +116,6 @@ public class CustomDashboardTemplateGeneratorTest {
         Map dashboardConfig = new HashMap();
         dashboardConfig.put("dashboardName", "Dashboard Test");
         dashboardConfig.put("enabled", true);
-        dashboardConfig.put("upload", true);
         dashboardConfig.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
         String dashboardString = FileUtils.readFileToString(new File("src/test/resources/dashboard/simDashboard.json"));
         CustomDashboardTemplateGenerator customDashboardGen = new CustomDashboardTemplateGenerator(dashboardConfig, controllerInfo, metricPrefix, dashboardName);

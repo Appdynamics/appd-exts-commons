@@ -30,8 +30,8 @@ public class CustomDashboardUtils {
 
     public static String getDashboardName(Map customDashboardConfig, String monitorName) {
         String dashboardName;
-        if (!Strings.isNullOrEmpty((String) customDashboardConfig.get("dashboardName"))) {
-            dashboardName = customDashboardConfig.get("dashboardName").toString();
+        if (!Strings.isNullOrEmpty((String) customDashboardConfig.get(DASHBOARD_NAME))) {
+            dashboardName = customDashboardConfig.get(DASHBOARD_NAME).toString();
         } else {
             dashboardName = monitorName + " Dashboard";
         }
@@ -39,8 +39,8 @@ public class CustomDashboardUtils {
     }
 
     public static boolean getOverwrite(Map customDashboardConfig) {
-        if (customDashboardConfig.get("overwriteDashboard") != null) {
-            return (Boolean) customDashboardConfig.get("overwriteDashboard");
+        if (customDashboardConfig.get(OVERWRITE_DASHBOARD) != null) {
+            return (Boolean) customDashboardConfig.get(OVERWRITE_DASHBOARD);
         }
         return false;
     }
@@ -68,14 +68,14 @@ public class CustomDashboardUtils {
     }
 
     public static Map<String, ? super Object> getHttpProperties(ControllerInfo controllerInfo, Map config) {
-        Map customDashboardConfig = (Map) config.get("customDashboard");
+        Map customDashboardConfig = (Map) config.get(CUSTOM_DASHBOARD);
         Map<String, ? super Object> httpProperties = new HashMap<>();
         List<Map<String, ? super Object>> controllerServersList = Lists.newArrayList();
         Map<String, ? super Object> controllerServerInfo = getControllerServerDetailsFromControllerInfo(controllerInfo);
         controllerServersList.add(controllerServerInfo);
-        httpProperties.put("servers", controllerServersList);
+        httpProperties.put(SERVERS, controllerServersList);
         Map<String, ? super Object> connectionMap = getConnectionMap(customDashboardConfig);
-        httpProperties.put("connection", connectionMap);
+        httpProperties.put(CONNECTION, connectionMap);
         setProxyIfApplicable(httpProperties, config);
         return httpProperties;
     }
