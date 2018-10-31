@@ -141,7 +141,7 @@ public class MonitorContext {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
 
-    public EventsServiceDataManager createEventsServiceDataManager() {
+    public EventsServiceDataManager getEventsServiceDataManager() {
         return eventsServiceModule.initEventsServiceDataManager(monitorName, config);
     }
 }

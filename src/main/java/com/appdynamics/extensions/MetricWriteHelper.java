@@ -15,10 +15,6 @@
 
 package com.appdynamics.extensions;
 
-import static com.appdynamics.extensions.eventsservice.EventsServiceUtils.areEventsServiceParametersValid;
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
-import static com.appdynamics.extensions.util.StringUtils.validateStrings;
-
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
@@ -37,6 +33,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
+import static com.appdynamics.extensions.util.StringUtils.validateStrings;
+
 
 public class MetricWriteHelper {
 
@@ -47,7 +46,6 @@ public class MetricWriteHelper {
     private boolean cacheMetrics;
 
     protected DerivedMetricsCalculator derivedMetricsCalculator;
-    private EventsServiceDataManager eventsServiceDataManager;
     private Map<String, String> metricsMap = Maps.newConcurrentMap();
 
     //used from WorkBench.
@@ -58,51 +56,29 @@ public class MetricWriteHelper {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
         derivedMetricsCalculator = baseMonitor.getContextConfiguration().getContext().createDerivedMetricsCalculator();
-        eventsServiceDataManager = baseMonitor.getContextConfiguration().getContext().createEventsServiceDataManager();
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if(baseMonitor.getContextConfiguration().getConfigYml().get("sendDataToMetricBrowser").equals("true")) {
-            if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue)) {
-                if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
-                    Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
-                    logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
-                    baseMonitor.getContextConfiguration().getContext().putInMetricCache(metricPath, metric);
-                } else {
-                    MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
-                    metricWriter.printMetric(metricValue);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollup, clusterRollup, metricPath, metricValue);
-                    }
-                    if (cacheMetrics) {
-                        Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
-                        baseMonitor.getContextConfiguration().getContext().putInMetricCache(metricPath, metric);
-                    }
-                }
-                addForDerivedMetricsCalculation(metricPath, metricValue);
-                metricsMap.put(metricPath, metricValue);
+        if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue)) {
+            if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
+                Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
+                logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
+                baseMonitor.getContextConfiguration().getContext().putInMetricCache(metricPath, metric);
             } else {
-                logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
+                MetricWriter metricWriter = getMetricWriter(metricPath, aggregationType, timeRollup, clusterRollup);
+                metricWriter.printMetric(metricValue);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Printing Metric [{}/{}/{}] [{}]=[{}]", aggregationType, timeRollup, clusterRollup, metricPath, metricValue);
+                }
+                if (cacheMetrics) {
+                    Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
+                    baseMonitor.getContextConfiguration().getContext().putInMetricCache(metricPath, metric);
+                }
             }
-        }
-
-        if(baseMonitor.getContextConfiguration().getConfigYml().get("sendDataToEventsService").equals("true")) {
-
-            processEventsServiceData((Map)baseMonitor.getContextConfiguration().getConfigYml().get("eventsServiceParameters"));
-
-
-            //todo - add validity checks for senddatattoMB & senddatatoES. Default = senddatatoMB
-            //todo - call event manager from here
-            // todo make sure events are registered only once
-            // todo - ensure that the schema used while publishing an event is registered
-            // todo - handle various schema cases (update, compare, delete
-            // todo - discuss with kunal whether to perform CRUD operations on schemas every time or to simply create schemas every min
-        }
-    }
-
-    private void processEventsServiceData(Map<String, ?> eventServiceParameters) {
-        if(areEventsServiceParametersValid(eventServiceParameters)) {
-            eventsServiceDataManager.registerSchema((List)eventServiceParameters.get("schemaParameters"));
+            addForDerivedMetricsCalculation(metricPath, metricValue);
+            metricsMap.put(metricPath, metricValue);
+        } else {
+            logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
         }
     }
 
@@ -237,6 +213,4 @@ public class MetricWriteHelper {
 
     public void reset() {
     }
-
-    // todo: invoke event publishing from MWH
 }
