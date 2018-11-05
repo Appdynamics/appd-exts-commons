@@ -21,6 +21,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -31,8 +33,31 @@ import java.util.concurrent.TimeUnit;
  */
 public class MetricCharSequenceReplacer {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricCharSequenceReplacer.class);
+    private static final String CONFIG_KEY = "metricReplacements";
+    private static final String REPLACEMENT_KEY = "replace";
+    private static final String REPLACEMENT_VALUE = "replaceWith";
+    private static final String EMPTY_STRING = "";
     private final Map<String, String> replacementMap;
     private final LoadingCache<String, String> cachedReplacements;
+
+    /**
+     * Contains all the delimiters for metric path
+     */
+    private enum Delimiter {
+        PIPE("|"),
+        COLON(":"),
+        COMMA(",");
+
+        private final String delimiter;
+
+        Delimiter(String delimiter) {
+            this.delimiter = delimiter;
+        }
+
+        public String getDelimiter() {
+            return this.delimiter;
+        }
+    }
 
     public MetricCharSequenceReplacer(final Map<String, String> replacementMap) {
         this.replacementMap = replacementMap;
@@ -50,12 +75,32 @@ public class MetricCharSequenceReplacer {
     }
 
     /**
-     * Fallback method for cache miss.
+     * Creates a new instance of MetricCharSequenceReplacer
+     * @param config Map containing the replacements configuration
+     * @return {@code MetricCharSequenceReplacer}
+     */
+    public static MetricCharSequenceReplacer createInstance(final Map<String, ?> config) {
+        final List<Map<String, String>> replacements = (List<Map<String, String>>) config.get(CONFIG_KEY);
+        final Map<String, String> replacementMap = new HashMap<>();
+        for (Delimiter delimiter: Delimiter.values()) {
+            replacementMap.put(delimiter.getDelimiter(), EMPTY_STRING);
+        }
+        if (replacements != null && !replacements.isEmpty()) {
+            final Map<String, String> userReplacementMap = createUserReplacementMap(replacements);
+            if (userReplacementMap == null || userReplacementMap.isEmpty()) {
+                logger.debug("No suitable replacements configured in config.yml.");
+            } else replacementMap.putAll(userReplacementMap);
+        }
+        return new MetricCharSequenceReplacer(replacementMap);
+    }
+
+    /**
+     * This methods applies the replacement that are configured
      * Could possibly use {@code org.apache.commons.lang3.StringUtils.replace}
      * @param token Input string for which replacements have to performed
      * @return  {@code String} with all the replacements
      */
-    private String replace(String token) {
+    public String replace(String token) {
         String replacedToken = token;
         for (Map.Entry<String, String> replace: replacementMap.entrySet()) {
             replacedToken = replacedToken.replace(replace.getKey(), replace.getValue());
@@ -68,8 +113,34 @@ public class MetricCharSequenceReplacer {
      * @param in Input string for which replacements have to performed
      * @return {@code String} with all the replacements
      */
-    public String getReplacementFor(String in) {
+    public String getReplacementFromCache(String in) {
         return cachedReplacements.getUnchecked(in);
     }
 
+    private static Map<String, String> createUserReplacementMap(final List<Map<String, String>> replacements) {
+        final Map<String, String> replacementMap = new HashMap<>();
+        for (final Map<String, String> replacement : replacements) {
+            final String replace = replacement.get(REPLACEMENT_KEY);
+            final String replaceWith = replacement.get(REPLACEMENT_VALUE);
+            if (replace == null || replace.isEmpty()) {
+                logger.debug("Skipping entry. Value for replace cannot be null or empty string");
+            } else {
+                if (replaceWith == null || hasDelimiter(replaceWith)) {
+                    logger.debug("replaceWith {} cannot be null or have delimiter (|:,). Defaulting replaceWith to empty string",
+                            replaceWith);
+                    replacementMap.put(replace, EMPTY_STRING);
+                } else {
+                    replacementMap.put(replace, replaceWith);
+                }
+            }
+        }
+        return replacementMap;
+    }
+
+    private static boolean hasDelimiter(final String replaceWith) {
+        for (char c : replaceWith.toCharArray()) {
+            if (c == '|' || c == ':' || c == ',') return true;
+        }
+        return false;
+    }
 }

@@ -52,7 +52,7 @@ public class MetricPathUtils {
         if (replacer == null) {
             return builder.append(DEFAULT_METRIC_SEPARATOR).append(metricName).toString();
         }
-        return builder.append(DEFAULT_METRIC_SEPARATOR).append(replacer.getReplacementFor(metricName)).toString();
+        return builder.append(DEFAULT_METRIC_SEPARATOR).append(replacer.getReplacementFromCache(metricName)).toString();
     }
 
     /**
@@ -66,7 +66,7 @@ public class MetricPathUtils {
      */
     public static String buildMetricPath(final MetricCharSequenceReplacer replacer, final String metricPrefix, final
     String... metricNames) {
-        String path = metricPrefix;
+        String path = StringUtils.trimTrailing(metricPrefix.trim(), "|");
         for (String partialPath : metricNames) {
             path = buildMetricPath(replacer, path, partialPath);
         }
