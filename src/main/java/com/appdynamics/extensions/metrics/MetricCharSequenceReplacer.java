@@ -128,14 +128,12 @@ public class MetricCharSequenceReplacer {
             final String replaceWith = replacement.get(REPLACEMENT_VALUE);
             if (replace == null || replace.isEmpty()) {
                 logger.debug("Skipping entry. Value for replace cannot be null or empty string");
-            } else {
-                if (replaceWith == null || hasDelimiter(replaceWith) || CharMatcher.ascii().matchesAllOf(replaceWith)) {
-                    logger.debug("replaceWith {} cannot be null or have delimiter (|:,) or non-ascii characters. " +
-                                    "Defaulting replaceWith to empty string", replaceWith);
+            } else if (replaceWith == null || hasDelimiter(replaceWith) || !CharMatcher.ascii().matchesAllOf(replaceWith)) {
+                    logger.debug("replaceWith {} is null or has delimiters (|:,) or non-ascii characters. " +
+                            "Defaulting replaceWith to empty string", replaceWith);
                     replacementMap.put(replace, EMPTY_STRING);
-                } else {
-                    replacementMap.put(replace, replaceWith);
-                }
+            } else {
+                replacementMap.put(replace, replaceWith);
             }
         }
         return replacementMap;
