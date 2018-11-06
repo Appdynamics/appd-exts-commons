@@ -48,7 +48,7 @@ public class MetricPathUtils {
      */
     public static String buildMetricPath(final MetricCharSequenceReplacer replacer, final String metricPrefix, final
     String metricName) {
-        final StringBuilder builder = new StringBuilder(metricPrefix);
+        final StringBuilder builder = new StringBuilder(StringUtils.trimTrailing(metricPrefix.trim(), "|"));
         if (replacer == null) {
             return builder.append(DEFAULT_METRIC_SEPARATOR).append(metricName).toString();
         }
