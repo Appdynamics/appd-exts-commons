@@ -52,6 +52,7 @@ public class Metric {
         this.metricProperties = buildMetricProperties(metricProperties);
     }
 
+    // is this constructor required??
     public Metric(final String metricName, final String metricValue, Map<String, ?> metricProperties,
                   final MetricCharSequenceReplacer replacementMap, final String metricPrefix, final String... tokens) {
         this(metricName, metricValue, "", metricProperties);

@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.metrics;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.google.common.base.CharMatcher;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -65,24 +66,25 @@ public class MetricCharSequenceReplacer {
                 .maximumSize(5000)
                 .expireAfterWrite(15, TimeUnit.MINUTES)
                 .build(
-                    new CacheLoader<String, String>() {
-                        @Override
-                        public String load(String key) {
-                            return replace(key);
-                        }
-                    });
+                        new CacheLoader<String, String>() {
+                            @Override
+                            public String load(String key) {
+                                return replace(key);
+                            }
+                        });
         logger.debug("Map and Cache initialized successfully");
     }
 
     /**
      * Creates a new instance of MetricCharSequenceReplacer
+     *
      * @param config Map containing the replacements configuration
      * @return {@code MetricCharSequenceReplacer}
      */
     public static MetricCharSequenceReplacer createInstance(final Map<String, ?> config) {
         final List<Map<String, String>> replacements = (List<Map<String, String>>) config.get(CONFIG_KEY);
         final Map<String, String> replacementMap = new HashMap<>();
-        for (Delimiter delimiter: Delimiter.values()) {
+        for (Delimiter delimiter : Delimiter.values()) {
             replacementMap.put(delimiter.getDelimiter(), EMPTY_STRING);
         }
         if (replacements != null && !replacements.isEmpty()) {
@@ -97,12 +99,13 @@ public class MetricCharSequenceReplacer {
     /**
      * This methods applies the replacement that are configured
      * Could possibly use {@code org.apache.commons.lang3.StringUtils.replace}
+     *
      * @param token Input string for which replacements have to performed
-     * @return  {@code String} with all the replacements
+     * @return {@code String} with all the replacements
      */
     public String replace(String token) {
         String replacedToken = token;
-        for (Map.Entry<String, String> replace: replacementMap.entrySet()) {
+        for (Map.Entry<String, String> replace : replacementMap.entrySet()) {
             replacedToken = replacedToken.replace(replace.getKey(), replace.getValue());
         }
         return replacedToken;
@@ -110,6 +113,7 @@ public class MetricCharSequenceReplacer {
 
     /**
      * Get replaced version of input String. The method will query the {@link LoadingCache} to fetch the output
+     *
      * @param in Input string for which replacements have to performed
      * @return {@code String} with all the replacements
      */
@@ -125,9 +129,9 @@ public class MetricCharSequenceReplacer {
             if (replace == null || replace.isEmpty()) {
                 logger.debug("Skipping entry. Value for replace cannot be null or empty string");
             } else {
-                if (replaceWith == null || hasDelimiter(replaceWith)) {
-                    logger.debug("replaceWith {} cannot be null or have delimiter (|:,). Defaulting replaceWith to empty string",
-                            replaceWith);
+                if (replaceWith == null || hasDelimiter(replaceWith) || CharMatcher.ascii().matchesAllOf(replaceWith)) {
+                    logger.debug("replaceWith {} cannot be null or have delimiter (|:,) or non-ascii characters. " +
+                                    "Defaulting replaceWith to empty string", replaceWith);
                     replacementMap.put(replace, EMPTY_STRING);
                 } else {
                     replacementMap.put(replace, replaceWith);

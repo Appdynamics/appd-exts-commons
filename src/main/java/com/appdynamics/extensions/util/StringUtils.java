@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.util;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 
 import java.util.ArrayList;
@@ -161,6 +162,6 @@ public class StringUtils {
     }
 
     public static boolean isValidMetricPath(String metricPath) {
-        return metricPath.contains(",") || metricPath.contains("||");
+        return metricPath.contains(",") || metricPath.contains("||") || CharMatcher.ascii().matchesAllOf(metricPath);
     }
 }
