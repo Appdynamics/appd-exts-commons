@@ -49,16 +49,16 @@ public class EventsServiceDataManager {
     }
 
     //region <Schema Creation Methods>
-    public void createSchema(String schemaName, File schemasToBeCreated) {
+    public void createSchema(String schemaName, File schemaToBeCreated) {
         try {
-            if (schemasToBeCreated.exists()) {
-                LOGGER.info("Creating schema from file: {}", schemasToBeCreated.getAbsolutePath());
-                createSchema(schemaName, FileUtils.readFileToString(schemasToBeCreated));
+            if (schemaToBeCreated.exists()) {
+                LOGGER.info("Creating Schema: {} from file: {}", schemaName, schemaToBeCreated.getAbsolutePath());
+                createSchema(schemaName, FileUtils.readFileToString(schemaToBeCreated));
             } else {
-                LOGGER.error("Schema file: {} does not exist", schemasToBeCreated);
+                LOGGER.error("Schema file: {} does not exist", schemaToBeCreated);
             }
         } catch (IOException ex) {
-            LOGGER.error("Failed to create schema from file: {}", schemasToBeCreated);
+            LOGGER.error("Failed to create schema from file: {}", schemaToBeCreated);
         }
     }
 
@@ -87,32 +87,31 @@ public class EventsServiceDataManager {
     // endregion
 
     // region <Schema Update Methods>
-    public void updateSchema(String schemaName, File schemaBodyToBeUpdated) {
+    public void updateSchema(String schemaName, File updatedSchemaBody) {
         try {
-            if (schemaBodyToBeUpdated.exists()) {
-                LOGGER.info("Creating schema from file: {}", schemaBodyToBeUpdated.getAbsolutePath());
-                createSchema(schemaName, FileUtils.readFileToString(schemaBodyToBeUpdated));
+            if (updatedSchemaBody.exists()) {
+                LOGGER.info("Creating schema from file: {}", updatedSchemaBody.getAbsolutePath());
+                updateSchema(schemaName, FileUtils.readFileToString(updatedSchemaBody));
             } else {
-                LOGGER.error("Schema file: {} does not exist", schemaBodyToBeUpdated);
+                LOGGER.error("Schema file: {} does not exist", updatedSchemaBody);
             }
         } catch (IOException ex) {
-            LOGGER.error("Failed to create schema from file: {}", schemaBodyToBeUpdated);
+            LOGGER.error("Failed to create schema from file: {}", updatedSchemaBody);
         }
     }
 
-    public void updateSchema(String schemaName, String schemaUpdateBody) {
-        if(!isSchemaRegistered(schemaName)) {
+    public void updateSchema(String schemaName, String updatedSchemaBody) {
+        if (!isSchemaRegistered(schemaName)) {
             LOGGER.error("Schema: {} has not been registered with the Events Service. " +
                     "Please register the schema before trying to update it.");
-        }
-        else {
+        } else {
             HttpPatch httpPatch = new HttpPatch(httpHost.toURI() + "/events/schema/" + schemaName);
             httpPatch.setHeader("X-Events-API-AccountName", globalAccountName);
             httpPatch.setHeader("X-Events-API-Key", eventsApiKey);
             httpPatch.setHeader("Accept", "application/vnd.appd.events+json;v=2");
             httpPatch.setHeader("Content-type", "application/vnd.appd.events+json;v=2");
             Gson gson = new Gson();
-            String entity = gson.toJson(schemaUpdateBody);
+            String entity = gson.toJson(updatedSchemaBody);
             try {
                 httpPatch.setEntity(new StringEntity(entity));
                 httpResponse = httpClient.execute(httpPatch);
@@ -150,10 +149,9 @@ public class EventsServiceDataManager {
      * @param schemaName The name of the schema to be deleted
      */
     public void deleteSchema(String schemaName) {
-        if(!isSchemaRegistered(schemaName)) {
+        if (!isSchemaRegistered(schemaName)) {
             LOGGER.error("Unable to delete Schema: {} as it does not exist.", schemaName);
-        }
-        else {
+        } else {
             HttpDelete httpDelete = new HttpDelete(httpHost.toURI() + "/events/schema/" + schemaName);
             httpDelete.setHeader("X-Events-API-AccountName", globalAccountName);
             httpDelete.setHeader("X-Events-API-Key", eventsApiKey);
@@ -217,6 +215,21 @@ public class EventsServiceDataManager {
     }
     //endregion
 
+    //region <Querying API>
+    public void executeQuery(String query) {
+
+    }
+
+    public void executeQuery(String query, long startTime, long endTime, int limit) {
+
+    }
+
+    public void executeQueries(File queries) {
+
+    }
+
+    //endregion
+
     //region <Utilities>
     private boolean isHttpResponseValid(CloseableHttpResponse httpResponse) {
         return httpResponse != null && httpResponse.getStatusLine() != null &&
@@ -255,5 +268,3 @@ public class EventsServiceDataManager {
     }
     //endregion
 }
-
-
