@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.*;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.codehaus.jackson.JsonNode;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.appdynamics.extensions.eventsservice.utils.EventsServiceUtils.closeHttpResponse;
 
@@ -67,10 +69,8 @@ public class EventsServiceDataManager {
         httpPost.setHeader("X-Events-API-AccountName", globalAccountName);
         httpPost.setHeader("X-Events-API-Key", eventsApiKey);
         httpPost.setHeader("Content-type", "application/vnd.appd.events+json;v=2");
-        Gson gson = new Gson();
-        String entity = gson.toJson(schemaBody);
         try {
-            httpPost.setEntity(new StringEntity(entity));
+            httpPost.setEntity(new StringEntity(schemaBody, ContentType.APPLICATION_FORM_URLENCODED));
             httpResponse = httpClient.execute(httpPost);
             if (isHttpResponseValid(httpResponse)) {
                 LOGGER.info("Schema: {} successfully created & registered with the Events Service", schemaName);
@@ -90,13 +90,13 @@ public class EventsServiceDataManager {
     public void updateSchema(String schemaName, File updatedSchemaBody) {
         try {
             if (updatedSchemaBody.exists()) {
-                LOGGER.info("Creating schema from file: {}", updatedSchemaBody.getAbsolutePath());
+                LOGGER.info("Updating schema from file: {}", updatedSchemaBody.getAbsolutePath());
                 updateSchema(schemaName, FileUtils.readFileToString(updatedSchemaBody));
             } else {
                 LOGGER.error("Schema file: {} does not exist", updatedSchemaBody);
             }
         } catch (IOException ex) {
-            LOGGER.error("Failed to create schema from file: {}", updatedSchemaBody);
+            LOGGER.error("Failed to update schema from file: {}", updatedSchemaBody);
         }
     }
 
@@ -110,10 +110,8 @@ public class EventsServiceDataManager {
             httpPatch.setHeader("X-Events-API-Key", eventsApiKey);
             httpPatch.setHeader("Accept", "application/vnd.appd.events+json;v=2");
             httpPatch.setHeader("Content-type", "application/vnd.appd.events+json;v=2");
-            Gson gson = new Gson();
-            String entity = gson.toJson(updatedSchemaBody);
             try {
-                httpPatch.setEntity(new StringEntity(entity));
+                httpPatch.setEntity(new StringEntity(updatedSchemaBody, ContentType.APPLICATION_FORM_URLENCODED));
                 httpResponse = httpClient.execute(httpPatch);
                 if (isHttpResponseValid(httpResponse)) {
                     LOGGER.info("Schema: {} successfully updated.", schemaName);
@@ -122,7 +120,8 @@ public class EventsServiceDataManager {
                             schemaName);
                 }
             } catch (Exception ex) {
-                LOGGER.error("Unable to update the schema: {}. Please check whether the schema body is valid.", schemaName, ex);
+                LOGGER.error("Unable to update the schema: {}. Verify whether the updated schema body is valid.",
+                        schemaName, ex);
             } finally {
                 closeHttpResponse(httpResponse);
             }
@@ -196,10 +195,9 @@ public class EventsServiceDataManager {
         httpPost.setHeader("X-Events-API-AccountName", globalAccountName);
         httpPost.setHeader("X-Events-API-Key", eventsApiKey);
         httpPost.setHeader("Content-type", "application/vnd.appd.events+json;v=2");
-        Gson gson = new Gson();
-        String entity = gson.toJson(eventsToBePublished);
+        String body = eventsToBePublished.stream().collect(Collectors.joining(",", "[", "]"));
         try {
-            httpPost.setEntity(new StringEntity(entity));
+            httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_FORM_URLENCODED));
             httpResponse = httpClient.execute(httpPost);
             if (isHttpResponseValid(httpResponse)) {
                 LOGGER.info("Events successfully published for schema: {}", schemaName);
@@ -242,9 +240,12 @@ public class EventsServiceDataManager {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode arrayNode = mapper.readTree(eventsFromFile);
-            ObjectReader objectReader = mapper.reader(new TypeReference<List<String>>() {
-            });
-            eventsToBePublishedForSchema = objectReader.readValue(arrayNode);
+            //ObjectReader objectReader = mapper.reader(new TypeReference<List<String>>() {
+            //});
+            for(JsonNode node: arrayNode) {
+                eventsToBePublishedForSchema.add(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node));
+            }
+            //eventsToBePublishedForSchema = mapper.readValue(arrayNode, List.class);
         } catch (Exception ex) {
             LOGGER.error("Error encountered while generating events from file: {}", eventsFromFile.getAbsolutePath(), ex);
         }
