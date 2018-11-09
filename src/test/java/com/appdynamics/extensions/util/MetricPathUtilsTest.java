@@ -15,14 +15,20 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
+import com.appdynamics.extensions.yml.YmlReader;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  * Created by venkata.konala on 8/29/17.
  */
 public class MetricPathUtilsTest {
     private String metricPath = "Server|Server1|Queue|Q1|hits";
+    private String metricPrefix = "Custom Metrics|Server1";
 
     @Test
     public void getMetricNameTest(){
@@ -34,5 +40,21 @@ public class MetricPathUtilsTest {
     public void getNullMetricNameTest(){
         String metricName = MetricPathUtils.getMetricName(null);
         Assert.assertTrue(metricName == null);
+    }
+
+    @Test
+    public void buildMetricPathWithNullMetricReplacementTest() {
+        String[] suffixes = new String[] {"North Americas", "Queue1", "Messages"};
+        String path = MetricPathUtils.buildMetricPath(null, metricPrefix, suffixes);
+        Assert.assertEquals("Custom Metrics|Server1|North Americas|Queue1|Messages", path);
+    }
+
+    @Test
+    public void buildMetricPathWithMetricReplacementTest() {
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/metricReplace/config_with_non_ascii.yml"));
+        MetricCharSequenceReplacer replacer = MetricCharSequenceReplacer.createInstance(conf);
+        String[] suffixes = new String[] {"Español", "Qûeue1", "Messagés"};
+        String path = MetricPathUtils.buildMetricPath(replacer, metricPrefix, suffixes);
+        Assert.assertEquals("Custom Metrics|Server1|Espanol|Queue1|Messages", path);
     }
 }
