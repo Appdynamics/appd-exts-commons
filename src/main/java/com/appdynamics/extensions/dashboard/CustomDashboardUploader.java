@@ -55,13 +55,13 @@ public class CustomDashboardUploader {
         String fileContentType = APPLICATION_JSON;
         if (isDashboardPresent(dashboardName, allDashboards)) {
             if (overwrite) {
-                logger.debug("Attempting to overwrite dashboard");
+                logger.debug("Overwriting dashboard: {}", dashboardName);
                 //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
                 // This will not be present in the config.yml so it will never override.
                 // Keeping this here for when override will be supported
                 apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
             } else {
-                logger.debug("Dashboard {} Already present, can not overwrite. ", dashboardName);
+                logger.debug("Overwrite Disabled, not attempting to overwrite dashboard: {}", dashboardName);
             }
         } else {
             apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
@@ -72,10 +72,12 @@ public class CustomDashboardUploader {
         if (existingDashboards != null) {
             for (JsonNode existingDashboard : existingDashboards) {
                 if (dashboardName.equals(getTextValue(existingDashboard.get("name")))) {
+                    logger.debug("Dashboard Already present: {}", dashboardName);
                     return true;
                 }
             }
         }
+        logger.debug("Dashboard not present, attempting to upload: {} ", dashboardName);
         return false;
     }
 }
