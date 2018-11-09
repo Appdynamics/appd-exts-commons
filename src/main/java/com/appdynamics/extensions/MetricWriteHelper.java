@@ -85,7 +85,9 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            logger.warn("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
+            logger.warn("The metric is not valid. Name - {}, Value - {}, Path - {}, Qualifiers - {}, {}, {}",
+                    MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup,
+                    clusterRollup);
         }
 
     }

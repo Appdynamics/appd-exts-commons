@@ -36,6 +36,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
+import static com.appdynamics.extensions.util.StringUtils.validateStrings;
+
 /**
  * Created by abey.tom on 3/16/16.
  */
@@ -63,15 +67,19 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
 
     @Override
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (StringUtils.hasText(metricValue)) {
+        if (validateStrings(metricPath, metricValue) && isValidMetricValue(metricValue) && isValidMetricPath(metricPath)) {
             addMetric(metricPath, new BigDecimal(metricValue));
         } else {
-            logger.error("The value of [{}] is {}", metricPath, metricValue);
+            logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, metricValue);
         }
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
-        addMetric(metricPath, value);
+        if (validateStrings(metricPath) && isValidMetricPath(metricPath)) {
+            addMetric(metricPath, value);
+        } else {
+            logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, value);
+        }
     }
 
     private void addMetric(String metricPath, BigDecimal value) {
