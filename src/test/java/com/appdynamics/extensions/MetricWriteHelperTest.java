@@ -61,7 +61,7 @@ public class MetricWriteHelperTest {
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
-        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample", "2.04", "Custom Metrics|Sample Monitor|sample");
         metricList.add(metric1);
@@ -82,7 +82,7 @@ public class MetricWriteHelperTest {
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
-        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
 
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/DerivedSample.yml"));
@@ -163,7 +163,7 @@ public class MetricWriteHelperTest {
 
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
-        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");
         when(configuration.getContext()).thenReturn(context);
 
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
