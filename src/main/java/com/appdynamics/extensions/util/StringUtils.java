@@ -162,6 +162,6 @@ public class StringUtils {
     }
 
     public static boolean isValidMetricPath(String metricPath) {
-        return !metricPath.contains(",") && !metricPath.contains("||") && CharMatcher.ascii().matchesAllOf(metricPath);
+        return !metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher.ascii().matchesAllOf(metricPath);
     }
 }
