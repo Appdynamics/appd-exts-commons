@@ -32,8 +32,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @author pradeep.nair
  */
+//TODO: I don't see any unit tests for this class
 public class MetricCharSequenceReplacer {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricCharSequenceReplacer.class);
+    //TODO: move these to a Constants class
     private static final String CONFIG_KEY = "metricReplacements";
     private static final String REPLACEMENT_KEY = "replace";
     private static final String REPLACEMENT_VALUE = "replaceWith";
@@ -41,6 +43,7 @@ public class MetricCharSequenceReplacer {
     private final Map<String, String> replacementMap;
     private final LoadingCache<String, String> cachedReplacements;
 
+    //TODO: this can also move to an independent enum outside of this class
     /**
      * Contains all the delimiters for metric path
      */
@@ -60,6 +63,7 @@ public class MetricCharSequenceReplacer {
         }
     }
 
+    //TODO: From the method on line 88, this class looks like a Singleton and this constructor must be private
     public MetricCharSequenceReplacer(final Map<String, String> replacementMap) {
         this.replacementMap = replacementMap;
         cachedReplacements = CacheBuilder.newBuilder()
@@ -75,6 +79,7 @@ public class MetricCharSequenceReplacer {
         logger.debug("Map and Cache initialized successfully");
     }
 
+    // TODO: Javadoc incomplete. Line 86
     /**
      * Creates a new instance of MetricCharSequenceReplacer
      *
@@ -117,10 +122,12 @@ public class MetricCharSequenceReplacer {
      * @param in Input string for which replacements have to performed
      * @return {@code String} with all the replacements
      */
+    //TODO: Provide a better name for 'in'
     public String getReplacementFromCache(String in) {
         return cachedReplacements.getUnchecked(in);
     }
 
+    // TODO: Move static methods to a util class if required
     private static Map<String, String> createUserReplacementMap(final List<Map<String, String>> replacements) {
         final Map<String, String> replacementMap = new HashMap<>();
         for (final Map<String, String> replacement : replacements) {

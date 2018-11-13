@@ -17,8 +17,7 @@ package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
 import com.google.common.base.Splitter;
-import com.sun.xml.internal.bind.v2.TODO;
-
+//TODO: There was an unused import that caused a build failure on my box and it has been removed (com.sun.xml.internal.bind.v2.TODO)
 import java.util.List;
 
 public class MetricPathUtils {
@@ -48,8 +47,11 @@ public class MetricPathUtils {
      * @param metricName    name of the metric
      * @return the final metric path
      */
+
+    //TODO: this method should be private
     public static String buildMetricPath(final MetricCharSequenceReplacer replacer, final String metricPrefix, final
     String metricName) {
+        //TODO: there's no need to initialize a new StringBuilder every time
         final StringBuilder builder = new StringBuilder(StringUtils.trimTrailing(metricPrefix.trim(), "|"));
         if (replacer == null) {
             return builder.append(DEFAULT_METRIC_SEPARATOR).append(metricName).toString();

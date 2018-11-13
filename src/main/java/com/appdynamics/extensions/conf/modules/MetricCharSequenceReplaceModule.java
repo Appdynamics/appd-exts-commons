@@ -32,7 +32,7 @@ public class MetricCharSequenceReplaceModule {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricCharSequenceReplaceModule.class);
 
     private MetricCharSequenceReplacer replacer;
-    // #TODO Can you please reolve the below TODO?
+    // #TODO Can you please resolve the below TODO?
     //TODO check length, check for *, check again for = and other doubtful chars in metric path
     /**
      * Initializes {@link MetricCharSequenceReplacer} with the values configured in config.yml
@@ -50,4 +50,5 @@ public class MetricCharSequenceReplaceModule {
     public MetricCharSequenceReplacer getMetricSequenceReplacer() {
         return replacer;
     }
+    //TODO: You can simply combine these two methods into one and call it from MonitorContext's getMetricCharSequenceReplacer()
 }
