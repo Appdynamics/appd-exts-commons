@@ -1,40 +1,38 @@
+/*
+ *  Copyright 2018. AppDynamics LLC and its affiliates.
+ * All Rights Reserved.
+ * This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
+ * The copyright notice above does not evidence any actual or intended publication of such source code.
+ */
+
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.StringUtils;
 import org.slf4j.Logger;
 
 import java.util.Map;
 
+import static com.appdynamics.extensions.eventsservice.utils.EventsServiceUtils.isValid;
+
 /**
- * @author: Aditya Jagtiani
+ * @author : Aditya Jagtiani
  */
 public class EventsServiceModule {
     private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(DerivedMetricsModule.class);
 
     public EventsServiceDataManager initEventsServiceDataManager(String monitorName, Map<String, ?> config) {
-        if(config.containsKey("eventsServiceParameters")) {
+        if (config.containsKey("eventsServiceParameters")) {
             Map<String, ?> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
-            if(isValid(eventsServiceParameters)) {
+            if (isValid(eventsServiceParameters)) {
                 LOGGER.info("Events Service parameters validated successfully for monitor: {}. Initializing..", monitorName);
                 return new EventsServiceDataManager(eventsServiceParameters);
+            } else {
+                LOGGER.error("Events Service parameters invalid for monitor: {}. Check your config.yml", monitorName);
             }
-            else {
-                LOGGER.error("Events Service parameters invalid for monitor: {}. Please check your config.yml", monitorName);
-            }
-        }
-        else {
+        } else {
             LOGGER.info("Events Service parameters not set for monitor: {}. Skipping", monitorName);
         }
         return null;
-    }
-
-    private boolean isValid(Map<String, ?> eventsServiceParameters) {
-        return (eventsServiceParameters.containsKey("host") && eventsServiceParameters.get("host") != null)
-                && (eventsServiceParameters.containsKey("port") && eventsServiceParameters.get("port") != null)
-                && (eventsServiceParameters.containsKey("globalAccountName") && eventsServiceParameters.get("globalAccount") != null)
-                && (eventsServiceParameters.containsKey("eventsApiKey") && eventsServiceParameters.get("eventsApiKey") != null)
-                && (eventsServiceParameters.containsKey("useSsl") && eventsServiceParameters.get("useSsl") != null);
     }
 }
