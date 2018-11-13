@@ -32,7 +32,11 @@ import static com.appdynamics.extensions.eventsservice.utils.Constants.*;
 import static com.appdynamics.extensions.eventsservice.utils.EventsServiceUtils.closeHttpResponse;
 
 /**
+ * This class is an SDK for developers to communicate with the AppDynamics Events Service. It supports CRUD operations
+ * for Schemas and batch publishing of Events.
+ *
  * @author : Aditya Jagtiani
+ * @since : 2.2.1
  */
 public class EventsServiceDataManager {
     private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceDataManager.class);
@@ -62,19 +66,19 @@ public class EventsServiceDataManager {
     /**
      * This method is used to create and register a new Schema with the Events Service
      *
-     * @param schemaName        Name of the Schema to be created
-     * @param schemaToBeCreated File containing a valid Schema body
+     * @param schemaName Name of the Schema to be created
+     * @param schemaBody File containing a valid Schema body
      */
-    public void createSchema(String schemaName, File schemaToBeCreated) {
+    public void createSchema(String schemaName, File schemaBody) {
         try {
-            if (schemaToBeCreated.exists()) {
-                LOGGER.info("Creating Schema: {} from file: {}", schemaName, schemaToBeCreated.getAbsolutePath());
-                createSchema(schemaName, FileUtils.readFileToString(schemaToBeCreated));
+            if (schemaBody.exists()) {
+                LOGGER.info("Creating Schema: {} from file: {}", schemaName, schemaBody.getAbsolutePath());
+                createSchema(schemaName, FileUtils.readFileToString(schemaBody));
             } else {
-                LOGGER.error("Schema file: {} does not exist", schemaToBeCreated);
+                LOGGER.error("Schema file: {} does not exist", schemaBody);
             }
         } catch (IOException ex) {
-            LOGGER.error("Failed to create schema from file: {}", schemaToBeCreated);
+            LOGGER.error("Failed to create schema from file: {}", schemaBody);
         }
     }
 
@@ -105,6 +109,7 @@ public class EventsServiceDataManager {
 
     /**
      * This method is used to retrieve an existing Schema
+     *
      * @param schemaName Name of the Schema to be retrieved
      * @return String representing the Schema body
      */
@@ -135,31 +140,31 @@ public class EventsServiceDataManager {
     /**
      * This method is used to update an existing Schema by field, using an HTTP Patch
      *
-     * @param schemaName        Name of the Schema to be updated
-     * @param updatedSchemaBody File containing the updates to be applied to the Schema
+     * @param schemaName    Name of the Schema to be updated
+     * @param schemaUpdates File containing the updates to be applied to the Schema
      */
-    public void updateSchema(String schemaName, File updatedSchemaBody) {
+    public void updateSchema(String schemaName, File schemaUpdates) {
         try {
-            if (updatedSchemaBody.exists()) {
-                LOGGER.info("Updating schema from file: {}", updatedSchemaBody.getAbsolutePath());
-                updateSchema(schemaName, FileUtils.readFileToString(updatedSchemaBody));
+            if (schemaUpdates.exists()) {
+                LOGGER.info("Updating schema from file: {}", schemaUpdates.getAbsolutePath());
+                updateSchema(schemaName, FileUtils.readFileToString(schemaUpdates));
             } else {
-                LOGGER.error("Schema file: {} does not exist", updatedSchemaBody);
+                LOGGER.error("Schema update file: {} does not exist", schemaUpdates);
             }
         } catch (IOException ex) {
-            LOGGER.error("Failed to update schema from file: {}", updatedSchemaBody);
+            LOGGER.error("Failed to update schema from file: {}", schemaUpdates);
         }
     }
 
     /**
      * This method is used to update an existing Schema by field, using an HTTP Patch
      *
-     * @param schemaName        Name of the Schema to be updated
-     * @param updatedSchemaBody Request body, defining the updates to be applied to the Schema
+     * @param schemaName    Name of the Schema to be updated
+     * @param schemaUpdates Request body, defining the updates to be applied to the Schema
      */
-    public void updateSchema(String schemaName, String updatedSchemaBody) {
+    public void updateSchema(String schemaName, String schemaUpdates) {
         if (!StringUtils.hasText(retrieveSchema(schemaName))) {
-            LOGGER.error("Schema: {} does not exist. Register the schema first", schemaName);
+            LOGGER.error("Schema: {} does not exist. Create the schema before proceeding", schemaName);
         } else {
             HttpPatch httpPatch = new HttpPatch(buildRequestUri(schemaName, SCHEMA_PATH_PARAMS));
             httpPatch.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
@@ -167,12 +172,12 @@ public class EventsServiceDataManager {
             httpPatch.setHeader(ACCEPT_HEADER, ACCEPTED_CONTENT_TYPE);
             httpPatch.setHeader(CONTENT_TYPE_HEADER, ACCEPTED_CONTENT_TYPE);
             try {
-                httpPatch.setEntity(new StringEntity(updatedSchemaBody, ContentType.APPLICATION_FORM_URLENCODED));
+                httpPatch.setEntity(new StringEntity(schemaUpdates, ContentType.APPLICATION_FORM_URLENCODED));
                 httpResponse = httpClient.execute(httpPatch);
                 if (isResponseSuccessful(httpResponse)) {
                     LOGGER.info("Schema: {} successfully updated.", schemaName);
                 } else {
-                    LOGGER.error("Unable to update Schema: {}. Verify whether the updated Schema body is valid.",
+                    LOGGER.error("Schema update body invalid. Unable to update Schema: {}",
                             schemaName);
                 }
             } catch (IOException ex) {
@@ -240,7 +245,7 @@ public class EventsServiceDataManager {
                 LOGGER.error("File: {} does not exist. Cannot publish events.", eventsToBePublished.getAbsolutePath());
             }
         } else {
-            LOGGER.error("Schema: {} is not registered with the Events Service. Register the schema before proceeding.",
+            LOGGER.error("Unable to publish events as schema: {} does not exist. Create the schema before proceeding",
                     schemaName);
         }
     }
@@ -259,7 +264,7 @@ public class EventsServiceDataManager {
             if (isResponseSuccessful(httpResponse)) {
                 LOGGER.info("Batch with {} events successfully published for schema: {}", eventBatch.size(), schemaName);
             } else {
-                LOGGER.error("One or more events invalid for Schema: {}. Unable to publish.", schemaName);
+                LOGGER.error("One or more events invalid for Schema: {}. Unable to publish", schemaName);
             }
         } catch (IOException ex) {
             LOGGER.error("Error encountered while publishing events for Schema: {}", schemaName, ex);

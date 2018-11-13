@@ -25,10 +25,12 @@ public class EventsServiceModule {
         if (config.containsKey("eventsServiceParameters")) {
             Map<String, ?> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
             if (isValid(eventsServiceParameters)) {
-                LOGGER.info("Events Service parameters validated successfully for monitor: {}. Initializing..", monitorName);
+                LOGGER.info("Events Service parameters validated successfully for monitor: {}. Initializing..",
+                        monitorName);
                 return new EventsServiceDataManager(eventsServiceParameters);
             } else {
-                LOGGER.error("Events Service parameters invalid for monitor: {}. Check your config.yml", monitorName);
+                LOGGER.error("Events Service parameters invalid for monitor: {}. Check your config.yml and retry before " +
+                        "proceeding", monitorName);
             }
         } else {
             LOGGER.info("Events Service parameters not set for monitor: {}. Skipping", monitorName);
