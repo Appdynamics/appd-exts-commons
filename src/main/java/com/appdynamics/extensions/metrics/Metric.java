@@ -52,6 +52,10 @@ public class Metric {
         this.metricProperties = buildMetricProperties(metricProperties);
     }
 
+    // #TODO Why is the replacementMap(which should not have map in the name) being taken as an input here? In the
+    // MetricCharSequenceReplaceModule, you are initalizing a MetricCharSequenceReplacer after the parsing
+    // the config.yml, the design is not clear here.
+    // #TODO Are there second thoughts about the constructor below?
     // is this constructor required??
     public Metric(final String metricName, final String metricValue, Map<String, ?> metricProperties,
                   final MetricCharSequenceReplacer replacementMap, final String metricPrefix, final String... tokens) {

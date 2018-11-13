@@ -95,7 +95,7 @@ public class MetricCharSequenceReplacer {
         }
         return new MetricCharSequenceReplacer(replacementMap);
     }
-
+    // #TODO Can you please decide if you want to use the String.replace() or other replacement utils?
     /**
      * This methods applies the replacement that are configured
      * Could possibly use {@code org.apache.commons.lang3.StringUtils.replace}

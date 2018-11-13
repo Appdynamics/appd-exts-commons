@@ -64,6 +64,7 @@ public class MetricWriteHelper {
         derivedMetricsCalculator = baseMonitor.getContextConfiguration().getContext().createDerivedMetricsCalculator();
     }
 
+    //# TODO can you please change the name of the validateString() to isValidString()?
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
         if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&
                 isValidMetricPath(metricPath)) {

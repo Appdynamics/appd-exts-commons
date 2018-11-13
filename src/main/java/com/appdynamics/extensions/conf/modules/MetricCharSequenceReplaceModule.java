@@ -32,6 +32,7 @@ public class MetricCharSequenceReplaceModule {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricCharSequenceReplaceModule.class);
 
     private MetricCharSequenceReplacer replacer;
+    // #TODO Can you please reolve the below TODO?
     //TODO check length, check for *, check again for = and other doubtful chars in metric path
     /**
      * Initializes {@link MetricCharSequenceReplacer} with the values configured in config.yml
@@ -39,11 +40,13 @@ public class MetricCharSequenceReplaceModule {
      * @param config {@code Map<String, String>} map view of the config.yml
      */
     public void initMetricCharSequenceReplacer(final Map<String, ?> config) {
+        // #TODO It would be better if this log statement is placed in MonitorContext class. Can you please check?
         logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
         replacer = MetricCharSequenceReplacer.createInstance(config);
         logger.info("MetricCharSequenceReplacer initialized successfully");
     }
 
+    //#TODO Can you please keep the method name consistent with the class name?
     public MetricCharSequenceReplacer getMetricSequenceReplacer() {
         return replacer;
     }

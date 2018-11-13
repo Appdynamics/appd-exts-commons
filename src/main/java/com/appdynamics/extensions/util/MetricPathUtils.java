@@ -17,6 +17,7 @@ package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
 import com.google.common.base.Splitter;
+import com.sun.xml.internal.bind.v2.TODO;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class MetricPathUtils {
         return null;
     }
 
+    // #TODO If the suggestion in the TODO for below method is implemented, there will be only one method.
     /**
      * Builds the metric path. If the replacer is null then the method appends the metricPrefix and metricName with
      * default separator "|". If the replacer is not null, all applicable replacements will be done on the metricName
@@ -55,6 +57,10 @@ public class MetricPathUtils {
         return builder.append(DEFAULT_METRIC_SEPARATOR).append(replacer.getReplacementFromCache(metricName)).toString();
     }
 
+    // #TODO Can you please change the name of the third argument? It should not be metricNames(token or something similiar is suggested).
+    // Also update the comment accordingly.
+    // #TODO Right now you are creating a new StringBuilder object for each token passed. But you can do it with a single StringBuilder
+    // object for all the token passed.
     /**
      * Builds the metric path. If the replacer is null then the method will append the metricPrefix and metricNames with
      * default separator "|". If the replacer is not null, all applicable replacements will be done on the metricName

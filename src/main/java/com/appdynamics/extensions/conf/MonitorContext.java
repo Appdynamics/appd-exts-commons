@@ -41,6 +41,7 @@ public class MonitorContext {
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
+    // #TODO Please remove the below comment.
     // MetricCharReplace changes
     private MetricCharSequenceReplaceModule metricCharSequenceReplaceModule;
 
@@ -146,4 +147,6 @@ public class MonitorContext {
     public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
         return metricCharSequenceReplaceModule.getMetricSequenceReplacer();
     }
+
+    //#TODO Please add a setter also.Check the other modules, this is provided as a flexibility to the developers.
 }
