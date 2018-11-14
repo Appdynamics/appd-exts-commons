@@ -144,4 +144,8 @@ public class MonitorContext {
     public EventsServiceDataManager getEventsServiceDataManager() {
         return eventsServiceModule.initEventsServiceDataManager(monitorName, config);
     }
+
+    public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
+        this.eventsServiceModule = eventsServiceModule;
+    }
 }
