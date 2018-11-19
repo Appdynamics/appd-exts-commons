@@ -141,6 +141,13 @@ public class MonitorContext {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
 
+    // #TODO Looks like the EventsService initialization needs to be done from the extension as per your design.
+    // Ideally it should be happening from the MonitorContext.initialize() method.
+    // In this way the HttpClient can be initialized once and used for all the subsequent monitor job runs.
+    // Another advantage of initializing the EventsServiceDataManager from MonitorContext.initialize(), is that any
+    // changes in config.yml related to eventsServiceParameters are automatically reflected in the extension after some
+    // time. If this change is done, the there needs to be getter for EventsServiceDataManager just like
+    // getHttpClient(): line 92
     public EventsServiceDataManager getEventsServiceDataManager() {
         return eventsServiceModule.initEventsServiceDataManager(monitorName, config);
     }

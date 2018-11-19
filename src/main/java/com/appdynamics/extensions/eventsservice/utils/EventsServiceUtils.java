@@ -20,6 +20,8 @@ public class EventsServiceUtils {
 
     private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceUtils.class);
 
+    // #TODO The following should ideally be in the http.HttpClientUtils class. Can you please see the feasibility of moving
+    // this method.
     public static void closeHttpResponse(CloseableHttpResponse response) {
         if (response != null) {
             try {
@@ -30,6 +32,7 @@ public class EventsServiceUtils {
         }
     }
 
+    // #TODO There is no need to check if the key is present or not. The get method should be enough.
     public static boolean isValid(Map<String, ?> eventsServiceParameters) {
         return (eventsServiceParameters.containsKey("host") && eventsServiceParameters.get("host") != null)
                 && (eventsServiceParameters.containsKey("port") && eventsServiceParameters.get("port") != null)
