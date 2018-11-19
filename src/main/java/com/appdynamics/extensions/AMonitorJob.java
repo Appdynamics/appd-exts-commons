@@ -19,7 +19,6 @@ package com.appdynamics.extensions;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.AssertUtils;
-import com.appdynamics.extensions.util.YmlUtils;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
 
@@ -48,13 +47,6 @@ public class AMonitorJob implements Runnable {
         List<Map<String, ?>> servers =  baseMonitor.getServers();
         AssertUtils.assertNotNull(servers, "getServers() cannot return null");
         TasksExecutionServiceProvider obj = new TasksExecutionServiceProvider(baseMonitor, MetricWriteHelperFactory.create(baseMonitor));
-        Map<String, ?> configMap = baseMonitor.getContextConfiguration().getConfigYml();
-        boolean displayNameCheckEnabled = (configMap.get("displayNameCheckEnabled")==null)?
-                true : YmlUtils.getBoolean(configMap.get("displayNameCheckEnabled"));
-
-        if(displayNameCheckEnabled) {
-            checkDisplayName(servers);
-        }
         baseMonitor.doRun(obj);
     }
 
@@ -73,19 +65,4 @@ public class AMonitorJob implements Runnable {
         }
     }
 
-    private void checkDisplayName(List<Map<String, ?>> servers){
-        if(baseMonitor.getServers().size() > 1){
-            for(Map<String, ?> server : servers){
-                AssertUtils.assertNotNull(server.get("displayName"), "[displayName] of server cannot be " +
-                        "null when multiple servers are present ");
-            }
-        }
-        else if(baseMonitor.getServers().size() == 1){
-            Map<String, ?> server = servers.get(0);
-            if(server.containsKey("displayName")){
-               AssertUtils.assertEmpty(server.get("displayName"),"[displayName] of server cannot be " +
-                "present when one server is present" );
-            }
-        }
-    }
 }

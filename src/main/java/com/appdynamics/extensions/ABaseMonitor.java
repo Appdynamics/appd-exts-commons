@@ -21,6 +21,7 @@ import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.PathResolver;
+import com.appdynamics.extensions.util.TimeUtils;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
@@ -70,9 +71,10 @@ import java.util.Map;
  *     //...logic to add the core logic for the SampleMonitor
  * }
  *
- * protected abstract int getTaskCount(){
- *     //...number of tasks from which metrics can be pulled
- *     //concurrently.
+ * protected abstract List<Map<>> getServers(){
+ *     //list of servers from the config.yml
+ *     // to keep track of tasks to be processed in parallel
+ *
  * }
  *
  * }}
@@ -85,6 +87,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ABaseMonitor.class);
 
+    private Long startTime;
     /**
      * The name of the monitor.
      */
@@ -174,6 +177,8 @@ public abstract class ABaseMonitor extends AManagedMonitor {
      */
     @Override
     public TaskOutput execute(Map<String, String> args, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
+        startTime = System.currentTimeMillis();
+        logger.info("Started executing " + monitorName + " at " + TimeUtils.getFormattedTimestamp(startTime, "yyyy-MM-dd HH:mm:ss z"));
         logger.info("Using {} Version [" + getImplementationVersion() + "]", monitorName);
         logger.debug("The raw arguments are {}", args);
         initialize(args);
@@ -198,6 +203,10 @@ public abstract class ABaseMonitor extends AManagedMonitor {
 
     protected static String getImplementationVersion() {
         return ABaseMonitor.class.getPackage().getImplementationTitle();
+    }
+
+    public Long getStartTime() {
+        return startTime;
     }
 
     protected abstract String getDefaultMetricPrefix();
