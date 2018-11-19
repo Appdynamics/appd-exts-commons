@@ -11,25 +11,21 @@ import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.appdynamics.extensions.eventsservice.utils.Constants.*;
-import static com.appdynamics.extensions.eventsservice.utils.EventsServiceUtils.closeHttpResponse;
+import static com.appdynamics.extensions.http.HttpClientUtils.closeHttpResponse;
 
 /**
  * This class is an SDK for developers to communicate with the AppDynamics Events Service. It supports CRUD operations
@@ -60,28 +56,8 @@ public class EventsServiceDataManager {
         httpClient = Http4ClientBuilder.getBuilder(eventsServiceParameters).build();
         httpHost = new HttpHost(eventsServiceHost, eventsServicePort, useSsl ? "https" : "http");
     }
-    // #TODO Is the following comment required?
+
     //region <Schema Creation>
-
-    /**
-     * This method is used to create and register a new Schema with the Events Service
-     *
-     * @param schemaName Name of the Schema to be created
-     * @param schemaBody File containing a valid Schema body
-     */
-    public void createSchema(String schemaName, File schemaBody) {
-        try {
-            if (schemaBody.exists()) {
-                LOGGER.info("Creating Schema: {} from file: {}", schemaName, schemaBody.getAbsolutePath());
-                createSchema(schemaName, FileUtils.readFileToString(schemaBody));
-            } else {
-                LOGGER.error("Schema file: {} does not exist", schemaBody);
-            }
-        } catch (IOException ex) {
-            LOGGER.error("Failed to create schema from file: {}", schemaBody);
-        }
-    }
-
     /**
      * This method is used to create and register a new Schema with the Events Service
      *
@@ -103,10 +79,8 @@ public class EventsServiceDataManager {
             closeHttpResponse(httpResponse);
         }
     }
-    // #TODO Is the following comment required?
     // endregion
 
-    // #TODO Is the following comment required?
     //region <Schema Retrieval>
 
     /**
@@ -116,8 +90,7 @@ public class EventsServiceDataManager {
      * @return String representing the Schema body
      */
     public String retrieveSchema(String schemaName) {
-        // #TODO Can you please use the buildrequestUri method here as was used in the createSchema() method?
-        HttpGet httpGet = new HttpGet(httpHost.toURI() + SCHEMA_PATH_PARAMS + schemaName);
+        HttpGet httpGet = new HttpGet(buildRequestUri(schemaName, SCHEMA_PATH_PARAMS));
         httpGet.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
         httpGet.setHeader(API_KEY_HEADER, eventsApiKey);
         httpGet.setHeader(ACCEPT_HEADER, ACCEPTED_CONTENT_TYPE);
@@ -125,8 +98,7 @@ public class EventsServiceDataManager {
             LOGGER.info("Attempting to retrieve Schema: {}", schemaName);
             httpResponse = httpClient.execute(httpGet);
             if (isResponseSuccessful(httpResponse)) {
-                // #TODO The log is missing a variable
-                LOGGER.info("Schema: {} found");
+                LOGGER.info("Schema: {} found", schemaName);
                 return EntityUtils.toString(httpResponse.getEntity());
             }
         } catch (IOException ex) {
@@ -137,30 +109,9 @@ public class EventsServiceDataManager {
         LOGGER.error("Schema: {} does not exist", schemaName);
         return "";
     }
-    // #TODO Is the following comment required?
     //endregion
-    // #TODO Is the following comment required?
+
     // region <Schema Update>
-
-    /**
-     * This method is used to update an existing Schema by field, using an HTTP Patch
-     *
-     * @param schemaName    Name of the Schema to be updated
-     * @param schemaUpdates File containing the updates to be applied to the Schema
-     */
-    public void updateSchema(String schemaName, File schemaUpdates) {
-        try {
-            if (schemaUpdates.exists()) {
-                LOGGER.info("Updating schema from file: {}", schemaUpdates.getAbsolutePath());
-                updateSchema(schemaName, FileUtils.readFileToString(schemaUpdates));
-            } else {
-                LOGGER.error("Schema update file: {} does not exist", schemaUpdates);
-            }
-        } catch (IOException ex) {
-            LOGGER.error("Failed to update schema from file: {}", schemaUpdates);
-        }
-    }
-
     /**
      * This method is used to update an existing Schema by field, using an HTTP Patch
      *
@@ -234,32 +185,13 @@ public class EventsServiceDataManager {
     //endregion
 
     //region <Event Publishing>
-
-    // #TODO Can you please add a publishEvents() method that takes in a List<String> eventsToBePublished
-    // just like how there are two public createSchema() methods one with a file and other with a String?
-    // or you can just change the name of the publishAllEventsInBatches() method and change its
-    // access modifier to public.
     /**
      * This method is used to publish events to the Events Service, in batches of 1000
      *
      * @param schemaName          Name of the Schema to publish the Events to
-     * @param eventsToBePublished File containing the Events to be published
+     * @param eventsToBePublished A List containing the events to be published
      */
-    public void publishEvent(String schemaName, File eventsToBePublished) {
-        if (StringUtils.hasText(retrieveSchema(schemaName))) {
-            if (eventsToBePublished.exists()) {
-                LOGGER.info("Processing Events from file: {}", eventsToBePublished.getAbsolutePath());
-                publishAllEventsInBatches(schemaName, generateEventsForSchema(eventsToBePublished));
-            } else {
-                LOGGER.error("File: {} does not exist. Cannot publish events.", eventsToBePublished.getAbsolutePath());
-            }
-        } else {
-            LOGGER.error("Unable to publish events as schema: {} does not exist. Create the schema before proceeding",
-                    schemaName);
-        }
-    }
-
-    public void publishAllEventsInBatches(String schemaName, List<String> eventsToBePublished) {
+    public void publishEvents(String schemaName, List<String> eventsToBePublished) {
         List<List<String>> eventBatches = Lists.partition(eventsToBePublished, 1000);
         for (List<String> eventBatch : eventBatches) {
             publishBatch(schemaName, eventBatch);
@@ -281,10 +213,8 @@ public class EventsServiceDataManager {
             closeHttpResponse(httpResponse);
         }
     }
-    // #TODO Is the following comment required?
     //endregion
 
-    // #TODO Is the following comment required?
     //region <Utilities>
     private CloseableHttpResponse executeHttpPost(String uri, String requestBody) throws IOException {
         HttpPost httpPost = new HttpPost(uri);
@@ -304,20 +234,5 @@ public class EventsServiceDataManager {
                 (httpResponse.getStatusLine().getStatusCode() == 202 || httpResponse.getStatusLine().getStatusCode() == 201
                         || httpResponse.getStatusLine().getStatusCode() == 200);
     }
-
-    private List<String> generateEventsForSchema(File eventsFromFile) {
-        List<String> eventsToBePublishedForSchema = Lists.newArrayList();
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode arrayNode = mapper.readTree(eventsFromFile);
-            for (JsonNode node : arrayNode) {
-                eventsToBePublishedForSchema.add(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node));
-            }
-        } catch (Exception ex) {
-            LOGGER.error("Error encountered while generating events from file: {}", eventsFromFile.getAbsolutePath(), ex);
-        }
-        return eventsToBePublishedForSchema;
-    }
-    // #TODO Is the following comment required?
     //endregion
 }

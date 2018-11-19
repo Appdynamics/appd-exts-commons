@@ -8,13 +8,17 @@
 package com.appdynamics.extensions.eventsservice;
 
 import com.appdynamics.extensions.http.Http4ClientBuilder;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.collect.Lists;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.List;
@@ -41,6 +46,7 @@ import static org.powermock.api.mockito.PowerMockito.*;
 @PrepareForTest({EventsServiceDataManager.class, Http4ClientBuilder.class, HttpClientBuilder.class})
 @PowerMockIgnore({"javax.net.ssl.*"})
 public class EventsServiceDataManagerTest {
+    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceDataManagerTest.class);
     private EventsServiceDataManager eventsServiceDataManager;
     private Map<String, ?> eventsServiceParams;
     private CloseableHttpClient httpClient;
@@ -68,8 +74,8 @@ public class EventsServiceDataManagerTest {
                 return "schema1";
             }
         };
-        eventsServiceDataManager.createSchema("schema1", new File("src/test/resources/eventsservice/" +
-                "createSchema.json"));
+        eventsServiceDataManager.createSchema("schema1", FileUtils.readFileToString(new File("src/" +
+                "test/resources/eventsservice/createSchema.json")));
         verify(httpClient, times(1)).execute(httpPost);
     }
 
@@ -108,8 +114,8 @@ public class EventsServiceDataManagerTest {
                 return "schema1";
             }
         };
-        eventsServiceDataManager.updateSchema("Schema1", new File("src/test/resources/eventsservice/" +
-                "updateSchema.json"));
+        eventsServiceDataManager.updateSchema("Schema1", FileUtils.readFileToString(new File("src/test/" +
+                "resources/eventsservice/updateSchema.json")));
         verify(httpClient, times(1)).execute(httpPatch);
     }
 
@@ -143,8 +149,22 @@ public class EventsServiceDataManagerTest {
                 return "schema1";
             }
         };
-        eventsServiceDataManager.publishEvent("schema1", new File("src/test/resources/eventsservice/" +
-                "publishEvents.json"));
+        eventsServiceDataManager.publishEvents("schema1", generateEventsFromFile(new File("src/test/" +
+                "resources/eventsservice/publishEvents.json")));
         verify(httpClient, times(2)).execute(httpPost);
+    }
+
+    private List<String> generateEventsFromFile(File eventsFromFile) {
+        List<String> eventsToBePublishedForSchema = Lists.newArrayList();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode arrayNode = mapper.readTree(eventsFromFile);
+            for (JsonNode node : arrayNode) {
+                eventsToBePublishedForSchema.add(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node));
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Error encountered while generating events from file: {}", eventsFromFile.getAbsolutePath(), ex);
+        }
+        return eventsToBePublishedForSchema;
     }
 }

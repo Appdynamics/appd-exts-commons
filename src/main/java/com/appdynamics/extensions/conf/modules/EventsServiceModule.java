@@ -19,15 +19,15 @@ import static com.appdynamics.extensions.eventsservice.utils.EventsServiceUtils.
  * @author : Aditya Jagtiani
  */
 public class EventsServiceModule {
-    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(DerivedMetricsModule.class);
+    private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceModule.class);
+    private EventsServiceDataManager eventsServiceDataManager;
 
-    // #TODO The indentation of this method has been changed by me. Please verify the changes.
-    public EventsServiceDataManager initEventsServiceDataManager(String monitorName, Map<String, ?> config) {
+    public void initEventsServiceDataManager(String monitorName, Map<String, ?> config) {
         if (config.containsKey("eventsServiceParameters")) {
             Map<String, ?> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
             if (isValid(eventsServiceParameters)) {
                 LOGGER.info("Events Service parameters validated successfully for monitor: {}. Initializing..", monitorName);
-                return new EventsServiceDataManager(eventsServiceParameters);
+                eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParameters);
             } else {
                 LOGGER.error("Events Service parameters invalid for monitor: {}. Check your config.yml and retry before " +
                         "proceeding", monitorName);
@@ -35,6 +35,12 @@ public class EventsServiceModule {
         } else {
             LOGGER.info("Events Service parameters not set for monitor: {}. Skipping", monitorName);
         }
-        return null;
+    }
+
+    public EventsServiceDataManager getEventsServiceDataManager() {
+        if (eventsServiceDataManager != null) {
+            return eventsServiceDataManager;
+        }
+        throw new RuntimeException("The Events Service Data Manager is not initialized.");
     }
 }
