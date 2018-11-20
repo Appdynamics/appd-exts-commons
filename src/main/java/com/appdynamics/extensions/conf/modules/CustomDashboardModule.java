@@ -30,7 +30,7 @@ public class CustomDashboardModule {
     private String dashboardTemplate;
     private CustomDashboardUploader dashboardUploader;
     private long timeDelayInMilliSeconds;
-//    private CloseableHttpClient client;
+    private CloseableHttpClient client;
     private volatile AtomicLong lastRecordedTime = new AtomicLong();
     private Map httpProperties;
 
@@ -48,6 +48,7 @@ public class CustomDashboardModule {
                 timeDelayInMilliSeconds = getTimeDelay(customDashboardConfig) * 1000;
                 dashboardUploader = new CustomDashboardUploader(new ControllerApiService(controllerInfo));
                 httpProperties = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
+                client = Http4ClientBuilder.getBuilder(httpProperties).build();
                 initialized = true;
             }
         } else {
@@ -61,8 +62,6 @@ public class CustomDashboardModule {
             if (hasTimeElapsed(currentTime, lastRecordedTime.get(), timeDelayInMilliSeconds)) {
                 try {
                     logger.debug("Attempting to upload dashboard: {}", dashboardName);
-                    CloseableHttpClient client = Http4ClientBuilder.getBuilder(httpProperties).build();
-
                     dashboardUploader.checkAndUpload(client, dashboardName, dashboardTemplate,
                             httpProperties, overwrite);
                     lastRecordedTime.set(currentTime);

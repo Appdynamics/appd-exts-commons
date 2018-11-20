@@ -8,8 +8,8 @@ import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -48,7 +48,7 @@ public class ControllerApiService {
         urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
 
         HttpGet get = new HttpGet(urlBuilder.path("controller/auth?action=login").build());
-        HttpResponse response;
+        CloseableHttpResponse response = null;
         CookiesCsrf cookiesCsrf = new CookiesCsrf();
         StatusLine statusLine;
         try {
@@ -85,6 +85,8 @@ public class ControllerApiService {
 
         } catch (IOException e) {
             throw new ApiException("Error in controller login", e);
+        } finally {
+            closeHttpResponse(response);
         }
     }
 
@@ -101,8 +103,9 @@ public class ControllerApiService {
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
             get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
         }
+        CloseableHttpResponse response = null;
         try {
-            HttpResponse response = httpClient.execute(get);
+            response = httpClient.execute(get);
             JsonNode arrayNode = null;
             StatusLine statusLine = response.getStatusLine();
             if (statusLine != null && statusLine.getStatusCode() == 200) {
@@ -115,8 +118,21 @@ public class ControllerApiService {
             return arrayNode;
         } catch (IOException e) {
             throw new ApiException("Error in getting all dashboards", e);
+        } finally {
+            closeHttpResponse(response);
         }
     }
+
+    private void closeHttpResponse(CloseableHttpResponse response) {
+        if (response != null) {
+            try {
+                response.close();
+            } catch (Exception ex) {
+                logger.error("Error encountered while closing the HTTP response", ex);
+            }
+        }
+    }
+
 
     /*
       #TODO This uses basic http to do Multi-part form upload. Need to change this by using the apache client once the dependency with MA is resolved.
