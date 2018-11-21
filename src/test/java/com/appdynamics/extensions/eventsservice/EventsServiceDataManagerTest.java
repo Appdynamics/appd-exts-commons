@@ -68,19 +68,14 @@ public class EventsServiceDataManagerTest {
         whenNew(HttpPost.class).withAnyArguments().thenReturn(httpPost);
         doNothing().when(httpPost).setHeader(anyString(), anyString());
         doNothing().when(httpPost).setEntity(isA(StringEntity.class));
-        eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParams) {
-            @Override
-            public String retrieveSchema(String schemaName) {
-                return "schema1";
-            }
-        };
+        eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParams);
         eventsServiceDataManager.createSchema("schema1", FileUtils.readFileToString(new File("src/" +
                 "test/resources/eventsservice/createSchema.json")));
         verify(httpClient, times(1)).execute(httpPost);
     }
 
     @Test
-    public void retrieveSchemaTest() throws Exception {
+    public void retrieveSchemaTestWhenSchemaExists() throws Exception {
         HttpGet httpGet = mock(HttpGet.class);
         CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
         StatusLine statusLine = mock(StatusLine.class);
@@ -96,8 +91,23 @@ public class EventsServiceDataManagerTest {
 
         eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParams);
         Assert.assertEquals("SchemaBody", eventsServiceDataManager.retrieveSchema("schema1"));
+    }
 
+    @Test
+    public void retrieveSchemaTestWhenSchemaDoesNotExist() throws Exception {
+        HttpGet httpGet = mock(HttpGet.class);
+        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+        StatusLine statusLine = mock(StatusLine.class);
+        StringEntity entity = new StringEntity("SchemaBody");
+
+        whenNew(HttpGet.class).withAnyArguments().thenReturn(httpGet);
+        doNothing().when(httpGet).setHeader(anyString(), anyString());
+
+        when(httpClient.execute(httpGet)).thenReturn(httpResponse);
+        when(httpResponse.getStatusLine()).thenReturn(statusLine);
         when(statusLine.getStatusCode()).thenReturn(400);
+        when(httpResponse.getEntity()).thenReturn(entity);
+
         eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParams);
         Assert.assertEquals("", eventsServiceDataManager.retrieveSchema("schema1"));
     }

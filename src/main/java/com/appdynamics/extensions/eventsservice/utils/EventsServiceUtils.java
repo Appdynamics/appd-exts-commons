@@ -17,7 +17,7 @@ public class EventsServiceUtils {
     public static boolean isValid(Map<String, ?> eventsServiceParameters) {
         return eventsServiceParameters.get("host") != null
                 && eventsServiceParameters.get("port") != null
-                && eventsServiceParameters.get("globalAccount") != null
+                && eventsServiceParameters.get("globalAccountName") != null
                 && eventsServiceParameters.get("eventsApiKey") != null
                 && eventsServiceParameters.get("useSsl") != null;
     }
