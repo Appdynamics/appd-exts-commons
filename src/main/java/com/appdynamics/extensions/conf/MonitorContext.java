@@ -19,6 +19,7 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
@@ -41,8 +42,6 @@ public class MonitorContext {
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
-    // #TODO Please remove the below comment.
-    // MetricCharReplace changes
     private MetricCharSequenceReplaceModule metricCharSequenceReplaceModule;
 
     MonitorContext(String monitorName) {
@@ -70,6 +69,7 @@ public class MonitorContext {
             cacheModule.initCache();
             healthCheckModule.initMATroubleshootChecks(monitorName, config);
             metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(config);
+            logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
@@ -145,8 +145,10 @@ public class MonitorContext {
     }
 
     public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
-        return metricCharSequenceReplaceModule.getMetricSequenceReplacer();
+        return metricCharSequenceReplaceModule.getMetricCharSequenceReplacer();
     }
 
-    //#TODO Please add a setter also.Check the other modules, this is provided as a flexibility to the developers.
+    public void setMetricCharSequenceReplaceModule (MetricCharSequenceReplaceModule metricCharSequenceReplaceModule) {
+        this.metricCharSequenceReplaceModule = metricCharSequenceReplaceModule;
+    }
 }

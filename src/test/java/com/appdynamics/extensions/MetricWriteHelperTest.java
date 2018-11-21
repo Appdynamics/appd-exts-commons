@@ -19,8 +19,10 @@ package com.appdynamics.extensions;
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
+import com.appdynamics.extensions.conf.modules.MetricCharSequenceReplaceModule;
 import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.metrics.DefaultMetricProperties;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.yml.YmlReader;
@@ -40,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -200,11 +204,50 @@ public class MetricWriteHelperTest {
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|samp,le1", "7",MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
                 MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
-        metricWriteHelper.printMetric("Custom Metrics|Sample Monitor||sample1", "7",MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
+        metricWriteHelper.printMetric("Custom Metrics|Sample Monitor||sample2", "7",MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
                 MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
-        metricWriteHelper.printMetric("Custom Metrics|Samplé Monitor|sample1", "7",MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
+        metricWriteHelper.printMetric("Custom Metrics|Samplé Monitor|sample4", "7",MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
                 MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
+        List<Metric> metrics = new ArrayList<>();
+        Metric metric1 = new Metric("samp,le1", "10", "Custom Metrics|Sample Monitor|samp,le1");
+        Metric metric2 = new Metric("sample2", "10", "Custom Metrics|Sample Monitor||sample2");
+        Metric metric3 = new Metric("sample3", "10", "Custom Metrics|Sample Monitor| |sample3");
+        Metric metric4 = new Metric("sample4", "10", "Custom Metrics|Samplé Monitor|sample4");
+        metrics.add(metric1);
+        metrics.add(metric2);
+        metrics.add(metric3);
+        metrics.add(metric4);
+        metricWriteHelper.transformAndPrintMetrics(metrics);
         verify(metricWriter, never()).printMetric(stringArgumentCaptor.capture());
+    }
+
+    @Test
+    public void whenMetricPathConstructorIsUsedThenReplacementsShouldBeDone() {
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
+        MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
+        MonitorContext context = mock(MonitorContext.class);
+        when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");
+        when(configuration.getContext()).thenReturn(context);
+        MetricWriter metricWriter = mock(MetricWriter.class);
+        when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
+        MetricCharSequenceReplaceModule metricCharSequenceReplaceModule = new MetricCharSequenceReplaceModule();
+        Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/metricReplace/config_with_non_ascii.yml"));
+        metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(conf);
+        MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
+        List<Metric> metricList = Lists.newArrayList();
+        Metric metric1 = new Metric("ÇPU utilización", "10", new HashMap<String, Object>(),
+                "Custom Metrics|Sample Monitor|","ÇPU utilización" );
+        Metric metric2 = new Metric("Memóry, Free", "10", new HashMap<String, Object>(),
+                "Custom Metrics|Sample Monitor|","Memóry, Free" );
+        Metric metric3 = new Metric("Memóry Used", "10", "Custom Metrics|Sample Monitor|", "Memóry Used");
+        metricList.add(metric1);
+        metricList.add(metric2);
+        metricList.add(metric3);
+        metricWriteHelper.transformAndPrintMetrics(metricList);
+        metricWriteHelper.onComplete();
+        verify(metricWriter, times(4)).printMetric(stringArgumentCaptor.capture());
     }
 }
 

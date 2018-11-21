@@ -52,14 +52,31 @@ public class Metric {
         this.metricProperties = buildMetricProperties(metricProperties);
     }
 
-    // #TODO Why is the replacementMap(which should not have map in the name) being taken as an input here? In the
-    // MetricCharSequenceReplaceModule, you are initalizing a MetricCharSequenceReplacer after the parsing
-    // the config.yml, the design is not clear here.
-    // #TODO Are there second thoughts about the constructor below?
-    // is this constructor required??
-    public Metric(final String metricName, final String metricValue, Map<String, ?> metricProperties,
-                  final MetricCharSequenceReplacer replacementMap, final String metricPrefix, final String... tokens) {
-        this(metricName, metricValue,  MetricPathUtils.buildMetricPath(replacementMap, metricPrefix, tokens), metricProperties);
+    /**
+     * Constructor for building the metric path with replacements, with metric properties. Use this constructor when
+     * you want to apply metric replacements and build the metric path.
+     *
+     * @param metricName        Name of the metric
+     * @param metricValue       Value of the metric
+     * @param metricProperties  Map of metric properties
+     * @param metricPrefix      Metric Path prefix
+     * @param tokens            Various tokens in metric path
+     */
+    public Metric(String metricName, String metricValue, Map<String, ?> metricProperties, String metricPrefix, String... tokens) {
+        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, tokens), metricProperties);
+    }
+
+    /**
+     * Constructor for building the metric path with replacements. Use this constructor when you want to apply
+     * metric replacements and build the metric path.
+     *
+     * @param metricName        Name of the metric
+     * @param metricValue       Value of the metric
+     * @param metricPrefix      Metric Path prefix
+     * @param tokens            Various tokens in metric path
+     */
+    public Metric(String metricName, String metricValue, String metricPrefix, String... tokens) {
+        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, tokens));
     }
 
     private MetricProperties buildMetricProperties(Map<String, ?> metricProperties){

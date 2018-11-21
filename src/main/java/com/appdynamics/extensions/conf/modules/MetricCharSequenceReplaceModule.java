@@ -17,9 +17,9 @@ package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
+import com.appdynamics.extensions.util.MetricPathUtils;
 import org.slf4j.Logger;
 
-import java.nio.charset.Charset;
 import java.util.Map;
 
 /**
@@ -32,23 +32,20 @@ public class MetricCharSequenceReplaceModule {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricCharSequenceReplaceModule.class);
 
     private MetricCharSequenceReplacer replacer;
-    // #TODO Can you please resolve the below TODO?
-    //TODO check length, check for *, check again for = and other doubtful chars in metric path
+
     /**
      * Initializes {@link MetricCharSequenceReplacer} with the values configured in config.yml
      *
      * @param config {@code Map<String, String>} map view of the config.yml
      */
-    public void initMetricCharSequenceReplacer(final Map<String, ?> config) {
-        // #TODO It would be better if this log statement is placed in MonitorContext class. Can you please check?
-        logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
+    public void initMetricCharSequenceReplacer(Map<String, ?> config) {
         replacer = MetricCharSequenceReplacer.createInstance(config);
+        MetricPathUtils.registerMetricCharSequenceReplacer(replacer);
         logger.info("MetricCharSequenceReplacer initialized successfully");
     }
 
-    //#TODO Can you please keep the method name consistent with the class name?
-    public MetricCharSequenceReplacer getMetricSequenceReplacer() {
+    public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
         return replacer;
     }
-    //TODO: You can simply combine these two methods into one and call it from MonitorContext's getMetricCharSequenceReplacer()
+    //TODO: You can simply combine these two methods into one and call it from MonitorContext's getMetricCharSequenceReplacer() - discussed
 }

@@ -45,7 +45,7 @@ public class MetricPathUtilsTest {
     @Test
     public void buildMetricPathWithNullMetricReplacementTest() {
         String[] suffixes = new String[] {"North Americas", "Queue1", "Messages"};
-        String path = MetricPathUtils.buildMetricPath(null, metricPrefix, suffixes);
+        String path = MetricPathUtils.buildMetricPath(metricPrefix, suffixes);
         Assert.assertEquals("Custom Metrics|Server1|North Americas|Queue1|Messages", path);
     }
 
@@ -53,8 +53,9 @@ public class MetricPathUtilsTest {
     public void buildMetricPathWithMetricReplacementTest() {
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/metricReplace/config_with_non_ascii.yml"));
         MetricCharSequenceReplacer replacer = MetricCharSequenceReplacer.createInstance(conf);
+        MetricPathUtils.registerMetricCharSequenceReplacer(replacer);
         String[] suffixes = new String[] {"Español", "Qûeue1", "Messagés"};
-        String path = MetricPathUtils.buildMetricPath(replacer, metricPrefix, suffixes);
+        String path = MetricPathUtils.buildMetricPath(metricPrefix, suffixes);
         Assert.assertEquals("Custom Metrics|Server1|Espanol|Queue1|Messages", path);
     }
 }

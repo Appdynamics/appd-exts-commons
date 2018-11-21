@@ -17,7 +17,7 @@ package com.appdynamics.extensions;
 
 import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
 import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
-import static com.appdynamics.extensions.util.StringUtils.validateStrings;
+import static com.appdynamics.extensions.util.StringUtils.isValidString;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
@@ -64,9 +64,8 @@ public class MetricWriteHelper {
         derivedMetricsCalculator = baseMonitor.getContextConfiguration().getContext().createDerivedMetricsCalculator();
     }
 
-    //# TODO can you please change the name of the validateString() to isValidString()?
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&
+        if (isValidString(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&
                 isValidMetricPath(metricPath)) {
             if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
@@ -86,7 +85,7 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            //TODO: why is this a logger.warn?
+            //TODO: why is this a logger.warn? - discussed
             logger.warn("The metric is not valid. Name - {}, Value - {}, Path - {}, Qualifiers - {}, {}, {}",
                     MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup,
                     clusterRollup);
@@ -121,7 +120,7 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
-        if (validateStrings(metricPath, metricType) && value != null) {
+        if (isValidString(metricPath, metricType) && value != null) {
             String valStr = value.setScale(0, BigDecimal.ROUND_HALF_UP).toPlainString();
             String[] qualifiers = createMetricType(metricType);
             printMetric(metricPath, valStr, qualifiers[0], qualifiers[1], qualifiers[2]);

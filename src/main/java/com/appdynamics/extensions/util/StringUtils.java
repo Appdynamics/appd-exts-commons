@@ -142,7 +142,7 @@ public class StringUtils {
         return sb.toString();
     }
 
-    public static boolean validateStrings(String...args) {
+    public static boolean isValidString(String...args) {
         if(args != null){
             for(String arg : args){
                 if(Strings.isNullOrEmpty(arg)){
