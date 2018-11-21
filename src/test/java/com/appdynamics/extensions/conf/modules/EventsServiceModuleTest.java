@@ -5,9 +5,9 @@
  * The copyright notice above does not evidence any actual or intended publication of such source code.
  */
 
-package com.appdynamics.extensions.eventsservice;
+package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.conf.modules.EventsServiceModule;
+import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.yml.YmlReader;
 import org.junit.Assert;
 import org.junit.Before;
