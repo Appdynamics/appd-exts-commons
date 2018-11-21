@@ -45,4 +45,12 @@ public class EventsServiceModuleTest {
         eventsServiceModule.initEventsServiceDataManager("testMonitor", config);
         eventsServiceModule.getEventsServiceDataManager();
     }
+
+    @Test(expected = RuntimeException.class)
+    public void testInitializationWithoutEventsServiceParameters() {
+        config = YmlReader.readFromFile(new File("src/test/resources/conf/" +
+                "config_withoutEventsServiceParameters.yml"));
+        eventsServiceModule.initEventsServiceDataManager("testMonitor", config);
+        eventsServiceModule.getEventsServiceDataManager();
+    }
 }
