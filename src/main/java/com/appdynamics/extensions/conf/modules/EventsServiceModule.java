@@ -24,8 +24,11 @@ public class EventsServiceModule {
 
     public void initEventsServiceDataManager(String monitorName, Map<String, ?> config) {
         if (config.containsKey("eventsServiceParameters")) {
-            Map<String, ?> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
+            Map<String, ? super Object> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
             if (isValid(eventsServiceParameters)) {
+                if(config.containsKey("connection")) {
+                    eventsServiceParameters.put("connection", (Map)config.get("connection"));
+                }
                 LOGGER.info("Events Service parameters validated successfully for monitor: {}. Initializing..", monitorName);
                 eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParameters);
             } else {
