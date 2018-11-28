@@ -26,9 +26,7 @@ public class EventsServiceModule {
         if (config.containsKey("eventsServiceParameters")) {
             Map<String, ? super Object> eventsServiceParameters = (Map) config.get("eventsServiceParameters");
             if (isValid(eventsServiceParameters)) {
-                if(config.containsKey("connection")) {
-                    eventsServiceParameters.put("connection", (Map)config.get("connection"));
-                }
+                addConnectionPropertiesToEventsServiceParameters(config, eventsServiceParameters);
                 LOGGER.info("Events Service parameters validated successfully for monitor: {}. Initializing..", monitorName);
                 eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParameters);
             } else {
@@ -37,6 +35,16 @@ public class EventsServiceModule {
             }
         } else {
             LOGGER.info("Events Service parameters not set for monitor: {}. Skipping", monitorName);
+        }
+    }
+
+    private void addConnectionPropertiesToEventsServiceParameters(Map<String, ?> config,
+                                                                  Map<String, ? super Object> eventsServiceParameters) {
+        if(config.containsKey("connection")) {
+            eventsServiceParameters.put("connection", (Map)config.get("connection"));
+        }
+        if(config.containsKey("proxy")) {
+            eventsServiceParameters.put("proxy", (Map)config.get("proxy"));
         }
     }
 
