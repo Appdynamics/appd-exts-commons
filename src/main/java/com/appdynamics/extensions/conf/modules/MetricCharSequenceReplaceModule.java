@@ -17,7 +17,6 @@ package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
-import com.appdynamics.extensions.util.MetricPathUtils;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -40,7 +39,6 @@ public class MetricCharSequenceReplaceModule {
      */
     public void initMetricCharSequenceReplacer(Map<String, ?> config) {
         replacer = MetricCharSequenceReplacer.createInstance(config);
-        MetricPathUtils.registerMetricCharSequenceReplacer(replacer);
         logger.info("MetricCharSequenceReplacer initialized successfully");
     }
 

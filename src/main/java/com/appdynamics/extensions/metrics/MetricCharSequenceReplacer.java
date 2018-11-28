@@ -16,7 +16,6 @@
 package com.appdynamics.extensions.metrics;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.MetricPathUtils;
 import com.google.common.base.CharMatcher;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -98,6 +97,9 @@ public class MetricCharSequenceReplacer {
             if (userReplacementMap == null || userReplacementMap.isEmpty()) {
                 logger.debug("No suitable replacements configured in config.yml.");
             } else replacementMap.putAll(userReplacementMap);
+        } else {
+            logger.debug("No suitable replacements configured in config.yml. MetricCharReplacer will be initialized " +
+                    "with default replacements, \"|,:\" will be replaced by empty string");
         }
         return new MetricCharSequenceReplacer(replacementMap);
     }

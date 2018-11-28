@@ -15,16 +15,19 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.ABaseMonitor;
+import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
 import com.google.common.base.Splitter;
+
 import java.util.List;
 
 public class MetricPathUtils {
     private static final String DEFAULT_METRIC_SEPARATOR = "|";
-    private static MetricCharSequenceReplacer replacer;
+    private static MonitorContext monitorContext;
 
-    public static void registerMetricCharSequenceReplacer(MetricCharSequenceReplacer r) {
-        replacer = r;
+    public static void registerMetricCharSequenceReplacer(ABaseMonitor baseMonitor) {
+        monitorContext = baseMonitor.getContextConfiguration().getContext();
     }
 
     public static final Splitter PIPE_SPLITTER = Splitter.on('|')
@@ -48,7 +51,11 @@ public class MetricPathUtils {
      * @return  {@code String} with replaced characters
      */
     public static String getReplacedString(String toReplace) {
-        return replacer.getReplacementFromCache(toReplace);
+        MetricCharSequenceReplacer replacer = monitorContext.getMetricCharSequenceReplacer();
+        if (replacer != null) {
+            return replacer.getReplacementFromCache(toReplace);
+        }
+        return toReplace;
     }
 
     /**
@@ -62,11 +69,7 @@ public class MetricPathUtils {
     public static String buildMetricPath(final String metricPrefix, final String... metricTokens) {
         StringBuilder pathBuilder = new StringBuilder(StringUtils.trimTrailing(metricPrefix.trim(), "|"));
         for (String token : metricTokens) {
-            if (replacer == null) {
-                pathBuilder.append(DEFAULT_METRIC_SEPARATOR).append(token);
-            } else {
-                pathBuilder.append(DEFAULT_METRIC_SEPARATOR).append(getReplacedString(token));
-            }
+            pathBuilder.append(DEFAULT_METRIC_SEPARATOR).append(getReplacedString(token));
         }
         return pathBuilder.toString();
     }
