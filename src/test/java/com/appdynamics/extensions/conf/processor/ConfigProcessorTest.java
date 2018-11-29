@@ -5,9 +5,9 @@
  * The copyright notice above does not evidence any actual or intended publication of such source code.
  */
 
-package com.appdynamics.extensions.config;
+package com.appdynamics.extensions.conf.processor;
 
-import com.appdynamics.extensions.assertUtils.AssertUtils;
+import com.appdynamics.extensions.asserts.CustomAsserts;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
@@ -88,11 +88,11 @@ public class ConfigProcessorTest {
         Assert.assertEquals(2, awsAccounts.size());
         Map<String, String> awsAccount1 = awsAccounts.get(0);
         Map<String, String> awsAccount2 = awsAccounts.get(0);
-        //#TODO There are duplicate asserts below. Please remove them.
-        AssertUtils.assertOneOf(Lists.newArrayList("MyEC2AccessKey1", "MyEC2AccessKey2"), awsAccount1.get("awsAccessKey"));
-        AssertUtils.assertOneOf(Lists.newArrayList("MyEC2AccessKey1", "MyEC2AccessKey2"), awsAccount2.get("awsAccessKey"));
-        AssertUtils.assertOneOf(Lists.newArrayList("MyEC2SecretKey1", "MyEC2SecretKey2"), awsAccount1.get("awsSecretKey"));
-        AssertUtils.assertOneOf(Lists.newArrayList("MyEC2SecretKey1", "MyEC2SecretKey2"), awsAccount2.get("awsSecretKey"));
+        //Different asserts, getting values from different object
+        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2AccessKey1", "MyEC2AccessKey2"), awsAccount1.get("awsAccessKey"));
+        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2AccessKey1", "MyEC2AccessKey2"), awsAccount2.get("awsAccessKey"));
+        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2SecretKey1", "MyEC2SecretKey2"), awsAccount1.get("awsSecretKey"));
+        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2SecretKey1", "MyEC2SecretKey2"), awsAccount2.get("awsSecretKey"));
         Map<String, ?> proxyConfig = (Map<String, ?>) awsConfig.get("proxyConfig");
         Assert.assertEquals("localhost", proxyConfig.get("host"));
         Assert.assertEquals("8090", proxyConfig.get("port"));

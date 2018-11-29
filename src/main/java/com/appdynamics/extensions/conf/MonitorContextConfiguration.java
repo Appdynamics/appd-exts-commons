@@ -9,7 +9,7 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.conf.modules.FileWatchListenerModule;
-import com.appdynamics.extensions.config.ConfigProcessor;
+import com.appdynamics.extensions.conf.processor.ConfigProcessor;
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;

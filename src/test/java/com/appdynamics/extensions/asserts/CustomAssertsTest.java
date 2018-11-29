@@ -5,7 +5,7 @@
  * The copyright notice above does not evidence any actual or intended publication of such source code.
  */
 
-package com.appdynamics.extensions.assertUtils;
+package com.appdynamics.extensions.asserts;
 
 import com.google.common.collect.Lists;
 import org.junit.Test;
@@ -13,15 +13,15 @@ import org.junit.Test;
 /**
  * @author Satish Muddam
  */
-public class AssertUtilsTest {
+public class CustomAssertsTest {
 
     @Test
     public void testAssertOneOfWithMatchedValue() {
-        AssertUtils.assertOneOf(Lists.newArrayList(1, 2, 3, 4), 3);
+        CustomAsserts.assertOneOf(Lists.newArrayList(1, 2, 3, 4), 3);
     }
 
     @Test(expected = AssertionError.class)
     public void testAssertOneOfWithNoMatchedValues() {
-        AssertUtils.assertOneOf(Lists.newArrayList(1, 2, 3, 4), 5);
+        CustomAsserts.assertOneOf(Lists.newArrayList(1, 2, 3, 4), 5);
     }
 }

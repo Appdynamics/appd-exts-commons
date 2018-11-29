@@ -5,7 +5,7 @@
  * The copyright notice above does not evidence any actual or intended publication of such source code.
  */
 
-package com.appdynamics.extensions.assertUtils;
+package com.appdynamics.extensions.asserts;
 
 import org.junit.Assert;
 
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Satish Muddam
  */
-public class AssertUtils extends Assert {
+public class CustomAsserts extends Assert {
 
 
     public static <T> void assertOneOf(List<T> expectsOneOf, T value) {
