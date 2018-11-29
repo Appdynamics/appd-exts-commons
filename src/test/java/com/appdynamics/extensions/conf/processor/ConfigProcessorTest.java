@@ -31,7 +31,7 @@ public class ConfigProcessorTest {
 
     private static final String CONFIG_FILE = "src/test/resources/conf/config_SystemEnvVariables.yml";
 
-    private static final String CONIG_EC2 = "src/test/resources/conf/config_ec2_SystemVariables.yml";
+    private static final String CONFIG_EC2 = "src/test/resources/conf/config_ec2_SystemVariables.yml";
 
     private Map<String, String> populateSystemEnvParams() {
         Map<String, String> dummy = new HashMap<>();
@@ -79,7 +79,7 @@ public class ConfigProcessorTest {
     public void testConfigEnvironmentVariablesForEC2() {
         PowerMockito.mockStatic(System.class);
         Mockito.when(System.getenv()).thenReturn(populateSystemEnvParamsForEC2());
-        Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONIG_EC2));
+        Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_EC2));
         if (rootElem == null) {
             Assert.fail("Unable to get data from the config file");
         }
@@ -87,12 +87,11 @@ public class ConfigProcessorTest {
         List<Map<String, String>> awsAccounts = (List<Map<String, String>>) awsConfig.get("accounts");
         Assert.assertEquals(2, awsAccounts.size());
         Map<String, String> awsAccount1 = awsAccounts.get(0);
-        Map<String, String> awsAccount2 = awsAccounts.get(0);
-        //Different asserts, getting values from different object
-        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2AccessKey1", "MyEC2AccessKey2"), awsAccount1.get("awsAccessKey"));
-        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2AccessKey1", "MyEC2AccessKey2"), awsAccount2.get("awsAccessKey"));
-        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2SecretKey1", "MyEC2SecretKey2"), awsAccount1.get("awsSecretKey"));
-        CustomAsserts.assertOneOf(Lists.newArrayList("MyEC2SecretKey1", "MyEC2SecretKey2"), awsAccount2.get("awsSecretKey"));
+        Map<String, String> awsAccount2 = awsAccounts.get(1);
+        Assert.assertTrue("MyEC2AccessKey1".equals(awsAccount1.get("awsAccessKey")));
+        Assert.assertTrue("MyEC2SecretKey1".equals(awsAccount1.get("awsSecretKey")));
+        Assert.assertTrue("MyEC2AccessKey2".equals(awsAccount2.get("awsAccessKey")));
+        Assert.assertTrue("MyEC2SecretKey2".equals(awsAccount2.get("awsSecretKey")));
         Map<String, ?> proxyConfig = (Map<String, ?>) awsConfig.get("proxyConfig");
         Assert.assertEquals("localhost", proxyConfig.get("host"));
         Assert.assertEquals("8090", proxyConfig.get("port"));
