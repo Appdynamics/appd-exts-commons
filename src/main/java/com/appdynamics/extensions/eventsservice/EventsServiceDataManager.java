@@ -32,7 +32,7 @@ import static com.appdynamics.extensions.http.HttpClientUtils.closeHttpResponse;
  * for Schemas and batch publishing of Events.
  *
  * @author : Aditya Jagtiani
- * @since : 2.2.1
+ * @since : 2.2.0
  */
 public class EventsServiceDataManager {
     private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceDataManager.class);
