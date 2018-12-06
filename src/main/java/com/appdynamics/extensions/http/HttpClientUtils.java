@@ -173,4 +173,14 @@ public class HttpClientUtils {
     public interface ResponseConverter<T> {
         T convert(HttpEntity entity);
     }
+
+    public static void closeHttpResponse(CloseableHttpResponse response) {
+        if (response != null) {
+            try {
+                response.close();
+            } catch (Exception ex) {
+                logger.error("Error encountered while closing the HTTP response", ex);
+            }
+        }
+    }
 }

@@ -15,9 +15,7 @@
 
 package com.appdynamics.extensions;
 
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
-import static com.appdynamics.extensions.util.StringUtils.validateStrings;
-
+import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
@@ -35,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
+import static com.appdynamics.extensions.util.StringUtils.validateStrings;
 
 
 public class MetricWriteHelper {
@@ -85,7 +86,6 @@ public class MetricWriteHelper {
         } else {
             logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
         }
-
     }
 
     protected void addForDerivedMetricsCalculation(String metricPath, String metricValue) {
@@ -248,5 +248,4 @@ public class MetricWriteHelper {
 
     public void reset() {
     }
-
 }
