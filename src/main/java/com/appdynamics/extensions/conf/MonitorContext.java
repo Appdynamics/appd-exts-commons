@@ -10,6 +10,7 @@ package com.appdynamics.extensions.conf;
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
+import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
@@ -43,6 +44,7 @@ public class MonitorContext {
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
     private MetricCharSequenceReplaceModule metricCharSequenceReplaceModule;
+    private EventsServiceModule eventsServiceModule;
 
     MonitorContext(String monitorName) {
         this.monitorName = monitorName;
@@ -55,6 +57,7 @@ public class MonitorContext {
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
         healthCheckModule = new HealthCheckModule();
         metricCharSequenceReplaceModule = new MetricCharSequenceReplaceModule();
+        eventsServiceModule = new EventsServiceModule();
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
@@ -70,10 +73,10 @@ public class MonitorContext {
             healthCheckModule.initMATroubleshootChecks(monitorName, config);
             metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(config);
             logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
+            eventsServiceModule.initEventsServiceDataManager(monitorName, config);
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
-
     }
 
     public static boolean isWorkbenchMode() {
@@ -143,12 +146,19 @@ public class MonitorContext {
     public PerMinValueCalculator getPerMinValueCalculator() {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
-
     public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
         return metricCharSequenceReplaceModule.getMetricCharSequenceReplacer();
     }
 
     public void setMetricCharSequenceReplaceModule (MetricCharSequenceReplaceModule metricCharSequenceReplaceModule) {
         this.metricCharSequenceReplaceModule = metricCharSequenceReplaceModule;
+    }
+
+    public EventsServiceDataManager getEventsServiceDataManager() {
+        return eventsServiceModule.getEventsServiceDataManager();
+    }
+
+    public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
+        this.eventsServiceModule = eventsServiceModule;
     }
 }

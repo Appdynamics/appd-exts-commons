@@ -19,6 +19,7 @@ import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
 import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
 import static com.appdynamics.extensions.util.StringUtils.isValidString;
 
+import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
@@ -36,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-
 
 public class MetricWriteHelper {
 
@@ -90,7 +90,6 @@ public class MetricWriteHelper {
                     MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup,
                     clusterRollup);
         }
-
     }
 
     protected void addForDerivedMetricsCalculation(String metricPath, String metricValue) {
@@ -253,5 +252,4 @@ public class MetricWriteHelper {
 
     public void reset() {
     }
-
 }
