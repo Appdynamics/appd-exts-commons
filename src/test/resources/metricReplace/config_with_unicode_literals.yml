@@ -30,7 +30,7 @@ metrics:
       timeRollUpType: "AVERAGE"
       clusterRollUpType: "INDIVIDUAL"
 
-metricReplacements:
+metricPathReplacements:
   - replace: "\u00c7"
     replaceWith: "C"
   - replace: "\u00f3"

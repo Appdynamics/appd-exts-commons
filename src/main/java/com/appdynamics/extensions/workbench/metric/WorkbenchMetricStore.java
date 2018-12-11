@@ -35,8 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static com.appdynamics.extensions.util.StringUtils.isValidMetric;
 import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
 import static com.appdynamics.extensions.util.StringUtils.isValidString;
 
 /**
@@ -66,7 +66,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
 
     @Override
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (isValidString(metricPath, metricValue) && isValidMetricValue(metricValue) && isValidMetricPath(metricPath)) {
+        if (isValidMetric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
             addMetric(metricPath, new BigDecimal(metricValue));
         } else {
             logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, metricValue);

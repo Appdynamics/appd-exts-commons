@@ -164,4 +164,9 @@ public class StringUtils {
     public static boolean isValidMetricPath(String metricPath) {
         return !metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher.ascii().matchesAllOf(metricPath);
     }
+
+    public static boolean isValidMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
+        return isValidString(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&
+                isValidMetricPath(metricPath);
+    }
 }

@@ -30,7 +30,7 @@ metrics:
       timeRollUpType: "AVERAGE"
       clusterRollUpType: "INDIVIDUAL"
 
-metricReplacements:
+metricPathReplacements:
   - replace: "Ç"
     replaceWith: "C"
   - replace: "ó"

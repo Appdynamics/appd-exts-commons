@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class MetricCharSequenceReplacer {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricCharSequenceReplacer.class);
     //TODO: move these to a Constants class - these are very specific to this class. I dont have a separate module for this so I didn't want to make them globally available. Please suggest if you still think it should be moved out
-    private static final String CONFIG_KEY = "metricReplacements";
+    private static final String CONFIG_KEY = "metricPathReplacements";
     private static final String REPLACEMENT_KEY = "replace";
     private static final String REPLACEMENT_VALUE = "replaceWith";
     private static final String EMPTY_STRING = "";
@@ -67,8 +67,7 @@ public class MetricCharSequenceReplacer {
     public MetricCharSequenceReplacer(final Map<String, String> replacementMap) {
         this.replacementMap = replacementMap;
         cachedReplacements = CacheBuilder.newBuilder()
-                .maximumSize(5000)
-                .expireAfterWrite(15, TimeUnit.MINUTES)
+                .expireAfterAccess(15, TimeUnit.MINUTES)
                 .build(
                         new CacheLoader<String, String>() {
                             @Override
@@ -149,8 +148,10 @@ public class MetricCharSequenceReplacer {
     }
 
     private static boolean hasDelimiter(final String replaceWith) {
-        for (char c : replaceWith.toCharArray()) {
-            if (c == '|' || c == ':' || c == ',') return true;
+        for (Delimiter delimiter : Delimiter.values()) {
+            if (replaceWith.contains(delimiter.getDelimiter())) {
+                return true;
+            }
         }
         return false;
     }

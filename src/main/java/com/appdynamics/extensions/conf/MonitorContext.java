@@ -146,6 +146,7 @@ public class MonitorContext {
     public PerMinValueCalculator getPerMinValueCalculator() {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
+
     public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
         return metricCharSequenceReplaceModule.getMetricCharSequenceReplacer();
     }
