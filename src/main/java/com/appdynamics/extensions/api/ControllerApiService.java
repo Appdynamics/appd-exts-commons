@@ -2,6 +2,7 @@ package com.appdynamics.extensions.api;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.dashboard.DashboardConstants;
 import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
@@ -11,6 +12,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.FormBodyPart;
+import org.apache.http.entity.mime.FormBodyPartBuilder;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonNode;
@@ -132,6 +140,87 @@ public class ControllerApiService {
             }
         }
     }
+
+    public void uploadDashboardUsingHttpClient(CloseableHttpClient httpClient, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent) throws ApiException {
+
+        UrlBuilder urlBuilder = new UrlBuilder();
+        urlBuilder.host(controllerInfo.getControllerHost());
+        urlBuilder.port(controllerInfo.getControllerPort());
+        urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
+        logger.debug("Right before post request for dashboard");
+
+        HttpPost httpPost = new HttpPost(urlBuilder.path("controller/CustomDashboardImportExportServlet").build());
+
+//        String urlStr = urlBuilder.path("controller/CustomDashboardImportExportServlet").build();
+        String boundary = "*****";
+        String lineEnd = "\r\n";
+        String dashboardFileName = dashboardName + "." + fileExtension;
+
+
+        if (!Strings.isNullOrEmpty(cookiesCsrf.getCookies())) {
+            httpPost.setHeader("Cookie", cookiesCsrf.getCookies());
+        }
+        if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
+            httpPost.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
+        }
+        httpPost.setHeader("Cache-Control", "no-cache");
+        httpPost.setHeader("Connection", "Keep-Alive");
+        httpPost.setHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+        logger.debug("Set all headers for post request for dashboard");
+
+        FormBodyPart bodyPart = FormBodyPartBuilder.create()
+                .setName("dashboard")
+                .addField("Content-Disposition", "form-data; name=\"" + dashboardName + "\"; filename=\"" + dashboardFileName + "\"" + lineEnd)
+                .addField("Content-Type", DashboardConstants.APPLICATION_JSON + lineEnd)
+                .setBody(new StringBody(lineEnd + fileContent + lineEnd + lineEnd, ContentType.MULTIPART_FORM_DATA))
+                .build();
+        logger.debug("Format Body part for dashboard");
+
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
+                .setBoundary(boundary)
+                .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+                .addPart(bodyPart);
+        logger.debug("made multipartentity for dashboard");
+        logger.debug("creating httpentity dashboard");
+
+        HttpEntity entity = null;
+        logger.debug("going to try block dashboard");
+        try {
+            logger.debug("Trying dashboard for venks with new jars");
+            entity = multipartEntityBuilder.build();
+            logger.debug("Trying dashboard for venks after build");
+        } catch (Exception e){
+            logger.error("Multipart build error : {}", e);
+        }
+        logger.debug("setEntity for post for dashboard");
+
+        httpPost.setEntity(entity);
+        CloseableHttpResponse response = null;
+
+        try {
+            logger.debug("Attempting to post request for dashboard");
+            response = httpClient.execute(httpPost);
+            if (isResponseSuccessful(response)) {
+                logger.info("Dashboard : {} uploaded successfully", dashboardFileName);
+            } else {
+                logger.error("Unable to upload dashboard: {}", dashboardFileName);
+            }
+            EntityUtils.consume(entity);
+
+        } catch (IOException e) {
+            throw new ApiException("Error in uploading dashboard", e);
+        } finally {
+            closeHttpResponse(response);
+        }
+
+    }
+
+    private boolean isResponseSuccessful(CloseableHttpResponse httpResponse) {
+        return httpResponse != null && httpResponse.getStatusLine() != null &&
+                (httpResponse.getStatusLine().getStatusCode() == 202 || httpResponse.getStatusLine().getStatusCode() == 201
+                        || httpResponse.getStatusLine().getStatusCode() == 200);
+    }
+
 
     public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ApiException {
         UrlBuilder urlBuilder = new UrlBuilder();
