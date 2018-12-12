@@ -203,10 +203,20 @@ public class MetricWriteHelperTest {
         Metric metric2 = new Metric("sample2", "10", "Custom Metrics|Sample Monitor||sample2");
         Metric metric3 = new Metric("sample3", "10", "Custom Metrics|Sample Monitor| |sample3");
         Metric metric4 = new Metric("sample4", "10", "Custom Metrics|Samplé Monitor|sample4");
+        Metric metric5 = new Metric("sample5", "10", "Server|Custom Metrics|Sample Monitor|sample5");
+        Metric metric6 = new Metric("sample6", "10", "Server|Component:|Custom Metrics|Sample Monitor|sample6");
+        Metric metric7 = new Metric("sample7", "10", "Server|Component:<TIER_ID>|Custom Metrics|Sample Monitor|sample7");
+        Metric metric8 = new Metric("sample8", "10", "Server|Component:123|Custom metrics|Sample Monitor|sample8");
+        Metric metric9 = new Metric("sample9", "10", "Custom metrics|Sample Monitor|sample9");
         metrics.add(metric1);
         metrics.add(metric2);
         metrics.add(metric3);
         metrics.add(metric4);
+        metrics.add(metric5);
+        metrics.add(metric6);
+        metrics.add(metric7);
+        metrics.add(metric8);
+        metrics.add(metric9);
         metricWriteHelper.transformAndPrintMetrics(metrics);
         verify(metricWriter, never()).printMetric(stringArgumentCaptor.capture());
     }

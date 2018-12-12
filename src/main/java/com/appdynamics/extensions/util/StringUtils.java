@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.util;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ import java.util.List;
 public class StringUtils {
 
     public static final int INDEX_NOT_FOUND = -1;
+
+    private static final Splitter COLON_SPLITTER = Splitter.on(":").trimResults().omitEmptyStrings();
 
     public static boolean hasText(String str) {
         return str != null && !str.trim().isEmpty();
@@ -121,7 +124,8 @@ public class StringUtils {
 
     public static String unescapeXml(String str) {
         if (str != null) {
-            return str.replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&apos;", "'").replaceAll("&quot;", "\"");
+            return str.replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&apos;",
+                    "'").replaceAll("&quot;", "\"");
         }
         return str;
     }
@@ -142,10 +146,10 @@ public class StringUtils {
         return sb.toString();
     }
 
-    public static boolean isValidString(String...args) {
-        if(args != null){
-            for(String arg : args){
-                if(Strings.isNullOrEmpty(arg)){
+    public static boolean isValidString(String... args) {
+        if (args != null) {
+            for (String arg : args) {
+                if (Strings.isNullOrEmpty(arg)) {
                     return false;
                 }
             }
@@ -154,19 +158,36 @@ public class StringUtils {
         return false;
     }
 
-    public static boolean isValidMetricValue(String metricValue){
-        if(metricValue != null && NumberUtils.isNumber(metricValue) && !NumberUtils.isNegative(metricValue)){
+    public static boolean isValidMetricValue(String metricValue) {
+        if (metricValue != null && NumberUtils.isNumber(metricValue) && !NumberUtils.isNegative(metricValue)) {
             return true;
         }
         return false;
     }
 
     public static boolean isValidMetricPath(String metricPath) {
-        return !metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher.ascii().matchesAllOf(metricPath);
+        return !metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher
+                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(metricPath) ;
     }
 
-    public static boolean isValidMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
+    public static boolean isValidMetric(String metricPath, String metricValue, String aggregationType, String
+            timeRollup, String clusterRollup) {
         return isValidString(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&
                 isValidMetricPath(metricPath);
+    }
+
+    public static boolean isValidMetricPrefix(String metricPath) {
+        if (metricPath.startsWith("Server|Component:")) {
+            List<String> tokens = MetricPathUtils.PIPE_SPLITTER.splitToList(metricPath);
+            if (tokens.size() > 3 && tokens.get(2).equals("Custom Metrics")) {
+                List<String> component = COLON_SPLITTER.splitToList(tokens.get(1));
+                if (component.size() > 1) {
+                    String tier = component.get(1);
+                    return hasText(tier) && !tier.startsWith("<") && !tier.endsWith(">");
+                }
+            }
+            return false;
+        }
+        return metricPath.startsWith("Custom Metrics|");
     }
 }

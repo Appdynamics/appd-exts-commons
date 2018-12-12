@@ -61,7 +61,7 @@ public class ABaseMonitorAndAMonitorJobTest {
 
         @Override
         public void run(){
-            metricWriteHelper.printMetric("Custom Metric|Sample|sample value", value, "AVERAGE", "AVERAGE", "INDIVIDUAL");
+            metricWriteHelper.printMetric("Custom Metrics|Sample|sample value", value, "AVERAGE", "AVERAGE", "INDIVIDUAL");
         }
     }
 
@@ -110,7 +110,7 @@ public class ABaseMonitorAndAMonitorJobTest {
         sampleMonitor.execute(args, null);
         Thread.sleep(1000);
         ConcurrentMap<String, Metric> cache = sampleMonitor.getContextConfiguration().getContext().getCachedMetrics();
-        Assert.assertTrue(cache.get("Custom Metric|Sample|sample value").getMetricValue().equals("3") || cache.get("Custom Metric|Sample|sample value").getMetricValue().equals("4"));
+        Assert.assertTrue(cache.get("Custom Metrics|Sample|sample value").getMetricValue().equals("3") || cache.get("Custom Metrics|Sample|sample value").getMetricValue().equals("4"));
     }
 
 
