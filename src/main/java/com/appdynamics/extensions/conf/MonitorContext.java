@@ -9,9 +9,14 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
+<<<<<<< HEAD
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.conf.modules.*;
+=======
+import com.appdynamics.extensions.conf.modules.*;
+import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+>>>>>>> master
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
@@ -47,7 +52,7 @@ public class MonitorContext {
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
     private CustomDashboardModule dashboardModule;
-
+    private EventsServiceModule eventsServiceModule;
 
     MonitorContext(String monitorName, File installDir) {
         this.installDir = installDir;
@@ -61,6 +66,7 @@ public class MonitorContext {
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
         healthCheckModule = new HealthCheckModule();
         dashboardModule = new CustomDashboardModule();
+        eventsServiceModule = new EventsServiceModule();
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
@@ -81,10 +87,11 @@ public class MonitorContext {
             cacheModule.initCache();
             healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
             dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo);
+            healthCheckModule.initMATroubleshootChecks(monitorName, config);
+            eventsServiceModule.initEventsServiceDataManager(monitorName, config);
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
-
     }
 
     public static boolean isWorkbenchMode() {
@@ -168,4 +175,11 @@ public class MonitorContext {
         return controllerInfo;
     }
 
+    public EventsServiceDataManager getEventsServiceDataManager() {
+        return eventsServiceModule.getEventsServiceDataManager();
+    }
+
+    public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
+        this.eventsServiceModule = eventsServiceModule;
+    }
 }

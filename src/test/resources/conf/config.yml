@@ -125,9 +125,6 @@ derivedMetrics:
       formula: "{x}|hits / ({x}|hits + {x}|misses)"
 
 
-
-
-
 # Generate a custom dashboard based on the provided template
 customDashboard:
     enabled: true
@@ -150,4 +147,9 @@ controllerInfo:
     encryptedPassword: ""
     encryptionKey: ""
 
-
+eventsServiceParameters:
+  host: dummyHost
+  port: 9080
+  globalAccountName: dummyAccount
+  eventsApiKey: dummyKey
+  useSsl: false
