@@ -51,23 +51,31 @@ numberOfThreads: 1
 customDashboard:
     enabled: true
     dashboardName: "Sample Monitor Dashboard"
-
+    sslCertCheckEnabled: true
     # Update the path to the dashboard file.
     pathToSIMDashboard: "monitors/SampleMonitor/normalDashboard.json"
     pathToNormalDashboard: "monitors/SampleMonitor/normalDashboard.json"
-    periodToCheckDashboardPresenceInSeconds: 300
+    periodicDashboardCheckInSeconds: 300
+
 # To upload the dashboard, please create a user from Controller UI or
 # add the credentials of an existing user.
-
 controllerInfo:
-    host: ""
-    port:
-    account: ""
-    username: ""
-    password: ""
-    # OPTIONAL Items
+    controllerHost: "host"
+    controllerPort: 9090
+    controllerSslEnabled: false
+    enableOrchestration: false
+    uniqueHostId: ""
+    username: "username"
+    password: "password"
     encryptedPassword: ""
     encryptionKey: ""
+    accountAccessKey: ""
+    account: "account"
+    machinePath: ""
+    simEnabled: false
+    applicationName: "application"
+    tierName: "tier"
+    nodeName: "node"
 
 # This is to run this in scheduled mode. In this case, the extension will fetch the data every 300 seconds
 # and caches the data. The cached data will be reported to controller every min. This way there is no metric drop.
