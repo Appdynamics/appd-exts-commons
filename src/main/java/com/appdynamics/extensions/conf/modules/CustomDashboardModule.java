@@ -62,8 +62,7 @@ public class CustomDashboardModule {
             if (hasTimeElapsed(currentTime, lastRecordedTime.get(), timeDelayInMilliSeconds)) {
                 try {
                     logger.debug("Attempting to upload dashboard: {}", dashboardName);
-                    dashboardUploader.checkAndUpload(client, dashboardName, dashboardTemplate,
-                            httpProperties, overwrite);
+                    dashboardUploader.checkAndUpload(client, dashboardName, dashboardTemplate, overwrite);
                     lastRecordedTime.set(currentTime);
                     long endTime = System.currentTimeMillis();
                     logger.debug("Time to complete customDashboardModule  :" + (endTime - currentTime) + " ms");

@@ -89,7 +89,7 @@ public class CustomDashboardModuleTest {
         PowerMockito.whenNew(CustomDashboardUploader.class).withArguments(mockApiService).thenReturn(mockUploader);
         Map httpProps = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
 
-        PowerMockito.doNothing().when(mockUploader).checkAndUpload(mockHttpClient, "MonitorName", "DashboardContent", httpProps, false);
+        PowerMockito.doNothing().when(mockUploader).checkAndUpload(mockHttpClient, "MonitorName", "DashboardContent",  false);
 
         PowerMockito.mockStatic(System.class);
         PowerMockito.when(System.currentTimeMillis()).thenReturn(300001l).thenReturn(300211l)
@@ -101,13 +101,13 @@ public class CustomDashboardModuleTest {
         CustomDashboardModule customDashboardModule = new CustomDashboardModule();
         customDashboardModule.initCustomDashboard(config, metric, monitorName, controllerInfo);
         customDashboardModule.uploadDashboard();
-        verify(mockUploader, times(1)).checkAndUpload(isA(CloseableHttpClient.class), isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
+        verify(mockUploader, times(1)).checkAndUpload(isA(CloseableHttpClient.class), isA(String.class), isA(String.class), isA(Boolean.class));
 
         customDashboardModule.uploadDashboard();
-        verify(mockUploader, times(1)).checkAndUpload(isA(CloseableHttpClient.class), isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
+        verify(mockUploader, times(1)).checkAndUpload(isA(CloseableHttpClient.class), isA(String.class), isA(String.class), isA(Boolean.class));
 
         customDashboardModule.uploadDashboard();
-        verify(mockUploader, times(2)).checkAndUpload(isA(CloseableHttpClient.class), isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
+        verify(mockUploader, times(2)).checkAndUpload(isA(CloseableHttpClient.class), isA(String.class), isA(String.class), isA(Boolean.class));
 
     }
 }

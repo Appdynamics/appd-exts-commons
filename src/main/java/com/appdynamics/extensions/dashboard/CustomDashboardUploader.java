@@ -42,35 +42,30 @@ public class CustomDashboardUploader {
     }
 
     public void checkAndUpload(CloseableHttpClient client, String dashboardName,
-                               String fileContents, Map httpProperties, boolean overwrite) throws ApiException {
+                               String fileContents, boolean overwrite) throws ApiException {
         CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client);
         JsonNode allDashboards = apiService.getAllDashboards(client, cookiesCsrf);
-        uploadDashboard(client, dashboardName, fileContents, overwrite, httpProperties, cookiesCsrf, allDashboards);
+        uploadDashboard(client, dashboardName, fileContents, overwrite, cookiesCsrf, allDashboards);
 
     }
 
     private void uploadDashboard(CloseableHttpClient client, String dashboardName, String fileContents, boolean overwrite,
-                                 Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ApiException {
+                                 CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ApiException {
         String fileExtension = JSON;
-        String fileContentType = APPLICATION_JSON;
         if (isDashboardPresent(dashboardName, allDashboards)) {
             if (overwrite) {
                 logger.debug("Overwriting dashboard: {}", dashboardName);
                 //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
                 // This will not be present in the config.yml so it will never override.
                 // Keeping this here for when override will be supported
-//                apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
                 apiService.uploadDashboardUsingHttpClient(client,cookiesCsrf,dashboardName,fileExtension,fileContents);
             } else {
                 logger.debug("Overwrite Disabled, not attempting to overwrite dashboard: {}", dashboardName);
             }
         } else {
-//            apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
             apiService.uploadDashboardUsingHttpClient(client,cookiesCsrf,dashboardName,fileExtension,fileContents);
-
         }
     }
-
 
     private boolean isDashboardPresent(String dashboardName, JsonNode existingDashboards) {
         if (existingDashboards != null) {
