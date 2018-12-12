@@ -9,14 +9,10 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
-<<<<<<< HEAD
 import com.appdynamics.extensions.conf.controller.ControllerInfo;
 import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.conf.modules.*;
-=======
-import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
->>>>>>> master
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
@@ -87,7 +83,7 @@ public class MonitorContext {
             cacheModule.initCache();
             healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
             dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo);
-            healthCheckModule.initMATroubleshootChecks(monitorName, config);
+            healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
