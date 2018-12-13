@@ -15,9 +15,11 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +37,7 @@ public class StringUtils {
     public static final int INDEX_NOT_FOUND = -1;
 
     private static final Splitter COLON_SPLITTER = Splitter.on(":").trimResults().omitEmptyStrings();
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(StringUtils.class);
 
     public static boolean hasText(String str) {
         return str != null && !str.trim().isEmpty();
@@ -150,11 +153,13 @@ public class StringUtils {
         if (args != null) {
             for (String arg : args) {
                 if (Strings.isNullOrEmpty(arg)) {
+                    logger.debug("The metric path, metric value or qualifiers cannot be null or empty.");
                     return false;
                 }
             }
             return true;
         }
+        logger.debug("The metric path, metric value or qualifiers cannot be null or empty.");
         return false;
     }
 
@@ -162,12 +167,17 @@ public class StringUtils {
         if (metricValue != null && NumberUtils.isNumber(metricValue) && !NumberUtils.isNegative(metricValue)) {
             return true;
         }
+        logger.debug("The metric value {} should be a positive number.", metricValue);
         return false;
     }
 
     public static boolean isValidMetricPath(String metricPath) {
-        return !metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher
-                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(metricPath) ;
+        if (!metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher
+                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(metricPath)) {
+            return true;
+        }
+        logger.debug("The metric path {} is invalid", metricPath);
+        return false;
     }
 
     public static boolean isValidMetric(String metricPath, String metricValue, String aggregationType, String
@@ -186,8 +196,15 @@ public class StringUtils {
                     return hasText(tier) && !tier.startsWith("<") && !tier.endsWith(">");
                 }
             }
+            logger.debug("Metric prefix {} is invalid. The third token of prefix should be 'Custom Metrics' (case sensitive) " +
+                    "Component should be configured", metricPath);
             return false;
         }
-        return metricPath.startsWith("Custom Metrics|");
+        if (metricPath.startsWith("Custom Metrics|")) {
+            return true;
+        }
+        logger.debug("Metric prefix {} should either start with 'Server|Component:' or 'Custom Metrics|' (case sensitive).",
+                metricPath);
+        return false;
     }
 }
