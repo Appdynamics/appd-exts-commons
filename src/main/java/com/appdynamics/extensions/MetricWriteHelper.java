@@ -82,7 +82,6 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            //TODO: why is this a logger.warn? - discussed
             logger.warn("The metric is not valid. Name - {}, Value - {}, Path - {}, Qualifiers - {}, {}, {}",
                     MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup,
                     clusterRollup);

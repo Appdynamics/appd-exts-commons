@@ -32,10 +32,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @author pradeep.nair
  */
-//TODO: I don't see any unit tests for this class - there are test cases, see MetricCharSequenceReplacerTest
 public class MetricCharSequenceReplacer {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricCharSequenceReplacer.class);
-    //TODO: move these to a Constants class - these are very specific to this class. I dont have a separate module for this so I didn't want to make them globally available. Please suggest if you still think it should be moved out
     private static final String CONFIG_KEY = "metricPathReplacements";
     private static final String REPLACEMENT_KEY = "replace";
     private static final String REPLACEMENT_VALUE = "replaceWith";
@@ -43,7 +41,6 @@ public class MetricCharSequenceReplacer {
     private final Map<String, String> replacementMap;
     private final LoadingCache<String, String> cachedReplacements;
 
-    //TODO: this can also move to an independent enum outside of this class - discussed
     /**
      * Contains all the delimiters for metric path
      */
@@ -63,7 +60,6 @@ public class MetricCharSequenceReplacer {
         }
     }
 
-    //TODO: From the method on line 88, this class looks like a Singleton and this constructor must be private - not a singleton, createInstance has some initialisations and checks and the map passed is not directly available from, didn't want to overload the constructor with those responsibilities
     public MetricCharSequenceReplacer(final Map<String, String> replacementMap) {
         this.replacementMap = replacementMap;
         cachedReplacements = CacheBuilder.newBuilder()
@@ -78,7 +74,6 @@ public class MetricCharSequenceReplacer {
         logger.debug("Map and Cache initialized successfully");
     }
 
-    // TODO: Javadoc incomplete. Line 86 - done
     /**
      * Creates a new instance of MetricCharSequenceReplacer
      *
@@ -123,12 +118,10 @@ public class MetricCharSequenceReplacer {
      * @param toReplace Input string for which replacements have to performed
      * @return {@code String} with all the replacements
      */
-    //TODO: Provide a better name for 'in' - done
     public String getReplacementFromCache(String toReplace) {
         return cachedReplacements.getUnchecked(toReplace);
     }
 
-    // TODO: Move static methods to a util class if required - discussed, private static method specific to this class
     private static Map<String, String> createUserReplacementMap(final List<Map<String, String>> replacements) {
         final Map<String, String> replacementMap = new HashMap<>();
         for (final Map<String, String> replacement : replacements) {

@@ -45,5 +45,4 @@ public class MetricCharSequenceReplaceModule {
     public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
         return replacer;
     }
-    //TODO: You can simply combine these two methods into one and call it from MonitorContext's getMetricCharSequenceReplacer() - discussed
 }
