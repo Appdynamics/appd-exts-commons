@@ -60,3 +60,9 @@ eventsServiceParameters:
   globalAccountName:
   eventsApiKey:
   useSsl: false
+
+metricPathReplacements:
+  - replace: "&"
+    replaceWith: ""
+  - replace: "percent"
+    replaceWith: "%"

@@ -34,6 +34,7 @@ import static com.appdynamics.extensions.http.HttpClientUtils.closeHttpResponse;
  * @author : Aditya Jagtiani
  * @since : 2.2.0
  */
+
 public class EventsServiceDataManager {
     private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceDataManager.class);
     private Map<String, ?> eventsServiceParameters;

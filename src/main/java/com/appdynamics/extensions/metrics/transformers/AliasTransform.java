@@ -27,7 +27,6 @@ import java.util.List;
  */
 class AliasTransform {
     Splitter PIPE_SPLITTER = Splitter.on('|')
-            .omitEmptyStrings()
             .trimResults();
 
     void applyAlias(Metric metric){
