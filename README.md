@@ -5,7 +5,7 @@ AppDynamics platform can be extended to support custom metrics by using [AppDyna
 This Java SDK abstracts out common extension features and makes extension development very straightforward.
 
 # Release Notes
-Beginning 2.0.0, all the changes to the SDK are tracked in the [CHANGELOG.md](CHANGELOG.md).
+All the changes to the SDK are tracked in the [CHANGELOG.md](CHANGELOG.md).
 
 # Getting Started
 
@@ -65,7 +65,7 @@ In addition to configuration, the SDK reads the `config.yml` to load and initial
   
 
 ### metrics.xml
-This is an optional file to define the metrics and their properties for a given extension artifact. More about [Metric and Metric Types](#Metric and Metric Types) later.
+This is an optional file to define the metrics and their properties for a given extension artifact. More about [Metric Types and Metric Transformers](#Metric and Metric Types) later.
 
 A new extension should be developed by extending the ABaseMonitor class. For eg. 
 
@@ -117,7 +117,7 @@ CryptoUtil.getPassword(Map)
 
 For more details on password encrpytion, please check [How do I use Password Encryption with Extensions](https://community.appdynamics.com/t5/Knowledge-Base/How-do-I-use-Password-Encryption-with-Extensions/ta-p/29397)
 
-## Metric and Metric Types
+## Metric Types and Metric Transformers
 
 ## Controller Info
 The SDK automatically pulls the Controller information and builds a ControllerInfo object which is made available to the extension developer via
@@ -156,15 +156,63 @@ For more details on ControllerInfo, check [How do I auto upload dashboards from 
 
 ## Auto Upload Custom Dashboards
 
+The SDK supports automatic upload of a pre-built dashboard to the controller. The dashboard template 
+can be updated and more data can be added to increase the visibility of the metrics provided by the extension. 
+For configuring auto upload of custom dashboards, the following configuration needs to be defined in the `config.yml`.
+
+```
+customDashboard:
+    enabled: true
+    dashboardName: "Custom Dashboard"
+    pathToSIMDashboard: "monitors/<ExtensionName>/simDashboard.json"
+    pathToNormalDashboard: "monitors/<ExtensionName>/normalDashboard.json"
+    periodToCheckDashboardPresenceInSeconds: 300
+
+```
+
+For more details on this feature, check [Uploading Dashboards automatically with AppDynamics Extensions]().
+
 ## Derived Metrics
 
-## Configurable HTTP Client
+Derived metrics are the metrics that can be created using existing metrics by applying a math formula.
+Derived metrics can also be used to create rolled-up metrics at any level in the metric tree.
+The SDK automatically starts emitting out the derived metrics defined in the `config.yml`. Following configuration needs to be defined in the `config.yml`
+
+```
+derivedMetrics:
+   - derivedMetricPath: "{x}|Queue|{y}|Cache ratio"
+     formula: “{x}|Queue|{y}|Cache hits / ({x}|Queue|{y}|Cache hits + {x}|Queue|{y}|Cache misses)”
+   - derivedMetricPath: “RolledUp|Total ops"
+     formula: “{x}|Total ops”
+     aggregationType: “SUM"
+     timeRollUpType: “SUM"
+     clusterRollUpType: “COLLECTIVE”
+  - derivedMetricPath: “{x}|Queue|Server Total ops”
+    formula: “{x}|Queue|{y}|RAM ops + {x}|Queue|{y}|hdd ops"
+``` 
+
+For more information on derived metrics, check [Derived Metrics Calculation](https://community.appdynamics.com/t5/Knowledge-Base/What-are-the-Derived-Metrics-Calculator-and-Cluster-Metrics/ta-p/29403).
+
+## Configuring HTTP Client
+
+
+### Proxy
+
+## Concurrent Fan Out
+
+
 
 ## Events Services
 
 ## Task Schedule
 
+## Extension Logger
 
+## Workbench
+
+
+
+## 
  
 
 # Getting Help
