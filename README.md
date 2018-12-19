@@ -65,7 +65,7 @@ In addition to configuration, the SDK reads the `config.yml` to load and initial
   
 
 ### metrics.xml
-This is an optional file to define the metrics and their properties for a given extension artifact.
+This is an optional file to define the metrics and their properties for a given extension artifact. More about [Metric and Metric Types](#Metric and Metric Types) later.
 
 A new extension should be developed by extending the ABaseMonitor class. For eg. 
 
@@ -95,7 +95,64 @@ For more details on how to use this Java SDK to build an AppDynamics extension, 
 
 # Features
 
+## Encrypting Clear Text Passwords
+The SDK provides a mechanism to encrypt clear text passwords that need to be defined in `config.yml`. 
+To encrypt a password using an `encryptionKey`, run the following command using the extension's jar
+
+```
+java -cp the-monitoring-extension.jar com.appdynamics.extensions.crypto.Encryptor <encryptionKey> <clearTextPassword>
+```  
+The `encryptedPassword` produced using the above command along with the `encryptionKey` needs to be defined in the `config.yml`.
+
+```
+encryptedPassword: 
+encryptionKey: 
+```
+
+The extension developer should use the following api to decrypt an encrypted password by adding the `encryptionKey` and `encryptedPassword` to the Map.
+
+```
+CryptoUtil.getPassword(Map)
+```
+
+For more details on password encrpytion, please check [How do I use Password Encryption with Extensions](https://community.appdynamics.com/t5/Knowledge-Base/How-do-I-use-Password-Encryption-with-Extensions/ta-p/29397)
+
+## Metric and Metric Types
+
 ## Controller Info
+The SDK automatically pulls the Controller information and builds a ControllerInfo object which is made available to the extension developer via
+```
+ABaseMonitor.getContextConfiguration().getContext().getControllerInfo()
+```
+
+The controller information can also be provided in the `config.yml`
+
+```
+controllerInfo:
+    controllerHost: ""
+    controllerPort: ""
+    account: ""
+    username: ""
+    password: ""
+    encryptedPassword: ""
+    encryptionKey: ""
+    controllerSslEnabled: ""
+    enableOrchestration: ""
+    uniqueHostId: ""
+    accountAccessKey: ""
+    machinePath: ""
+    simEnabled: ""
+    applicationName: ""
+    tierName: ""
+    nodeName: ""
+```
+
+The ControllerInfo object is built by loading the properties from the following sources in the following order
+1. controller-info.xml
+2. System Properties
+3. config.yml
+
+For more details on ControllerInfo, check [How do I auto upload dashboards from Extensions]().
 
 ## Auto Upload Custom Dashboards
 
