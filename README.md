@@ -302,9 +302,10 @@ Workbench by default uses port 9090. Another port can be configured using
 java -jar <monitoring-extension.jar> <host> <port>
 ```
 
-Navigate to `http://localhost:9090/` to see the Workbench screen 
+Navigate to `http://localhost:9090/` to see the ![Workbench screen](workbench.png) 
 
-For more details on workbench, check 
+
+For more details on workbench, check [How to use the Extensions WorkBench](https://community.appdynamics.com/t5/Knowledge-Base/How-to-use-the-Extensions-WorkBench/ta-p/30130).
 
 
 # Getting Help
