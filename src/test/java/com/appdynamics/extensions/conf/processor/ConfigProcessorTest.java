@@ -7,9 +7,7 @@
 
 package com.appdynamics.extensions.conf.processor;
 
-import com.appdynamics.extensions.asserts.CustomAsserts;
 import com.appdynamics.extensions.yml.YmlReader;
-import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +57,9 @@ public class ConfigProcessorTest {
     @PrepareForTest(ConfigProcessor.class)
     public void testConfigEnvironmentVariables() {
         PowerMockito.mockStatic(System.class);
-        Mockito.when(System.getenv()).thenReturn(populateSystemEnvParams());
+        Map<String, String> valueMap = populateSystemEnvParams();
+        Mockito.when(System.getenv()).thenReturn(valueMap);
+
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_FILE));
         if (rootElem == null) {
             Assert.fail("Unable to get data from the config file");
@@ -78,7 +78,9 @@ public class ConfigProcessorTest {
     @PrepareForTest(ConfigProcessor.class)
     public void testConfigEnvironmentVariablesForEC2() {
         PowerMockito.mockStatic(System.class);
-        Mockito.when(System.getenv()).thenReturn(populateSystemEnvParamsForEC2());
+        Map<String, String> valueMap = populateSystemEnvParamsForEC2();
+        Mockito.when(System.getenv()).thenReturn(valueMap);
+
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_EC2));
         if (rootElem == null) {
             Assert.fail("Unable to get data from the config file");
@@ -97,5 +99,75 @@ public class ConfigProcessorTest {
         Assert.assertEquals("8090", proxyConfig.get("port"));
         Assert.assertEquals("admin", proxyConfig.get("username"));
         Assert.assertEquals("admin", proxyConfig.get("password"));
+    }
+
+    @Test
+    @PrepareForTest(ConfigProcessor.class)
+    public void testConfigEnvironmentVariablesFromPropFile() {
+        PowerMockito.mockStatic(System.class);
+        Map<String, String> valueMap = populateSystemEnvParams();
+        valueMap.put("EXTENSIONS_CONFIG_FILE", "src/test/resources/conf/config-extensions.properties");
+
+        Mockito.when(System.getenv()).thenReturn(valueMap);
+
+        Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_FILE));
+        if (rootElem == null) {
+            Assert.fail("Unable to get data from the config file");
+        }
+        Map<String, ?> process = ConfigProcessor.process(rootElem);
+        List<Map<String, String>> serverConfigs = (List<Map<String, String>>) process.get("servers");
+        Assert.assertEquals(1, serverConfigs.size());
+        Map<String, String> server1Config = serverConfigs.get(0);
+        Assert.assertEquals("TestServer1", server1Config.get("name"));
+        Assert.assertEquals("localhost", server1Config.get("host"));
+        Assert.assertEquals("8080", server1Config.get("port"));
+        Assert.assertEquals("admin", server1Config.get("password"));
+    }
+
+
+    @Test
+    @PrepareForTest(ConfigProcessor.class)
+    public void testConfigEnvironmentVariablesForEC2FromPropFile() {
+        PowerMockito.mockStatic(System.class);
+        Map<String, String> valueMap = populateSystemEnvParamsForEC2();
+        valueMap.put("EXTENSIONS_CONFIG_FILE", "src/test/resources/conf/config-ec2-extensions.properties");
+        
+        Mockito.when(System.getenv()).thenReturn(valueMap);
+
+        Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_EC2));
+        if (rootElem == null) {
+            Assert.fail("Unable to get data from the config file");
+        }
+        Map<String, ?> awsConfig = ConfigProcessor.process(rootElem);
+        List<Map<String, String>> awsAccounts = (List<Map<String, String>>) awsConfig.get("accounts");
+        Assert.assertEquals(2, awsAccounts.size());
+        Map<String, String> awsAccount1 = awsAccounts.get(0);
+        Map<String, String> awsAccount2 = awsAccounts.get(1);
+        Assert.assertTrue("MyEC2AccessKey1".equals(awsAccount1.get("awsAccessKey")));
+        Assert.assertTrue("MyEC2SecretKey1".equals(awsAccount1.get("awsSecretKey")));
+        Assert.assertTrue("MyEC2AccessKey2".equals(awsAccount2.get("awsAccessKey")));
+        Assert.assertTrue("MyEC2SecretKey2".equals(awsAccount2.get("awsSecretKey")));
+        Map<String, ?> proxyConfig = (Map<String, ?>) awsConfig.get("proxyConfig");
+        Assert.assertEquals("localhost", proxyConfig.get("host"));
+        Assert.assertEquals("8090", proxyConfig.get("port"));
+        Assert.assertEquals("admin", proxyConfig.get("username"));
+        Assert.assertEquals("admin", proxyConfig.get("password"));
+    }
+
+
+    @Test(expected = ExceptionInInitializerError.class)
+    @PrepareForTest(ConfigProcessor.class)
+    public void testConfigEnvironmentVariablesFromNonExistingPropFile() {
+        PowerMockito.mockStatic(System.class);
+        Map<String, String> valueMap = populateSystemEnvParams();
+        valueMap.put("EXTENSIONS_CONFIG_FILE", "src/test/resources/conf1/config-extensions1.properties");
+
+        Mockito.when(System.getenv()).thenReturn(valueMap);
+
+        Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_FILE));
+        if (rootElem == null) {
+            Assert.fail("Unable to get data from the config file");
+        }
+        Map<String, ?> process = ConfigProcessor.process(rootElem);
     }
 }

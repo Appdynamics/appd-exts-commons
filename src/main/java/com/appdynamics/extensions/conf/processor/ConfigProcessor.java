@@ -8,10 +8,14 @@
 package com.appdynamics.extensions.conf.processor;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
+import java.io.FileInputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,9 +40,39 @@ public class ConfigProcessor {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ConfigProcessor.class);
 
+    private static final String EXTENSIONS_CONFIG_PROP_FILE = "EXTENSIONS_CONFIG_FILE";
+
     private static final Pattern ENV_VAR_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
 
+
     private static final Map<String, String> SYSTEM_ENV_VARS = System.getenv();
+
+    private static Map<String, String> extensionConfigProperties = new HashMap<>();
+
+    static {
+        init();
+    }
+
+    private static void init() {
+
+        String extensionsConfigFile = SYSTEM_ENV_VARS.get(EXTENSIONS_CONFIG_PROP_FILE);
+        if (extensionsConfigFile != null) {
+            logger.info("Extension config properties file provided and replacing placeholders in config file using [" + extensionsConfigFile + "]");
+
+            Properties properties = new Properties();
+            try {
+                properties.load(new FileInputStream(extensionsConfigFile));
+            } catch (Exception e) {
+                logger.error("Unable to load properties from the provided extension config properties file [" + extensionsConfigFile + "]", e);
+                throw new IllegalArgumentException("Unable to load properties from the provided extension config properties file [" + extensionsConfigFile + "]", e);
+            }
+
+            extensionConfigProperties = Maps.fromProperties(properties);
+        } else {
+            logger.info("Extension config properties file for replacing placeholders not provided");
+            extensionConfigProperties = SYSTEM_ENV_VARS;
+        }
+    }
 
     public static Map<String, ?> process(Map config) {
         if (config == null) {
@@ -63,7 +97,7 @@ public class ConfigProcessor {
                     boolean found = matcher.find();
                     if (found) {
                         String systemVariableName = matcher.group(1);
-                        String valueFromSystemEnv = SYSTEM_ENV_VARS.get(systemVariableName);
+                        String valueFromSystemEnv = extensionConfigProperties.get(systemVariableName);
                         if (valueFromSystemEnv != null) {
                             config.put(key, valueFromSystemEnv);
                         } else {
