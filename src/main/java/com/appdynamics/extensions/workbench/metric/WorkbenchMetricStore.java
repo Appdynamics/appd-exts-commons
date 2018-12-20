@@ -24,20 +24,12 @@ import org.slf4j.Logger;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static com.appdynamics.extensions.util.StringUtils.isValidMetric;
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
-import static com.appdynamics.extensions.util.StringUtils.isValidString;
+import static com.appdynamics.extensions.util.StringUtils.*;
 
 /**
  * Created by abey.tom on 3/16/16.

@@ -7,8 +7,8 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.util.JsonUtils;
 import com.google.common.escape.Escaper;

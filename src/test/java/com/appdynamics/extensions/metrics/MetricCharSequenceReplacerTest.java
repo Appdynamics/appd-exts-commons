@@ -16,9 +16,6 @@
 package com.appdynamics.extensions.metrics;
 
 import com.appdynamics.extensions.yml.YmlReader;
-
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import java.io.File;
@@ -26,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * @author pradeep.nair

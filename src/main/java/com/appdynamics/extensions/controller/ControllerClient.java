@@ -10,9 +10,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Created by venkata.konala on 12/19/18.

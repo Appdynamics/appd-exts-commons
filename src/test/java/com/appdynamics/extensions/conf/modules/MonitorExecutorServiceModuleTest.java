@@ -15,9 +15,6 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
-
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.yml.YmlReader;
@@ -34,6 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
+
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
 /**
  * Created by venkata.konala on 10/24/17.

@@ -16,7 +16,6 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.file.FileWatchListener;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;

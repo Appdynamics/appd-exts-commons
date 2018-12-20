@@ -8,13 +8,9 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.controller.ControllerInfo;
-import com.appdynamics.extensions.controller.ControllerInfoFactory;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
-import java.io.File;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.Map;
 

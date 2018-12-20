@@ -15,9 +15,8 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.Constants;
-import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.CookiesCsrf;
 import com.appdynamics.extensions.http.UrlBuilder;
@@ -26,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
+
 import javax.net.ssl.*;
 import java.io.DataOutputStream;
 import java.io.IOException;

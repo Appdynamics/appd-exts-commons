@@ -10,6 +10,8 @@ package com.appdynamics.extensions.conf;
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
@@ -18,8 +20,8 @@ import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
-import com.appdynamics.extensions.controller.*;
 import org.slf4j.Logger;
+
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;

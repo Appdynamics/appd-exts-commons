@@ -15,10 +15,6 @@
 
 package com.appdynamics.extensions.crypto;
 
-import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
-import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
-import static com.appdynamics.extensions.Constants.PASSWORD;
-
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.EncoderException;
@@ -26,6 +22,8 @@ import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
 
 import java.util.Map;
+
+import static com.appdynamics.extensions.Constants.*;
 
 public class CryptoUtil {
 

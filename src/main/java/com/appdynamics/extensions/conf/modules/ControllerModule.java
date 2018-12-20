@@ -1,11 +1,10 @@
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.google.common.collect.Maps;
-import org.slf4j.Logger;
 import com.appdynamics.extensions.controller.*;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import org.slf4j.Logger;
+
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;

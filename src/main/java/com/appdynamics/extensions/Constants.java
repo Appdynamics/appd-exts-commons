@@ -17,7 +17,6 @@ package com.appdynamics.extensions;
 
 import com.google.common.base.Strings;
 
-import javax.annotation.PreDestroy;
 import java.util.Map;
 
 /**

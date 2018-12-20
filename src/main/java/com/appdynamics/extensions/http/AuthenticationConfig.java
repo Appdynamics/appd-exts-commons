@@ -15,9 +15,6 @@
 
 package com.appdynamics.extensions.http;
 
-import static com.appdynamics.extensions.Constants.AUTH_TYPE;
-import static com.appdynamics.extensions.Constants.USER;
-
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
@@ -25,6 +22,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 
 import java.util.Map;
+
+import static com.appdynamics.extensions.Constants.AUTH_TYPE;
+import static com.appdynamics.extensions.Constants.USER;
 
 /**
  * Created with IntelliJ IDEA.

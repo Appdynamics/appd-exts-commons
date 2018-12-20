@@ -15,11 +15,11 @@
 
 package com.appdynamics.extensions;
 
-import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
-
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import org.slf4j.Logger;
+
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by abey.tom on 3/20/16.

@@ -15,21 +15,16 @@
 
 package com.appdynamics.extensions.http;
 
-import static com.appdynamics.extensions.Constants.defaultIfEmpty;
-import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
-
 import com.appdynamics.extensions.Constants;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static com.appdynamics.extensions.Constants.defaultIfEmpty;
+import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
 
 /**
  * Created with IntelliJ IDEA.

@@ -15,8 +15,6 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
-
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
@@ -30,6 +28,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by venkata.konala on 10/24/17.

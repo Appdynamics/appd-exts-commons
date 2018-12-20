@@ -15,8 +15,6 @@
 
 package com.appdynamics.extensions.workbench;
 
-import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
-
 import com.appdynamics.extensions.conf.monitorxml.Argument;
 import com.appdynamics.extensions.conf.monitorxml.Monitor;
 import com.appdynamics.extensions.conf.monitorxml.TaskArguments;
@@ -43,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
 
 /**
  * Created by abey.tom on 3/16/16.

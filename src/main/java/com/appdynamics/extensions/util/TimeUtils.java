@@ -1,6 +1,5 @@
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.ABaseMonitor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
