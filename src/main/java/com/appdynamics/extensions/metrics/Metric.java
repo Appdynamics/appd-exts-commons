@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.metrics;
 
 import com.appdynamics.extensions.util.AssertUtils;
+import com.appdynamics.extensions.util.MetricPathUtils;
 
 import java.util.Map;
 
@@ -49,6 +50,33 @@ public class Metric {
         this(metricName,metricValue,metricPath);
         AssertUtils.assertNotNull(metricProperties,"Metric Properties cannot be null");
         this.metricProperties = buildMetricProperties(metricProperties);
+    }
+
+    /**
+     * Constructor for building the metric path with replacements, with metric properties. Use this constructor when
+     * you want to apply metric replacements and build the metric path.
+     *
+     * @param metricName        Name of the metric
+     * @param metricValue       Value of the metric
+     * @param metricProperties  Map of metric properties
+     * @param metricPrefix      Metric Path prefix
+     * @param tokens            Various tokens in metric path
+     */
+    public Metric(String metricName, String metricValue, Map<String, ?> metricProperties, String metricPrefix, String... tokens) {
+        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, tokens), metricProperties);
+    }
+
+    /**
+     * Constructor for building the metric path with replacements. Use this constructor when you want to apply
+     * metric replacements and build the metric path.
+     *
+     * @param metricName        Name of the metric
+     * @param metricValue       Value of the metric
+     * @param metricPrefix      Metric Path prefix
+     * @param tokens            Various tokens in metric path
+     */
+    public Metric(String metricName, String metricValue, String metricPrefix, String... tokens) {
+        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, tokens));
     }
 
     private MetricProperties buildMetricProperties(Map<String, ?> metricProperties){

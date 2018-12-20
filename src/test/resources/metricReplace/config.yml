@@ -1,0 +1,53 @@
+#This will populate the metrics in all the tiers, under this path(not recommended)
+#metricPrefix: "Custom Metrics|Redis"
+
+#The following prefix will populate the metrics under one tier
+metricPrefix: "Server|Component:Test|Custom Metrics|Test"
+
+
+#Add your list of Redis servers here.
+servers:
+  - name: "Server1"
+    host: "localhost"
+    port: "6379"
+    password: ""
+
+encryptionKey: ""
+
+numberOfThreads: 7
+
+metrics:
+  - pipehere|andhere|:
+      aggregationType: "AVERAGE"
+      timeRollUpType: "AVERAGE"
+      clusterRollUpType: "INDIVIDUAL"
+  - lookma,nocomma:
+      aggregationType: "AVERAGE"
+      timeRollUpType: "AVERAGE"
+      clusterRollUpType: "INDIVIDUAL"
+  - read&wirte?latency-percent:
+      aggregationType: "AVERAGE"
+      timeRollUpType: "AVERAGE"
+      clusterRollUpType: "INDIVIDUAL"
+  - metricnotvalid:
+      alias: "metric,notvalid"
+      aggregationType: "AVERAGE"
+      timeRollUpType: "AVERAGE"
+      clusterRollUpType: "INDIVIDUAL"
+
+metricPathReplacements:
+  - replace: "&"
+    replaceWith: ""
+  - replace: "-"
+    replaceWith: "_"
+  - replace: "percent"
+    replaceWith: "%"
+  - replace: "?"
+    replaceWith: " "
+
+# below section is just for testing
+finalMetricName:
+  pipehere|andhere|: pipehereandhere
+  lookma,nocomma: lookmanocomma
+  read&wirte?latency-percent: readwirte latency_%
+  metricnotvalid: metricnotvalid

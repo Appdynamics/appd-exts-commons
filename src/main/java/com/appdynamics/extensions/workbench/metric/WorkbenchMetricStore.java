@@ -18,7 +18,6 @@ package com.appdynamics.extensions.workbench.metric;
 import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
-import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
 import org.slf4j.Logger;
 
@@ -35,6 +34,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.appdynamics.extensions.util.StringUtils.isValidMetric;
+import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
+import static com.appdynamics.extensions.util.StringUtils.isValidString;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -63,15 +66,19 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
 
     @Override
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (StringUtils.hasText(metricValue)) {
+        if (isValidMetric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
             addMetric(metricPath, new BigDecimal(metricValue));
         } else {
-            logger.error("The value of [{}] is {}", metricPath, metricValue);
+            logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, metricValue);
         }
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
-        addMetric(metricPath, value);
+        if (isValidString(metricPath) && isValidMetricPath(metricPath)) {
+            addMetric(metricPath, value);
+        } else {
+            logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, value);
+        }
     }
 
     private void addMetric(String metricPath, BigDecimal value) {

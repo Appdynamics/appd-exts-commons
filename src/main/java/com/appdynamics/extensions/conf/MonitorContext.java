@@ -13,6 +13,7 @@ import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
+import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
 import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
@@ -20,7 +21,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import com.appdynamics.extensions.controller.*;
 import org.slf4j.Logger;
 import java.io.File;
-import java.util.HashMap;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 /**
@@ -44,6 +45,7 @@ public class MonitorContext {
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
     private CustomDashboardModule dashboardModule;
+    private MetricCharSequenceReplaceModule metricCharSequenceReplaceModule;
     private EventsServiceModule eventsServiceModule;
 
     MonitorContext(String monitorName, File installDir) {
@@ -57,6 +59,7 @@ public class MonitorContext {
         cacheModule = new CacheModule();
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
+        metricCharSequenceReplaceModule = new MetricCharSequenceReplaceModule();
         eventsServiceModule = new EventsServiceModule();
         healthCheckModule = new HealthCheckModule();
         dashboardModule = new CustomDashboardModule();
@@ -67,12 +70,14 @@ public class MonitorContext {
         this.metricPrefix = metricPrefix;
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
+            logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
             controllerModule.initController(installDir, config);
             workBenchModule.initWorkBenchStore(config, metricPrefix);
             httpClientModule.initHttpClient(config);
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
+            metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(config);
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
             ControllerInfo controllerInfo = getControllerInfo();
             ControllerClient controllerClient = getControllerClient();
@@ -163,6 +168,14 @@ public class MonitorContext {
 
     public PerMinValueCalculator getPerMinValueCalculator() {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
+    }
+
+    public void setMetricCharSequenceReplaceModule (MetricCharSequenceReplaceModule metricCharSequenceReplaceModule) {
+        this.metricCharSequenceReplaceModule = metricCharSequenceReplaceModule;
+    }
+
+    public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
+        return metricCharSequenceReplaceModule.getMetricCharSequenceReplacer();
     }
 
     public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
