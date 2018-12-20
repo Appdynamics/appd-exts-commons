@@ -15,10 +15,10 @@
 
 package com.appdynamics.extensions.http;
 
-import static com.appdynamics.extensions.TaskInputArgs.defaultIfEmpty;
+import static com.appdynamics.extensions.Constants.defaultIfEmpty;
 import static com.appdynamics.extensions.util.AssertUtils.assertNotNull;
 
-import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.Constants;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
@@ -65,27 +65,27 @@ public class UrlBuilder {
 
 
     public UrlBuilder ssl(boolean useSSL) {
-        taskArgs.put(TaskInputArgs.USE_SSL, String.valueOf(useSSL));
+        taskArgs.put(Constants.USE_SSL, String.valueOf(useSSL));
         return this;
     }
 
     public UrlBuilder host(String host) {
-        taskArgs.put(TaskInputArgs.HOST, host);
+        taskArgs.put(Constants.HOST, host);
         return this;
     }
 
     public UrlBuilder port(String port) {
-        taskArgs.put(TaskInputArgs.PORT, port);
+        taskArgs.put(Constants.PORT, port);
         return this;
     }
 
     public UrlBuilder port(int port) {
-        taskArgs.put(TaskInputArgs.PORT, String.valueOf(port));
+        taskArgs.put(Constants.PORT, String.valueOf(port));
         return this;
     }
 
     public UrlBuilder uri(String uri) {
-        taskArgs.put(TaskInputArgs.URI, uri);
+        taskArgs.put(Constants.URI, uri);
         return this;
     }
 
@@ -136,18 +136,18 @@ public class UrlBuilder {
 
     public String build() {
         StringBuilder sb = new StringBuilder();
-        String uri = taskArgs.get(TaskInputArgs.URI);
+        String uri = taskArgs.get(Constants.URI);
         if (!Strings.isNullOrEmpty(uri)) {
             sb.append(trimTrailingSlash(uri.trim()));
         } else {
-            String useSSL = defaultIfEmpty(taskArgs, TaskInputArgs.USE_SSL, "false");
+            String useSSL = defaultIfEmpty(taskArgs, Constants.USE_SSL, "false");
             if (Boolean.valueOf(useSSL)) {
                 sb.append("https://");
             } else {
                 sb.append("http://");
             }
-            String host = defaultIfEmpty(taskArgs, TaskInputArgs.HOST, "localhost");
-            String port = defaultIfEmpty(taskArgs, TaskInputArgs.PORT, "80");
+            String host = defaultIfEmpty(taskArgs, Constants.HOST, "localhost");
+            String port = defaultIfEmpty(taskArgs, Constants.PORT, "80");
             sb.append(host).append(":").append(port);
         }
 
@@ -177,13 +177,13 @@ public class UrlBuilder {
 
     public static UrlBuilder fromYmlServerConfig(Map server) {
         UrlBuilder builder = new UrlBuilder();
-        String uri = (String) server.get(TaskInputArgs.URI);
+        String uri = (String) server.get(Constants.URI);
         if (!Strings.isNullOrEmpty(uri)) {
             builder.uri(uri);
         } else {
-            String host = (String) server.get(TaskInputArgs.HOST);
+            String host = (String) server.get(Constants.HOST);
             assertNotNull(host, "Either [uri] or [host] should be set for each server");
-            Integer port = YmlUtils.getInteger(server.get(TaskInputArgs.PORT));
+            Integer port = YmlUtils.getInteger(server.get(Constants.PORT));
             Boolean useSSL = YmlUtils.getBoolean(server.get("useSSL"));
             if (useSSL == null) {
                 useSSL = false;

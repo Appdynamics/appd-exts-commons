@@ -7,7 +7,6 @@
 
 package com.appdynamics.extensions.conf;
 
-
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
@@ -20,13 +19,10 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import com.appdynamics.extensions.controller.*;
 import org.slf4j.Logger;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-import static com.appdynamics.extensions.controller.ControllerInfo.*;
-
 /**
  * Created by venkata.konala on 3/29/18.
  */
@@ -61,9 +57,9 @@ public class MonitorContext {
         cacheModule = new CacheModule();
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
+        eventsServiceModule = new EventsServiceModule();
         healthCheckModule = new HealthCheckModule();
         dashboardModule = new CustomDashboardModule();
-        eventsServiceModule = new EventsServiceModule();
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
@@ -71,18 +67,26 @@ public class MonitorContext {
         this.metricPrefix = metricPrefix;
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
-            controllerModule.initController(installDir, config, metricPrefix);
+            controllerModule.initController(installDir, config);
             workBenchModule.initWorkBenchStore(config, metricPrefix);
             httpClientModule.initHttpClient(config);
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
-            healthCheckModule.initMATroubleshootChecks(getControllerInfo(), getControllerClient(), monitorName, config);
-            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, getControllerInfo(), getControllerClient());
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
+            ControllerInfo controllerInfo = getControllerInfo();
+            ControllerClient controllerClient = getControllerClient();
+            if(controllerInfo != null && controllerClient != null) {
+                healthCheckModule.initMATroubleshootChecks(controllerInfo, controllerClient, monitorName, config);
+                dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo, controllerClient);
+            }
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
+    }
+
+    public void setControllerModule(ControllerModule controllerModule) {
+        this.controllerModule = controllerModule;
     }
 
     public ControllerInfo getControllerInfo() {
@@ -93,8 +97,8 @@ public class MonitorContext {
         return controllerModule.getControllerClient();
     }
 
-    public void setControllerModule(ControllerModule controllerModule) {
-        this.controllerModule = controllerModule;
+    public void setWorkBenchModule(WorkBenchModule workBenchModule) {
+        this.workBenchModule = workBenchModule;
     }
 
     public static boolean isWorkbenchMode() {
@@ -103,10 +107,6 @@ public class MonitorContext {
 
     public WorkBenchModule getWorkBenchModule() {
         return workBenchModule;
-    }
-
-    public void setWorkBenchModule(WorkBenchModule workBenchModule) {
-        this.workBenchModule = workBenchModule;
     }
 
     public void setHttpClientModule(HttpClientModule httpClientModule) {
@@ -125,20 +125,20 @@ public class MonitorContext {
         return monitorExecutorServiceModule.getExecutorService();
     }
 
-    public JobScheduleModule getJobScheduleModule() {
-        return jobScheduleModule;
-    }
-
     public void setJobScheduleModule(JobScheduleModule jobScheduleModule) {
         this.jobScheduleModule = jobScheduleModule;
     }
 
-    public void setCacheModule(CacheModule cacheModule) {
-        this.cacheModule = cacheModule;
-    }
-
     public boolean isScheduledModeEnabled() {
         return jobScheduleModule.getScheduler() != null;
+    }
+
+    public JobScheduleModule getJobScheduleModule() {
+        return jobScheduleModule;
+    }
+
+    public void setCacheModule(CacheModule cacheModule) {
+        this.cacheModule = cacheModule;
     }
 
     public ConcurrentMap<String, Metric> getCachedMetrics() {
@@ -149,12 +149,12 @@ public class MonitorContext {
         cacheModule.putInMetricCache(metricPath, metric);
     }
 
-    public MetricWriter getFromWriterCache(String metricPath) {
-        return cacheModule.getWriterCache().getIfPresent(metricPath);
-    }
-
     public void putInWriterCache(String metricPath, MetricWriter writer) {
         cacheModule.putInWriterCache(metricPath, writer);
+    }
+
+    public MetricWriter getFromWriterCache(String metricPath) {
+        return cacheModule.getWriterCache().getIfPresent(metricPath);
     }
 
     public DerivedMetricsCalculator createDerivedMetricsCalculator() {
@@ -165,19 +165,19 @@ public class MonitorContext {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
 
-    public CustomDashboardModule getDashboardModule() {
-        return dashboardModule;
-    }
-
-    public void setDashboardModule(CustomDashboardModule dashboardModule) {
-        this.dashboardModule = dashboardModule;
+    public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
+        this.eventsServiceModule = eventsServiceModule;
     }
 
     public EventsServiceDataManager getEventsServiceDataManager() {
         return eventsServiceModule.getEventsServiceDataManager();
     }
 
-    public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
-        this.eventsServiceModule = eventsServiceModule;
+    public void setDashboardModule(CustomDashboardModule dashboardModule) {
+        this.dashboardModule = dashboardModule;
+    }
+
+    public CustomDashboardModule getDashboardModule() {
+        return dashboardModule;
     }
 }

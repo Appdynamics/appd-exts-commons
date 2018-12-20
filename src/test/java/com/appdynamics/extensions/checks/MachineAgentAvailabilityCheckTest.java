@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.checks;
 
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +51,7 @@ public class MachineAgentAvailabilityCheckTest {
     }
 
     @Test
-    public void testMAStatusAvailable() throws IOException {
+    public void testMAStatusAvailable() throws IOException, ControllerHttpRequestException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -58,10 +60,10 @@ public class MachineAgentAvailabilityCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerRequestHandler controllerRequestHandler = Mockito.mock(ControllerRequestHandler.class);
-        Mockito.when(controllerRequestHandler.sendGet(Matchers.anyString())).thenReturn(maStatusResponse(1));
+        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
+        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(maStatusResponse(1));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerRequestHandler, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerClient, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -71,7 +73,7 @@ public class MachineAgentAvailabilityCheckTest {
     }
 
     @Test
-    public void testMAStatusNotAvailable() throws IOException {
+    public void testMAStatusNotAvailable() throws IOException, ControllerHttpRequestException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -80,10 +82,10 @@ public class MachineAgentAvailabilityCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerRequestHandler controllerRequestHandler = Mockito.mock(ControllerRequestHandler.class);
-        Mockito.when(controllerRequestHandler.sendGet(Matchers.anyString())).thenReturn(maStatusResponse(0));
+        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
+        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(maStatusResponse(0));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerRequestHandler, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerClient, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());

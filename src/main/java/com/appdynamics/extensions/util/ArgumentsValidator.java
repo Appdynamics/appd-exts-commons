@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.Constants;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
@@ -59,9 +59,9 @@ public class ArgumentsValidator {
     }
 
     private static void validate(Map<String, String> argsMap) {
-        String metricPrefix = argsMap.get(TaskInputArgs.METRIC_PREFIX);
+        String metricPrefix = argsMap.get(Constants.METRIC_PREFIX);
         if (metricPrefix != null) {
-            argsMap.put(TaskInputArgs.METRIC_PREFIX, trimTrailingPipe(metricPrefix.trim()));
+            argsMap.put(Constants.METRIC_PREFIX, trimTrailingPipe(metricPrefix.trim()));
         }
     }
 

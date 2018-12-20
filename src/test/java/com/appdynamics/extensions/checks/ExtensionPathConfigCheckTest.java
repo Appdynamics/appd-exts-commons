@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.checks;
 
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import org.junit.Assert;
 import org.junit.Test;
@@ -103,7 +105,7 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
-    public void testMetricPrefixWithComponentAndSIMNotEnabled() throws IOException {
+    public void testMetricPrefixWithComponentAndSIMNotEnabled() throws IOException, ControllerHttpRequestException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -112,12 +114,12 @@ public class ExtensionPathConfigCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerRequestHandler controllerRequestHandler = Mockito.mock(ControllerRequestHandler.class);
-        Mockito.when(controllerRequestHandler.sendGet(Matchers.anyString())).thenReturn(tierRESTResponse());
+        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
+        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(tierRESTResponse());
 
         HashMap<String, String> config = new HashMap<>();
         config.put("metricPrefix", "Server|Component:TestTier|Custom Metrics|Test");
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerRequestHandler, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerClient, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -127,7 +129,7 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
-    public void testMetricPrefixWithWrongComponentAndSIMNotEnabled() throws IOException {
+    public void testMetricPrefixWithWrongComponentAndSIMNotEnabled() throws IOException, ControllerHttpRequestException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -136,12 +138,12 @@ public class ExtensionPathConfigCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerRequestHandler controllerRequestHandler = Mockito.mock(ControllerRequestHandler.class);
-        Mockito.when(controllerRequestHandler.sendGet(Matchers.anyString())).thenReturn(tierRESTResponse());
+        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
+        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(tierRESTResponse());
 
         HashMap<String, String> config = new HashMap<>();
         config.put("metricPrefix", "Server|Component:TestTier123|Custom Metrics|Test");
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerRequestHandler, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerClient, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());

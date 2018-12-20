@@ -16,38 +16,29 @@
 package com.appdynamics.extensions;
 
 import com.google.common.base.Strings;
+
+import javax.annotation.PreDestroy;
 import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
  * User: abey.tom
  * Date: 4/2/14
- * Time: 10:49 AM
- * To change this template use File | Settings | File Templates.
  */
-public class TaskInputArgs {
+public class Constants {
+    public static final String URI = "uri";
+    public static final String HOST = "host";
+    public static final String PORT = "port";
+    public static final String AUTHTYPE = "authType";
     public static final String USER = "username";
     public static final String PASSWORD = "password";
     public static final String ENCRYPTED_PASSWORD = "encryptedPassword";
-    public static final String AUTH_TYPE = "auth-type";
-    public static final String HOST = "host";
-    public static final String URI = "uri";
-    public static final String PORT = "port";
     public static final String USE_SSL = "useSsl";
-    public static final String METRIC_PREFIX = "metric-prefix";
     public static final String ENCRYPTION_KEY = "encryptionKey";
-    public static final String SSL_PROTOCOL = "sslProtocols";
-    public static final String SSL_CERT_CHECK_ENABLED = "sslCertCheckEnabled";
-    public static final String CONNECT_TIMEOUT = "connectTimeout";
-    public static final String SOCKET_TIMEOUT = "socketTimeout";
-    public static final String CONNECTION = "connection";
-    public static final String TLSV_12 = "TLSv1.2";
-    public static final String SERVERS = "servers";
-    public static final String ACCOUNT_ACCESS_KEY = "accountAccessKey";
-    public static final String SINGULARITY_AGENT = "singularity-agent";
-    public static final String AT = "@";
-    public static final String USERNAME = "username";
     public static final String ENABLED = "enabled";
+    // #TODO Check if the following can be removed.
+    public static final String METRIC_PREFIX = "metric-prefix";
+    public static final String AUTH_TYPE = "auth-type";
 
     public static String getArg(Map<String, String> taskArgs, String key, String defaultValue) {
         if (taskArgs.containsKey(key)) {
@@ -69,6 +60,4 @@ public class TaskInputArgs {
             return defaultValue;
         }
     }
-
-
 }

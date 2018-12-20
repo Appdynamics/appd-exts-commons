@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.Constants;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
@@ -80,6 +80,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static com.appdynamics.extensions.Constants.AUTHTYPE;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -172,9 +174,9 @@ public class Http4ClientBuilder {
         List<Map<String, ?>> servers = (List<Map<String, ?>>) config.get("servers");
         if (servers != null && !servers.isEmpty()) {
             for (Map<String, ?> server : servers) {
-                String authType = (String) server.get("authType");
+                String authType = (String) server.get(AUTHTYPE);
                 if (!StringUtils.hasText(authType) || "BASIC".equals(authType)) {
-                    String username = (String) server.get(TaskInputArgs.USER);
+                    String username = (String) server.get(Constants.USER);
                     AuthScope authScope = createAuthScope(server);
                     if (!Strings.isNullOrEmpty(username)) {
                         if (authScope != null) {

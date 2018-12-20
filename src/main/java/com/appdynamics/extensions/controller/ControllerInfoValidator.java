@@ -8,30 +8,41 @@
 
 package com.appdynamics.extensions.controller;
 
-import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.appdynamics.extensions.Constants.PASSWORD;
+import static com.appdynamics.extensions.Constants.USER;
 
 public class ControllerInfoValidator {
+
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
     private List<String> unresolvedProps;
+    private ControllerInfo controllerInfo;
 
-    public boolean isValidatedAndResolved(ControllerInfo controllerInfo) {
+    public ControllerInfoValidator(ControllerInfo controllerInfo) {
+        this.controllerInfo = controllerInfo;
+    }
+
+    public boolean isValidatedAndResolved() {
+        if (controllerInfo == null) {
+            return false;
+        }
+        // #TODO Need to check why this is being used.
         if (controllerInfo.getAccount() == null) {
             controllerInfo.setAccount("customer1");
         }
-        check(TaskInputArgs.USER, controllerInfo.getUsername());
-        check(TaskInputArgs.PASSWORD, controllerInfo.getPassword());
+        check(USER, controllerInfo.getUsername());
+        check(PASSWORD, controllerInfo.getPassword());
         check("account", controllerInfo.getAccount());
         check("controllerHost", controllerInfo.getControllerHost());
         check("controllerPort", controllerInfo.getControllerPort());
         check("controllerSslEnabled", controllerInfo.getControllerSslEnabled());
-        // Incase the the machine agent is running in standalone mode and there is atleast one app agent, then there is
-        // need to check for app, tier and node. Right now we are not supporting this case as per below condition.
+        /*Incase the the machine agent is running in standalone mode and there is atleast one app agent, then there is
+        need to check for app, tier and node. Right now we are not supporting this case as per below condition.*/
         if (!isSimEnabled(controllerInfo)) {
             checkAppTierNode(controllerInfo);
         }

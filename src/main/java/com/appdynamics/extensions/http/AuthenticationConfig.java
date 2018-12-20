@@ -15,8 +15,8 @@
 
 package com.appdynamics.extensions.http;
 
-import static com.appdynamics.extensions.TaskInputArgs.AUTH_TYPE;
-import static com.appdynamics.extensions.TaskInputArgs.USER;
+import static com.appdynamics.extensions.Constants.AUTH_TYPE;
+import static com.appdynamics.extensions.Constants.USER;
 
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;

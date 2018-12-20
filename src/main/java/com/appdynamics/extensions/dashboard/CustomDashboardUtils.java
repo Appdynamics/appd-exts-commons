@@ -8,20 +8,14 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.controller.ControllerInfo;
-import com.appdynamics.extensions.controller.ControllerInfoValidator;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static com.appdynamics.extensions.TaskInputArgs.ENABLED;
+import static com.appdynamics.extensions.Constants.ENABLED;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
 
 /**
@@ -85,16 +79,12 @@ public class CustomDashboardUtils {
     }
 
     public static String getDashboardTemplate(String metricPrefix, Map customDashboardConfig, ControllerInfo controllerInfo, String dashboardName) {
-        ControllerInfoValidator validator = new ControllerInfoValidator();
-        if (validator.isValidatedAndResolved(controllerInfo)) {
             String dashboardMetricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metricPrefix);
             CustomDashboardTemplateGenerator templateGenerator = new CustomDashboardTemplateGenerator(customDashboardConfig, controllerInfo,
                     dashboardMetricPrefix, dashboardName);
             return templateGenerator.getDashboardTemplate();
-        }
-        return null;
     }
-    
+
     public static Boolean isValidDashboardTemplate(String dashboardTemplate) {
         if (!Strings.isNullOrEmpty(dashboardTemplate)) {
             logger.debug("Dashboard values resolved. Ready for uploader");

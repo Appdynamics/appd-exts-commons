@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.Constants;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;
@@ -40,6 +40,9 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
+
+import static com.appdynamics.extensions.Constants.HOST;
+import static com.appdynamics.extensions.Constants.PORT;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.APPLICATION_JSON;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.JSON;
 import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
@@ -53,17 +56,36 @@ public class CustomDashboardUploader {
     private ControllerInfo controllerInfo;
     private ControllerClient controllerClient;
 
+    //#TODO Check if ControllerInfo is required
     public CustomDashboardUploader(ControllerInfo controllerInfo, ControllerClient controllerClient) {
         this.controllerInfo = controllerInfo;
         this.controllerClient = controllerClient;
     }
 
-    public void checkAndUpload(String dashboardName, String fileContents, Map httpProperties, boolean overwrite) throws ControllerHttpRequestException {
+    public void checkAndUpload(String dashboardName, String fileContents, Map<String, ?> proxyMap, boolean overwrite) throws ControllerHttpRequestException {
         JsonNode allDashboardsNode = getAllDashboards();
-        uploadDashboard(dashboardName, fileContents, overwrite, httpProperties, controllerClient.getCookiesAndAuthToken(), allDashboardsNode);
+        // #TODO Check if cookiesCsrf from a different HttpClient can be used.
+        CookiesCsrf cookiesCsrf = controllerClient.getCookiesCsrf();
+        String fileExtension = JSON;
+        String fileContentType = APPLICATION_JSON;
+        if (isDashboardPresent(dashboardName, allDashboardsNode)) {
+            if (overwrite) {
+                logger.debug("Overwriting dashboard: {}", dashboardName);
+                /** Even though we intend to overwrite, this will actually create a new dashboard.
+                 * This option will not be exposed in the config.yml, which means it will always be false and
+                 * so we never try to overwrite.
+                 * This option needs to be expose when the editing option is supported through controller APIs.
+                 * */
+                uploadDashboard(proxyMap, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
+            } else {
+                logger.debug("Overwrite Disabled, not attempting to overwrite dashboard: {}", dashboardName);
+            }
+        } else {
+            uploadDashboard(proxyMap, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
+        }
     }
 
-    // #TODO Need to fill the catch blocks
+    // #TODO If all getAlldashboards returns null, dashboard is considered not present, a potential for dashboards explosion.
     private JsonNode getAllDashboards() {
         JsonNode allDashboardsNode = null;
         String alldashboards = null;
@@ -71,30 +93,11 @@ public class CustomDashboardUploader {
             alldashboards = controllerClient.sendGetRequest("controller/restui/dashboards/getAllDashboardsByType/false");
             return allDashboardsNode = new ObjectMapper().readTree(alldashboards);
         } catch (ControllerHttpRequestException e) {
-
+            logger.error("Invalid response from controller while fetching information about all dashbards", e);
         } catch (IOException e) {
-
+            logger.error("Error while getting all dashboards information", e);
         }
         return allDashboardsNode;
-    }
-
-    private void uploadDashboard(String dashboardName, String fileContents, boolean overwrite,
-                                 Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ControllerHttpRequestException {
-        String fileExtension = JSON;
-        String fileContentType = APPLICATION_JSON;
-        if (isDashboardPresent(dashboardName, allDashboards)) {
-            if (overwrite) {
-                logger.debug("Overwriting dashboard: {}", dashboardName);
-                //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
-                // This will not be present in the config.yml so it will never override.
-                // Keeping this here for when override will be supported
-                uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
-            } else {
-                logger.debug("Overwrite Disabled, not attempting to overwrite dashboard: {}", dashboardName);
-            }
-        } else {
-            uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
-        }
     }
 
     private boolean isDashboardPresent(String dashboardName, JsonNode existingDashboards) {
@@ -110,7 +113,7 @@ public class CustomDashboardUploader {
         return false;
     }
 
-    public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ControllerHttpRequestException {
+    public void uploadDashboard(Map<String, ?> proxyMap, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ControllerHttpRequestException {
         UrlBuilder urlBuilder = new UrlBuilder();
         urlBuilder.host(controllerInfo.getControllerHost());
         urlBuilder.port(controllerInfo.getControllerPort());
@@ -125,10 +128,9 @@ public class CustomDashboardUploader {
         HttpURLConnection connection = null;
         try {
             URL url = new URL(urlStr);
-            if (httpProperties.containsKey("proxy")) {
-                Map<String, ?> proxyMap = (Map<String, ?>) httpProperties.get("proxy");
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String) proxyMap.get(TaskInputArgs.HOST)
-                        , Integer.parseInt((String) proxyMap.get(TaskInputArgs.PORT))));
+            if (proxyMap != null && !proxyMap.isEmpty()) {
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String) proxyMap.get(HOST)
+                        , Integer.parseInt((String) proxyMap.get(PORT))));
                 connection = (HttpURLConnection) url.openConnection(proxy);
                 logger.debug("Created an HttpConnection for Fileupload with a proxy {}", proxy);
             } else {

@@ -13,13 +13,10 @@ import com.appdynamics.extensions.controller.ControllerInfoFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.appdynamics.extensions.dashboard.DashboardConstants.SSL_CERT_CHECK_ENABLED;
 
 /**
  * Created by bhuvnesh.kumar on 8/28/18.
@@ -85,29 +82,6 @@ public class CustomDashboardUtilsTest {
         String monitor = "MonitorName";
         String name = CustomDashboardUtils.getDashboardName(config, monitor);
         Assert.assertTrue(name.equals("MonitorName Dashboard"));
-    }
-
-    @Test
-    public void testGetHttpProperties() {
-        Map config = new HashMap();
-        Map customDashboardConfig = new HashMap();
-        customDashboardConfig.put(SSL_CERT_CHECK_ENABLED, false);
-        config.put("customDashboard", customDashboardConfig);
-        File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo;
-        ControllerInfoFactory.initialize(getConfigMap(), file);
-        controllerInfo = ControllerInfoFactory.getControllerInfo();
-        Map httpProperties = CustomDashboardUtils.getHttpProperties(controllerInfo, config);
-        ArrayList servers = (ArrayList) httpProperties.get("servers");
-        Map controllerServer = (Map) servers.get(0);
-        Map connection = (Map) httpProperties.get("connection");
-        Assert.assertTrue(controllerServer.get("password").toString().equals("passwordYML"));
-        Assert.assertTrue(controllerServer.get("username").toString().equals("usernameYML@accountNameYML"));
-        Assert.assertTrue(controllerServer.get("port").toString().equals("9999"));
-        Assert.assertTrue(controllerServer.get("host").toString().equals("hostNameYML"));
-        Assert.assertTrue(connection.get("sslCertCheckEnabled").toString().equals("false"));
-        Assert.assertTrue(connection.get("connectTimeout").toString().equals("10000"));
-        Assert.assertTrue(connection.get("socketTimeout").toString().equals("15000"));
     }
 
     private Map getConfigMap() {

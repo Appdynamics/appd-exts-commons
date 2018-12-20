@@ -23,13 +23,11 @@ import java.io.IOException;
  * @author Satish Muddam
  */
 public class MachineAgentAvailabilityCheck implements RunOnceCheck {
-    public Logger logger;
 
+    public Logger logger;
     private ControllerInfo controllerInfo;
     private ControllerClient controllerClient;
-
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
-
 
     public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerClient controllerClient, Logger logger) {
         this.logger = logger;
@@ -39,49 +37,37 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
 
     @Override
     public void check() {
-
         long start = System.currentTimeMillis();
-
         logger.info("Starting MachineAgentAvailabilityCheck");
-
-
         if (controllerInfo == null) {
             logger.error("Received ControllerInfo as null. Not checking anything.");
             return;
         }
-
         if (controllerInfo.getSimEnabled()) {
             logger.info("SIM is enabled, not checking MachineAgent availability metric");
             //TODO: Check if MA status needs to be verified if SIM is enabled.
             return;
         }
-
         int maStatus = getMAStatus();
         if (maStatus == 1) {
             logger.info("MachineAgent is reporting availability metric");
         } else {
             logger.error("MachineAgent is not reporting availability metric. Please check your configuration");
         }
-
         long diff = System.currentTimeMillis() - start;
         logger.info("MachineAgentAvailabilityCheck took {} ms to complete ", diff);
     }
 
     private int getMAStatus() {
-
         try {
-
             String statusURL = buildMAStatusCheckURL();
             String responseString = controllerClient.sendGetRequest(statusURL);
-
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(responseString);
-
             JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
             return valueNode.get(0).asInt();
         } catch (ControllerHttpRequestException e) {
             logger.error("Invalid response from controller while fetching MA status", e);
-
         } catch (IOException e) {
             logger.error("Error while getting the MA status information", e);
         }

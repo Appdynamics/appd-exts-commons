@@ -13,6 +13,9 @@ import com.appdynamics.extensions.crypto.CryptoUtil;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
+import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
+import static com.appdynamics.extensions.Constants.PASSWORD;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
 
 /**

@@ -15,9 +15,9 @@
 
 package com.appdynamics.extensions.crypto;
 
-import static com.appdynamics.extensions.TaskInputArgs.ENCRYPTED_PASSWORD;
-import static com.appdynamics.extensions.TaskInputArgs.ENCRYPTION_KEY;
-import static com.appdynamics.extensions.TaskInputArgs.PASSWORD;
+import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
+import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
+import static com.appdynamics.extensions.Constants.PASSWORD;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import java.util.Map;
 
 public class CryptoUtil {
+
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CryptoUtil.class);
     private static URLCodec codec = new URLCodec("UTF-8");
-
     public static final String SYSTEM_ARG_KEY = "appdynamics.extensions.key";
 
     public static String getPassword(Map<String, String> taskArgs) {

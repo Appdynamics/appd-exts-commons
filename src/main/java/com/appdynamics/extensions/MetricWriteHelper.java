@@ -141,8 +141,9 @@ public class MetricWriteHelper {
      * -------------------------
      * 1. Triggers the DerivedMetricsCalculator based on all the metrics published from all the tasks in a job
      *    run.
-     * 2. Prints the total metrics published in the current job run.
-     * 3. Logs the total execution time from the time execute() method is triggered to the time "Metrics uploaded"
+     * 2. Uploads the dashboard if initialized properly and not uploaded already.
+     * 3. Prints the total metrics published in the current job run.
+     * 4. Logs the total execution time from the time execute() method is triggered to the time "Metrics uploaded"
      *    metric is published.
      *
      */

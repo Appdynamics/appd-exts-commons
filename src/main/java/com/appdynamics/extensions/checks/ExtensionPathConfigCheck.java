@@ -26,10 +26,7 @@ import java.util.Map;
 public class ExtensionPathConfigCheck implements RunOnceCheck {
 
     public Logger logger;
-
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
-
-
     private ControllerInfo controllerInfo;
     private Map<String, ?> config;
     private ControllerClient controllerClient;
@@ -43,32 +40,24 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
 
     @Override
     public void check() {
-
         long start = System.currentTimeMillis();
-
         logger.info("Starting ExtensionPathConfigCheck");
-
         if (controllerInfo == null) {
             logger.error("Received ControllerInfo as null. Not checking anything.");
             return;
         }
-
         String metricPrefix = (String) config.get("metricPrefix");
         if (Strings.isNullOrEmpty(metricPrefix)) {
             logger.error("Metric prefix not configured in config file");
             return;
         }
-
         if (metricPrefix.startsWith("Server|Component")) { //Tier is configured in metric prefix
             if (controllerInfo.getSimEnabled()) {
                 logger.error("No need to configure tier-id as SIM is enabled. Please use the alternate metric prefix.");
             } else {
-
                 String[] split = metricPrefix.split(":|\\|");
                 String extensionTier = split[2];
-
                 String maTierID = getMAConfiguredTier();
-
                 if (maTierID != null) {
                     if (extensionTier.equals(maTierID) || extensionTier.equals(controllerInfo.getTierName())) {
                         logger.info("Extension configured correct tier id/tier name");
@@ -93,15 +82,11 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
         try {
             String statusURL = buildMAFetchTierURLL();
             String responseString = controllerClient.sendGetRequest(statusURL);
-
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(responseString);
-
             return jsonNode.get(0).get("id").asText();
-
         } catch (ControllerHttpRequestException e) {
-            logger.error("Invalid response from controller while fetching MA status", e);
-
+            logger.error("Invalid response from controller while fetching MA configured tier", e);
         } catch (IOException e) {
             logger.error("Error while getting the tier information", e);
         }
