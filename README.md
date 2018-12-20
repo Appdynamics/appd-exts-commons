@@ -11,7 +11,7 @@ All the changes to the SDK are tracked in the [CHANGELOG.md](CHANGELOG.md).
 
 ## Extension Prerequisites
 Before developing a new extension, please check if an AppDynamics supported extension already exists on the [exchange](https://www.appdynamics.com/community/exchange/).
-AppDynamics monitoring extensions extend the AppDynamics Server Infrastructure Agent (SIM) or Standalone Machine Agent functionality to report additional metrics to the AppDynamics Controller. 
+AppDynamics monitoring extensions extend the [AppDynamics Server Infrastructure Agent (SIM)]() or [Standalone Machine Agent]() functionality to report additional metrics to the AppDynamics Controller. 
 Please go over the [Extension Prerequisites Guide](https://community.appdynamics.com/t5/Knowledge-Base/Extensions-Prerequisites-Guide/ta-p/35213) for more details on the supported configurations. 
 
 ## Importing the Dependency
@@ -82,6 +82,9 @@ public class SampleMonitor extends ABaseMonitor {
  
   protected void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider){
       //...logic to add the core logic for the SampleMonitor
+      List<Metric> metrics = Lists.newArrayList();
+      metrics.add(new Metric("HeartBeat", String.valueOf(BigInteger.ONE), getDefaultMetricPrefix() + "|HeartBeat", "AVG", "AVG", "IND");
+      tasksExecutionServiceProvider.getMetricWriteHelper().transformAndPrintMetrics(metrics);
   }
  
   protected abstract List<Map<>> getServers(){
@@ -91,6 +94,8 @@ public class SampleMonitor extends ABaseMonitor {
  
 }
 ```
+
+
 For more details on how to use this Java SDK to build an AppDynamics extension, please check [Extension Starter project](https://github.com/Appdynamics/extension-starter)
 
 # Features
@@ -156,8 +161,7 @@ For more details on ControllerInfo, check [How do I auto upload dashboards from 
 ## Auto Upload Custom Dashboards
 
 The SDK supports automatic upload of a pre-built dashboard to the controller. The dashboard template should be provided to the extension through the `customDashboard` section
-in the `config.yml`. If a dashboard is already created through this feature, any update 
-can be updated and more data can be added to increase the visibility of the metrics provided by the extension. 
+in the `config.yml`. The template can be updated and more data can be added to increase the visibility of the metrics provided by the extension. 
 For enabling auto upload of custom dashboards, the following configuration needs to be defined in the `config.yml`.
 
 ```
@@ -276,7 +280,35 @@ ABaseMonitor.getContextConfiguration().getContext().getEventsServiceDataManager(
 
 For more details about Events Service client, check [Events Service Client]().
 
-## Metric Types and Metric Transformers
+## Metric Validity, Metric Types, Metric Transformers
+
+#### Metric Validity
+Following metric validation checks of the metric path and metric value are performed for every metric published using the SDK
+
+1. A metric value should be a positive integer. 
+2. 
+
+#### Metric Types
+The extension developer needs to configure the metric qualifiers for each metric that needs to be reported to the controller.
+These qualifiers can be easily set for every metric in the `metrics.xml` and the SDK takes care of setting the qualifier for every metric.
+For more details on metric qualifiers, check [Metric Qualifiers]().
+
+The default metric qualifier is  `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
+
+#### Metric Transformers
+The SDK provides an automated utility that allows extensions developers to transform a metric name and value as it would be represented in the Metric Browser. These transforms include the following: 
+
+**Alias:** Often, metrics are represented by ambiguous names in the artifacts being monitored. The Alias transform can be used to replace a metric’s name.
+
+**Multiplier:** The Multiplier transform can be used to multiply the original metric value by a factor configured in the `metrics.xml`.
+
+**Delta:** This transform compares the value of a metric at minute X with its value at minute X-1 and publishes the difference as a metric value. Note that the first value will always be null if delta is true. 
+
+**Convert:** The Convert transform can be applied to metrics that return a text value from an artifact’s API. These text values can be represented as numeric values.
+
+When MetricWriteHelper.transformAndPrintMetrics() is called, transformers applicable to every metric as defined in the metrics.xml will be applied.  For more details on metric transformers, check [Metric Transformers]().
+
+## Metric Path CharSequence Replacement
 
 ## Concurrent Fan Out
 
@@ -308,7 +340,9 @@ For more details on workbench, check [How to use the Extensions WorkBench](https
 
 ## Health Checks
 
-The SDK runs a few checks to validate the controller and machine agent configuration and to ensure an error-free run of any configured extensions. These checks on validation (or failure) log messages in the machine agent logs to help debug any issues. 
+The SDK runs a few checks to validate the controller and machine agent configuration and to ensure an error-free run of any configured extensions. These checks also monitor the log messages in the machine agent logs to help troubleshoot any issues. 
+A summary of all the different checks and issues detected is placed in `<machine-agent-dir>/logs/monitor-checks/<extension-name>.log`
+
 These checks are primarily categorized into:
 
 ####RunOnceCheck:
