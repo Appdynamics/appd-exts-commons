@@ -117,7 +117,6 @@ CryptoUtil.getPassword(Map)
 
 For more details on password encrpytion, please check [How do I use Password Encryption with Extensions](https://community.appdynamics.com/t5/Knowledge-Base/How-do-I-use-Password-Encryption-with-Extensions/ta-p/29397)
 
-## Metric Types and Metric Transformers
 
 ## Controller Info
 The SDK automatically pulls the Controller information and builds a ControllerInfo object which is made available to the extension developer via
@@ -251,11 +250,6 @@ proxy:
   encryptedPassword: ""
 ```
 
-
-## Concurrent Fan Out
-
-
-
 ## Events Services
 
 One of the limitations of the AppDynamics Metric Browser is its inability to support 
@@ -281,10 +275,12 @@ ABaseMonitor.getContextConfiguration().getContext().getEventsServiceDataManager(
 ``` 
 
 For more details about Events Service client, check [Events Service Client]().
-   
-## Task Schedule
 
-## Extension Logger
+## Metric Types and Metric Transformers
+
+## Concurrent Fan Out
+
+## Task Schedule
 
 ## Workbench
 
@@ -306,6 +302,14 @@ Navigate to `http://localhost:9090/` to see the ![Workbench screen](workbench.pn
 
 
 For more details on workbench, check [How to use the Extensions WorkBench](https://community.appdynamics.com/t5/Knowledge-Base/How-to-use-the-Extensions-WorkBench/ta-p/30130).
+
+
+## Health Checks
+
+
+
+## Extension Logger
+
 
 
 # Getting Help
