@@ -298,7 +298,9 @@ Workbench by default uses port 9090. Another port can be configured using
 java -jar <monitoring-extension.jar> <host> <port>
 ```
 
-Navigate to `http://localhost:9090/` to see the ![Workbench screen](workbench.png) 
+Navigate to `http://localhost:9090/` to see the WorkBench screen.
+
+![Workbench screen](workbench.png) 
 
 
 For more details on workbench, check [How to use the Extensions WorkBench](https://community.appdynamics.com/t5/Knowledge-Base/How-to-use-the-Extensions-WorkBench/ta-p/30130).
@@ -306,9 +308,39 @@ For more details on workbench, check [How to use the Extensions WorkBench](https
 
 ## Health Checks
 
+The SDK runs a few checks to validate the controller and machine agent configuration and to ensure an error-free run of any configured extensions. These checks on validation (or failure) log messages in the machine agent logs to help debug any issues. 
+These checks are primarily categorized into:
+
+####RunOnceCheck:
+   Runs only once on the start of the extension.
+
+**AppTierNode Check:** Ensures correct machine agent and SIM configuration.
+
+**ExtensionPathConfig Check:** Performs metric prefix and tierId or componentId check on extension path configuration.
+
+**Machine Agent Availability Check:** When SIM is disabled, checks whether Machine Agent Availability metric reports 1 or not.
+
+####RunAlwaysCheck: 
+   Runs periodically based on the defined frequency.
+
+**MaxMetricLimit Check:** The MaxMetricLimit check logs error on any occurrences of 
+`ERROR   ManagedMonitorDelegate - Maximum metrics limit reached [450] no new metrics can be created. This exception will not repeat until restart.` in the MachineAgent logs.
+
+**MetricBlacklistLimit Check:** This check looks up machine agent logs for any occurrences of `WARN ManagedMonitorDelegate - Metric registration blacklist limit reached`.
+
 
 
 ## Extension Logger
+
+Since the extension logs are clubbed in the machine agent logs, troubleshooting the extension becomes very difficult.
+The SDK provides an ExtensionLoggerFactory which prefixes the name of the extension to every log statement it outputs in machine-agent.log.
+
+This ExtensionLoggerFactory can be used in any java class in the following manner
+
+```
+Logger logger = ExtensionsLoggerFactory.getLogger(ABC.class)
+```
+
 
 
 
