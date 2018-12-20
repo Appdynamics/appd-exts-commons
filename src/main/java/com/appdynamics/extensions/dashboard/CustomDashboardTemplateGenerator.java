@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.commons.io.FileUtils;

@@ -37,6 +37,17 @@ public class TaskInputArgs {
     public static final String METRIC_PREFIX = "metric-prefix";
     public static final String ENCRYPTION_KEY = "encryptionKey";
     public static final String SSL_PROTOCOL = "sslProtocols";
+    public static final String SSL_CERT_CHECK_ENABLED = "sslCertCheckEnabled";
+    public static final String CONNECT_TIMEOUT = "connectTimeout";
+    public static final String SOCKET_TIMEOUT = "socketTimeout";
+    public static final String CONNECTION = "connection";
+    public static final String TLSV_12 = "TLSv1.2";
+    public static final String SERVERS = "servers";
+    public static final String ACCOUNT_ACCESS_KEY = "accountAccessKey";
+    public static final String SINGULARITY_AGENT = "singularity-agent";
+    public static final String AT = "@";
+    public static final String USERNAME = "username";
+    public static final String ENABLED = "enabled";
 
     public static String getArg(Map<String, String> taskArgs, String key, String defaultValue) {
         if (taskArgs.containsKey(key)) {

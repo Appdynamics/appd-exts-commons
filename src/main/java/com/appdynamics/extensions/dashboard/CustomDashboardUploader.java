@@ -15,16 +15,31 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.api.ApiException;
-import com.appdynamics.extensions.api.ControllerApiService;
-import com.appdynamics.extensions.api.CookiesCsrf;
+import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.controller.ControllerHttpRequestException;
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.CookiesCsrf;
+import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
-
+import javax.net.ssl.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
-
 import static com.appdynamics.extensions.dashboard.DashboardConstants.APPLICATION_JSON;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.JSON;
 import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
@@ -33,24 +48,38 @@ import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
  * Created by abey.tom on 4/11/15.
  */
 public class CustomDashboardUploader {
+
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUploader.class);
+    private ControllerInfo controllerInfo;
+    private ControllerClient controllerClient;
 
-    private ControllerApiService apiService;
-
-    public CustomDashboardUploader(ControllerApiService apiService) {
-        this.apiService = apiService;
+    public CustomDashboardUploader(ControllerInfo controllerInfo, ControllerClient controllerClient) {
+        this.controllerInfo = controllerInfo;
+        this.controllerClient = controllerClient;
     }
 
-    public void checkAndUpload(CloseableHttpClient client, String dashboardName,
-                               String fileContents, Map httpProperties, boolean overwrite) throws ApiException {
-        CookiesCsrf cookiesCsrf = apiService.getCookiesAndAuthToken(client);
-        JsonNode allDashboards = apiService.getAllDashboards(client, cookiesCsrf);
-        uploadDashboard(dashboardName, fileContents, overwrite, httpProperties, cookiesCsrf, allDashboards);
+    public void checkAndUpload(String dashboardName, String fileContents, Map httpProperties, boolean overwrite) throws ControllerHttpRequestException {
+        JsonNode allDashboardsNode = getAllDashboards();
+        uploadDashboard(dashboardName, fileContents, overwrite, httpProperties, controllerClient.getCookiesAndAuthToken(), allDashboardsNode);
+    }
 
+    // #TODO Need to fill the catch blocks
+    private JsonNode getAllDashboards() {
+        JsonNode allDashboardsNode = null;
+        String alldashboards = null;
+        try {
+            alldashboards = controllerClient.sendGetRequest("controller/restui/dashboards/getAllDashboardsByType/false");
+            return allDashboardsNode = new ObjectMapper().readTree(alldashboards);
+        } catch (ControllerHttpRequestException e) {
+
+        } catch (IOException e) {
+
+        }
+        return allDashboardsNode;
     }
 
     private void uploadDashboard(String dashboardName, String fileContents, boolean overwrite,
-                                 Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ApiException {
+                                 Map httpProperties, CookiesCsrf cookiesCsrf, JsonNode allDashboards) throws ControllerHttpRequestException {
         String fileExtension = JSON;
         String fileContentType = APPLICATION_JSON;
         if (isDashboardPresent(dashboardName, allDashboards)) {
@@ -59,13 +88,12 @@ public class CustomDashboardUploader {
                 //#NOTE Even though we intend to overwrite, this will actually create a new dashboard.
                 // This will not be present in the config.yml so it will never override.
                 // Keeping this here for when override will be supported
-                apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
+                uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
             } else {
                 logger.debug("Overwrite Disabled, not attempting to overwrite dashboard: {}", dashboardName);
             }
         } else {
-            apiService.uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
-
+            uploadDashboard(httpProperties, cookiesCsrf, dashboardName, fileExtension, fileContents, fileContentType);
         }
     }
 
@@ -80,5 +108,130 @@ public class CustomDashboardUploader {
         }
         logger.debug("Dashboard not present, attempting to upload: {} ", dashboardName);
         return false;
+    }
+
+    public void uploadDashboard(Map<String, ?> httpProperties, CookiesCsrf cookiesCsrf, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ControllerHttpRequestException {
+        UrlBuilder urlBuilder = new UrlBuilder();
+        urlBuilder.host(controllerInfo.getControllerHost());
+        urlBuilder.port(controllerInfo.getControllerPort());
+        urlBuilder.ssl(controllerInfo.getControllerSslEnabled());
+
+        String filename = dashboardName + "." + fileExtension;
+        String twoHyphens = "--";
+        String boundary = "*****";
+        String lineEnd = "\r\n";
+        String urlStr = urlBuilder.path("controller/CustomDashboardImportExportServlet").build();
+        logger.info("Uploading the custom Dashboard {} to {}", filename, urlStr);
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(urlStr);
+            if (httpProperties.containsKey("proxy")) {
+                Map<String, ?> proxyMap = (Map<String, ?>) httpProperties.get("proxy");
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String) proxyMap.get(TaskInputArgs.HOST)
+                        , Integer.parseInt((String) proxyMap.get(TaskInputArgs.PORT))));
+                connection = (HttpURLConnection) url.openConnection(proxy);
+                logger.debug("Created an HttpConnection for Fileupload with a proxy {}", proxy);
+            } else {
+                connection = (HttpURLConnection) url.openConnection();
+            }
+            if (connection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+                httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory());
+                httpsURLConnection.setHostnameVerifier(new CustomHostnameVerifier());
+            }
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Connection", "Keep-Alive");
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+            connection.setRequestProperty("Cookie", cookiesCsrf.getCookies());
+
+            DataOutputStream request = new DataOutputStream(connection.getOutputStream());
+            request.writeBytes(twoHyphens + boundary + lineEnd);
+            request.writeBytes("Content-Disposition: form-data; name=\"" + dashboardName + "\";filename=\"" + filename + "\"" + lineEnd);
+            request.writeBytes("Content-Type: " + fileContentType + lineEnd);
+            request.writeBytes(lineEnd);
+            request.write(fileContent.getBytes());
+            request.writeBytes(lineEnd + lineEnd);
+            request.writeBytes(twoHyphens + boundary + lineEnd);
+
+            if (cookiesCsrf.getCsrf() != null) {
+                request.writeBytes("Content-Disposition: form-data; name=\"X-CSRF-TOKEN\"" + lineEnd);
+                request.writeBytes(lineEnd);
+                request.writeBytes(cookiesCsrf.getCsrf());
+                request.writeBytes(lineEnd);
+                request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+            } else {
+                logger.warn("The CSRF is null, trying the dashboard upload without the CSRF token");
+            }
+
+            request.flush();
+            request.close();
+            InputStream inputStream = null;
+            try {
+                inputStream = connection.getInputStream();
+                int status = connection.getResponseCode();
+                if (status == 200) {
+                    logger.info("Successfully Imported the dashboard {}", filename);
+                } else {
+                    logger.error("The server responded with a status of {}", status);
+                    String content = null;
+                    if (inputStream != null) {
+                        content = IOUtils.toString(inputStream);
+                    }
+                    logger.error("The response headers are {} and content is [{}]",
+                            connection.getHeaderFields(), content);
+                }
+
+            } catch (IOException e) {
+                logger.error("Error while uploading the dashboard " + urlStr, e);
+                InputStream errorStream = connection.getErrorStream();
+                String content = null;
+                if (errorStream != null) {
+                    content = IOUtils.toString(errorStream);
+                }
+                logger.error("The error response headers are {} and content is [{}]",
+                        connection.getHeaderFields(), content);
+                throw new ControllerHttpRequestException("Error while uploading the dashboard", e);
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            throw new ControllerHttpRequestException("Error in uploading dashboard", e);
+        }
+
+    }
+
+    private static SSLSocketFactory createSSLSocketFactory() throws ControllerHttpRequestException {
+        try {
+            SSLContext context = SSLContext.getInstance("TLSv1.2");
+            context.init(null, new TrustManager[]{new X509TrustManager() {
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String authType) throws CertificateException {
+                }
+
+                public void checkServerTrusted(X509Certificate[] x509Certificates, String authType) throws CertificateException {
+
+                }
+
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+            }
+            }, new SecureRandom());
+            return context.getSocketFactory();
+        } catch (NoSuchAlgorithmException e) {
+            throw new ControllerHttpRequestException("Unsupported algorithm", e);
+        } catch (KeyManagementException e) {
+            throw new ControllerHttpRequestException("Key Management exception", e);
+        }
+    }
+
+    private static class CustomHostnameVerifier implements HostnameVerifier {
+        public boolean verify(String s, SSLSession sslSession) {
+            return true;
+        }
     }
 }

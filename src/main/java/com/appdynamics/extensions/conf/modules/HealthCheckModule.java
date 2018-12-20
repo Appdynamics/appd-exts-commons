@@ -10,13 +10,13 @@ package com.appdynamics.extensions.conf.modules;
 import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.checks.AppTierNodeCheck;
-import com.appdynamics.extensions.checks.ControllerRequestHandler;
 import com.appdynamics.extensions.checks.ExtensionPathConfigCheck;
 import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
 import com.appdynamics.extensions.checks.MaxMetricLimitCheck;
 import com.appdynamics.extensions.checks.MetricBlacklistLimitCheck;
 import com.appdynamics.extensions.checks.MonitorHealthCheck;
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -39,7 +39,7 @@ public class HealthCheckModule {
     private MonitorExecutorService executorService;
 
 
-    public void initMATroubleshootChecks(ControllerInfo controllerInfo,String monitorName, Map<String, ?> config) {
+    public void initMATroubleshootChecks(ControllerInfo controllerInfo, ControllerClient controllerClient, String monitorName, Map<String, ?> config) {
 
         String enableHealthChecksSysPropString = System.getProperty("enableHealthChecks");
 
@@ -67,6 +67,7 @@ public class HealthCheckModule {
             return;
         }
 
+        // #TODO Validation integration remaining
         if (!validateControllerInfo(controllerInfo)) {
             return;
         }
@@ -97,13 +98,11 @@ public class HealthCheckModule {
                 healthCheckMonitor.clearAllChecks();
             }
 
-            ControllerRequestHandler controllerRequestHandler = new ControllerRequestHandler(controllerInfo, MonitorHealthCheck.logger);
-
             healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MaxMetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MetricBlacklistLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerRequestHandler, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerRequestHandler, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerClient, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerClient, MonitorHealthCheck.logger));
 
 
             executorService.submit("HealthCheckMonitor", healthCheckMonitor);

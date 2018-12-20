@@ -7,10 +7,9 @@
 
 package com.appdynamics.extensions.conf;
 
+
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
-import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
@@ -19,12 +18,14 @@ import com.appdynamics.extensions.metrics.PerMinValueCalculator;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
+import com.appdynamics.extensions.controller.*;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import static com.appdynamics.extensions.controller.ControllerInfo.*;
 
 /**
  * Created by venkata.konala on 3/29/18.
@@ -37,8 +38,7 @@ public class MonitorContext {
     private Map<String, ?> config;
     private String metricPrefix;
     private File installDir;
-    private ControllerInfo controllerInfo;
-
+    private ControllerModule controllerModule;
     private WorkBenchModule workBenchModule;
     private HttpClientModule httpClientModule;
     private MonitorExecutorServiceModule monitorExecutorServiceModule;
@@ -53,6 +53,7 @@ public class MonitorContext {
     MonitorContext(String monitorName, File installDir) {
         this.installDir = installDir;
         this.monitorName = monitorName;
+        controllerModule = new ControllerModule();
         workBenchModule = new WorkBenchModule();
         httpClientModule = new HttpClientModule();
         monitorExecutorServiceModule = new MonitorExecutorServiceModule();
@@ -68,26 +69,32 @@ public class MonitorContext {
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
         this.config = config;
         this.metricPrefix = metricPrefix;
-        Map controllerInfoMap = new HashMap();
-        if (config.get("controllerInfo") != null) {
-            controllerInfoMap = (Map) config.get("controllerInfo");
-        }
-        ControllerInfoFactory.initialize(controllerInfoMap, installDir);
-        controllerInfo = ControllerInfo.getInstance();
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
+            controllerModule.initController(installDir, config, metricPrefix);
             workBenchModule.initWorkBenchStore(config, metricPrefix);
             httpClientModule.initHttpClient(config);
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
-            healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
-            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo);
-            healthCheckModule.initMATroubleshootChecks(controllerInfo, monitorName, config);
+            healthCheckModule.initMATroubleshootChecks(getControllerInfo(), getControllerClient(), monitorName, config);
+            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, getControllerInfo(), getControllerClient());
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
+    }
+
+    public ControllerInfo getControllerInfo() {
+        return controllerModule.getControllerInfo();
+    }
+
+    public ControllerClient getControllerClient() {
+        return controllerModule.getControllerClient();
+    }
+
+    public void setControllerModule(ControllerModule controllerModule) {
+        this.controllerModule = controllerModule;
     }
 
     public static boolean isWorkbenchMode() {
@@ -164,11 +171,6 @@ public class MonitorContext {
 
     public void setDashboardModule(CustomDashboardModule dashboardModule) {
         this.dashboardModule = dashboardModule;
-    }
-
-
-    public ControllerInfo getControllerInfo() {
-        return controllerInfo;
     }
 
     public EventsServiceDataManager getEventsServiceDataManager() {

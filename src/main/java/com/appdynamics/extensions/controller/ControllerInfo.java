@@ -6,7 +6,7 @@
  *
  */
 
-package com.appdynamics.extensions.conf.controller;
+package com.appdynamics.extensions.controller;
 
 import com.appdynamics.extensions.crypto.CryptoUtil;
 
@@ -19,7 +19,7 @@ import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
  * Created by abey.tom on 2/11/16.
  */
 public class ControllerInfo {
-
+    // #TODO Why are the following fields protected? Why can't they be private?
     protected String controllerHost;
     protected Integer controllerPort;
     protected Boolean controllerSslEnabled;
@@ -42,7 +42,7 @@ public class ControllerInfo {
     private ControllerInfo() {
     }
 
-    public static ControllerInfo getInstance() {
+    static ControllerInfo getInstance() {
         return controllerInfo;
     }
 

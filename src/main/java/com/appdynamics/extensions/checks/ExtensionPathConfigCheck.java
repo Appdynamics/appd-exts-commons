@@ -7,7 +7,9 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.ControllerHttpRequestException;
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
@@ -30,13 +32,13 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
 
     private ControllerInfo controllerInfo;
     private Map<String, ?> config;
-    private ControllerRequestHandler controllerRequestHandler;
+    private ControllerClient controllerClient;
 
-    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, ControllerRequestHandler controllerRequestHandler, Logger logger) {
+    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, ControllerClient controllerClient, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
         this.config = config;
-        this.controllerRequestHandler = controllerRequestHandler;
+        this.controllerClient = controllerClient;
     }
 
     @Override
@@ -90,14 +92,14 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
     private String getMAConfiguredTier() {
         try {
             String statusURL = buildMAFetchTierURLL();
-            String responseString = controllerRequestHandler.sendGet(statusURL);
+            String responseString = controllerClient.sendGetRequest(statusURL);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(responseString);
 
             return jsonNode.get(0).get("id").asText();
 
-        } catch (InvalidResponseException e) {
+        } catch (ControllerHttpRequestException e) {
             logger.error("Invalid response from controller while fetching MA status", e);
 
         } catch (IOException e) {

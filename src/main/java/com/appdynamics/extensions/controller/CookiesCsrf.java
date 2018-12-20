@@ -1,4 +1,4 @@
-package com.appdynamics.extensions.api;
+package com.appdynamics.extensions.controller;
 
 public class CookiesCsrf {
     private String cookies;

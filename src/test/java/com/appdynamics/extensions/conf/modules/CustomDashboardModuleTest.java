@@ -10,8 +10,8 @@ package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.api.ApiException;
 import com.appdynamics.extensions.api.ControllerApiService;
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
-import com.appdynamics.extensions.conf.controller.ControllerInfoFactory;
+import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
 import com.appdynamics.extensions.dashboard.CustomDashboardUtils;
 import org.apache.http.impl.client.CloseableHttpClient;

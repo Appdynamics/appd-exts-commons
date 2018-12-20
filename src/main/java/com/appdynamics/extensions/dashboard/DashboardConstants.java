@@ -13,11 +13,7 @@ package com.appdynamics.extensions.dashboard;
  */
 public class DashboardConstants {
 
-    public static final String SSL_CERT_CHECK_ENABLED = "sslCertCheckEnabled";
-    public static final String CONNECT_TIMEOUT = "connectTimeout";
-    public static final String SOCKET_TIMEOUT = "socketTimeout";
-    public static final String CONNECTION = "connection";
-    public static final String TLSV_12 = "TLSv1.2";
+
     public static final String REPLACE_MACHINE_PATH = "${MACHINE_PATH}";
     public static final String REPLACE_METRIC_PREFIX = "${METRIC_PREFIX}";
     public static final String REPLACE_APPLICATION_NAME = "${APPLICATION_NAME}";
@@ -27,16 +23,7 @@ public class DashboardConstants {
     public static final String REPLACE_SIM_APPLICATION_NAME = "${SIM_APPLICATION_NAME}";
     public static final String REPLACE_HOST_NAME = "${HOST_NAME}";
     public static final String DASHBOARD_NAME = "dashboardName";
-    public static final String SERVERS = "servers";
-    public static final String PASSWORD = "password";
-    public static final String ACCOUNT_ACCESS_KEY = "accountAccessKey";
     public static final String SIM_APPLICATION_NAME = "Server & Infrastructure Monitoring";
-    public static final String ENCRYPTED_PASSWORD = "encryptedPassword";
-    public static final String ENCRYPTION_KEY = "encryptionKey";
-    public static final String SINGULARITY_AGENT = "singularity-agent";
-    public static final String AT = "@";
-    public static final String USERNAME = "username";
-    public static final String ENABLED = "enabled";
     public static final String TRUE = "true";
     public static final String FALSE = "false";
     public static final String ROOT = "Root";
@@ -47,4 +34,5 @@ public class DashboardConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String METRICS_SEPARATOR = "|";
     public static final String OVERWRITE_DASHBOARD = "overwriteDashboard";
+    public static final int DEFAULT_PERIODIC_DASHBOARD_CHECK_IN_SECONDS = 300;
 }

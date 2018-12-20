@@ -53,7 +53,7 @@ customDashboard:
     dashboardName: "Sample Monitor Dashboard"
     sslCertCheckEnabled: true
     # Update the path to the dashboard file.
-    pathToSIMDashboard: "monitors/SampleMonitor/normalDashboard.json"
+    pathToSIMDashboard: "monitors/SampleMonitor/SIMDashboard.json"
     pathToNormalDashboard: "monitors/SampleMonitor/normalDashboard.json"
     periodicDashboardCheckInSeconds: 300
 

@@ -7,7 +7,9 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.ControllerHttpRequestException;
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.util.JsonUtils;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
@@ -24,15 +26,15 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
     public Logger logger;
 
     private ControllerInfo controllerInfo;
-    private ControllerRequestHandler controllerRequestHandler;
+    private ControllerClient controllerClient;
 
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
 
 
-    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerRequestHandler controllerRequestHandler, Logger logger) {
+    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerClient controllerClient, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
-        this.controllerRequestHandler = controllerRequestHandler;
+        this.controllerClient = controllerClient;
     }
 
     @Override
@@ -70,14 +72,14 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
         try {
 
             String statusURL = buildMAStatusCheckURL();
-            String responseString = controllerRequestHandler.sendGet(statusURL);
+            String responseString = controllerClient.sendGetRequest(statusURL);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(responseString);
 
             JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
             return valueNode.get(0).asInt();
-        } catch (InvalidResponseException e) {
+        } catch (ControllerHttpRequestException e) {
             logger.error("Invalid response from controller while fetching MA status", e);
 
         } catch (IOException e) {

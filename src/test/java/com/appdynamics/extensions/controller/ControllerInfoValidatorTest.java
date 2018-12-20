@@ -6,7 +6,7 @@
  *
  */
 
-package com.appdynamics.extensions.conf.controller;
+package com.appdynamics.extensions.controller;
 
 import org.junit.Assert;
 import org.junit.Test;

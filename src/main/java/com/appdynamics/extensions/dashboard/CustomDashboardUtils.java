@@ -9,7 +9,8 @@
 package com.appdynamics.extensions.dashboard;
 
 import com.appdynamics.extensions.TaskInputArgs;
-import com.appdynamics.extensions.conf.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.ControllerInfoValidator;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.base.Strings;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.appdynamics.extensions.TaskInputArgs.ENABLED;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.*;
 
 /**
@@ -58,6 +60,8 @@ public class CustomDashboardUtils {
             }
             dashboardMetricPrefix.deleteCharAt(dashboardMetricPrefix.length() - 1);
         } else {
+            //#TODO Since the metricPrefix is coming from MonitorContextConfiguration, it will never be null or empty
+            //#TODO nor will it have a "|" in the end. So this is in unnecessary check which will never be hit.
             if (metricPrefix.length() > 0 && metricPrefix.charAt(metricPrefix.length() - 1) == '|') {
                 metricPrefix = metricPrefix.substring(0, metricPrefix.length() - 1);
             }
@@ -67,102 +71,36 @@ public class CustomDashboardUtils {
         return dashboardMetricPrefix.toString();
     }
 
-    public static Map<String, ? super Object> getHttpProperties(ControllerInfo controllerInfo, Map config) {
-        Map customDashboardConfig = (Map) config.get(CUSTOM_DASHBOARD);
-        Map<String, ? super Object> httpProperties = new HashMap<>();
-        List<Map<String, ? super Object>> controllerServersList = Lists.newArrayList();
-        Map<String, ? super Object> controllerServerInfo = getControllerServerDetailsFromControllerInfo(controllerInfo);
-        controllerServersList.add(controllerServerInfo);
-        httpProperties.put(SERVERS, controllerServersList);
-        Map<String, ? super Object> connectionMap = getConnectionMap(customDashboardConfig);
-        httpProperties.put(CONNECTION, connectionMap);
-        setProxyIfApplicable(httpProperties, config);
-        return httpProperties;
+    public static boolean isCustomDashboardEnabled(Map customDashboardConfig) {
+        return customDashboardConfig != null && !customDashboardConfig.isEmpty() &&
+                (Boolean) customDashboardConfig.get(ENABLED);
     }
 
-    private static Map<String, ? super Object> getControllerServerDetailsFromControllerInfo(ControllerInfo controllerInfo) {
-        Map<String, ? super Object> controllerServer = new HashMap<>();
-        controllerServer.put(TaskInputArgs.HOST, controllerInfo.getControllerHost());
-        controllerServer.put(TaskInputArgs.PORT, String.valueOf(controllerInfo.getControllerPort()));
-        controllerServer.put(TaskInputArgs.USE_SSL, String.valueOf(controllerInfo.getControllerSslEnabled()));
-        controllerServer.put(TaskInputArgs.USER, getUserName(controllerInfo));
-        controllerServer.put(TaskInputArgs.PASSWORD, controllerInfo.getPassword());
-        return controllerServer;
+    public static int getTimeDelay(Map customDashboardConfig) {
+        Integer num = (Integer) customDashboardConfig.get("periodicDashboardCheckInSeconds");
+        if (num != null) {
+            return num;
+        }
+        return DEFAULT_PERIODIC_DASHBOARD_CHECK_IN_SECONDS;
     }
 
-    private static Map<String, ? super Object> getConnectionMap(Map customDashboardConfig) {
-        Map<String, ? super Object> connectionMap = new HashMap<>();
-        String[] sslProtocols = {TLSV_12};
-        connectionMap.put(TaskInputArgs.SSL_PROTOCOL, sslProtocols);
-        Object sslCertCheckEnabled = customDashboardConfig.get(SSL_CERT_CHECK_ENABLED);
-        if (sslCertCheckEnabled != null) {
-            connectionMap.put(SSL_CERT_CHECK_ENABLED, Boolean.valueOf(sslCertCheckEnabled.toString()));
-        } else {
-            connectionMap.put(SSL_CERT_CHECK_ENABLED, true);
+    public static String getDashboardTemplate(String metricPrefix, Map customDashboardConfig, ControllerInfo controllerInfo, String dashboardName) {
+        ControllerInfoValidator validator = new ControllerInfoValidator();
+        if (validator.isValidatedAndResolved(controllerInfo)) {
+            String dashboardMetricPrefix = CustomDashboardUtils.buildMetricPrefixForDashboard(metricPrefix);
+            CustomDashboardTemplateGenerator templateGenerator = new CustomDashboardTemplateGenerator(customDashboardConfig, controllerInfo,
+                    dashboardMetricPrefix, dashboardName);
+            return templateGenerator.getDashboardTemplate();
         }
-        connectionMap.put(CONNECT_TIMEOUT, 10000);
-        connectionMap.put(SOCKET_TIMEOUT, 15000);
-        return connectionMap;
+        return null;
     }
-
-    private static String getUserName(ControllerInfo controllerInfo) {
-        String accountName = controllerInfo.getAccount();
-        String username = controllerInfo.getUsername();
-        if (accountName != null && username != null) {
-            return username + AT + accountName;
+    
+    public static Boolean isValidDashboardTemplate(String dashboardTemplate) {
+        if (!Strings.isNullOrEmpty(dashboardTemplate)) {
+            logger.debug("Dashboard values resolved. Ready for uploader");
+            return true;
         }
-        return "";
-    }
-
-    private static void setProxyIfApplicable(Map<String, ? super Object> argsMap, Map config) {
-        Map proxyConfig = (Map) config.get("proxy");
-        String proxyHost = "";
-        String proxyPort = "";
-        String proxyUsername = "";
-        String proxyPassword = "";
-        // getting from system properties
-        if (Strings.isNullOrEmpty(System.getProperty("appdynamics.http.proxyHost"))) {
-            proxyHost = System.getProperty("appdynamics.http.proxyHost");
-        }
-        if (Strings.isNullOrEmpty(System.getProperty("appdynamics.http.proxyPort"))) {
-            proxyPort = System.getProperty("appdynamics.http.proxyPort");
-        }
-        if (Strings.isNullOrEmpty(System.getProperty("appdynamics.http.proxyUsername"))) {
-            proxyUsername = System.getProperty("appdynamics.http.proxyUsername");
-        }
-        if (Strings.isNullOrEmpty(System.getProperty("appdynamics.http.proxyPassword"))) {
-            proxyPassword = System.getProperty("appdynamics.http.proxyPassword");
-        }
-        // overwriting if config has values
-        if (proxyConfig != null) {
-            if (Strings.isNullOrEmpty((String) proxyConfig.get(TaskInputArgs.HOST))) {
-                proxyHost = proxyConfig.get(TaskInputArgs.HOST).toString();
-            }
-            if (Strings.isNullOrEmpty((String) proxyConfig.get(TaskInputArgs.PORT))) {
-                proxyPort = proxyConfig.get(TaskInputArgs.PORT).toString();
-            }
-            if (Strings.isNullOrEmpty((String) proxyConfig.get(TaskInputArgs.USER))) {
-                proxyUsername = proxyConfig.get(TaskInputArgs.USER).toString();
-            }
-            if (Strings.isNullOrEmpty((String) proxyConfig.get(TaskInputArgs.PASSWORD))) {
-                proxyPassword = proxyConfig.get(TaskInputArgs.PASSWORD).toString();
-            }
-        }
-        // adding proxy information to HTTP Properties
-        if (StringUtils.hasText(proxyHost) && StringUtils.hasText(proxyPort)) {
-            Map<String, ? super Object> proxyMap = new HashMap<>();
-            proxyMap.put(TaskInputArgs.HOST, proxyHost);
-            proxyMap.put(TaskInputArgs.PORT, proxyPort);
-            logger.debug("Using the proxy {}:{} to upload the dashboard", proxyHost, proxyPort);
-            if (StringUtils.hasText(proxyUsername) && StringUtils.hasText(proxyPassword)) {
-                proxyMap.put(TaskInputArgs.USER, proxyUsername);
-                proxyMap.put(TaskInputArgs.PASSWORD, proxyPassword);
-            }
-            argsMap.put("proxy", proxyMap);
-            logger.debug("Using the proxy {}:{} to upload the dashboard", proxyHost, proxyPort);
-        } else {
-            logger.debug("Not using proxy for dashboard upload appdynamics.http.proxyHost={} and appdynamics.http.proxyPort={}"
-                    , proxyHost, proxyPort);
-        }
+        logger.debug("Dashboard is not initialized, skipping upload.");
+        return false;
     }
 }

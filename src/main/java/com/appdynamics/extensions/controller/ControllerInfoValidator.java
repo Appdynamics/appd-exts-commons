@@ -6,7 +6,7 @@
  *
  */
 
-package com.appdynamics.extensions.conf.controller;
+package com.appdynamics.extensions.controller;
 
 import com.appdynamics.extensions.TaskInputArgs;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
@@ -30,6 +30,8 @@ public class ControllerInfoValidator {
         check("controllerHost", controllerInfo.getControllerHost());
         check("controllerPort", controllerInfo.getControllerPort());
         check("controllerSslEnabled", controllerInfo.getControllerSslEnabled());
+        // Incase the the machine agent is running in standalone mode and there is atleast one app agent, then there is
+        // need to check for app, tier and node. Right now we are not supporting this case as per below condition.
         if (!isSimEnabled(controllerInfo)) {
             checkAppTierNode(controllerInfo);
         }
