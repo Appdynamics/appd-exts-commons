@@ -100,7 +100,7 @@ The SDK provides a mechanism to encrypt clear text passwords that need to be def
 To encrypt a password using an `encryptionKey`, run the following command using the extension's jar
 
 ```
-java -cp the-monitoring-extension.jar com.appdynamics.extensions.crypto.Encryptor <encryptionKey> <clearTextPassword>
+java -cp <monitoring-extension.jar> com.appdynamics.extensions.crypto.Encryptor <encryptionKey> <clearTextPassword>
 ```  
 The `encryptedPassword` produced using the above command along with the `encryptionKey` needs to be defined in the `config.yml`.
 
@@ -156,9 +156,10 @@ For more details on ControllerInfo, check [How do I auto upload dashboards from 
 
 ## Auto Upload Custom Dashboards
 
-The SDK supports automatic upload of a pre-built dashboard to the controller. The dashboard template 
+The SDK supports automatic upload of a pre-built dashboard to the controller. The dashboard template should be provided to the extension through the `customDashboard` section
+in the `config.yml`. If a dashboard is already created through this feature, any update 
 can be updated and more data can be added to increase the visibility of the metrics provided by the extension. 
-For configuring auto upload of custom dashboards, the following configuration needs to be defined in the `config.yml`.
+For enabling auto upload of custom dashboards, the following configuration needs to be defined in the `config.yml`.
 
 ```
 customDashboard:
@@ -195,8 +196,61 @@ For more information on derived metrics, check [Derived Metrics Calculation](htt
 
 ## Configuring HTTP Client
 
+The SDK automatically configures a HTTP Client based on the `servers` section in the `config.yml`.
 
-### Proxy
+```
+servers:
+  - uri: ""
+    username: ""
+    password: ""
+    encryptedPassword: ""
+
+    # Uri is preferred instead of host-port-useSsl combo.
+  - host: "" # Avoid this, use uri instead
+    port: "" # Avoid this, use uri instead
+    useSsl: false # Avoid this, use uri instead.
+    username: ""
+    password: ""
+    encryptedPassword: ""
+```    
+
+This HTTP Client is available to be used by the extension developer via
+
+```
+ABaseMonitor.getContextConfiguration().getContext().getHttpClient()
+```
+
+Different settings related to the HTTP Client like SSL Certificates, Authentication, Proxy can be configured in the following manner in the `config.yml`.
+    
+```
+connection:
+  socketTimeout: 3000 # Read Timeout
+  connectTimeout: 1000
+  sslProtocols: ["TLSV1.2"] # Defaults to "default"
+  sslCertCheckEnabled: true
+  sslVerifyHostname: true
+
+  # This need not be exposed to user. Should be used on a need basis
+  sslCipherSuites: [] # Defaults to "default"
+
+  sslTrustStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-cacerts.jks. The prop "-Dappdynamics.extensions.truststore.path=/path/cacerts" takes precedence if set
+  sslTrustStorePassword: ""
+  sslTrustStoreEncryptedPassword: ""
+
+  sslKeyStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-clientcerts.jks. The prop "-Dappdynamics.extensions.keystore.path=/path/clientcerts" takes precedence if set
+  sslKeyStorePassword: ""
+  sslKeyStoreEncryptedPassword: ""
+
+  enableCookies: false #Defaults to false
+  enablePreemptiveAuth: true
+
+proxy:
+  uri: ""
+  username: ""
+  password: ""
+  encryptedPassword: ""
+```
+
 
 ## Concurrent Fan Out
 
@@ -204,18 +258,56 @@ For more information on derived metrics, check [Derived Metrics Calculation](htt
 
 ## Events Services
 
+One of the limitations of the AppDynamics Metric Browser is its inability to support 
+anything other than numerical values.This can be overcome by using the Events Service Client in the SDK.
+The Events Service client uses the AppDynamics Analytics Events API to define the structure of a 'custom event' 
+and capture the event as it occurs in an application.
+
+The SDK requires certain fields to be set in the config.yml to initiate a connection with the Analytics Events API. These fields are configured as follows: 
+
+```
+eventsServiceParameters:
+  host:		#Events Service Host
+  port: 	#Events Service Port
+  globalAccountName:	#Found in Controller -> Settings -> License -> Account
+  eventsApiKey:		#Generated from Controller -> Analytics -> Configuration -> API Keys
+  useSsl: 	#true/false
+```
+
+The Events Service client can be used to execute standard CRUD operations. The extension developer can obtain the client as follows
+
+```
+ABaseMonitor.getContextConfiguration().getContext().getEventsServiceDataManager()
+``` 
+
+For more details about Events Service client, check [Events Service Client]().
+   
 ## Task Schedule
 
 ## Extension Logger
 
 ## Workbench
 
+Currently, the AppDynamics platform does not allow a user to delete a metric once it has been registered. 
+The SDK provides the workbench feature in order to assist fine tuning of the extension before the metrics are registered in the controller. 
 
+To start the Workbench mode, run the following command using the extension jar
 
-## 
- 
+```
+java -jar <monitoring-extension.jar>
+```
+
+Workbench by default uses port 9090. Another port can be configured using
+```
+java -jar <monitoring-extension.jar> <host> <port>
+```
+
+Navigate to `http://localhost:9090/` to see the Workbench screen 
+
+For more details on workbench, check 
+
 
 # Getting Help
 
-For help related AppDynamics Extensions, please open a ticket on [AppDynamics Support Portal](http://help.appdynamics.com).
+For any help related AppDynamics Extensions, please open a ticket on [AppDynamics Support Portal](http://help.appdynamics.com).
 
