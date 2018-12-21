@@ -11,7 +11,7 @@ All the changes to the SDK are tracked in the [CHANGELOG.md](CHANGELOG.md).
 
 ## Extension Prerequisites
 Before developing a new extension, check if an AppDynamics supported extension already exists on the [AppDynamics Exchange](https://www.appdynamics.com/community/exchange/).
-AppDynamics monitoring extensions extend the [AppDynamics Server Infrastructure Agent (SIM)](https://docs.appdynamics.com/display/LATEST/Server+Visibility) or [Standalone Machine Agent](https://docs.appdynamics.com/display/LATEST/Standalone+Machine+Agent) functionality to report additional metrics to the AppDynamics Controller. 
+AppDynamics monitoring extensions extend the [AppDynamics Server Infrastructure Agent (SIM)](https://docs.appdynamics.com/display/LATEST/Server+Visibility) or [Standalone Machine Agent](https://docs.appdynamics.com/display/LATEST/Standalone+Machine+Agent) functionality to report additional metrics as `Custom Metrics` to the AppDynamics Controller. 
 Please go over the [Extension Prerequisites Guide](https://community.appdynamics.com/t5/Knowledge-Base/Extensions-Prerequisites-Guide/ta-p/35213) for more details on the supported configurations. 
 
 ## Importing the Dependency
