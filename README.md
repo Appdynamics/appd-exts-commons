@@ -97,7 +97,7 @@ public class SampleMonitor extends ABaseMonitor {
 ```
 
 
-For more details on how to use this Java SDK to build an AppDynamics extension, please check [Extension Starter project](https://github.com/Appdynamics/extension-starter)
+For more details on how to use this Java SDK to build an AppDynamics extension, please check [Extension Starter project](https://github.com/Appdynamics/extension-starter).
 
 # Features
 
@@ -122,19 +122,17 @@ The extension developer needs to configure the metric qualifiers for each metric
 These qualifiers are classified as:  
 
 ****aggregationType:**** If the extension runs multiple times in 1 min, the Machine Agent aggregates the data points to be sent to the controller. The developer can control how those data points are aggregated into a single datapoint, where the datapoint will be displayed on the metric browser at 1 minute granularity.
-Possible values are AVERAGE, SUM and OBSERVATION
+Possible values are AVERAGE, SUM and OBSERVATION.
 
 ****timeRollUpType:**** This qualifier allows the developer to decide how the data points are represented when metrics at 1-min resolution are rolled-up to 10-min resolution, and how the metrics at 10-min resolution are rolled up at 60-min resolution.
-Possible values are AVERAGE, SUM and CURRENT
+Possible values are AVERAGE, SUM and CURRENT.
 
 ****clusterRollUpType:**** The cluster-rollup qualifier specifies how the controller aggregates metric values from individual nodes in a tier.
-Possible values are INDIVIDUAL and COLLECTIVE
+Possible values are INDIVIDUAL and COLLECTIVE.
 
 For more details on Metric Qualifers, refer to [Metric Qualifiers]().
 
-These qualifiers can be set for every metric in the `metrics.xml` or `config.yml`. If qualifiers for a particular metric is not specified, the SDK automatically applies the following default qualifiers
- 
- `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
+These qualifiers can be set for every metric in the `metrics.xml` or `config.yml`. If qualifiers for a particular metric are not specified, the SDK automatically applies `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
 
 The SDK also checks for every metric's validity and blocks the reporting of invalid metrics to the AppDynamics Controller.
 
@@ -143,7 +141,7 @@ The SDK provides an automated utility that allows extensions developers to trans
 
 **Alias:** Often, metrics are represented by ambiguous names in the artifacts being monitored. The Alias transform can be used to replace a metric’s name.
 
-**Multiplier:** The Multiplier transformer can be used to multiply the original metric value by a factor configured.
+**Multiplier:** The Multiplier transformer can be used to multiply the original metric value by a configured factor.
 
 **Delta:** This transformer compares the value of a metric at minute X with its value at minute X-1 and publishes the difference as a metric value. Note: The first value will not be reported if delta is true. 
 
@@ -175,6 +173,8 @@ metricPathReplacements:
 ```
 Note: The SDK, by default, loads certain metricPathReplacements rules to replace special characters like comma(,),|,colon(:) in the tokens with empty strings.
 These defaults can also be overridden using the `metricPathReplacements` section in the `config.yml`.
+
+For more details on CharSequence Replacement, refer [Metric Path CharSequence Replacement]().
 
 ## Encrypting Clear Text Passwords
 The SDK provides a mechanism to encrypt clear text passwords that need to be defined in the `config.yml`. 
