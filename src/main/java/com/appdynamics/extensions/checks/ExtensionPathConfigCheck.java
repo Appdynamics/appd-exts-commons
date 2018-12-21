@@ -94,7 +94,7 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
     }
 
     private String buildMAFetchTierURLL() {
-        StringBuilder sb = new StringBuilder("/controller/rest/applications/");
+        StringBuilder sb = new StringBuilder("controller/rest/applications/");
         sb.append(controllerInfo.getApplicationName())
                 .append("/tiers/").append(controllerInfo.getTierName())
                 .append("?output=JSON");

@@ -23,6 +23,8 @@ import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.MetricPathUtils;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.TimeUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;

@@ -60,29 +60,29 @@ customDashboard:
 # To upload the dashboard, please create a user from Controller UI or
 # add the credentials of an existing user.
 controllerInfo:
-    controllerHost: "host"
-    controllerPort: 9090
+    controllerHost: ""
+    controllerPort: 8090
     controllerSslEnabled: false
     enableOrchestration: false
     uniqueHostId: ""
-    username: "username"
-    password: "password"
+    username: ""
+    password: ""
     encryptedPassword: ""
     encryptionKey: ""
     accountAccessKey: ""
-    account: "account"
+    account: "customer1"
     machinePath: ""
     simEnabled: false
-    applicationName: "application"
-    tierName: "tier"
-    nodeName: "node"
+    applicationName: ""
+    tierName: ""
+    nodeName: ""
 
 # This is to run this in scheduled mode. In this case, the extension will fetch the data every 300 seconds
 # and caches the data. The cached data will be reported to controller every min. This way there is no metric drop.
 # Can be used when the data rarely changes or to reduce the load while fetching metrics every minute.
-taskSchedule:
-  numberOfThreads: 1
-  taskDelaySeconds: 300
+#taskSchedule:
+#  numberOfThreads: 1
+#  taskDelaySeconds: 300
 
 # This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
 eventsServiceParameters:

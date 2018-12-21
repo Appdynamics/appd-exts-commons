@@ -33,22 +33,16 @@ public class HealthCheckModule {
     private Map<String, MonitorHealthCheck> healthChecksForMonitors = new ConcurrentHashMap<>();
     private MonitorExecutorService executorService;
 
-
     public void initMATroubleshootChecks(ControllerInfo controllerInfo, ControllerClient controllerClient, String monitorName, Map<String, ?> config) {
-
         String enableHealthChecksSysPropString = System.getProperty("enableHealthChecks");
-
         Boolean enableHealthChecksSysProp = true;
         if (enableHealthChecksSysPropString != null) {
             enableHealthChecksSysProp = Boolean.valueOf(enableHealthChecksSysPropString);
         }
-
         Boolean enableHealthChecks = (Boolean) config.get("enableHealthChecks");
-
         if (enableHealthChecks == null && !enableHealthChecksSysProp) {
             enableHealthChecks = false;
         }
-
 
         if (enableHealthChecks != null && !enableHealthChecks) {
             logger.info("Not initializing extension health checks as it is disabled in config");
@@ -56,22 +50,14 @@ public class HealthCheckModule {
         } else {
             logger.info("Running extension health checks");
         }
-
         if (monitorName == null) {
             logger.warn("Not initializing extension health checks as I have no idea on what extension is running now");
             return;
         }
-
-        // #TODO Validation integration remaining
-        if (!validateControllerInfo(controllerInfo)) {
-            return;
-        }
-
         if (executorService != null) {
             executorService.shutdown();
             executorService = null;
         }
-
         /**
          *  Initializing the thread pool with 2 threads.
          *    one thread will be used for all the normal checks
@@ -79,11 +65,8 @@ public class HealthCheckModule {
          *
          **/
         executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(2));
-
         try {
-
             File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
-
             MonitorHealthCheck healthCheckMonitor = healthChecksForMonitors.get(monitorName);
             if (healthCheckMonitor == null) {
                 healthCheckMonitor = new MonitorHealthCheck(monitorName, installDir, executorService);
@@ -92,32 +75,15 @@ public class HealthCheckModule {
                 healthCheckMonitor.updateMonitorExecutorService(executorService);
                 healthCheckMonitor.clearAllChecks();
             }
-
             healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MaxMetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MetricBlacklistLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerClient, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerClient, MonitorHealthCheck.logger));
-
-
             executorService.submit("HealthCheckMonitor", healthCheckMonitor);
 
         } catch (Exception e) {
             logger.error("Error initializing health check module", e);
         }
     }
-
-    private boolean validateControllerInfo(ControllerInfo controllerInfo) {
-
-        if (controllerInfo == null) {
-            return false;
-        }
-
-        if(controllerInfo.getControllerHost() == null || controllerInfo.getControllerPort() == null
-                || controllerInfo.getControllerSslEnabled() == null || controllerInfo.getSimEnabled() == null) {
-            return false;
-        }
-        return true;
-    }
-
 }

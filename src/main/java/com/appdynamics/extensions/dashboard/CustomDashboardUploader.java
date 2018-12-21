@@ -21,6 +21,7 @@ import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.CookiesCsrf;
 import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -43,6 +44,7 @@ import java.util.Map;
 
 import static com.appdynamics.extensions.Constants.HOST;
 import static com.appdynamics.extensions.Constants.PORT;
+import static com.appdynamics.extensions.Constants.URI;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.APPLICATION_JSON;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.JSON;
 import static com.appdynamics.extensions.util.JsonUtils.getTextValue;
@@ -128,9 +130,10 @@ public class CustomDashboardUploader {
         HttpURLConnection connection = null;
         try {
             URL url = new URL(urlStr);
-            if (proxyMap != null && !proxyMap.isEmpty()) {
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress((String) proxyMap.get(HOST)
-                        , Integer.parseInt((String) proxyMap.get(PORT))));
+            if (proxyMap != null && !proxyMap.isEmpty() && !Strings.isNullOrEmpty((String)proxyMap.get(URI))) {
+                URL proxyURL = new URL((String)proxyMap.get(URI));
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyURL.getHost()
+                        , proxyURL.getPort()));
                 connection = (HttpURLConnection) url.openConnection(proxy);
                 logger.debug("Created an HttpConnection for Fileupload with a proxy {}", proxy);
             } else {

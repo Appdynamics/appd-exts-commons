@@ -75,7 +75,7 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
     }
 
     private String buildMAStatusCheckURL() {
-        StringBuilder sb = new StringBuilder("/controller/rest/applications/");
+        StringBuilder sb = new StringBuilder("controller/rest/applications/");
         sb.append(controllerInfo.getApplicationName())
                 .append("/metric-data?metric-path=Application Infrastructure Performance|")
                 .append(controllerInfo.getTierName()).append("|Agent|Machine|Availability&time-range-type=BEFORE_NOW&duration-in-mins=15&output=JSON");
