@@ -66,7 +66,7 @@ In addition to the configuration, the SDK reads the `config.yml` to load and ini
   
 
 ### metrics.xml
-This is an optional file to define the metrics and their properties for a given extension artifact. More about metrics.xml in [Metric, Metric Qualifiers and Metric Transformers](#Metric,Metric Qualifiers and Metric Transformers) section below.
+This is an optional file to define the metrics and their properties for a given extension artifact. 
 
 A new extension should be developed by extending the ABaseMonitor class. For eg. 
 
