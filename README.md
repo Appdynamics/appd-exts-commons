@@ -101,6 +101,49 @@ For more details on how to use this Java SDK to build an AppDynamics extension, 
 
 # Features
 
+## Metric Validity, Metric Types, Metric Transformers
+
+#### Metric Validity
+The following metric validation checks of the metric path and metric value are performed for every metric published using the SDK
+
+1. A metric value should be a positive integer. 
+
+
+#### Metric Types
+The extension developer needs to configure the metric qualifiers for each metric that needs to be reported to the controller. These qualifiers determine how each metric is aggregated and rolled up over time and cluster dimensions.
+These qualifiers are classified as  
+
+**aggregationType:** If the extension runs multiple times in 1 min, the Machine Agent aggregates the data points to be sent to the controller. The developer can control how those data points are aggregated into a single datapoint, where the datapoint will be displayed on the metric browser at 1 minute granularity.
+Possible values are AVERAGE, SUM and OBSERVATION
+
+**timeRollUpType:** This qualifier allows the developer to decide how the data points are represented when metrics at 1-min resolution are rolled-up to 10-min resolution, and how the metrics at 10-min resolution are rolled up at 60-min resolution.
+Possible values are AVERAGE, SUM and CURRENT
+
+**clusterRollUpType:** The cluster-rollup qualifier specifies how the controller aggregates metric values from individual nodes in a tier.
+Possible values are INDIVIDUAL and COLLECTIVE
+
+
+These qualifiers can be set for every metric in the `metrics.xml` or `config.yml`. The default metric qualifier, if not specified in the extension configuration is  `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
+
+For more details on Metric Qualifers, refer to [Metric Qualifiers]().
+
+#### Metric Transformers
+The SDK provides an automated utility that allows extensions developers to transform a metric name and value as it would be represented in the Metric Browser. These transformers include the following: 
+
+**Alias:** Often, metrics are represented by ambiguous names in the artifacts being monitored. The Alias transform can be used to replace a metric’s name.
+
+**Multiplier:** The Multiplier transformer can be used to multiply the original metric value by a factor configured.
+
+**Delta:** This transformer compares the value of a metric at minute X with its value at minute X-1 and publishes the difference as a metric value. Note: The first value will not be reported if delta is true. 
+
+**Convert:** The Convert transformer can be applied to metrics that return a text value from an artifact’s API. These text values can be represented as numeric values.
+
+When MetricWriteHelper.transformAndPrintMetrics() is called, transformers applicable to every metric will be applied.  
+
+For more details on metric transformers, check [Metric Transformers]().
+
+## Metric Path CharSequence Replacement
+
 ## Encrypting Clear Text Passwords
 The SDK provides a mechanism to encrypt clear text passwords that need to be defined in the `config.yml`. 
 To encrypt a password using an `encryptionKey`, run the following command using the extension's jar
@@ -123,80 +166,6 @@ CryptoUtil.getPassword(Map)
 
 For more details on password encryption, please check [How do I use Password Encryption with Extensions](https://community.appdynamics.com/t5/Knowledge-Base/How-do-I-use-Password-Encryption-with-Extensions/ta-p/29397)
 
-
-## Controller Info
-The SDK automatically pulls the Controller information and builds a ControllerInfo object which is made available to the extension developer via
-```
-ABaseMonitor.getContextConfiguration().getContext().getControllerInfo()
-```
-
-The controller information can also be provided in the `config.yml`
-
-```
-controllerInfo:
-    controllerHost: ""
-    controllerPort: ""
-    account: ""
-    username: ""
-    password: ""
-    encryptedPassword: ""
-    encryptionKey: ""
-    controllerSslEnabled: ""
-    enableOrchestration: ""
-    uniqueHostId: ""
-    accountAccessKey: ""
-    machinePath: ""
-    simEnabled: ""
-    applicationName: ""
-    tierName: ""
-    nodeName: ""
-```
-
-The ControllerInfo object is built by loading the properties from the following sources in the following order
-1. controller-info.xml
-2. System Properties
-3. config.yml
-
-For more details on ControllerInfo, check [How do I auto upload dashboards from Extensions]().
-
-## Auto Upload Custom Dashboards
-
-The SDK supports automatic upload of a pre-built dashboard to the controller. The dashboard template should be provided to the extension through the `customDashboard` section
-in the `config.yml`. The template can be updated and more data can be added to increase the visibility of the metrics provided by the extension. 
-For enabling auto upload of custom dashboards, the following configuration needs to be defined in the `config.yml`.
-
-```
-customDashboard:
-    enabled: true
-    dashboardName: "Custom Dashboard"
-    pathToSIMDashboard: "monitors/<ExtensionName>/simDashboard.json"
-    pathToNormalDashboard: "monitors/<ExtensionName>/normalDashboard.json"
-    periodToCheckDashboardPresenceInSeconds: 300
-    sslCertCheckEnabled: false
-```
-
-For more details on this feature, check [Uploading Dashboards automatically with AppDynamics Extensions]().
-
-## Derived Metrics
-
-Derived metrics are the metrics that can be created using existing metrics by applying a math formula.
-Derived metrics can also be used to create rolled-up metrics at any level in the metric tree.
-The SDK automatically starts emitting out the derived metrics defined in the `config.yml`. The following configuration needs to be defined in the `config.yml`
-
-```
-derivedMetrics:
-   - derivedMetricPath: "{x}|Queue|{y}|Cache ratio"
-     formula: “{x}|Queue|{y}|Cache hits / ({x}|Queue|{y}|Cache hits + {x}|Queue|{y}|Cache misses)”
-   - derivedMetricPath: “RolledUp|Total ops"
-     formula: “{x}|Total ops”
-     aggregationType: “SUM"
-     timeRollUpType: “SUM"
-     clusterRollUpType: “COLLECTIVE”
-  - derivedMetricPath: “{x}|Queue|Server Total ops”
-    formula: “{x}|Queue|{y}|RAM ops + {x}|Queue|{y}|hdd ops"
-``` 
-
-For more information on derived metrics, check [Derived Metrics Calculation](https://community.appdynamics.com/t5/Knowledge-Base/What-are-the-Derived-Metrics-Calculator-and-Cluster-Metrics/ta-p/29403).
 
 ## HTTP Client
 
@@ -257,6 +226,83 @@ proxy:
 
 For more detailed explanation on HTTP Client, refer to [HTTP Client]().
 
+## Controller Info
+The SDK automatically pulls the Controller information and builds a ControllerInfo object which is made available to the extension developer via
+```
+ABaseMonitor.getContextConfiguration().getContext().getControllerInfo()
+```
+
+The controller information can also be provided in the `config.yml`
+
+```
+controllerInfo:
+    controllerHost: ""
+    controllerPort: ""
+    account: ""
+    username: ""
+    password: ""
+    encryptedPassword: ""
+    encryptionKey: ""
+    controllerSslEnabled: ""
+    enableOrchestration: ""
+    uniqueHostId: ""
+    accountAccessKey: ""
+    machinePath: ""
+    simEnabled: ""
+    applicationName: ""
+    tierName: ""
+    nodeName: ""
+```
+
+The ControllerInfo object is built by loading the properties from the following sources in the following order
+1. controller-info.xml
+2. System Properties
+3. config.yml
+
+For more details on ControllerInfo, check [How do I auto upload dashboards from Extensions]().
+
+## Auto Upload Custom Dashboards
+
+The SDK supports automatic upload of a pre-built dashboard to the controller. The dashboard template should be provided to the extension through the `customDashboard` section
+in the `config.yml`. The template can be updated and more data can be added to increase the visibility of the metrics provided by the extension. 
+For enabling auto upload of custom dashboards, the following configuration needs to be defined in the `config.yml`.
+
+```
+customDashboard:
+    enabled: true
+    dashboardName: "Custom Dashboard"
+    pathToSIMDashboard: "monitors/<ExtensionName>/simDashboard.json"
+    pathToNormalDashboard: "monitors/<ExtensionName>/normalDashboard.json"
+    periodToCheckDashboardPresenceInSeconds: 300
+    sslCertCheckEnabled: false
+```
+
+For more details on this feature, check [Uploading Dashboards automatically with AppDynamics Extensions]().
+
+
+
+## Derived Metrics
+
+Derived metrics are the metrics that can be created using existing metrics by applying a math formula.
+Derived metrics can also be used to create rolled-up metrics at any level in the metric tree.
+The SDK automatically starts emitting out the derived metrics defined in the `config.yml`. The following configuration needs to be defined in the `config.yml`
+
+```
+derivedMetrics:
+   - derivedMetricPath: "{x}|Queue|{y}|Cache ratio"
+     formula: “{x}|Queue|{y}|Cache hits / ({x}|Queue|{y}|Cache hits + {x}|Queue|{y}|Cache misses)”
+   - derivedMetricPath: “RolledUp|Total ops"
+     formula: “{x}|Total ops”
+     aggregationType: “SUM"
+     timeRollUpType: “SUM"
+     clusterRollUpType: “COLLECTIVE”
+  - derivedMetricPath: “{x}|Queue|Server Total ops”
+    formula: “{x}|Queue|{y}|RAM ops + {x}|Queue|{y}|hdd ops"
+``` 
+
+For more information on derived metrics, check [Derived Metrics Calculation](https://community.appdynamics.com/t5/Knowledge-Base/What-are-the-Derived-Metrics-Calculator-and-Cluster-Metrics/ta-p/29403).
+
+
 ## Events Services
 
 AppDynamics Metric Browser supports numerical values only.In order to make use of AppDynamics platform efficiently, the Events Service client from the SDK can be used.
@@ -281,46 +327,7 @@ ABaseMonitor.getContextConfiguration().getContext().getEventsServiceDataManager(
 
 For more details about the Events Service client, check [Events Service Client]().
 
-## Metric Validity, Metric Types, Metric Transformers
 
-#### Metric Validity
-The following metric validation checks of the metric path and metric value are performed for every metric published using the SDK
-
-1. A metric value should be a positive integer. 
-
-
-#### Metric Types
-The extension developer needs to configure the metric qualifiers for each metric that needs to be reported to the controller. These qualifiers determine how each metric is aggregated and rolled up over time and cluster dimensions.
-These qualifiers are classified as  
-
-**aggregationType:** If the extension runs multiple times in 1 min, the Machine Agent aggregates the data points to be sent to the controller. The developer can control how those data points are aggregated into a single datapoint, where the datapoint will be displayed on the metric browser at 1 minute granularity.
-Possible values are AVERAGE, SUM and OBSERVATION
-
-**timeRollUpType:** This qualifier allows the developer to decide how the data points are represented when metrics at 1-min resolution are rolled-up to 10-min resolution, and how the metrics at 10-min resolution are rolled up at 60-min resolution.
-Possible values are AVERAGE, SUM and CURRENT
-
-**clusterRollUpType:** The cluster-rollup qualifier specifies how the controller aggregates metric values from individual nodes in a tier.
-Possible values are INDIVIDUAL and COLLECTIVE
-
-
-These qualifiers can be set for every metric in the `metrics.xml` or `config.yml`. The default metric qualifier, if not specified in the extension configuration is  `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
-
-For more details on Metric Qualifers, refer to [Metric Qualifiers]().
-
-#### Metric Transformers
-The SDK provides an automated utility that allows extensions developers to transform a metric name and value as it would be represented in the Metric Browser. These transformers include the following: 
-
-**Alias:** Often, metrics are represented by ambiguous names in the artifacts being monitored. The Alias transform can be used to replace a metric’s name.
-
-**Multiplier:** The Multiplier transformer can be used to multiply the original metric value by a factor configured.
-
-**Delta:** This transformer compares the value of a metric at minute X with its value at minute X-1 and publishes the difference as a metric value. Note: The first value will not be reported if delta is true. 
-
-**Convert:** The Convert transformer can be applied to metrics that return a text value from an artifact’s API. These text values can be represented as numeric values.
-
-When MetricWriteHelper.transformAndPrintMetrics() is called, transformers applicable to every metric will be applied.  For more details on metric transformers, check [Metric Transformers]().
-
-## Metric Path CharSequence Replacement
 
 ## Concurrent Fan Out
 
