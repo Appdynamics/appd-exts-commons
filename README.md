@@ -66,7 +66,7 @@ In addition to the configuration, the SDK reads the `config.yml` to load and ini
   
 
 ### metrics.xml
-This is an optional file to define the metrics and their properties for a given extension artifact. More about metrics.xml in [Metric Validity, Metric Types, Metric Transformers](#Metric Validity,Metric Types,Metric Transformers) section below.
+This is an optional file to define the metrics and their properties for a given extension artifact. More about metrics.xml in [Metric, Metric Qualifiers and Metric Transformers](#Metric,Metric Qualifiers and Metric Transformers) section below.
 
 A new extension should be developed by extending the ABaseMonitor class. For eg. 
 
@@ -101,33 +101,44 @@ For more details on how to use this Java SDK to build an AppDynamics extension, 
 
 # Features
 
-## Metric Validity, Metric Types, Metric Transformers
+## Metric
 
-#### Metric Validity
-The following metric validation checks of the metric path and metric value are performed for every metric published using the SDK
+A metric to be reported to AppDynamics should consist of three parts: Metric Path, Metric Value, Metric Qualifiers. 
 
-1. A metric value should be a positive integer. 
+**Metric Path:** A metric path should be formed by concatenating a list of tokens with a `|`.
+For eg. `"Custom Metrics|Sample Monitor|Artifact Instance|HeartBeat"`.
+A metric path cannot have :
+- non-ascii characters 
+- comma(,) 
+- empty tokens like `Custom Metrics|Sample Monitor||HearBeat`. 
 
+A colon(:) in the metric path is treated the same as a `|` and will create a child hierarchy in the AppDynamics Metric Browser.
 
-#### Metric Types
+**Metric Value:** A metric value should be a positive integer. Currently, AppDynamics platform does not support decimal values.
+
+**Metric Qualifiers:**
 The extension developer needs to configure the metric qualifiers for each metric that needs to be reported to the controller. These qualifiers determine how each metric is aggregated and rolled up over time and cluster dimensions.
-These qualifiers are classified as  
 
-**aggregationType:** If the extension runs multiple times in 1 min, the Machine Agent aggregates the data points to be sent to the controller. The developer can control how those data points are aggregated into a single datapoint, where the datapoint will be displayed on the metric browser at 1 minute granularity.
+These qualifiers are classified as:  
+
+****aggregationType:**** If the extension runs multiple times in 1 min, the Machine Agent aggregates the data points to be sent to the controller. The developer can control how those data points are aggregated into a single datapoint, where the datapoint will be displayed on the metric browser at 1 minute granularity.
 Possible values are AVERAGE, SUM and OBSERVATION
 
-**timeRollUpType:** This qualifier allows the developer to decide how the data points are represented when metrics at 1-min resolution are rolled-up to 10-min resolution, and how the metrics at 10-min resolution are rolled up at 60-min resolution.
+****timeRollUpType:**** This qualifier allows the developer to decide how the data points are represented when metrics at 1-min resolution are rolled-up to 10-min resolution, and how the metrics at 10-min resolution are rolled up at 60-min resolution.
 Possible values are AVERAGE, SUM and CURRENT
 
-**clusterRollUpType:** The cluster-rollup qualifier specifies how the controller aggregates metric values from individual nodes in a tier.
+****clusterRollUpType:**** The cluster-rollup qualifier specifies how the controller aggregates metric values from individual nodes in a tier.
 Possible values are INDIVIDUAL and COLLECTIVE
-
-
-These qualifiers can be set for every metric in the `metrics.xml` or `config.yml`. The default metric qualifier, if not specified in the extension configuration is  `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
 
 For more details on Metric Qualifers, refer to [Metric Qualifiers]().
 
-#### Metric Transformers
+These qualifiers can be set for every metric in the `metrics.xml` or `config.yml`. If qualifiers for a particular metric is not specified, the SDK automatically applies the following default qualifiers
+ 
+ `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
+
+The SDK also checks for every metric's validity and blocks the reporting of invalid metrics to the AppDynamics Controller.
+
+## Metric Transformers
 The SDK provides an automated utility that allows extensions developers to transform a metric name and value as it would be represented in the Metric Browser. These transformers include the following: 
 
 **Alias:** Often, metrics are represented by ambiguous names in the artifacts being monitored. The Alias transform can be used to replace a metric’s name.
@@ -143,6 +154,27 @@ When MetricWriteHelper.transformAndPrintMetrics() is called, transformers applic
 For more details on metric transformers, check [Metric Transformers]().
 
 ## Metric Path CharSequence Replacement
+
+The SDK provides mechanism to build a metric path using string tokens. This can be done using either one of the two approaches mentioned below
+
+Use Metric constructor with the signature `Metric(String metricName, String metricValue, Map<String, ?> metricProperties, String metricPrefix, String... tokens)`
+
+OR
+
+Use the utility method `MetricPathUtils.buildMetricPath(String metricPrefix, String... metricTokens)`.
+
+When any of the above two approaches are used, the SDK automatically replaces any sequences from the tokens as specified in the `metricPathReplacements` of the `config.yml`
+
+```
+metricPathReplacements:
+  - replace: "&"
+    replaceWith: ""
+  - replace: "-"
+    replaceWith: "_"
+
+```
+Note: The SDK, by default, loads certain metricPathReplacements rules to replace special characters like comma(,),|,colon(:) in the tokens with empty strings.
+These defaults can also be overridden using the `metricPathReplacements` section in the `config.yml`.
 
 ## Encrypting Clear Text Passwords
 The SDK provides a mechanism to encrypt clear text passwords that need to be defined in the `config.yml`. 
