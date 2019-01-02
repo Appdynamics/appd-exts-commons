@@ -3,6 +3,8 @@ package com.appdynamics.extensions.checks;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.AppTierNodeAPIService;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -11,6 +13,10 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Satish Muddam
@@ -60,10 +66,10 @@ public class MachineAgentAvailabilityCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
-        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(maStatusResponse(1));
+        AppTierNodeAPIService appTierNodeAPIService = mock(AppTierNodeAPIService.class);
+        when(appTierNodeAPIService.getMetricData(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(maStatusResponse(1)));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerClient, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, appTierNodeAPIService, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -82,10 +88,10 @@ public class MachineAgentAvailabilityCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
-        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(maStatusResponse(0));
+        AppTierNodeAPIService appTierNodeAPIService = mock(AppTierNodeAPIService.class);
+        when(appTierNodeAPIService.getMetricData(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(maStatusResponse(0)));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerClient, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, appTierNodeAPIService, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());

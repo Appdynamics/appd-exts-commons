@@ -1,8 +1,9 @@
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
+import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
 import com.appdynamics.extensions.dashboard.CustomDashboardUtils;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
@@ -25,9 +26,13 @@ public class CustomDashboardModule {
     private volatile AtomicLong lastRecordedTime;
     private Map<String, ?> proxyMap;
 
-    public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName,
-                                    ControllerInfo controllerInfo, ControllerClient controllerClient) {
+    public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName, ControllerInfo controllerInfo) {
         initialized = false;
+        CustomDashboardAPIService customDashboardAPIService = ControllerAPIServiceFactory.getCustomDashboardAPIService();
+        if(controllerInfo == null || customDashboardAPIService == null) {
+            logger.debug("ControllerInfo/ControllerClient is null.....Not initializing CustomDashBoardModule");
+            return;
+        }
         lastRecordedTime = new AtomicLong();
         Map customDashboardConfig = (Map) config.get(CUSTOM_DASHBOARD);
         if (CustomDashboardUtils.isCustomDashboardEnabled(customDashboardConfig)) {
@@ -38,7 +43,7 @@ public class CustomDashboardModule {
                 proxyMap = (Map<String, ?>)config.get("proxy");
                 overwrite = CustomDashboardUtils.getOverwrite(customDashboardConfig);
                 timeDelayInMilliSeconds = CustomDashboardUtils.getTimeDelay(customDashboardConfig) * 1000;
-                dashboardUploader = new CustomDashboardUploader(controllerInfo, controllerClient);
+                dashboardUploader = new CustomDashboardUploader(customDashboardAPIService);
                 initialized = true;
             }
         } else {

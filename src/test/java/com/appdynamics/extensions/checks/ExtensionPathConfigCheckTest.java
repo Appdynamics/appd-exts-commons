@@ -3,6 +3,8 @@ package com.appdynamics.extensions.checks;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.AppTierNodeAPIService;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -13,12 +15,16 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * @author Satish Muddam
  */
 public class ExtensionPathConfigCheckTest {
 
-    private Logger logger = Mockito.mock(Logger.class);
+    private Logger logger = mock(Logger.class);
 
 
     @Test
@@ -38,7 +44,7 @@ public class ExtensionPathConfigCheckTest {
     public void testNullMetricPrefix() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
-        ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
 
 
         ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, new HashMap<String, String>(), null, logger);
@@ -54,7 +60,7 @@ public class ExtensionPathConfigCheckTest {
     public void testMetricPrefixWithComponentAndSIMEnabled() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
-        ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
 
         HashMap<String, String> config = new HashMap<>();
@@ -72,7 +78,7 @@ public class ExtensionPathConfigCheckTest {
     public void testMetricPrefixSIMNotEnabled() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
-        ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
 
         HashMap<String, String> config = new HashMap<>();
@@ -90,7 +96,7 @@ public class ExtensionPathConfigCheckTest {
     public void testMetricPrefixSIMEnabled() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
-        ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
 
         HashMap<String, String> config = new HashMap<>();
@@ -108,18 +114,18 @@ public class ExtensionPathConfigCheckTest {
     public void testMetricPrefixWithComponentAndSIMNotEnabled() throws IOException, ControllerHttpRequestException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
-        ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
         Mockito.when(controllerInfo.getApplicationName()).thenReturn("TestApp");
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
-        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(tierRESTResponse());
+        AppTierNodeAPIService appTierNodeAPIService = mock(AppTierNodeAPIService.class);
+        when(appTierNodeAPIService.getSpecificTierNode(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(tierRESTResponse()));
 
         HashMap<String, String> config = new HashMap<>();
         config.put("metricPrefix", "Server|Component:TestTier|Custom Metrics|Test");
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerClient, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, appTierNodeAPIService, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -132,18 +138,19 @@ public class ExtensionPathConfigCheckTest {
     public void testMetricPrefixWithWrongComponentAndSIMNotEnabled() throws IOException, ControllerHttpRequestException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
-        ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
         Mockito.when(controllerInfo.getApplicationName()).thenReturn("TestApp");
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
-        ControllerClient controllerClient = Mockito.mock(ControllerClient.class);
-        Mockito.when(controllerClient.sendGetRequest(Matchers.anyString())).thenReturn(tierRESTResponse());
+        AppTierNodeAPIService appTierNodeAPIService = mock(AppTierNodeAPIService.class);
+        when(appTierNodeAPIService.getSpecificTierNode(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(tierRESTResponse()));
+
 
         HashMap<String, String> config = new HashMap<>();
         config.put("metricPrefix", "Server|Component:TestTier123|Custom Metrics|Test");
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerClient, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, appTierNodeAPIService, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());

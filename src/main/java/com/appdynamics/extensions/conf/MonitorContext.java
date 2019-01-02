@@ -81,12 +81,8 @@ public class MonitorContext {
             cacheModule.initCache();
             metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(config);
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
-            ControllerInfo controllerInfo = getControllerInfo();
-            ControllerClient controllerClient = getControllerClient();
-            if(controllerInfo != null && controllerClient != null) {
-                healthCheckModule.initMATroubleshootChecks(controllerInfo, controllerClient, monitorName, config);
-                dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo, controllerClient);
-            }
+            healthCheckModule.initMATroubleshootChecks(config, monitorName, getControllerInfo());
+            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, getControllerInfo());
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
@@ -100,6 +96,7 @@ public class MonitorContext {
         return controllerModule.getControllerInfo();
     }
 
+    /*TODO Is this required (or) we should be using the APIService way which has the ControllerClient embedded. */
     public ControllerClient getControllerClient() {
         return controllerModule.getControllerClient();
     }

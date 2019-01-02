@@ -32,7 +32,7 @@ public class ControllerInfoValidator {
         if (controllerInfo == null) {
             return false;
         }
-        // #TODO Need to check why this is being used.
+        // #TODO Need to check why this is being set.
         if (controllerInfo.getAccount() == null) {
             controllerInfo.setAccount("customer1");
         }

@@ -19,23 +19,23 @@ import static com.appdynamics.extensions.Constants.*;
  * Created by abey.tom on 2/11/16.
  */
 public class ControllerInfo {
-    // #TODO Why are the following fields protected? Why can't they be private?
-    protected String controllerHost;
-    protected Integer controllerPort;
-    protected Boolean controllerSslEnabled;
-    protected Boolean enableOrchestration;
-    protected String uniqueHostId;
-    protected String username;
-    protected String password;
-    protected String encryptedPassword;
-    protected String encryptionKey;
-    protected String accountAccessKey;
-    protected String account;
-    protected String machinePath;
-    protected Boolean simEnabled;
-    protected String applicationName;
-    protected String tierName;
-    protected String nodeName;
+
+    private String controllerHost;
+    private Integer controllerPort;
+    private Boolean controllerSslEnabled;
+    private Boolean enableOrchestration;
+    private String uniqueHostId;
+    private String username;
+    private String password;
+    private String encryptedPassword;
+    private String encryptionKey;
+    private String accountAccessKey;
+    private String account;
+    private String machinePath;
+    private Boolean simEnabled;
+    private String applicationName;
+    private String tierName;
+    private String nodeName;
 
     private static ControllerInfo controllerInfo = new ControllerInfo();
 

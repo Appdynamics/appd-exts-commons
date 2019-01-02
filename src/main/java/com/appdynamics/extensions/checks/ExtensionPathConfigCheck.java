@@ -10,6 +10,7 @@ package com.appdynamics.extensions.checks;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.AppTierNodeAPIService;
 import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
@@ -29,13 +30,13 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
     private ControllerInfo controllerInfo;
     private Map<String, ?> config;
-    private ControllerClient controllerClient;
+    private AppTierNodeAPIService appTierNodeAPIService;
 
-    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, ControllerClient controllerClient, Logger logger) {
+    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, AppTierNodeAPIService appTierNodeAPIService, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
         this.config = config;
-        this.controllerClient = controllerClient;
+        this.appTierNodeAPIService = appTierNodeAPIService;
     }
 
     @Override
@@ -79,25 +80,10 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
     }
 
     private String getMAConfiguredTier() {
-        try {
-            String statusURL = buildMAFetchTierURLL();
-            String responseString = controllerClient.sendGetRequest(statusURL);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(responseString);
+        JsonNode jsonNode = appTierNodeAPIService.getSpecificTierNode(controllerInfo.getApplicationName(), controllerInfo.getTierName());
+        if(jsonNode != null) {
             return jsonNode.get(0).get("id").asText();
-        } catch (ControllerHttpRequestException e) {
-            logger.error("Invalid response from controller while fetching MA configured tier", e);
-        } catch (IOException e) {
-            logger.error("Error while getting the tier information", e);
         }
         return null;
-    }
-
-    private String buildMAFetchTierURLL() {
-        StringBuilder sb = new StringBuilder("controller/rest/applications/");
-        sb.append(controllerInfo.getApplicationName())
-                .append("/tiers/").append(controllerInfo.getTierName())
-                .append("?output=JSON");
-        return URL_ESCAPER.escape(sb.toString());
     }
 }

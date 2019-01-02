@@ -1,7 +1,9 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.controller.*;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.util.AssertUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -31,12 +33,14 @@ public class ControllerModule {
         controllerInfo = ControllerInfoFactory.getControllerInfo();
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
         if(controllerInfoValidator.isValidatedAndResolved()) {
-            ControllerClientFactory controllerClientFactory = new ControllerClientFactory(controllerInfo,
+            ControllerClientFactory.initialize(controllerInfo,
                     (Map<String, ?>) config.get("connection"), (Map<String, ?>) config.get("proxy"),
                     (String)config.get(ENCRYPTION_KEY));
-            controllerClient = controllerClientFactory.getControllerClient();
+            controllerClient = ControllerClientFactory.getControllerClient();
+            //#TODO Check if this assert is ok.
+            AssertUtils.assertNotNull(controllerClient, "ControllerClient is null");
+            ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
         } else {
-            // #TODO Check if this is ok.
             controllerInfo = null;
             logger.warn("ControllerInfo instance is not validated and resolved.....the ControllerClient is null");
         }
@@ -46,6 +50,7 @@ public class ControllerModule {
         return controllerInfo;
     }
 
+    /*TODO Is this required (or) we should be using the APIService way which has the ControllerClient embedded. */
     public ControllerClient getControllerClient() {
         return controllerClient;
     }

@@ -17,7 +17,6 @@ import java.util.Arrays;
 /**
  * Created by venkata.konala on 12/19/18.
  */
-// #TODO Check about the logger required for healthchecks
 public class ControllerClient {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerClient.class);

@@ -10,6 +10,7 @@ package com.appdynamics.extensions.checks;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.AppTierNodeAPIService;
 import com.appdynamics.extensions.util.JsonUtils;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
@@ -26,13 +27,13 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
 
     public Logger logger;
     private ControllerInfo controllerInfo;
-    private ControllerClient controllerClient;
+    private AppTierNodeAPIService appTierNodeAPIService;
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
 
-    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerClient controllerClient, Logger logger) {
+    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, AppTierNodeAPIService appTierNodeAPIService, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
-        this.controllerClient = controllerClient;
+        this.appTierNodeAPIService = appTierNodeAPIService;
     }
 
     @Override
@@ -59,26 +60,20 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
     }
 
     private int getMAStatus() {
-        try {
-            String statusURL = buildMAStatusCheckURL();
-            String responseString = controllerClient.sendGetRequest(statusURL);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(responseString);
+        JsonNode jsonNode = appTierNodeAPIService.getMetricData(controllerInfo.getApplicationName(), getEndPointForMAStatusMetric());
+        if(jsonNode != null) {
             JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
-            return valueNode.get(0).asInt();
-        } catch (ControllerHttpRequestException e) {
-            logger.error("Invalid response from controller while fetching MA status", e);
-        } catch (IOException e) {
-            logger.error("Error while getting the MA status information", e);
+            return valueNode == null ? 0 : valueNode.get(0).asInt();
+        } else {
+            return 0;
         }
-        return 0;
     }
 
-    private String buildMAStatusCheckURL() {
-        StringBuilder sb = new StringBuilder("controller/rest/applications/");
-        sb.append(controllerInfo.getApplicationName())
-                .append("/metric-data?metric-path=Application Infrastructure Performance|")
+    //#TODO Check if this end point is still valid in the latest versions of the controller
+    private String getEndPointForMAStatusMetric() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("/metric-data?metric-path=Application Infrastructure Performance|")
                 .append(controllerInfo.getTierName()).append("|Agent|Machine|Availability&time-range-type=BEFORE_NOW&duration-in-mins=15&output=JSON");
-        return URL_ESCAPER.escape(sb.toString());
+        return sb.toString();
     }
 }

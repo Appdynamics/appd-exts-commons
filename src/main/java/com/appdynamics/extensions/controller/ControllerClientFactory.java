@@ -15,36 +15,24 @@ import static com.appdynamics.extensions.Constants.*;
  * Created by venkata.konala on 12/19/18.
  */
 public class ControllerClientFactory {
+    private static String controllerBaseURL;
+    private static HttpClientBuilder httpClientBuilder;
+    private static ControllerClient controllerClient;
 
-    private ControllerInfo controllerInfo;
-    private Map<String, ?> connectionMap;
-    private Map<String, ?> proxyMap;
-    private String encryptionKey;
-    private String controllerBaseURL;
-    private HttpClientBuilder httpClientBuilder;
-    private ControllerClient controllerClient;
-
-    public ControllerClientFactory(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
-        this.controllerInfo = controllerInfo;
-        this.connectionMap = connectionMap;
-        this.proxyMap = proxyMap;
-        this.encryptionKey = encryptionKey;
+    //#TODO make it static and move all initializations
+    public static void initialize(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
         controllerBaseURL = buildURI(controllerInfo.getControllerHost(), String.valueOf(controllerInfo.getControllerPort()), controllerInfo.getControllerSslEnabled());
-        httpClientBuilder = Http4ClientBuilder.getBuilder(getPropMap());
-        initialize();
-    }
-
-    private void initialize() {
+        httpClientBuilder = Http4ClientBuilder.getBuilder(getPropMap(controllerInfo, connectionMap, proxyMap, encryptionKey));
         controllerClient = ControllerClient.getControllerClient();
         controllerClient.setControllerHttpClient(httpClientBuilder.build());
         controllerClient.setControllerBaseURL(controllerBaseURL);
     }
 
-    public ControllerClient getControllerClient() {
+    public static ControllerClient getControllerClient() {
         return controllerClient;
     }
 
-    private String buildURI(String host, String port, boolean sslEnabled) {
+    private static String buildURI(String host, String port, boolean sslEnabled) {
         StringBuilder sb = new StringBuilder();
         if (sslEnabled) {
             sb.append("https://");
@@ -55,9 +43,9 @@ public class ControllerClientFactory {
         return sb.toString();
     }
 
-    private Map<String, ?> getPropMap() {
+    private static Map<String, ?> getPropMap(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
         Map<String, Object> propMap = Maps.newHashMap();
-        propMap.put("servers", getServersList());
+        propMap.put("servers", getServersList(controllerInfo));
         if(connectionMap != null) {
             propMap.put("connection", connectionMap);
         }
@@ -70,11 +58,11 @@ public class ControllerClientFactory {
         return propMap;
     }
 
-    private List<Map<String, Object>> getServersList() {
+    private static List<Map<String, Object>> getServersList(ControllerInfo controllerInfo) {
         List<Map<String, Object>> serversList = Lists.newArrayList();
         Map<String, Object> controllerServerMap = Maps.newHashMap();
         controllerServerMap.put(URI, controllerBaseURL);
-        controllerServerMap.put(USER, getUserName());
+        controllerServerMap.put(USER, getUserName(controllerInfo));
         controllerServerMap.put(PASSWORD, controllerInfo.getPassword());
         controllerServerMap.put(ENCRYPTED_PASSWORD, controllerInfo.getEncryptedPassword());
         serversList.add(controllerServerMap);
@@ -86,7 +74,7 @@ public class ControllerClientFactory {
     * So the username that works is username@accountName
     * eg: admin@customer1
     * */
-    private String getUserName() {
+    private static String getUserName(ControllerInfo controllerInfo) {
         String username = controllerInfo.getUsername();
         String accountName = controllerInfo.getAccount();
         if (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(accountName)) {

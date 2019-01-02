@@ -55,7 +55,7 @@ public class CustomDashboardUtils {
             dashboardMetricPrefix.deleteCharAt(dashboardMetricPrefix.length() - 1);
         } else {
             //#TODO Since the metricPrefix is coming from MonitorContextConfiguration, it will never be null or empty
-            //#TODO nor will it have a "|" in the end. So this is in unnecessary check which will never be hit.
+            //#TODO nor will it have a "|" in the end. So this is an unnecessary check which will never be hit.
             if (metricPrefix.length() > 0 && metricPrefix.charAt(metricPrefix.length() - 1) == '|') {
                 metricPrefix = metricPrefix.substring(0, metricPrefix.length() - 1);
             }
