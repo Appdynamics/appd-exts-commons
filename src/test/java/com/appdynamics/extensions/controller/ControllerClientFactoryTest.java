@@ -3,16 +3,10 @@ package com.appdynamics.extensions.controller;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
@@ -28,9 +22,9 @@ public class ControllerClientFactoryTest {
         ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo();
         ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
         ControllerClient controllerClient = ControllerClientFactory.getControllerClient();
-        Assert.assertNotNull(controllerClient.getControllerBaseURL());
-        Assert.assertNotNull(controllerClient.getControllerHttpClient());
-        Assert.assertEquals(controllerClient.getControllerBaseURL(), "http://localhost:8090/");
+        Assert.assertNotNull(controllerClient.getBaseURL());
+        Assert.assertNotNull(controllerClient.getHttpClient());
+        Assert.assertEquals(controllerClient.getBaseURL(), "http://localhost:8090/");
 
     }
 
@@ -42,9 +36,9 @@ public class ControllerClientFactoryTest {
         controllerInfo.setControllerSslEnabled(true);
         ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
         ControllerClient controllerClient = ControllerClientFactory.getControllerClient();
-        Assert.assertNotNull(controllerClient.getControllerBaseURL());
-        Assert.assertNotNull(controllerClient.getControllerHttpClient());
-        Assert.assertEquals(controllerClient.getControllerBaseURL(), "https://localhost:8090/");
+        Assert.assertNotNull(controllerClient.getBaseURL());
+        Assert.assertNotNull(controllerClient.getHttpClient());
+        Assert.assertEquals(controllerClient.getBaseURL(), "https://localhost:8090/");
 
     }
 }

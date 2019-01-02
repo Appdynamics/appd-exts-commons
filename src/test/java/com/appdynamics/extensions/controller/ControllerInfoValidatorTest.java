@@ -31,7 +31,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getNodeName()).thenReturn("node");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        Boolean check = controllerInfoValidator.isValidatedAndResolved();
+        Boolean check = controllerInfoValidator.isValidated();
         Assert.assertTrue(check);
     }
 
@@ -48,7 +48,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("tier");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        Boolean check = controllerInfoValidator.isValidatedAndResolved();
+        Boolean check = controllerInfoValidator.isValidated();
         Assert.assertFalse(check);
     }
 
@@ -63,7 +63,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getControllerSslEnabled()).thenReturn(true);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        Boolean check = controllerInfoValidator.isValidatedAndResolved();
+        Boolean check = controllerInfoValidator.isValidated();
         Assert.assertTrue(check);
     }
 
@@ -81,7 +81,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getNodeName()).thenReturn("node");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        Boolean check = controllerInfoValidator.isValidatedAndResolved();
+        Boolean check = controllerInfoValidator.isValidated();
         Assert.assertTrue(check);
     }
 
@@ -95,7 +95,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getControllerPort()).thenReturn(9080);
         Mockito.when(controllerInfo.getControllerSslEnabled()).thenReturn(true);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        Boolean check = controllerInfoValidator.isValidatedAndResolved();
+        Boolean check = controllerInfoValidator.isValidated();
         Assert.assertFalse(check);
     }
 
@@ -113,7 +113,7 @@ public class ControllerInfoValidatorTest {
         Mockito.when(controllerInfo.getNodeName()).thenReturn("node");
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(null);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        Boolean check = controllerInfoValidator.isValidatedAndResolved();
+        Boolean check = controllerInfoValidator.isValidated();
         Assert.assertFalse(check);
     }
 }

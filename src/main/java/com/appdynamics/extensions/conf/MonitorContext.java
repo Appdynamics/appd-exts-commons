@@ -96,7 +96,6 @@ public class MonitorContext {
         return controllerModule.getControllerInfo();
     }
 
-    /*TODO Is this required (or) we should be using the APIService way which has the ControllerClient embedded. */
     public ControllerClient getControllerClient() {
         return controllerModule.getControllerClient();
     }

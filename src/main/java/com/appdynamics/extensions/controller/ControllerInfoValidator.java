@@ -10,7 +10,9 @@ package com.appdynamics.extensions.controller;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.slf4j.Logger;
+import sun.management.resources.agent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +30,9 @@ public class ControllerInfoValidator {
         this.controllerInfo = controllerInfo;
     }
 
-    public boolean isValidatedAndResolved() {
+    public boolean isValidated() {
         if (controllerInfo == null) {
             return false;
-        }
-        // #TODO Need to check why this is being set.
-        if (controllerInfo.getAccount() == null) {
-            controllerInfo.setAccount("customer1");
         }
         check(USER, controllerInfo.getUsername());
         check(PASSWORD, controllerInfo.getPassword());
@@ -42,8 +40,11 @@ public class ControllerInfoValidator {
         check("controllerHost", controllerInfo.getControllerHost());
         check("controllerPort", controllerInfo.getControllerPort());
         check("controllerSslEnabled", controllerInfo.getControllerSslEnabled());
-        /*Incase the the machine agent is running in standalone mode and there is atleast one app agent, then there is
-        need to check for app, tier and node. Right now we are not supporting this case as per below condition.*/
+        /*
+        #TODO Incase the the machine agent is running in standalone mode and there is atleast one app agent, then there is no
+        need to check for app, tier and node. Right now we are not supporting this case as per below condition.
+        EXPLORE FULL AGENT RESOLVER IN MA
+        */
         if (!isSimEnabled(controllerInfo)) {
             checkAppTierNode(controllerInfo);
         }

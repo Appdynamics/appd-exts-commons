@@ -19,17 +19,17 @@ public class ControllerClientFactory {
     private static HttpClientBuilder httpClientBuilder;
     private static ControllerClient controllerClient;
 
-    //#TODO make it static and move all initializations
-    public static void initialize(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
+    public static ControllerClient initialize(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
         controllerBaseURL = buildURI(controllerInfo.getControllerHost(), String.valueOf(controllerInfo.getControllerPort()), controllerInfo.getControllerSslEnabled());
         httpClientBuilder = Http4ClientBuilder.getBuilder(getPropMap(controllerInfo, connectionMap, proxyMap, encryptionKey));
-        controllerClient = ControllerClient.getControllerClient();
-        controllerClient.setControllerHttpClient(httpClientBuilder.build());
-        controllerClient.setControllerBaseURL(controllerBaseURL);
+        initializeControllerClient();
+        return controllerClient;
     }
 
-    public static ControllerClient getControllerClient() {
-        return controllerClient;
+    private static void initializeControllerClient() {
+        controllerClient = new ControllerClient();
+        controllerClient.setHttpClient(httpClientBuilder.build());
+        controllerClient.setBaseURL(controllerBaseURL);
     }
 
     private static String buildURI(String host, String port, boolean sslEnabled) {

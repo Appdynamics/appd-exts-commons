@@ -27,15 +27,19 @@ import java.util.Map;
  * 3rd priority : Controller Info xml
  * This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
  */
+
+// #TODO Refactor local ControllerInfos.
 public class ControllerInfoFactory {
     private static ControllerInfo controllerInfo;
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
+
 
     public static ControllerInfo getControllerInfo() {
         return controllerInfo;
     }
 
-    public static void initialize(Map config, File installDir) {
+    public static ControllerInfo initialize(Map config, File installDir) {
+        controllerInfo = new ControllerInfo();
         ControllerInfo localControllerInfo = getControllerInfoFromXml(installDir);
         logger.debug("The resolved properties from controller-info.xml are {}", localControllerInfo);
         getControllerInfoFromSystemProperties(localControllerInfo);
@@ -44,7 +48,7 @@ public class ControllerInfoFactory {
             getControllerInfoFromYml(config, localControllerInfo);
             logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", localControllerInfo);
         }
-        controllerInfo = localControllerInfo;
+        return controllerInfo = localControllerInfo;
     }
 
     private static ControllerInfo getControllerInfoFromXml(File directory) {
@@ -57,7 +61,7 @@ public class ControllerInfoFactory {
             }
         }
         if (controllerInfoFromXML == null) {
-            controllerInfoFromXML = ControllerInfo.getInstance();
+            controllerInfoFromXML = controllerInfo;
         }
         return controllerInfoFromXML;
     }
@@ -75,20 +79,20 @@ public class ControllerInfoFactory {
     }
 
     private static ControllerInfo mergeValuesFromXML(final XmlControllerInfo xmlControllerInfo) {
-        ControllerInfo controllerInfo = ControllerInfo.getInstance();
-        controllerInfo.setAccountAccessKey(xmlControllerInfo.getAccountAccessKey());
-        controllerInfo.setAccount(xmlControllerInfo.getAccount());
-        controllerInfo.setControllerHost(xmlControllerInfo.getControllerHost());
-        controllerInfo.setControllerPort(xmlControllerInfo.getControllerPort());
-        controllerInfo.setControllerSslEnabled(xmlControllerInfo.getControllerSslEnabled());
-        controllerInfo.setEnableOrchestration(xmlControllerInfo.getEnableOrchestration());
-        controllerInfo.setMachinePath(xmlControllerInfo.getMachinePath());
-        controllerInfo.setUniqueHostId(xmlControllerInfo.getUniqueHostId());
-        controllerInfo.setNodeName(xmlControllerInfo.getNodeName());
-        controllerInfo.setTierName(xmlControllerInfo.getTierName());
-        controllerInfo.setApplicationName(xmlControllerInfo.getApplicationName());
-        controllerInfo.setSimEnabled(xmlControllerInfo.getSimEnabled());
-        return controllerInfo;
+        ControllerInfo localControllerInfo = controllerInfo;
+        localControllerInfo.setAccountAccessKey(xmlControllerInfo.getAccountAccessKey());
+        localControllerInfo.setAccount(xmlControllerInfo.getAccount());
+        localControllerInfo.setControllerHost(xmlControllerInfo.getControllerHost());
+        localControllerInfo.setControllerPort(xmlControllerInfo.getControllerPort());
+        localControllerInfo.setControllerSslEnabled(xmlControllerInfo.getControllerSslEnabled());
+        localControllerInfo.setEnableOrchestration(xmlControllerInfo.getEnableOrchestration());
+        localControllerInfo.setMachinePath(xmlControllerInfo.getMachinePath());
+        localControllerInfo.setUniqueHostId(xmlControllerInfo.getUniqueHostId());
+        localControllerInfo.setNodeName(xmlControllerInfo.getNodeName());
+        localControllerInfo.setTierName(xmlControllerInfo.getTierName());
+        localControllerInfo.setApplicationName(xmlControllerInfo.getApplicationName());
+        localControllerInfo.setSimEnabled(xmlControllerInfo.getSimEnabled());
+        return localControllerInfo;
     }
 
     private static void getControllerInfoFromSystemProperties(ControllerInfo controllerInfo) {

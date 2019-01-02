@@ -13,6 +13,8 @@ import java.io.IOException;
 /**
  * Created by venkata.konala on 1/1/19.
  */
+
+// #TODO change the name to ApplicationModel API
 public class AppTierNodeAPIService extends APIService {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(AppTierNodeAPIService.class);
@@ -58,6 +60,7 @@ public class AppTierNodeAPIService extends APIService {
         return null;
     }
 
+    // #TODO Move to MetricAPIService
     public JsonNode getMetricData(String applicationName, String metricPathEndPoint) {
         if(controllerClient != null) {
             JsonNode MetricDataNode = null;

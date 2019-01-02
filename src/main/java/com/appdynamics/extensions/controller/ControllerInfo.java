@@ -37,13 +37,7 @@ public class ControllerInfo {
     private String tierName;
     private String nodeName;
 
-    private static ControllerInfo controllerInfo = new ControllerInfo();
-
-    private ControllerInfo() {
-    }
-
-    static ControllerInfo getInstance() {
-        return controllerInfo;
+    ControllerInfo() {
     }
 
     public void setUsername(String username) {

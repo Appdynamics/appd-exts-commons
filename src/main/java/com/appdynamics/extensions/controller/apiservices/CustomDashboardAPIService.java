@@ -4,8 +4,6 @@ import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.CookiesCsrf;
-import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
-import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
@@ -81,7 +79,7 @@ public class CustomDashboardAPIService extends APIService{
         String twoHyphens = "--";
         String boundary = "*****";
         String lineEnd = "\r\n";
-        String urlStr = controllerClient.getControllerBaseURL() + "controller/CustomDashboardImportExportServlet";
+        String urlStr = controllerClient.getBaseURL() + "controller/CustomDashboardImportExportServlet";
         logger.info("Uploading the custom Dashboard {} to {}", filename, urlStr);
         HttpURLConnection connection = null;
         try {
@@ -166,6 +164,7 @@ public class CustomDashboardAPIService extends APIService{
 
     }
 
+    // #TODO Make the SSL connection from the common utility
     private static SSLSocketFactory createSSLSocketFactory() throws ControllerHttpRequestException {
         try {
             SSLContext context = SSLContext.getInstance("TLSv1.2");

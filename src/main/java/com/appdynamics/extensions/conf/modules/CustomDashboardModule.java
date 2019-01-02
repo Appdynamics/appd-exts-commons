@@ -28,12 +28,12 @@ public class CustomDashboardModule {
 
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName, ControllerInfo controllerInfo) {
         initialized = false;
+        lastRecordedTime = new AtomicLong();
         CustomDashboardAPIService customDashboardAPIService = ControllerAPIServiceFactory.getCustomDashboardAPIService();
         if(controllerInfo == null || customDashboardAPIService == null) {
             logger.debug("ControllerInfo/ControllerClient is null.....Not initializing CustomDashBoardModule");
             return;
         }
-        lastRecordedTime = new AtomicLong();
         Map customDashboardConfig = (Map) config.get(CUSTOM_DASHBOARD);
         if (CustomDashboardUtils.isCustomDashboardEnabled(customDashboardConfig)) {
             dashboardName = CustomDashboardUtils.getDashboardName(customDashboardConfig, monitorName);

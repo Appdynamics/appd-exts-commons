@@ -20,41 +20,37 @@ import java.util.Arrays;
 public class ControllerClient {
 
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerClient.class);
-    private CloseableHttpClient controllerHttpClient;
-    private String controllerBaseURL;
+    private CloseableHttpClient httpClient;
+    private String baseURL;
     // #TODO This needs to be synchronized
     private CookiesCsrf cookiesCsrf;
 
-    private ControllerClient() {
+    ControllerClient() {
     }
 
-    private static ControllerClient controllerClient = new ControllerClient();
-
-    static ControllerClient getControllerClient(){
-        return controllerClient;
+    void setHttpClient(CloseableHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
-    void setControllerHttpClient(CloseableHttpClient controllerHttpClient) {
-        this.controllerHttpClient = controllerHttpClient;
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
     }
 
-    public CloseableHttpClient getControllerHttpClient() {
-        return controllerHttpClient;
+    void setBaseURL(String baseURL) {
+        this.baseURL = baseURL;
     }
 
-    void setControllerBaseURL(String controllerBaseURL) {
-        this.controllerBaseURL = controllerBaseURL;
-    }
-
-    public String getControllerBaseURL() {
-        return controllerBaseURL;
+    public String getBaseURL() {
+        return baseURL;
     }
 
     void setCookiesCsrf(CookiesCsrf cookiesCsrf) {
         this.cookiesCsrf = cookiesCsrf;
     }
 
-    public CookiesCsrf getCookiesCsrf() throws ControllerHttpRequestException{
+    // #TODO Check the CSRF token expiry
+    // #TODO Make it private once dashboard uploader is updated to Apache HttpClient 4.4+
+    public synchronized CookiesCsrf getCookiesCsrf() throws ControllerHttpRequestException{
         if (cookiesCsrf == null) {
             cookiesCsrf = getCookiesAndAuthToken();
         }
@@ -62,10 +58,8 @@ public class ControllerClient {
     }
 
     public String sendGetRequest(String url) throws ControllerHttpRequestException {
-        if(cookiesCsrf == null) {
-            cookiesCsrf = getCookiesAndAuthToken();
-        }
-        HttpGet get = new HttpGet(controllerBaseURL + url);
+        getCookiesCsrf();
+        HttpGet get = new HttpGet(baseURL + url);
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
             get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
         }
@@ -75,7 +69,7 @@ public class ControllerClient {
         }
         CloseableHttpResponse response = null;
         try {
-            response = controllerHttpClient.execute(get);
+            response = httpClient.execute(get);
             StatusLine statusLine = response.getStatusLine();
             String responseString = null;
             if (statusLine != null && statusLine.getStatusCode() == 200) {
@@ -95,12 +89,12 @@ public class ControllerClient {
 
     // #TODO Need to check if the tokens expires in a set time.
     private CookiesCsrf getCookiesAndAuthToken()throws ControllerHttpRequestException{
-        HttpGet get = new HttpGet(controllerBaseURL + "controller/auth?action=login");
+        HttpGet get = new HttpGet(baseURL + "controller/auth?action=login");
         CloseableHttpResponse response = null;
         CookiesCsrf cookiesCsrf = new CookiesCsrf();
         StatusLine statusLine;
         try {
-            response = controllerHttpClient.execute(get);
+            response = httpClient.execute(get);
             statusLine = response.getStatusLine();
             if (statusLine != null && statusLine.getStatusCode() == 200) {
                 Header[] headers = response.getAllHeaders();

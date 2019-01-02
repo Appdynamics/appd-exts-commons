@@ -32,13 +32,11 @@ public class ControllerModule {
         ControllerInfoFactory.initialize(controllerInfoMap, installDir);
         controllerInfo = ControllerInfoFactory.getControllerInfo();
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        if(controllerInfoValidator.isValidatedAndResolved()) {
-            ControllerClientFactory.initialize(controllerInfo,
+        if(controllerInfoValidator.isValidated()) {
+            controllerClient = ControllerClientFactory.initialize(controllerInfo,
                     (Map<String, ?>) config.get("connection"), (Map<String, ?>) config.get("proxy"),
                     (String)config.get(ENCRYPTION_KEY));
-            controllerClient = ControllerClientFactory.getControllerClient();
-            //#TODO Check if this assert is ok.
-            AssertUtils.assertNotNull(controllerClient, "ControllerClient is null");
+            // #TODO Add a model class that holds all different API services
             ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
         } else {
             controllerInfo = null;
@@ -50,7 +48,6 @@ public class ControllerModule {
         return controllerInfo;
     }
 
-    /*TODO Is this required (or) we should be using the APIService way which has the ControllerClient embedded. */
     public ControllerClient getControllerClient() {
         return controllerClient;
     }

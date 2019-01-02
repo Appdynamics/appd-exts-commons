@@ -11,6 +11,7 @@ public class ControllerAPIServiceFactory {
     private static AppTierNodeAPIService appTierNodeAPIService;
     private static CustomDashboardAPIService customDashboardAPIService;
 
+    // #TODO Refactor based on ControllerClientFactory
     public static void initialize(ControllerInfo controllerInfo, ControllerClient controllerClient) {
         appTierNodeAPIService = AppTierNodeAPIService.getInstance();
         appTierNodeAPIService.setControllerInfo(controllerInfo);
