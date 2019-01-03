@@ -33,7 +33,9 @@ public class ControllerInfoFactory {
 
     public static ControllerInfo initialize(Map config, File installDir) {
         controllerInfo = new ControllerInfo();
-        getControllerInfoFromXml(installDir);
+        if(installDir != null) {
+            getControllerInfoFromXml(installDir);
+        }
         logger.debug("The resolved properties from controller-info.xml are {}", controllerInfo);
         getControllerInfoFromSystemProperties();
         logger.debug("The resolved properties after controller-info.xml and system properties are {}", controllerInfo);

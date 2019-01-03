@@ -12,11 +12,16 @@ package com.appdynamics.extensions.conf.modules;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.ControllerInfoFactory;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
 import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
+import com.appdynamics.extensions.dashboard.CustomDashboardUtils;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.util.PathResolver;
 import com.google.common.collect.Maps;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -24,31 +29,31 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by bhuvnesh.kumar on 9/19/18.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({System.class, HttpClientBuilder.class, CustomDashboardModule.class, CustomDashboardUploader.class, ControllerAPIServiceFactory.class})
+@PrepareForTest({ System.class, HttpClientBuilder.class, CustomDashboardModule.class, CustomDashboardUploader.class, ControllerAPIService.class})
 @PowerMockIgnore("javax.net.ssl.*")
 
 public class CustomDashboardModuleTest {
-
     private Map getCustomDashboardMap() {
         Map config = new HashMap<>();
         config.put("enabled", true);
         config.put("dashboardName", "MonitorName");
         config.put("pathToSIMDashboard", "src/test/resources/dashboard/simDashboard.json");
         config.put("pathToNormalDashboard", "src/test/resources/dashboard/normalDashboard.json");
+        config.put("periodicDashboardCheckInSeconds", 30);
         return config;
     }
 
@@ -70,37 +75,46 @@ public class CustomDashboardModuleTest {
     }
 
     @Test
-    public void testUploadDashboardForCorrectTimeDifference() throws Exception, ControllerHttpRequestException {
-        /*Map config = new HashMap<>();
+    public void whenTimeDifferenceGreaterThanThresholdTimeShouldTryToUpload() throws Exception, ControllerHttpRequestException {
+        Map config = new HashMap<>();
         config.put("customDashboard", getCustomDashboardMap());
         config.put("controllerInfo", getControllerInfoMap());
         config.put("proxy", Maps.newHashMap());
-        String metric = "Custom Metrics|MonitorName";
+        String metricPrefix = "Custom Metrics|MonitorName";
         String monitorName = "MonitorName";
-        File file = Mockito.mock(File.class);
-        ControllerInfo controllerInfo;
-        ControllerInfoFactory.initialize(getControllerInfoMap(), file);
-        controllerInfo = ControllerInfoFactory.getControllerInfo();
-        PowerMockito.mockStatic(ControllerAPIServiceFactory.class);
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getControllerInfoMap(), null);
+        ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         CustomDashboardAPIService customDashboardAPIService = mock(CustomDashboardAPIService.class);
-        PowerMockito.when(ControllerAPIServiceFactory.getCustomDashboardAPIService()).thenReturn(customDashboardAPIService);
-        CustomDashboardUploader mockUploader = PowerMockito.mock(CustomDashboardUploader.class);
-        PowerMockito.whenNew(CustomDashboardUploader.class).withArguments(isA(CustomDashboardAPIService.class)).thenReturn(mockUploader);
-        PowerMockito.doNothing().when(mockUploader).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
-        PowerMockito.mockStatic(System.class);
-        PowerMockito.when(System.currentTimeMillis()).thenReturn(300001l).thenReturn(300211l)
-                .thenReturn(500001l)
-                .thenReturn(700001l).thenReturn(700211l)
-                .thenReturn(700001l).thenReturn(700211l)
-                .thenReturn(800001l).thenReturn(800211l)
-                .thenReturn(1100001l).thenReturn(1100211l);
+        when(controllerAPIService.getCustomDashboardAPIService()).thenReturn(customDashboardAPIService);
+        CustomDashboardUploader customDashboardUploader = mock(CustomDashboardUploader.class);
+        PowerMockito.whenNew(CustomDashboardUploader.class).withAnyArguments().thenReturn(customDashboardUploader);
+        PowerMockito.doNothing().when(customDashboardUploader).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
         CustomDashboardModule customDashboardModule = new CustomDashboardModule();
-        customDashboardModule.initCustomDashboard(config, metric, monitorName, controllerInfo);
+        customDashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo, controllerAPIService);
         customDashboardModule.uploadDashboard();
-        verify(mockUploader, times(1)).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
+        verify(customDashboardUploader, atLeastOnce()).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
+    }
+
+    @Test
+    public void whenTimeDifferenceLessThanThresholdShouldNotTryToUpload() throws Exception, ControllerHttpRequestException {
+        Map config = new HashMap<>();
+        config.put("customDashboard", getCustomDashboardMap());
+        config.put("controllerInfo", getControllerInfoMap());
+        config.put("proxy", Maps.newHashMap());
+        String metricPrefix = "Custom Metrics|MonitorName";
+        String monitorName = "MonitorName";
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getControllerInfoMap(), null);
+        ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
+        CustomDashboardAPIService customDashboardAPIService = mock(CustomDashboardAPIService.class);
+        when(controllerAPIService.getCustomDashboardAPIService()).thenReturn(customDashboardAPIService);
+        CustomDashboardUploader customDashboardUploader = mock(CustomDashboardUploader.class);
+        PowerMockito.whenNew(CustomDashboardUploader.class).withAnyArguments().thenReturn(customDashboardUploader);
+        PowerMockito.doNothing().when(customDashboardUploader).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
+        CustomDashboardModule customDashboardModule = new CustomDashboardModule();
+        customDashboardModule.initCustomDashboard(config, metricPrefix, monitorName, controllerInfo, controllerAPIService);
         customDashboardModule.uploadDashboard();
-        verify(mockUploader, times(1)).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
+        verify(customDashboardUploader, times(1)).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
         customDashboardModule.uploadDashboard();
-        verify(mockUploader, times(2)).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));*/
+        verify(customDashboardUploader, times(1)).checkAndUpload(isA(String.class), isA(String.class), isA(Map.class), isA(Boolean.class));
     }
 }
