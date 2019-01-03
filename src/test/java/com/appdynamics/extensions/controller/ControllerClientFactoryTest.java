@@ -18,10 +18,8 @@ public class ControllerClientFactoryTest {
     @Test
     public void whenSSLNotEnabledThenShouldUseHttp() {
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/controller/config.yml"));
-        ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo();
-        ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
-        ControllerClient controllerClient = ControllerClientFactory.getControllerClient();
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
+        ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
         Assert.assertNotNull(controllerClient.getBaseURL());
         Assert.assertNotNull(controllerClient.getHttpClient());
         Assert.assertEquals(controllerClient.getBaseURL(), "http://localhost:8090/");
@@ -31,11 +29,9 @@ public class ControllerClientFactoryTest {
     @Test
     public void whenSSLEnabledThenShouldUseHttps() {
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/controller/config.yml"));
-        ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
-        ControllerInfo controllerInfo = ControllerInfoFactory.getControllerInfo();
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
         controllerInfo.setControllerSslEnabled(true);
-        ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
-        ControllerClient controllerClient = ControllerClientFactory.getControllerClient();
+        ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
         Assert.assertNotNull(controllerClient.getBaseURL());
         Assert.assertNotNull(controllerClient.getHttpClient());
         Assert.assertEquals(controllerClient.getBaseURL(), "https://localhost:8090/");

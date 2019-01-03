@@ -7,18 +7,15 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.controller.ControllerClient;
-import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
-import com.appdynamics.extensions.controller.apiservices.AppTierNodeAPIService;
+import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
+import com.appdynamics.extensions.util.AssertUtils;
 import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -30,13 +27,14 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
     private ControllerInfo controllerInfo;
     private Map<String, ?> config;
-    private AppTierNodeAPIService appTierNodeAPIService;
+    private ApplicationModelAPIService applicationModelAPIService;
 
-    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, AppTierNodeAPIService appTierNodeAPIService, Logger logger) {
+    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, ApplicationModelAPIService applicationModelAPIService, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
         this.config = config;
-        this.appTierNodeAPIService = appTierNodeAPIService;
+        this.applicationModelAPIService = applicationModelAPIService;
+        AssertUtils.assertNotNull(this.applicationModelAPIService, "The ApplicationModelAPIService is null");
     }
 
     @Override
@@ -80,7 +78,7 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
     }
 
     private String getMAConfiguredTier() {
-        JsonNode jsonNode = appTierNodeAPIService.getSpecificTierNode(controllerInfo.getApplicationName(), controllerInfo.getTierName());
+        JsonNode jsonNode = applicationModelAPIService.getSpecificTierNode(controllerInfo.getApplicationName(), controllerInfo.getTierName());
         if(jsonNode != null) {
             return jsonNode.get(0).get("id").asText();
         }

@@ -2,6 +2,7 @@ package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
 import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
@@ -26,11 +27,10 @@ public class CustomDashboardModule {
     private volatile AtomicLong lastRecordedTime;
     private Map<String, ?> proxyMap;
 
-    public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName, ControllerInfo controllerInfo) {
+    public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
         initialized = false;
         lastRecordedTime = new AtomicLong();
-        CustomDashboardAPIService customDashboardAPIService = ControllerAPIServiceFactory.getCustomDashboardAPIService();
-        if(controllerInfo == null || customDashboardAPIService == null) {
+        if(controllerInfo == null || controllerAPIService == null) {
             logger.debug("ControllerInfo/ControllerClient is null.....Not initializing CustomDashBoardModule");
             return;
         }
@@ -43,7 +43,7 @@ public class CustomDashboardModule {
                 proxyMap = (Map<String, ?>)config.get("proxy");
                 overwrite = CustomDashboardUtils.getOverwrite(customDashboardConfig);
                 timeDelayInMilliSeconds = CustomDashboardUtils.getTimeDelay(customDashboardConfig) * 1000;
-                dashboardUploader = new CustomDashboardUploader(customDashboardAPIService);
+                dashboardUploader = new CustomDashboardUploader(controllerAPIService.getCustomDashboardAPIService());
                 initialized = true;
             }
         } else {

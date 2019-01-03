@@ -11,8 +11,9 @@ import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.checks.*;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
-import com.appdynamics.extensions.controller.apiservices.AppTierNodeAPIService;
+import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -34,9 +35,8 @@ public class HealthCheckModule {
     private Map<String, MonitorHealthCheck> healthChecksForMonitors = new ConcurrentHashMap<>();
     private MonitorExecutorService executorService;
 
-    public void initMATroubleshootChecks(Map<String, ?> config, String monitorName, ControllerInfo controllerInfo) {
-        AppTierNodeAPIService appTierNodeAPIService = ControllerAPIServiceFactory.getAppTierNodeAPIService();
-        if(controllerInfo == null || appTierNodeAPIService != null) {
+    public void initMATroubleshootChecks(Map<String, ?> config, String monitorName, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
+        if(controllerInfo == null || controllerAPIService == null) {
             logger.debug("ControllerInfo/ControllerClient is null.....Not initializing HealthCheckModule");
             return;
         }
@@ -84,8 +84,8 @@ public class HealthCheckModule {
             healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MaxMetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
             healthCheckMonitor.registerChecks(new MetricBlacklistLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, appTierNodeAPIService, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), appTierNodeAPIService, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService.getMetricAPIService(), MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerAPIService.getApplicationModelAPIService(), MonitorHealthCheck.logger));
             executorService.submit("HealthCheckMonitor", healthCheckMonitor);
 
         } catch (Exception e) {

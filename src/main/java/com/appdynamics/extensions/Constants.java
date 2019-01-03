@@ -35,17 +35,6 @@ public class Constants {
     public static final String USE_SSL = "useSsl";
     public static final String ENCRYPTION_KEY = "encryptionKey";
     public static final String ENABLED = "enabled";
-    // #TODO Check if the following can be removed.
-    public static final String METRIC_PREFIX = "metric-prefix";
-    public static final String AUTH_TYPE = "auth-type";
-
-    public static String getArg(Map<String, String> taskArgs, String key, String defaultValue) {
-        if (taskArgs.containsKey(key)) {
-            return taskArgs.get(key);
-        } else {
-            return defaultValue;
-        }
-    }
 
     public static String defaultIfEmpty(Map<String, String> taskArgs, String key, String defaultValue) {
         if (taskArgs.containsKey(key)) {

@@ -27,75 +27,61 @@ import java.util.Map;
  * 3rd priority : Controller Info xml
  * This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
  */
-
-// #TODO Refactor local ControllerInfos.
 public class ControllerInfoFactory {
     private static ControllerInfo controllerInfo;
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
 
-
-    public static ControllerInfo getControllerInfo() {
+    public static ControllerInfo initialize(Map config, File installDir) {
+        controllerInfo = new ControllerInfo();
+        getControllerInfoFromXml(installDir);
+        logger.debug("The resolved properties from controller-info.xml are {}", controllerInfo);
+        getControllerInfoFromSystemProperties();
+        logger.debug("The resolved properties after controller-info.xml and system properties are {}", controllerInfo);
+        if (config != null) {
+            getControllerInfoFromYml(config);
+            logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", controllerInfo);
+        }
         return controllerInfo;
     }
 
-    public static ControllerInfo initialize(Map config, File installDir) {
-        controllerInfo = new ControllerInfo();
-        ControllerInfo localControllerInfo = getControllerInfoFromXml(installDir);
-        logger.debug("The resolved properties from controller-info.xml are {}", localControllerInfo);
-        getControllerInfoFromSystemProperties(localControllerInfo);
-        logger.debug("The resolved properties after controller-info.xml and system properties are {}", localControllerInfo);
-        if (config != null) {
-            getControllerInfoFromYml(config, localControllerInfo);
-            logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", localControllerInfo);
-        }
-        return controllerInfo = localControllerInfo;
-    }
-
-    private static ControllerInfo getControllerInfoFromXml(File directory) {
+    private static void getControllerInfoFromXml(File directory) {
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
-        ControllerInfo controllerInfoFromXML = null;
         if (directory.exists()) {
             File xmlControllerInfoFile = new File(new File(directory, "conf"), "controller-info.xml");
             if (xmlControllerInfoFile.exists()) {
-                controllerInfoFromXML = fromXml(xmlControllerInfoFile);
+                fromXml(xmlControllerInfoFile);
             }
         }
-        if (controllerInfoFromXML == null) {
-            controllerInfoFromXML = controllerInfo;
-        }
-        return controllerInfoFromXML;
     }
 
-    private static ControllerInfo fromXml(File file) {
+    private static void fromXml(File file) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(XmlControllerInfo.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             XmlControllerInfo xmlControllerInfo = (XmlControllerInfo) unmarshaller.unmarshal(file);
-            return mergeValuesFromXML(xmlControllerInfo);
+            mergeValuesFromXML(xmlControllerInfo);
         } catch (JAXBException e) {
             String msg = "Cannot unmarshall the controller-info.xml from " + file.getAbsolutePath();
             throw new RuntimeException(msg, e);
         }
     }
 
-    private static ControllerInfo mergeValuesFromXML(final XmlControllerInfo xmlControllerInfo) {
-        ControllerInfo localControllerInfo = controllerInfo;
-        localControllerInfo.setAccountAccessKey(xmlControllerInfo.getAccountAccessKey());
-        localControllerInfo.setAccount(xmlControllerInfo.getAccount());
-        localControllerInfo.setControllerHost(xmlControllerInfo.getControllerHost());
-        localControllerInfo.setControllerPort(xmlControllerInfo.getControllerPort());
-        localControllerInfo.setControllerSslEnabled(xmlControllerInfo.getControllerSslEnabled());
-        localControllerInfo.setEnableOrchestration(xmlControllerInfo.getEnableOrchestration());
-        localControllerInfo.setMachinePath(xmlControllerInfo.getMachinePath());
-        localControllerInfo.setUniqueHostId(xmlControllerInfo.getUniqueHostId());
-        localControllerInfo.setNodeName(xmlControllerInfo.getNodeName());
-        localControllerInfo.setTierName(xmlControllerInfo.getTierName());
-        localControllerInfo.setApplicationName(xmlControllerInfo.getApplicationName());
-        localControllerInfo.setSimEnabled(xmlControllerInfo.getSimEnabled());
-        return localControllerInfo;
+    private static void mergeValuesFromXML(final XmlControllerInfo xmlControllerInfo) {
+        controllerInfo.setAccountAccessKey(xmlControllerInfo.getAccountAccessKey());
+        controllerInfo.setAccount(xmlControllerInfo.getAccount());
+        controllerInfo.setControllerHost(xmlControllerInfo.getControllerHost());
+        controllerInfo.setControllerPort(xmlControllerInfo.getControllerPort());
+        controllerInfo.setControllerSslEnabled(xmlControllerInfo.getControllerSslEnabled());
+        controllerInfo.setEnableOrchestration(xmlControllerInfo.getEnableOrchestration());
+        controllerInfo.setMachinePath(xmlControllerInfo.getMachinePath());
+        controllerInfo.setUniqueHostId(xmlControllerInfo.getUniqueHostId());
+        controllerInfo.setNodeName(xmlControllerInfo.getNodeName());
+        controllerInfo.setTierName(xmlControllerInfo.getTierName());
+        controllerInfo.setApplicationName(xmlControllerInfo.getApplicationName());
+        controllerInfo.setSimEnabled(xmlControllerInfo.getSimEnabled());
     }
 
-    private static void getControllerInfoFromSystemProperties(ControllerInfo controllerInfo) {
+    private static void getControllerInfoFromSystemProperties() {
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.accountAccessKey"))) {
             controllerInfo.setAccountAccessKey(System.getProperty("appdynamics.agent.accountAccessKey"));
         }
@@ -143,7 +129,7 @@ public class ControllerInfoFactory {
         }
     }
 
-    private static void getControllerInfoFromYml(Map config, ControllerInfo controllerInfo) {
+    private static void getControllerInfoFromYml(Map config) {
         if (!Strings.isNullOrEmpty((String) config.get("controllerHost"))) {
             controllerInfo.setControllerHost(config.get("controllerHost").toString());
         }

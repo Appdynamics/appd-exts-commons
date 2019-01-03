@@ -10,10 +10,7 @@ package com.appdynamics.extensions.controller;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.slf4j.Logger;
-import sun.management.resources.agent;
-
 import java.util.ArrayList;
 import java.util.List;
 

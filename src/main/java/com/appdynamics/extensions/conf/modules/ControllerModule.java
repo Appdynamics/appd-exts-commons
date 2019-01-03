@@ -1,9 +1,9 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.controller.*;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.AssertUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -19,6 +19,7 @@ public class ControllerModule {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerModule.class);
     private ControllerInfo controllerInfo;
     private ControllerClient controllerClient;
+    private ControllerAPIService controllerAPIService;
 
     /**
      * This method initializes the ControllerInfo instance which is singleton from the ControllerInfoFactory and then
@@ -29,15 +30,13 @@ public class ControllerModule {
      * */
     public void initController(File installDir, Map<String, ?> config) {
         Map controllerInfoMap = (Map) config.get("controllerInfo");
-        ControllerInfoFactory.initialize(controllerInfoMap, installDir);
-        controllerInfo = ControllerInfoFactory.getControllerInfo();
+        controllerInfo = ControllerInfoFactory.initialize(controllerInfoMap, installDir);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
         if(controllerInfoValidator.isValidated()) {
             controllerClient = ControllerClientFactory.initialize(controllerInfo,
                     (Map<String, ?>) config.get("connection"), (Map<String, ?>) config.get("proxy"),
                     (String)config.get(ENCRYPTION_KEY));
-            // #TODO Add a model class that holds all different API services
-            ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
+            controllerAPIService = ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
         } else {
             controllerInfo = null;
             logger.warn("ControllerInfo instance is not validated and resolved.....the ControllerClient is null");
@@ -50,5 +49,9 @@ public class ControllerModule {
 
     public ControllerClient getControllerClient() {
         return controllerClient;
+    }
+
+    public ControllerAPIService getControllerAPIService() {
+        return controllerAPIService;
     }
  }

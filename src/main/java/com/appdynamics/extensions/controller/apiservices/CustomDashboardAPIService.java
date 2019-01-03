@@ -35,23 +35,17 @@ public class CustomDashboardAPIService extends APIService{
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardAPIService.class);
 
-    private CustomDashboardAPIService() {
-    }
-
-    private static CustomDashboardAPIService customDashboardAPIService = new CustomDashboardAPIService();
-
-    static CustomDashboardAPIService getInstance() {
-        return customDashboardAPIService;
+    CustomDashboardAPIService() {
     }
 
     @Override
     void setControllerInfo(ControllerInfo controllerInfo) {
-        customDashboardAPIService.controllerInfo = controllerInfo;
+        this.controllerInfo = controllerInfo;
     }
 
     @Override
     void setControllerClient(ControllerClient controllerClient) {
-        customDashboardAPIService.controllerClient = controllerClient;
+        this.controllerClient = controllerClient;
     }
 
     public JsonNode getAllDashboards() {

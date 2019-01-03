@@ -7,18 +7,14 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.controller.ControllerClient;
-import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
-import com.appdynamics.extensions.controller.apiservices.AppTierNodeAPIService;
+import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
+import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.JsonUtils;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
-
-import java.io.IOException;
 
 /**
  * @author Satish Muddam
@@ -27,13 +23,14 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
 
     public Logger logger;
     private ControllerInfo controllerInfo;
-    private AppTierNodeAPIService appTierNodeAPIService;
+    private MetricAPIService metricAPIService;
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
 
-    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, AppTierNodeAPIService appTierNodeAPIService, Logger logger) {
+    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, MetricAPIService metricAPIService, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
-        this.appTierNodeAPIService = appTierNodeAPIService;
+        this.metricAPIService = metricAPIService;
+        AssertUtils.assertNotNull(metricAPIService, "The MetricAPIService is null");
     }
 
     @Override
@@ -60,7 +57,7 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
     }
 
     private int getMAStatus() {
-        JsonNode jsonNode = appTierNodeAPIService.getMetricData(controllerInfo.getApplicationName(), getEndPointForMAStatusMetric());
+        JsonNode jsonNode = metricAPIService.getMetricData(controllerInfo.getApplicationName(), getEndPointForMAStatusMetric());
         if(jsonNode != null) {
             JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
             return valueNode == null ? 0 : valueNode.get(0).asInt();

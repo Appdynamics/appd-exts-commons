@@ -2,30 +2,18 @@ package com.appdynamics.extensions.controller.apiservices;
 
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 
 /**
  * Created by venkata.konala on 12/20/18.
  */
 public class ControllerAPIServiceFactory {
 
-    private static AppTierNodeAPIService appTierNodeAPIService;
-    private static CustomDashboardAPIService customDashboardAPIService;
+    private static ControllerAPIService controllerAPIService;
 
-    // #TODO Refactor based on ControllerClientFactory
-    public static void initialize(ControllerInfo controllerInfo, ControllerClient controllerClient) {
-        appTierNodeAPIService = AppTierNodeAPIService.getInstance();
-        appTierNodeAPIService.setControllerInfo(controllerInfo);
-        appTierNodeAPIService.setControllerClient(controllerClient);
-        customDashboardAPIService = CustomDashboardAPIService.getInstance();
-        customDashboardAPIService.setControllerInfo(controllerInfo);
-        customDashboardAPIService.setControllerClient(controllerClient);
-    }
-
-    public static AppTierNodeAPIService getAppTierNodeAPIService() {
-        return appTierNodeAPIService;
-    }
-
-    public static CustomDashboardAPIService getCustomDashboardAPIService() {
-        return customDashboardAPIService;
+    public static ControllerAPIService initialize(ControllerInfo controllerInfo, ControllerClient controllerClient) {
+        controllerAPIService = new ControllerAPIService();
+        controllerAPIService.initialize(controllerInfo, controllerClient);
+        return controllerAPIService;
     }
 }

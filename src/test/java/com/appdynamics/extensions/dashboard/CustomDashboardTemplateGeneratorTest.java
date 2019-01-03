@@ -41,9 +41,7 @@ public class CustomDashboardTemplateGeneratorTest {
 
     @Test
     public void replaceDefaultValuesInTheNormalDashboard() throws Exception {
-        ControllerInfo controllerInfo;
-        ControllerInfoFactory.initialize(getConfigMap(), file);
-        controllerInfo = ControllerInfoFactory.getControllerInfo();
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getConfigMap(), file);
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
         Map dashboardConfig = new HashMap();
@@ -76,9 +74,7 @@ public class CustomDashboardTemplateGeneratorTest {
 
     @Test
     public void replaceDefaultValuesInTheSIMDashboard() throws Exception {
-        ControllerInfo controllerInfo;
-        ControllerInfoFactory.initialize(getConfigMapForSim(), file);
-        controllerInfo = ControllerInfoFactory.getControllerInfo();
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getConfigMapForSim(), file);
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
         Map dashboardConfig = new HashMap();
@@ -106,11 +102,9 @@ public class CustomDashboardTemplateGeneratorTest {
 
     @Test
     public void verifyTheCorrectMachinePath() throws Exception {
-        ControllerInfo controllerInfo;
         Map controllerInfoMapWithMachinePath = getConfigMapForSim();
         controllerInfoMapWithMachinePath.put("machinePath", "Test1|Test2|Test3|Test4");
-        ControllerInfoFactory.initialize(controllerInfoMapWithMachinePath, file);
-        controllerInfo = ControllerInfoFactory.getControllerInfo();
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(controllerInfoMapWithMachinePath, file);
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
         Map dashboardConfig = new HashMap();

@@ -12,6 +12,7 @@ import com.appdynamics.extensions.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
@@ -81,8 +82,8 @@ public class MonitorContext {
             cacheModule.initCache();
             metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(config);
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
-            healthCheckModule.initMATroubleshootChecks(config, monitorName, getControllerInfo());
-            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, getControllerInfo());
+            healthCheckModule.initMATroubleshootChecks(config, monitorName, getControllerInfo(), getControllerAPIService());
+            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, getControllerInfo(), getControllerAPIService());
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
@@ -98,6 +99,10 @@ public class MonitorContext {
 
     public ControllerClient getControllerClient() {
         return controllerModule.getControllerClient();
+    }
+
+    public ControllerAPIService getControllerAPIService() {
+        return controllerModule.getControllerAPIService();
     }
 
     public void setWorkBenchModule(WorkBenchModule workBenchModule) {

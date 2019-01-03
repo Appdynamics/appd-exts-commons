@@ -58,7 +58,6 @@ public class CustomDashboardUploader {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardUploader.class);
     private CustomDashboardAPIService customDashboardAPIService;
 
-    //#TODO ControllerInfo is not required after the uploadDashboard method is updated.
     public CustomDashboardUploader(CustomDashboardAPIService customDashboardAPIService) {
         this.customDashboardAPIService = customDashboardAPIService;
     }
