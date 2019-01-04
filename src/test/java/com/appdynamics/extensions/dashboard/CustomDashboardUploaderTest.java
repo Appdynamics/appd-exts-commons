@@ -52,9 +52,9 @@ public class CustomDashboardUploaderTest {
         CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(customDashboardAPIService);
         String dashboardName = "ExistingDashboardName";
         String fileContents = "contents";
-        Map<String, ? super Object> proxyMap = new HashMap<>();
+        Map<String, ? super Object> configMap = new HashMap<>();
         boolean overwrite = false;
-        customDashboardUploader.checkAndUpload(dashboardName, fileContents, proxyMap, overwrite);
+        customDashboardUploader.checkAndUpload(dashboardName, fileContents, configMap, overwrite);
         verify(customDashboardAPIService, Mockito.times(0)).uploadDashboard(isA(Map.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
     }
 
@@ -67,9 +67,9 @@ public class CustomDashboardUploaderTest {
         CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(customDashboardAPIService);
         String dashboardName = "ExistingDashboardName";
         String fileContents = "contents";
-        Map<String, ? super Object> proxyMap = new HashMap<>();
+        Map<String, ? super Object> configMap = new HashMap<>();
         boolean overwrite = true;
-        customDashboardUploader.checkAndUpload(dashboardName, fileContents, proxyMap, overwrite);
+        customDashboardUploader.checkAndUpload(dashboardName, fileContents, configMap, overwrite);
         verify(customDashboardAPIService, Mockito.times(1)).uploadDashboard(isA(Map.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
     }
 
@@ -82,9 +82,9 @@ public class CustomDashboardUploaderTest {
         CustomDashboardUploader customDashboardUploader = new CustomDashboardUploader(customDashboardAPIService);
         String dashboardName = "NonExistingDashboardName";
         String fileContents = "contents";
-        Map<String, ? super Object> proxyMap = new HashMap<>();
+        Map<String, ? super Object> configMap = new HashMap<>();
         boolean overwrite = false;
-        customDashboardUploader.checkAndUpload(dashboardName, fileContents, proxyMap, overwrite);
+        customDashboardUploader.checkAndUpload(dashboardName, fileContents, configMap, overwrite);
         verify(customDashboardAPIService, Mockito.times(1)).uploadDashboard(isA(Map.class), isA(String.class), isA(String.class), isA(String.class), isA(String.class));
     }
 

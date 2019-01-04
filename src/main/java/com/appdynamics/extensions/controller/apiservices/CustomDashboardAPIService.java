@@ -4,26 +4,37 @@ import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.CookiesCsrf;
+import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.*;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
+import sun.security.ssl.SSLSocketFactoryImpl;
 
 import javax.net.ssl.*;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Map;
 
 import static com.appdynamics.extensions.Constants.URI;
@@ -67,7 +78,10 @@ public class CustomDashboardAPIService extends APIService{
     }
 
     // #TODO Check if cookiesCsrf from a different HttpClient can be used.
-    public void uploadDashboard(Map<String, ?> proxyMap, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ControllerHttpRequestException {
+    public void uploadDashboard(Map<String, ?> propMap, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ControllerHttpRequestException {
+        Map<String, ?> connectionMap = (Map<String, ?>)propMap.get("connection");
+        Map<String, ?> proxyMap = (Map<String, ?>)propMap.get("proxy");
+
         CookiesCsrf cookiesCsrf = controllerClient.getCookiesCsrf();
         String filename = dashboardName + "." + fileExtension;
         String twoHyphens = "--";
@@ -89,8 +103,8 @@ public class CustomDashboardAPIService extends APIService{
             }
             if (connection instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory());
-                httpsURLConnection.setHostnameVerifier(new CustomHostnameVerifier());
+                httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory(connectionMap));
+                httpsURLConnection.setHostnameVerifier(createHostNameVerifier(connectionMap));
             }
             connection.setUseCaches(false);
             connection.setDoOutput(true);
@@ -159,31 +173,100 @@ public class CustomDashboardAPIService extends APIService{
     }
 
     // #TODO Make the SSL connection from the common utility
-    private static SSLSocketFactory createSSLSocketFactory() throws ControllerHttpRequestException {
+    private static SSLSocketFactory createSSLSocketFactory(Map<String, ?> connectionMap) throws ControllerHttpRequestException {
         try {
             SSLContext context = SSLContext.getInstance("TLSv1.2");
-            context.init(null, new TrustManager[]{new X509TrustManager() {
-                public void checkClientTrusted(X509Certificate[] x509Certificates, String authType) throws CertificateException {
-                }
+            KeyStore keyStore = buildKeyStore(connectionMap);
+            KeyStore trustStore = buildTrustStore(connectionMap);
 
-                public void checkServerTrusted(X509Certificate[] x509Certificates, String authType) throws CertificateException {
-
-                }
-
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
+            KeyManager[] keyManagers = null;
+            if(keyStore != null) {
+                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                keyManagerFactory.init(keyStore, getKeyStorePassword(connectionMap));
+                keyManagers = keyManagerFactory.getKeyManagers();
             }
-            }, new SecureRandom());
+
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+
+            context.init( keyManagers, trustManagers, new SecureRandom());
             return context.getSocketFactory();
         } catch (NoSuchAlgorithmException e) {
             throw new ControllerHttpRequestException("Unsupported algorithm", e);
         } catch (KeyManagementException e) {
             throw new ControllerHttpRequestException("Key Management exception", e);
+        } catch (Exception e) {
+            throw new ControllerHttpRequestException("SSLSocketFactory build exception", e);
         }
     }
 
-    private static class CustomHostnameVerifier implements HostnameVerifier {
+    private static KeyStore buildKeyStore(Map<String, ?> connectionMap) {
+        KeyStore keyStore;
+        if(connectionMap != null && connectionMap.get("sslKeyStorePath") != null && connectionMap.get("sslKeyStorePassword") != null) {
+            try {
+                keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                String keyStorePath = (String)connectionMap.get("sslKeyStorePath");
+                String keyStorePassword = (String)connectionMap.get("sslKeyStorePassword");
+                InputStream inputStream = new FileInputStream(keyStorePath);
+                keyStore.load(inputStream, keyStorePassword.toCharArray());
+                inputStream.close();
+                return keyStore;
+            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+                logger.error("Exception while creating a custom keystore. Will fallback on the jre default keystore if available", e);
+            }
+        }
+        return null;
+    }
+
+    //#TODO Take care of the encryption
+    private static char[] getKeyStorePassword(Map<String, ?> connectionMap) {
+        if(connectionMap != null && connectionMap.get("sslKeyStorePath") != null && connectionMap.get("sslKeyStorePassword") != null) {
+            String password = (String)connectionMap.get("sslKeyStorePassword");
+            return password.toCharArray();
+        }
+        return null;
+    }
+
+    //#TODO Need to fall back on ma-cacerts as well
+    private static KeyStore buildTrustStore(Map<String, ?> connectionMap) {
+        KeyStore trustStore;
+        if(connectionMap != null && connectionMap.get("sslTrustStorePath") != null && connectionMap.get("sslTrustStorePassword") != null) {
+            try {
+                trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                String keyStorePath = (String)connectionMap.get("sslTrustStorePath");
+                String keyStorePassword = (String)connectionMap.get("sslTrustStorePassword");
+                InputStream inputStream = new FileInputStream(keyStorePath);
+                trustStore.load(inputStream, keyStorePassword.toCharArray());
+                inputStream.close();
+                return trustStore;
+            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+                logger.error("Exception while creating a custom truststore. Will fallback on the jre default truststore if available", e);
+            }
+        }
+        return null;
+    }
+
+    private HostnameVerifier createHostNameVerifier(Map<String, ?> connectionMap) {
+        if(connectionMap != null && connectionMap.get("sslVerifyHostname") != null && (Boolean)connectionMap.get("sslVerifyHostname")) {
+            return new BrowserCompatHostnameVerifier();
+        }
+        return new AllHostnameVerifier();
+    }
+
+    private static class AllHostnameVerifier implements X509HostnameVerifier {
+        public void verify(String host, SSLSocket ssl)
+                throws IOException {
+        }
+
+        public void verify(String host, X509Certificate cert)
+                throws SSLException {
+        }
+
+        public void verify(String host, String[] cns,
+                           String[] subjectAlts) throws SSLException {
+        }
+
         public boolean verify(String s, SSLSession sslSession) {
             return true;
         }

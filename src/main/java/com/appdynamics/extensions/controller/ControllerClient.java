@@ -22,7 +22,6 @@ public class ControllerClient {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerClient.class);
     private CloseableHttpClient httpClient;
     private String baseURL;
-    // #TODO This needs to be synchronized
     private CookiesCsrf cookiesCsrf;
 
     ControllerClient() {

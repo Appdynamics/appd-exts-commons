@@ -62,7 +62,7 @@ public class CustomDashboardUploader {
         this.customDashboardAPIService = customDashboardAPIService;
     }
 
-    public void checkAndUpload(String dashboardName, String fileContents, Map<String, ?> proxyMap, boolean overwrite) throws ControllerHttpRequestException {
+    public void checkAndUpload(String dashboardName, String fileContents, Map<String, ?> config, boolean overwrite) throws ControllerHttpRequestException {
         JsonNode allDashboardsNode = customDashboardAPIService.getAllDashboards();
         String fileExtension = JSON;
         String fileContentType = APPLICATION_JSON;
@@ -74,12 +74,12 @@ public class CustomDashboardUploader {
                  * so we never try to overwrite.
                  * This option needs to be expose when the editing option is supported through controller APIs.
                  * */
-                customDashboardAPIService.uploadDashboard(proxyMap, dashboardName, fileExtension, fileContents, fileContentType);
+                customDashboardAPIService.uploadDashboard(config, dashboardName, fileExtension, fileContents, fileContentType);
             } else {
                 logger.debug("Overwrite Disabled, not attempting to overwrite dashboard: {}", dashboardName);
             }
         } else {
-            customDashboardAPIService.uploadDashboard(proxyMap, dashboardName, fileExtension, fileContents, fileContentType);
+            customDashboardAPIService.uploadDashboard(config, dashboardName, fileExtension, fileContents, fileContentType);
         }
     }
 

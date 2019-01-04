@@ -25,7 +25,7 @@ public class CustomDashboardModule {
     private CustomDashboardUploader dashboardUploader;
     private long timeDelayInMilliSeconds;
     private volatile AtomicLong lastRecordedTime;
-    private Map<String, ?> proxyMap;
+    private Map<String, ?> config;
 
     public void initCustomDashboard(Map<String, ?> config, String metricPrefix, String monitorName, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
         initialized = false;
@@ -34,13 +34,13 @@ public class CustomDashboardModule {
             logger.debug("ControllerInfo/ControllerClient is null.....Not initializing CustomDashBoardModule");
             return;
         }
+        this.config = config;
         Map customDashboardConfig = (Map) config.get(CUSTOM_DASHBOARD);
         if (CustomDashboardUtils.isCustomDashboardEnabled(customDashboardConfig)) {
             dashboardName = CustomDashboardUtils.getDashboardName(customDashboardConfig, monitorName);
             String dashboardTemplate = CustomDashboardUtils.getDashboardTemplate(metricPrefix, customDashboardConfig, controllerInfo, dashboardName);
             if (CustomDashboardUtils.isValidDashboardTemplate(dashboardTemplate)) {
                 this.dashboardTemplate = dashboardTemplate;
-                proxyMap = (Map<String, ?>)config.get("proxy");
                 overwrite = CustomDashboardUtils.getOverwrite(customDashboardConfig);
                 timeDelayInMilliSeconds = CustomDashboardUtils.getTimeDelay(customDashboardConfig) * 1000;
                 dashboardUploader = new CustomDashboardUploader(controllerAPIService.getCustomDashboardAPIService());
@@ -57,7 +57,7 @@ public class CustomDashboardModule {
             if (hasTimeElapsed(currentTime, lastRecordedTime.get(), timeDelayInMilliSeconds)) {
                 try {
                     logger.debug("Attempting to upload dashboard: {}", dashboardName);
-                    dashboardUploader.checkAndUpload(dashboardName, dashboardTemplate, proxyMap, overwrite);
+                    dashboardUploader.checkAndUpload(dashboardName, dashboardTemplate, config, overwrite);
                     lastRecordedTime.set(currentTime);
                     long endTime = System.currentTimeMillis();
                     logger.debug("Time to complete customDashboardModule  :" + (endTime - currentTime) + " ms");
