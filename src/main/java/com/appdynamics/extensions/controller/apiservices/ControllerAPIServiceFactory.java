@@ -2,7 +2,6 @@ package com.appdynamics.extensions.controller.apiservices;
 
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;
-import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 
 /**
  * Created by venkata.konala on 12/20/18.

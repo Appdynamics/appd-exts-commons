@@ -3,8 +3,6 @@ package com.appdynamics.extensions.conf.modules;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
-import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
-import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
 import com.appdynamics.extensions.dashboard.CustomDashboardUtils;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;

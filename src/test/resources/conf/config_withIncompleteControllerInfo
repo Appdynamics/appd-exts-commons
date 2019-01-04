@@ -143,7 +143,6 @@ controllerInfo:
     controllerSslEnabled: false
     account: "accountName"
     username: "user"
-    password: "password"
     encryptedPassword: ""
     simEnabled: true
 

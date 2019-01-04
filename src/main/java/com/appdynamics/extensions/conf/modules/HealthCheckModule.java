@@ -12,8 +12,6 @@ import com.appdynamics.extensions.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.checks.*;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
-import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
-import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;

@@ -15,17 +15,8 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.ABaseMonitor;
-import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorContext;
-import com.appdynamics.extensions.conf.MonitorContextConfiguration;
-import com.appdynamics.extensions.conf.modules.CustomDashboardModule;
-import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
-import com.appdynamics.extensions.controller.ControllerInfo;
-import com.appdynamics.extensions.controller.CookiesCsrf;
 import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
-import com.google.common.collect.Maps;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
@@ -35,7 +26,6 @@ import org.mockito.Mockito;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**

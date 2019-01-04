@@ -62,10 +62,6 @@ public class ControllerClient {
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
             get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
         }
-        get.setHeader("Cookie", cookiesCsrf.getCookies());
-        if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
-            get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
-        }
         CloseableHttpResponse response = null;
         try {
             response = httpClient.execute(get);

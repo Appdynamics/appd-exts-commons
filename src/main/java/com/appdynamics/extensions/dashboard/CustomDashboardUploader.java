@@ -15,37 +15,14 @@
 
 package com.appdynamics.extensions.dashboard;
 
-import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
-import com.appdynamics.extensions.controller.ControllerInfo;
-import com.appdynamics.extensions.controller.CookiesCsrf;
 import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
-import com.appdynamics.extensions.http.UrlBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.google.common.base.Strings;
-import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 
-import javax.net.ssl.*;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 
-import static com.appdynamics.extensions.Constants.HOST;
-import static com.appdynamics.extensions.Constants.PORT;
-import static com.appdynamics.extensions.Constants.URI;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.APPLICATION_JSON;
 import static com.appdynamics.extensions.dashboard.DashboardConstants.JSON;
 import static com.appdynamics.extensions.util.JsonUtils.getTextValue;

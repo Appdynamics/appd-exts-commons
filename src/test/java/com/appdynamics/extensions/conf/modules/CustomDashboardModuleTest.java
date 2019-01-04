@@ -13,26 +13,17 @@ import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.ControllerInfoFactory;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
-import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
 import com.appdynamics.extensions.controller.apiservices.CustomDashboardAPIService;
 import com.appdynamics.extensions.dashboard.CustomDashboardUploader;
-import com.appdynamics.extensions.dashboard.CustomDashboardUtils;
-import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.PathResolver;
 import com.google.common.collect.Maps;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
