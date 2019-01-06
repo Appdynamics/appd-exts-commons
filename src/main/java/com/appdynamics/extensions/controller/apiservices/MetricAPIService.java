@@ -31,19 +31,19 @@ public class MetricAPIService extends APIService{
 
     public JsonNode getMetricData(String applicationName, String metricPathEndPoint) {
         if(controllerClient != null) {
-            JsonNode MetricDataNode = null;
+            JsonNode metricDataNode = null;
             String metricData;
             try {
                 StringBuilder sb = new StringBuilder("controller/rest/applications/");
                 sb.append(applicationName).append(metricPathEndPoint);
                 metricData = controllerClient.sendGetRequest(sb.toString());
-                MetricDataNode = new ObjectMapper().readTree(metricData);
+                metricDataNode = new ObjectMapper().readTree(metricData);
             } catch (ControllerHttpRequestException e) {
                 logger.error("Invalid response from controller while fetching information about all dashboards", e);
             } catch (IOException e) {
                 logger.error("Error while getting all dashboards information", e);
             }
-            return MetricDataNode;
+            return metricDataNode;
         }
         logger.debug("The controllerClient is not initialized");
         return null;

@@ -23,7 +23,8 @@ import java.util.LinkedList;
  * @author Satish Muddam
  */
 public class MonitorHealthCheck implements Runnable {
-
+    //#TODO @satish.muddam The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
+    // called MonitorConstants at the ABaseMonitor level.
     private static final String EXTENSIONS_CHECKS_LOG_LEVEL = "monitor.checks.log.level";
     public static Logger logger = null;
 
@@ -42,11 +43,11 @@ public class MonitorHealthCheck implements Runnable {
         this.executorService = executorService;
     }
 
-    private static void configureLogger(File installDir, String extensionName) {
+    private static void configureLogger(File installDir, String monitorName) {
         try {
             PatternLayout layout = new PatternLayout("%d{ABSOLUTE} %5p [%t] %c{1} - %m%n");
             RollingFileAppender fileAppender = new RollingFileAppender();
-            File file = new File(installDir, "logs/monitor-checks/" + extensionName + ".log");
+            File file = new File(installDir, "logs/monitor-checks/" + monitorName + ".log");
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -62,11 +63,12 @@ public class MonitorHealthCheck implements Runnable {
                 level = Level.toLevel(property);
             }
 
-            org.apache.log4j.Logger extCheckLogger = org.apache.log4j.Logger.getLogger(extensionName);
+            org.apache.log4j.Logger extCheckLogger = org.apache.log4j.Logger.getLogger(monitorName);
             extCheckLogger.setLevel(level);
             extCheckLogger.setAdditivity(false);
             extCheckLogger.addAppender(fileAppender);
         } catch (IOException e) {
+            // #TODO @satish.muddam Why is this sysout?
             System.out.println("Unable to initialise monitor check logger: " + e.getMessage());
         }
     }

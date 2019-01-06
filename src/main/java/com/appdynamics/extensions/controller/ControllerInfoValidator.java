@@ -38,11 +38,6 @@ public class ControllerInfoValidator {
         check("controllerHost", controllerInfo.getControllerHost());
         check("controllerPort", controllerInfo.getControllerPort());
         check("controllerSslEnabled", controllerInfo.getControllerSslEnabled());
-        /*
-        #TODO Incase the the machine agent is running in standalone mode and there is atleast one app agent, then there is no
-        need to check for app, tier and node. Right now we are not supporting this case as per below condition.
-        EXPLORE FULL AGENT RESOLVER IN MA
-        */
         if (!isSimEnabled(controllerInfo)) {
             checkAppTierNode(controllerInfo);
         }

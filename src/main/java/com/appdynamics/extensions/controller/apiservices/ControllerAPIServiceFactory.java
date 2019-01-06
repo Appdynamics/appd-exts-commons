@@ -8,10 +8,10 @@ import com.appdynamics.extensions.controller.ControllerInfo;
  */
 public class ControllerAPIServiceFactory {
 
-    private static ControllerAPIService controllerAPIService;
+    private static final ControllerAPIService controllerAPIService = new ControllerAPIService();
 
+    //#TODO Assert for ControllerClient
     public static ControllerAPIService initialize(ControllerInfo controllerInfo, ControllerClient controllerClient) {
-        controllerAPIService = new ControllerAPIService();
         controllerAPIService.initialize(controllerInfo, controllerClient);
         return controllerAPIService;
     }

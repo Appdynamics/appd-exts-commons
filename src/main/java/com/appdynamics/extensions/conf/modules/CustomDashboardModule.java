@@ -49,7 +49,7 @@ public class CustomDashboardModule {
         }
     }
 
-    public void uploadDashboard() {
+    public synchronized void uploadDashboard() {
         if (initialized) {
             long currentTime = System.currentTimeMillis();
             if (hasTimeElapsed(currentTime, lastRecordedTime.get(), timeDelayInMilliSeconds)) {

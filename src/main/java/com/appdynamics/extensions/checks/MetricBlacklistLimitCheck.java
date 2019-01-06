@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Akshay Srivastava
  */
+
+//#TODO @satish.muddam This healthcheck can be combined with MaxMetricLimitChack, using a single Pattern.
 public class MetricBlacklistLimitCheck implements RunAlwaysCheck {
 
     public Logger logger;
@@ -33,20 +35,15 @@ public class MetricBlacklistLimitCheck implements RunAlwaysCheck {
 
     @Override
     public void check() {
-
         if (!stop) {
             long start = System.currentTimeMillis();
-
             logger.info("Starting MetricBlacklistLimitCheck");
-
             File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
             if (directory.exists()) {
                 File logs = new File(directory, "logs");
                 //This is taking around 500ms for 25MB log files ( 5 files * 5 MB )
                 List<Line> blacklistLimitErrorLogLines = Unix4j.cd(logs).grep(Grep.Options.lineNumber, BLACKLIST_METRIC_LIMIT_ERROR_LINE, "*.log*").toLineList();
-
                 if (blacklistLimitErrorLogLines != null && blacklistLimitErrorLogLines.size() > 0) {
-
                     logger.error("Found blacklist metric limit reached error, below are the details");
                     for (Line line : blacklistLimitErrorLogLines) {
                         logger.error(line.toString());

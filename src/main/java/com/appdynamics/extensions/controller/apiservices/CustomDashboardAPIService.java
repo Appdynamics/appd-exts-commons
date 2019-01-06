@@ -4,8 +4,13 @@ import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.CookiesCsrf;
+import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.util.PathResolver;
+import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.base.Strings;
+import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -14,10 +19,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 
 import javax.net.ssl.*;
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -93,7 +95,7 @@ public class CustomDashboardAPIService extends APIService{
             }
             if (connection instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory(connectionMap));
+                httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory(propMap));
                 httpsURLConnection.setHostnameVerifier(createHostNameVerifier(connectionMap));
             }
             connection.setUseCaches(false);
@@ -156,25 +158,28 @@ public class CustomDashboardAPIService extends APIService{
                     inputStream.close();
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ControllerHttpRequestException("Error in uploading dashboard", e);
         }
 
     }
 
-    // #TODO Make the SSL connection from the common utility
-    private static SSLSocketFactory createSSLSocketFactory(Map<String, ?> connectionMap) throws ControllerHttpRequestException {
+    /*#TODO The SSLContext creation needs to be a common utility available fot all clients.*/
+    private static SSLSocketFactory createSSLSocketFactory(Map<String, ?> propMap) throws Exception {
         try {
+            Map<String, ?> connectionMap = (Map<String, ?>)propMap.get("connection");
+            //#TODO Add protocols from connections.
             SSLContext context = SSLContext.getInstance("TLSv1.2");
             KeyStore keyStore = buildKeyStore(connectionMap);
+            char[] keyStorePassword = getKeyStorePassword(connectionMap, (String)propMap.get("encryptionKey"));
             KeyStore trustStore = buildTrustStore(connectionMap);
 
             KeyManager[] keyManagers = null;
-            if(keyStore != null) {
-                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                keyManagerFactory.init(keyStore, getKeyStorePassword(connectionMap));
-                keyManagers = keyManagerFactory.getKeyManagers();
-            }
+
+            //#TODO Check for an empty keystore.
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(keyStore, keyStorePassword);
+            keyManagers = keyManagerFactory.getKeyManagers();
 
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(trustStore);
@@ -182,15 +187,12 @@ public class CustomDashboardAPIService extends APIService{
 
             context.init( keyManagers, trustManagers, new SecureRandom());
             return context.getSocketFactory();
-        } catch (NoSuchAlgorithmException e) {
-            throw new ControllerHttpRequestException("Unsupported algorithm", e);
-        } catch (KeyManagementException e) {
-            throw new ControllerHttpRequestException("Key Management exception", e);
         } catch (Exception e) {
-            throw new ControllerHttpRequestException("SSLSocketFactory build exception", e);
+            throw e;
         }
     }
 
+    //#TODO Need to fall back on ma-cacerts as well
     private static KeyStore buildKeyStore(Map<String, ?> connectionMap) {
         KeyStore keyStore;
         if(connectionMap != null && connectionMap.get("sslKeyStorePath") != null && connectionMap.get("sslKeyStorePassword") != null) {
@@ -200,7 +202,6 @@ public class CustomDashboardAPIService extends APIService{
                 String keyStorePassword = (String)connectionMap.get("sslKeyStorePassword");
                 InputStream inputStream = new FileInputStream(keyStorePath);
                 keyStore.load(inputStream, keyStorePassword.toCharArray());
-                inputStream.close();
                 return keyStore;
             } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
                 logger.error("Exception while creating a custom keystore. Will fallback on the jre default keystore if available", e);
@@ -209,26 +210,31 @@ public class CustomDashboardAPIService extends APIService{
         return null;
     }
 
-    //#TODO Take care of the encryption
-    private static char[] getKeyStorePassword(Map<String, ?> connectionMap) {
-        if(connectionMap != null && connectionMap.get("sslKeyStorePath") != null && connectionMap.get("sslKeyStorePassword") != null) {
+    private static char[] getKeyStorePassword(Map<String, ?> connectionMap, String encryptionKey) {
+        if (connectionMap != null) {
             String password = (String)connectionMap.get("sslKeyStorePassword");
-            return password.toCharArray();
+            String encryptedPassword = (String)connectionMap.get("sslKeyStoreEncryptedPassword");
+            if (!Strings.isNullOrEmpty(password)) {
+                return password.toCharArray();
+            } else if (!Strings.isNullOrEmpty(encryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
+                return new Decryptor(encryptionKey).decrypt(encryptedPassword).toCharArray();
+            }
         }
+        logger.warn("Returning null password for sslKeyStore");
         return null;
     }
 
     //#TODO Need to fall back on ma-cacerts as well
+    // #TODO Add extensions-cacerts
     private static KeyStore buildTrustStore(Map<String, ?> connectionMap) {
         KeyStore trustStore;
         if(connectionMap != null && connectionMap.get("sslTrustStorePath") != null && connectionMap.get("sslTrustStorePassword") != null) {
             try {
                 trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                String keyStorePath = (String)connectionMap.get("sslTrustStorePath");
-                String keyStorePassword = (String)connectionMap.get("sslTrustStorePassword");
-                InputStream inputStream = new FileInputStream(keyStorePath);
-                trustStore.load(inputStream, keyStorePassword.toCharArray());
-                inputStream.close();
+                String trustStorePath = (String)connectionMap.get("sslTrustStorePath");
+                String trustStorePassword = (String)connectionMap.get("sslTrustStorePassword");
+                InputStream inputStream = new FileInputStream(trustStorePath);
+                trustStore.load(inputStream, trustStorePassword.toCharArray());
                 return trustStore;
             } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
                 logger.error("Exception while creating a custom truststore. Will fallback on the jre default truststore if available", e);

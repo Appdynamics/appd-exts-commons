@@ -40,21 +40,16 @@ public class MaxMetricLimitCheck implements RunAlwaysCheck {
 
     @Override
     public void check() {
-
         if (!stop) {
-
             long start = System.currentTimeMillis();
-
             logger.info("Starting MaxMetricLimitCheck");
-
             File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
             if (directory.exists()) {
                 File logs = new File(directory, "logs");
                 //This is taking around 500ms for 25MB log files ( 5 files * 5 MB )
+                //#TODO @satish.muddam Add support for windows : https://www.baeldung.com/grep-in-java
                 List<Line> metricLimitErrorLogLines = Unix4j.cd(logs).grep(Grep.Options.lineNumber, MAX_METRIC_ERROR_LINE, "*.log*").toLineList();
-
                 if (metricLimitErrorLogLines != null && metricLimitErrorLogLines.size() > 0) {
-
                     logger.error("Found metric limit reached error, below are the details");
                     for (Line line : metricLimitErrorLogLines) {
                         logger.error(line.toString());
@@ -62,7 +57,6 @@ public class MaxMetricLimitCheck implements RunAlwaysCheck {
                     stop = true;
                 }
             }
-
             long diff = System.currentTimeMillis() - start;
             logger.info("MaxMetricLimitCheck took {} ms to complete ", diff);
         } else {

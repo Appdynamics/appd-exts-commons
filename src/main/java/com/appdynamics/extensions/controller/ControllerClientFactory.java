@@ -17,7 +17,7 @@ import static com.appdynamics.extensions.Constants.*;
 public class ControllerClientFactory {
     private static String controllerBaseURL;
     private static HttpClientBuilder httpClientBuilder;
-    private static ControllerClient controllerClient;
+    private static final ControllerClient controllerClient = new ControllerClient();
 
     public static ControllerClient initialize(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
         controllerBaseURL = buildURI(controllerInfo.getControllerHost(), String.valueOf(controllerInfo.getControllerPort()), controllerInfo.getControllerSslEnabled());
@@ -27,7 +27,6 @@ public class ControllerClientFactory {
     }
 
     private static void initializeControllerClient() {
-        controllerClient = new ControllerClient();
         controllerClient.setHttpClient(httpClientBuilder.build());
         controllerClient.setBaseURL(controllerBaseURL);
     }

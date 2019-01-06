@@ -23,6 +23,8 @@ import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.MetricPathUtils;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.TimeUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
@@ -30,6 +32,7 @@ import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -201,6 +204,33 @@ public abstract class ABaseMonitor extends AManagedMonitor {
         } else {
             logger.debug("The monitor [{}] is not enabled.", getMonitorName());
         }
+    }
+
+    public static void main(String args[]) throws Exception{
+        ABaseMonitor aBaseMonitor = new ABaseMonitor() {
+            @Override
+            protected String getDefaultMetricPrefix() {
+                return "Custom Metrics | Sample Monitor";
+            }
+
+            @Override
+            public String getMonitorName() {
+                return "Sample Monitor";
+            }
+
+            @Override
+            protected void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider) {
+
+            }
+
+            @Override
+            protected List<Map<String, ?>> getServers() {
+                return Lists.newArrayList();
+            }
+        };
+        Map<String, String> arg = Maps.newHashMap();
+        arg.put("config-file", "/Users/venkata.konala/AppDynamics/Repos/Extensions/appd-exts-commons/src/test/resources/controller/configtest.yml");
+        aBaseMonitor.execute(arg, null);
     }
 
     protected static String getImplementationVersion() {

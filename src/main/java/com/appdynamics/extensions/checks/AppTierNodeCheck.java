@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 /**
  * @author Satish Muddam
  */
+// #TODO If the FullAgentResolver is implemented, then we are enforcing the proper configuration by making the extension
+// fail. In that case this check is not required.
 public class AppTierNodeCheck implements RunOnceCheck {
 
     public Logger logger;
@@ -38,13 +40,12 @@ public class AppTierNodeCheck implements RunOnceCheck {
         }
 
         Boolean simEnabled = controllerInfo.getSimEnabled();
-
+        //#TODO @satish.muddam Nodename is not mandatory. defaults to node1. Please check.
         if (Strings.isNullOrEmpty(controllerInfo.getApplicationName()) || Strings.isNullOrEmpty(controllerInfo.getTierName())
                 || Strings.isNullOrEmpty(controllerInfo.getNodeName())) {
 
             if (!simEnabled) {
-                logger.error("SIM is not enabled and Application name, Tier name or node name not configured. " +
-                        "For more details, please visit https://docs.appdynamics.com");
+                logger.error("SIM is not enabled and Application name, Tier name or node name not resolved");
             } else {
                 logger.info("Application name, Tier name or node name not configured but SIM is enabled. Check for metrics in the SIM metric browser.");
             }

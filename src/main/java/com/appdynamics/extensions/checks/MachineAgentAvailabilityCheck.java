@@ -30,11 +30,11 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
         this.metricAPIService = metricAPIService;
-        AssertUtils.assertNotNull(metricAPIService, "The MetricAPIService is null");
     }
 
     @Override
     public void check() {
+        AssertUtils.assertNotNull(metricAPIService, "The MetricAPIService is null");
         long start = System.currentTimeMillis();
         logger.info("Starting MachineAgentAvailabilityCheck");
         if (controllerInfo == null) {
@@ -43,7 +43,7 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
         }
         if (controllerInfo.getSimEnabled()) {
             logger.info("SIM is enabled, not checking MachineAgent availability metric");
-            //TODO: Check if MA status needs to be verified if SIM is enabled.
+            //TODO @satish.muddam Check if MA status needs to be verified if SIM is enabled.
             return;
         }
         int maStatus = getMAStatus();
@@ -66,7 +66,7 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
         }
     }
 
-    //#TODO Check if this end point is still valid in the latest versions of the controller
+    //#TODO @venkata.konala Check if this end point is still valid in the latest versions of the controller
     private String getEndPointForMAStatusMetric() {
         StringBuilder sb = new StringBuilder();
         sb.append("/metric-data?metric-path=Application Infrastructure Performance|")

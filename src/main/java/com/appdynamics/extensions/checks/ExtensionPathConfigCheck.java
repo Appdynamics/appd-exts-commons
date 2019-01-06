@@ -21,6 +21,10 @@ import java.util.Map;
 /**
  * @author Satish Muddam
  */
+//#TODO Handle the standalone MA with multiple app agents case after the Full Agent Resolver is implemented and
+// there is a flag in ControllerInfo to know this special case. This flag would indicate that the app, tier and node in the
+// ControllerInfo are not the only ones to which MA sends the data to. So in this case the customers have to use
+// "Custom Metrics| Extension"
 public class ExtensionPathConfigCheck implements RunOnceCheck {
 
     public Logger logger;
@@ -34,18 +38,20 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
         this.controllerInfo = controllerInfo;
         this.config = config;
         this.applicationModelAPIService = applicationModelAPIService;
-        AssertUtils.assertNotNull(this.applicationModelAPIService, "The ApplicationModelAPIService is null");
     }
 
     @Override
     public void check() {
+        AssertUtils.assertNotNull(this.applicationModelAPIService, "The ApplicationModelAPIService is null");
         long start = System.currentTimeMillis();
         logger.info("Starting ExtensionPathConfigCheck");
         if (controllerInfo == null) {
             logger.error("Received ControllerInfo as null. Not checking anything.");
             return;
         }
+        //#TODO @satish.muddam Get it from MonitorContext, not directly from config.yml
         String metricPrefix = (String) config.get("metricPrefix");
+        //#TODO @satish.muddam If getting the metricPrefix from MonitorContext, then the following check is not required.
         if (Strings.isNullOrEmpty(metricPrefix)) {
             logger.error("Metric prefix not configured in config file");
             return;
@@ -68,7 +74,7 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
             }
         } else { //Tier is not configured in metric prefix
             if (!controllerInfo.getSimEnabled()) {
-                logger.error("Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers");
+                logger.info("Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers/applications(when there are multiple app agents)");
             } else {
                 logger.info("SIM is enabled, please look in the SIM metric browser for metrics.");
             }

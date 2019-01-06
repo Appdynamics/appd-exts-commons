@@ -180,6 +180,8 @@ public class StringUtils {
         return false;
     }
 
+    // #TODO Move it out of here to a separate Validation class.
+    // #TODO If SIM is enabled, then use Custom Metrics. Enforce this.
     public static boolean isValidMetric(String metricPath, String metricValue, String aggregationType, String
             timeRollup, String clusterRollup) {
         return isValidString(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&

@@ -15,6 +15,7 @@ import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -30,10 +31,15 @@ import java.util.concurrent.TimeUnit;
 public class HealthCheckModule {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(HealthCheckModule.class);
+    /*
+     #TODO @satish.muddam Why is this map needed? We understand that this is caching the MonitorHealthCheck.
+     But a concurrentHashMap is not the right data structure. Can't we directly save it as MonitorHealthCheck?
+     */
     private Map<String, MonitorHealthCheck> healthChecksForMonitors = new ConcurrentHashMap<>();
     private MonitorExecutorService executorService;
 
     public void initMATroubleshootChecks(Map<String, ?> config, String monitorName, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
+        // #TODO @venkata.konala These checks should not block this. Instead it should log in the health logs in the corresponding check.
         if(controllerInfo == null || controllerAPIService == null) {
             logger.debug("ControllerInfo/ControllerClient is null.....Not initializing HealthCheckModule");
             return;
@@ -68,7 +74,8 @@ public class HealthCheckModule {
          *    second thread will be used for run-always check
          *
          **/
-        executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(2));
+        //#TODO @satish.muddam The size has to be 1 + number of runAlwaysChecks. Already changed it from 2 to 3. Please validate.
+        executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(3));
         try {
             File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
             MonitorHealthCheck healthCheckMonitor = healthChecksForMonitors.get(monitorName);

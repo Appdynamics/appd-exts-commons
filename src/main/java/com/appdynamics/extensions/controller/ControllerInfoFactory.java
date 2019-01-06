@@ -27,12 +27,12 @@ import java.util.Map;
  * 3rd priority : Controller Info xml
  * This class first gets data from controller-info.xml, then checks system properties and then config.yml and overwrites any new values as it finds them
  */
+
 public class ControllerInfoFactory {
-    private static ControllerInfo controllerInfo;
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerInfoFactory.class);
+    private static final ControllerInfo controllerInfo = new ControllerInfo();
 
     public static ControllerInfo initialize(Map config, File installDir) {
-        controllerInfo = new ControllerInfo();
         if(installDir != null) {
             getControllerInfoFromXml(installDir);
         }
@@ -43,6 +43,12 @@ public class ControllerInfoFactory {
             getControllerInfoFromYml(config);
             logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", controllerInfo);
         }
+        /*
+        #TODO FULL AGENT RESOLVER
+        1. MA with one app agent, automatically resolve app, tier and node.
+        2. *MA with multiple app agents does *require* resolving. It can have non sim and non AppTierNode, for this case have a separate field in the controllerinfo*
+        3. MA with no agents, throw a run time exception.
+        */
         return controllerInfo;
     }
 
@@ -56,6 +62,7 @@ public class ControllerInfoFactory {
         }
     }
 
+    //#TODO Check the flag appdynamics.machine.agent.configFile & remove the exception instead log a warn statement
     private static void fromXml(File file) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(XmlControllerInfo.class);
@@ -102,15 +109,23 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.controller.hostName"))) {
             controllerInfo.setControllerHost(System.getProperty("appdynamics.controller.hostName"));
         }
+        //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
+        // called MonitorConstants at the ABaseMonitor level.
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.username"))) {
             controllerInfo.setUsername(System.getProperty("appdynamics.agent.monitors.controller.username"));
         }
+        //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
+        // called MonitorConstants at the ABaseMonitor level.
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.password"))) {
             controllerInfo.setPassword(System.getProperty("appdynamics.agent.monitors.controller.password"));
         }
+        //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
+        // called MonitorConstants at the ABaseMonitor level.
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"))) {
             controllerInfo.setEncryptionKey(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"));
         }
+        //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
+        // called MonitorConstants at the ABaseMonitor level.
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"))) {
             controllerInfo.setEncryptedPassword(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"));
         }
