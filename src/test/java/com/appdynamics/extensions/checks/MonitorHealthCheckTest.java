@@ -1,7 +1,7 @@
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.MonitorExecutorService;
-import com.appdynamics.extensions.MonitorThreadPoolExecutor;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
+import com.appdynamics.extensions.executorservice.MonitorThreadPoolExecutor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;

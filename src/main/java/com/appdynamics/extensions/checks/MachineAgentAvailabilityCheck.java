@@ -8,6 +8,7 @@
 package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.JsonUtils;
@@ -23,24 +24,27 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
 
     public Logger logger;
     private ControllerInfo controllerInfo;
+    private ControllerAPIService controllerAPIService;
     private MetricAPIService metricAPIService;
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
 
-    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, MetricAPIService metricAPIService, Logger logger) {
+    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerAPIService controllerAPIService, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
-        this.metricAPIService = metricAPIService;
+        this.controllerAPIService = controllerAPIService;
     }
 
     @Override
     public void check() {
-        AssertUtils.assertNotNull(metricAPIService, "The MetricAPIService is null");
         long start = System.currentTimeMillis();
         logger.info("Starting MachineAgentAvailabilityCheck");
         if (controllerInfo == null) {
             logger.error("Received ControllerInfo as null. Not checking anything.");
             return;
         }
+        AssertUtils.assertNotNull(controllerAPIService, "The ControllerAPIService is null");
+        metricAPIService = controllerAPIService.getMetricAPIService();
+        AssertUtils.assertNotNull(metricAPIService, "The MetricAPIService is null");
         if (controllerInfo.getSimEnabled()) {
             logger.info("SIM is enabled, not checking MachineAgent availability metric");
             //TODO @satish.muddam Check if MA status needs to be verified if SIM is enabled.

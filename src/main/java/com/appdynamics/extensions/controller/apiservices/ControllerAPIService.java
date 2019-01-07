@@ -17,17 +17,9 @@ public class ControllerAPIService {
 
     //#TODO Pass in the dependencies in the abstract super class itself
     void initialize(ControllerInfo controllerInfo, ControllerClient controllerClient) {
-        applicationModelAPIService = new ApplicationModelAPIService();
-        applicationModelAPIService.setControllerInfo(controllerInfo);
-        applicationModelAPIService.setControllerClient(controllerClient);
-
-        customDashboardAPIService = new CustomDashboardAPIService();
-        customDashboardAPIService.setControllerInfo(controllerInfo);
-        customDashboardAPIService.setControllerClient(controllerClient);
-
-        metricAPIService = new MetricAPIService();
-        metricAPIService.setControllerInfo(controllerInfo);
-        metricAPIService.setControllerClient(controllerClient);
+        applicationModelAPIService = new ApplicationModelAPIService(controllerInfo, controllerClient);
+        customDashboardAPIService = new CustomDashboardAPIService(controllerInfo, controllerClient);
+        metricAPIService = new MetricAPIService(controllerInfo, controllerClient);
     }
 
     public ApplicationModelAPIService getApplicationModelAPIService() {

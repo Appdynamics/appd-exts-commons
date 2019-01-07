@@ -10,7 +10,6 @@ import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -38,17 +37,8 @@ public class CustomDashboardAPIService extends APIService{
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardAPIService.class);
 
-    CustomDashboardAPIService() {
-    }
-
-    @Override
-    void setControllerInfo(ControllerInfo controllerInfo) {
-        this.controllerInfo = controllerInfo;
-    }
-
-    @Override
-    void setControllerClient(ControllerClient controllerClient) {
-        this.controllerClient = controllerClient;
+    CustomDashboardAPIService(ControllerInfo controllerInfo, ControllerClient controllerClient) {
+        super(controllerInfo, controllerClient);
     }
 
     public JsonNode getAllDashboards() {
@@ -243,14 +233,14 @@ public class CustomDashboardAPIService extends APIService{
         return null;
     }
 
-    private HostnameVerifier createHostNameVerifier(Map<String, ?> connectionMap) {
+    public static HostnameVerifier createHostNameVerifier(Map<String, ?> connectionMap) {
         if(connectionMap != null && connectionMap.get("sslVerifyHostname") != null && (Boolean)connectionMap.get("sslVerifyHostname")) {
             return new BrowserCompatHostnameVerifier();
         }
         return new AllHostnameVerifier();
     }
 
-    private static class AllHostnameVerifier implements X509HostnameVerifier {
+    public static class AllHostnameVerifier implements X509HostnameVerifier {
         public void verify(String host, SSLSocket ssl)
                 throws IOException {
         }

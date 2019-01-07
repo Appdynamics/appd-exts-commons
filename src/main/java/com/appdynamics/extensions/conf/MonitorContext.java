@@ -8,7 +8,7 @@
 package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
-import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;

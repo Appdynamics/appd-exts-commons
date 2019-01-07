@@ -17,17 +17,8 @@ public class ApplicationModelAPIService extends APIService {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(ApplicationModelAPIService.class);
 
-    ApplicationModelAPIService() {
-    }
-
-    @Override
-    void setControllerInfo(ControllerInfo controllerInfo) {
-        this.controllerInfo = controllerInfo;
-    }
-
-    @Override
-    void setControllerClient(ControllerClient controllerClient) {
-        this.controllerClient = controllerClient;
+    ApplicationModelAPIService(ControllerInfo controllerInfo, ControllerClient controllerClient) {
+        super(controllerInfo, controllerClient);
     }
 
     public JsonNode getSpecificTierNode(String applicationName, String tierName) {

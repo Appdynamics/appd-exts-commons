@@ -7,7 +7,7 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.util.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;

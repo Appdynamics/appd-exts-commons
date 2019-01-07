@@ -16,17 +16,8 @@ import java.io.IOException;
 public class MetricAPIService extends APIService{
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricAPIService.class);
 
-    MetricAPIService() {
-    }
-
-    @Override
-    void setControllerInfo(ControllerInfo controllerInfo) {
-        this.controllerInfo = controllerInfo;
-    }
-
-    @Override
-    void setControllerClient(ControllerClient controllerClient) {
-        this.controllerClient = controllerClient;
+    MetricAPIService(ControllerInfo controllerInfo, ControllerClient controllerClient) {
+        super(controllerInfo, controllerClient);
     }
 
     public JsonNode getMetricData(String applicationName, String metricPathEndPoint) {

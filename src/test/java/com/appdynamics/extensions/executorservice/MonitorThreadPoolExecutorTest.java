@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-package com.appdynamics.extensions;
+package com.appdynamics.extensions.executorservice;
 
+import com.appdynamics.extensions.executorservice.MonitorThreadPoolExecutor;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -27,7 +28,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /*@RunWith(PowerMockRunner.class)
 @PrepareForTest({MonitorThreadPoolExecutor.class, LoggerFactory.class})
-@SuppressStaticInitializationFor("com.appdynamics.extensions.MonitorThreadPoolExecutor.class")*/
+@SuppressStaticInitializationFor("com.appdynamics.extensions.executorservice.MonitorThreadPoolExecutor.class")*/
 public class MonitorThreadPoolExecutorTest {
 
     static Logger logger;

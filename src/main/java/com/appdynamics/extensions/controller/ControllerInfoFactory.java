@@ -33,6 +33,7 @@ public class ControllerInfoFactory {
     private static final ControllerInfo controllerInfo = new ControllerInfo();
 
     public static ControllerInfo initialize(Map config, File installDir) {
+        // #TODO There should be a clear method for all the previously set fields. Uncomment the unit test in ControllerModuleTest accordingly. Also check ControllerInfo test.
         if(installDir != null) {
             getControllerInfoFromXml(installDir);
         }

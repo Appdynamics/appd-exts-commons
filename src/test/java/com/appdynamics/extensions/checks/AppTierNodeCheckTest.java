@@ -44,7 +44,7 @@ public class AppTierNodeCheckTest {
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
 
         String value = logCaptor.getValue();
-        Assert.assertTrue(value.contains("SIM is not enabled and Application name, Tier name or node name not configured."));
+        Assert.assertTrue(value.contains("SIM is not enabled and Application name, Tier name or node name not resolved"));
     }
 
     @Test

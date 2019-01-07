@@ -29,12 +29,12 @@ import java.util.Map;
 
 public class ControllerInfoFactoryTest {
 
-    @Before
+    /*@Before
     public void resetSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         Field instance = ControllerInfoFactory.class.getDeclaredField("controllerInfo");
         instance.setAccessible(true);
         instance.set(null, null);
-    }
+    }*/
 
     @Test
     public void testGetControllerInfoWithNoProps() {

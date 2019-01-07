@@ -32,12 +32,12 @@ public class CustomDashboardTemplateGeneratorTest {
 
     private File file = Mockito.mock(File.class);
 
-    @Before
+    /*@Before
     public void resetSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         Field instance = ControllerInfoFactory.class.getDeclaredField("controllerInfo");
         instance.setAccessible(true);
         instance.set(null, null);
-    }
+    }*/
 
     @Test
     public void replaceDefaultValuesInTheNormalDashboard() throws Exception {

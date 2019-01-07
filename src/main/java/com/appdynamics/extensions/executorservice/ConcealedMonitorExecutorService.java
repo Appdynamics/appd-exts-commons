@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.appdynamics.extensions;
+package com.appdynamics.extensions.executorservice;
 
 import java.util.List;
 

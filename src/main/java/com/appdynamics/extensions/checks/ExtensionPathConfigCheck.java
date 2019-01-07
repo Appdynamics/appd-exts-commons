@@ -9,6 +9,7 @@ package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
@@ -31,24 +32,27 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
     private ControllerInfo controllerInfo;
     private Map<String, ?> config;
+    private ControllerAPIService controllerAPIService;
     private ApplicationModelAPIService applicationModelAPIService;
 
-    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, ApplicationModelAPIService applicationModelAPIService, Logger logger) {
+    public ExtensionPathConfigCheck(ControllerInfo controllerInfo, Map<String, ?> config, ControllerAPIService controllerAPIService, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
         this.config = config;
-        this.applicationModelAPIService = applicationModelAPIService;
+        this.controllerAPIService = controllerAPIService;
     }
 
     @Override
     public void check() {
-        AssertUtils.assertNotNull(this.applicationModelAPIService, "The ApplicationModelAPIService is null");
         long start = System.currentTimeMillis();
         logger.info("Starting ExtensionPathConfigCheck");
         if (controllerInfo == null) {
             logger.error("Received ControllerInfo as null. Not checking anything.");
             return;
         }
+        AssertUtils.assertNotNull(this.controllerAPIService, "The ControllerAPIService is null");
+        applicationModelAPIService = controllerAPIService.getApplicationModelAPIService();
+        AssertUtils.assertNotNull(applicationModelAPIService, "The ApplicationModelAPIService is null");
         //#TODO @satish.muddam Get it from MonitorContext, not directly from config.yml
         String metricPrefix = (String) config.get("metricPrefix");
         //#TODO @satish.muddam If getting the metricPrefix from MonitorContext, then the following check is not required.
@@ -74,7 +78,7 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
             }
         } else { //Tier is not configured in metric prefix
             if (!controllerInfo.getSimEnabled()) {
-                logger.info("Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers/applications(when there are multiple app agents)");
+                logger.warn("Configured metric prefix with no tier id. With this configuration, metric browser will show metric names in all the available tiers/applications(when there are multiple app agents)");
             } else {
                 logger.info("SIM is enabled, please look in the SIM metric browser for metrics.");
             }

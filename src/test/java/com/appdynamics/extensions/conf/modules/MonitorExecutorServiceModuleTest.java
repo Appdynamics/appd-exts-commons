@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.yml.YmlReader;
 import org.junit.Assert;

@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-package com.appdynamics.extensions;
+package com.appdynamics.extensions.executorservice;
+
+import com.appdynamics.extensions.executorservice.ConcealedMonitorExecutorService;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;

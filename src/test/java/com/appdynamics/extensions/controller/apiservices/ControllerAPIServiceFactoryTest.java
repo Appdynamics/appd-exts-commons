@@ -28,14 +28,10 @@ public class ControllerAPIServiceFactoryTest {
         Assert.assertEquals(jsonNode.get("key").asText(), "1");
     }
 
-    @Test
-    public void whenControllerClientIsNullShouldReturnNull() throws ControllerHttpRequestException{
+    @Test(expected = RuntimeException.class)
+    public void whenControllerClientIsNullShouldThrowAnException() throws ControllerHttpRequestException{
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
         ControllerClient controllerClient = null;
         ControllerAPIService controllerAPIService = ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
-        MetricAPIService metricAPIService = controllerAPIService.getMetricAPIService();
-        Assert.assertNotNull(metricAPIService);
-        JsonNode jsonNode = metricAPIService.getMetricData("applicationName", "endPoint");
-        Assert.assertNull(jsonNode);
     }
 }

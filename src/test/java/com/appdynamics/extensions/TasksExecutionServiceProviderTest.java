@@ -19,6 +19,7 @@ package com.appdynamics.extensions;
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.google.common.collect.Maps;
 import org.junit.Test;
 

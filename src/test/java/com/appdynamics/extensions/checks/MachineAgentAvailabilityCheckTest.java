@@ -2,6 +2,7 @@ package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
@@ -27,8 +28,10 @@ public class MachineAgentAvailabilityCheckTest {
     @Test
     public void testNullControllerInfo() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         MetricAPIService metricAPIService = mock(MetricAPIService.class);
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(null, metricAPIService, logger);
+        when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(null, controllerAPIService, logger);
         machineAgentAvailabilityCheck.check();
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
         String value = logCaptor.getValue();
@@ -42,8 +45,10 @@ public class MachineAgentAvailabilityCheckTest {
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
 
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
+        ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         MetricAPIService metricAPIService = mock(MetricAPIService.class);
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, metricAPIService, logger);
+        when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -62,10 +67,12 @@ public class MachineAgentAvailabilityCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
+        ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         MetricAPIService metricAPIService = mock(MetricAPIService.class);
+        when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
         when(metricAPIService.getMetricData(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(maStatusResponse(1)));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, metricAPIService, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -84,10 +91,12 @@ public class MachineAgentAvailabilityCheckTest {
         Mockito.when(controllerInfo.getTierName()).thenReturn("TestTier");
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
+        ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         MetricAPIService metricAPIService = mock(MetricAPIService.class);
+        when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
         when(metricAPIService.getMetricData(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(maStatusResponse(0)));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, metricAPIService, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
