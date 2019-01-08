@@ -9,7 +9,6 @@
 package com.appdynamics.extensions.controller;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -17,7 +16,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +33,25 @@ public class ControllerInfoFactoryTest {
         instance.setAccessible(true);
         instance.set(null, null);
     }*/
+
+    @Test
+    public void whenControllerInfoNotPresentShouldGetConfigFilePathFromProperty() {
+        setConfigFileSystemProperty();
+        File file = new File("src/");
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(null, file);
+        Assert.assertNotNull(controllerInfo.getControllerHost());
+        Assert.assertNotNull(controllerInfo.getControllerPort());
+        Assert.assertNull(controllerInfo.getAccount());
+        resetConfigFileSystemProperty();
+    }
+
+    private void setConfigFileSystemProperty() {
+        System.setProperty("appdynamics.machine.agent.configFile", "src/test/resources/controller/config.xml");
+    }
+
+    private void resetConfigFileSystemProperty() {
+        System.clearProperty("appdynamics.machine.agent.configFile");
+    }
 
     @Test
     public void testGetControllerInfoWithNoProps() {

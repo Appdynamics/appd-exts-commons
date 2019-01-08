@@ -8,9 +8,9 @@ import com.appdynamics.extensions.controller.ControllerInfo;
  */
 public class ControllerAPIService {
 
-    private static ApplicationModelAPIService applicationModelAPIService;
-    private static CustomDashboardAPIService customDashboardAPIService;
-    private static MetricAPIService metricAPIService;
+    private ApplicationModelAPIService applicationModelAPIService;
+    private CustomDashboardAPIService customDashboardAPIService;
+    private MetricAPIService metricAPIService;
 
     ControllerAPIService() {
     }
@@ -32,5 +32,17 @@ public class ControllerAPIService {
 
     public MetricAPIService getMetricAPIService() {
         return metricAPIService;
+    }
+
+    void setApplicationModelAPIService(ApplicationModelAPIService applicationModelAPIService) {
+        this.applicationModelAPIService = applicationModelAPIService;
+    }
+
+    void setCustomDashboardAPIService(CustomDashboardAPIService customDashboardAPIService) {
+        this.customDashboardAPIService = customDashboardAPIService;
+    }
+
+    void setMetricAPIService(MetricAPIService metricAPIService) {
+        this.metricAPIService = metricAPIService;
     }
 }

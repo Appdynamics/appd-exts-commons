@@ -20,10 +20,17 @@ public class ControllerClientFactory {
     private static final ControllerClient controllerClient = new ControllerClient();
 
     public static ControllerClient initialize(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
+        resetControllerClient();
         controllerBaseURL = buildURI(controllerInfo.getControllerHost(), String.valueOf(controllerInfo.getControllerPort()), controllerInfo.getControllerSslEnabled());
         httpClientBuilder = Http4ClientBuilder.getBuilder(getPropMap(controllerInfo, connectionMap, proxyMap, encryptionKey));
         initializeControllerClient();
         return controllerClient;
+    }
+
+    private static void resetControllerClient() {
+        controllerClient.setBaseURL(null);
+        controllerClient.setHttpClient(null);
+        controllerClient.setCookiesCsrf(null);
     }
 
     private static void initializeControllerClient() {

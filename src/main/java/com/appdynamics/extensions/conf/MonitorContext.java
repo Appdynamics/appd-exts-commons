@@ -8,12 +8,12 @@
 package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
-import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;

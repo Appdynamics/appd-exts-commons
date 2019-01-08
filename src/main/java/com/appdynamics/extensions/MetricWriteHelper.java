@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions;
 
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
@@ -26,29 +27,22 @@ import com.appdynamics.extensions.util.TimeUtils;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-
-import static com.appdynamics.extensions.util.StringUtils.isValidMetric;
-import static com.appdynamics.extensions.util.StringUtils.isValidString;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidMetric;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidString;
 
 public class MetricWriteHelper {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricWriteHelper.class);
-
     private ABaseMonitor baseMonitor;
-
     private Long startTime;
-
     //Used for Dashboard. Cache the current list of metrics.
     private boolean cacheMetrics;
-
     protected DerivedMetricsCalculator derivedMetricsCalculator;
-
     private Map<String, String> metricsMap = Maps.newConcurrentMap();
 
     //used from WorkBench.

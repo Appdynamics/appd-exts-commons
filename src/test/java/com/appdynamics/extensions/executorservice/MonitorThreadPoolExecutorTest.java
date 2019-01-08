@@ -15,7 +15,6 @@
 
 package com.appdynamics.extensions.executorservice;
 
-import com.appdynamics.extensions.executorservice.MonitorThreadPoolExecutor;
 import org.junit.Test;
 import org.slf4j.Logger;
 

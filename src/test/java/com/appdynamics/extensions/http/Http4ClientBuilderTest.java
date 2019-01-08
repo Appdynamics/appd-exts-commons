@@ -37,7 +37,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH;
+import static com.appdynamics.extensions.SystemPropertyConstants.TRUSTSTORE_PATH;
+
 /**
+ * Created by abey.tom on 6/30/15.
  * Created by abey.tom on 6/30/15.
  */
 public class Http4ClientBuilderTest {
@@ -279,10 +283,10 @@ public class Http4ClientBuilderTest {
         File file = Http4ClientBuilder.resolveTrustStorePath(connection);
         Assert.assertEquals("truststore.changethis.jks", file.getName());
 
-        System.setProperty("appdynamics.extensions.truststore.path", "src/test/resources/keystore/keystore.jks");
+        System.setProperty(TRUSTSTORE_PATH, "src/test/resources/keystore/keystore.jks");
         file = Http4ClientBuilder.resolveTrustStorePath(connection);
         Assert.assertEquals("keystore.jks", file.getName());
-        System.getProperties().remove("appdynamics.extensions.truststore.path");
+        System.getProperties().remove(TRUSTSTORE_PATH);
     }
 
     @Test
@@ -317,10 +321,10 @@ public class Http4ClientBuilderTest {
         File file = Http4ClientBuilder.resolveKeyStorePath(connection);
         Assert.assertEquals("server.jks", file.getName());
 
-        System.setProperty("appdynamics.extensions.keystore.path", "src/test/resources/keystore/keystore.jks");
+        System.setProperty(KEYSTORE_PATH, "src/test/resources/keystore/keystore.jks");
         file = Http4ClientBuilder.resolveKeyStorePath(connection);
         Assert.assertEquals("keystore.jks", file.getName());
-        System.getProperties().remove("appdynamics.extensions.keystore.path");
+        System.getProperties().remove(KEYSTORE_PATH);
     }
 
     @Test

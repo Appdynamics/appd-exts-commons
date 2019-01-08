@@ -29,7 +29,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static com.appdynamics.extensions.util.StringUtils.*;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidMetric;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidMetricPath;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidString;
 
 /**
  * Created by abey.tom on 3/16/16.

@@ -15,8 +15,6 @@
 
 package com.appdynamics.extensions.executorservice;
 
-import com.appdynamics.extensions.executorservice.ConcealedMonitorExecutorService;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;

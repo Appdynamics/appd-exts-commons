@@ -15,18 +15,17 @@ servers:
 connection:
   socketTimeout: 3000 # Read Timeout
   connectTimeout: 1000
-  sslProtocols: ["TLSV1.2"] # Defaults to "default"
   sslCertCheckEnabled: true
   sslVerifyHostname: true
-
+  sslProtocols: ["TLSV1.2"] # Defaults to "default"
   # This need not be exposed to user. Should be used on a need basis
   sslCipherSuites: [] # Defaults to "default"
 
-  sslTrustStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-cacerts.jks. The prop "-Dappdynamics.extensions.truststore.path=/path/cacerts" takes precedence if set
+  sslTrustStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-cacerts.jks. The prop "-Dappdynamics.agent.monitors.truststore.path=/path/cacerts" takes precedence if set
   sslTrustStorePassword: ""
   sslTrustStoreEncryptedPassword: ""
 
-  sslKeyStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-clientcerts.jks. The prop "-Dappdynamics.extensions.keystore.path=/path/clientcerts" takes precedence if set
+  sslKeyStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-clientcerts.jks. The prop "-Dappdynamics.agent.monitors.keystore.path=/path/clientcerts" takes precedence if set
   sslKeyStorePassword: ""
   sslKeyStoreEncryptedPassword: ""
 

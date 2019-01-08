@@ -7,11 +7,11 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.executorservice.MonitorExecutorService;
-import com.appdynamics.extensions.executorservice.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.checks.*;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
+import com.appdynamics.extensions.executorservice.MonitorThreadPoolExecutor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;

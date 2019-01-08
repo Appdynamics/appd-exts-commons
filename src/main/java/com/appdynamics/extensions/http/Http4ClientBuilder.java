@@ -65,6 +65,8 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 
 import static com.appdynamics.extensions.Constants.AUTHTYPE;
+import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH;
+import static com.appdynamics.extensions.SystemPropertyConstants.TRUSTSTORE_PATH;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -382,10 +384,10 @@ public class Http4ClientBuilder {
     }
 
     protected static File resolveKeyStorePath(Map<String, ?> connection) {
-        String property = System.getProperty("appdynamics.extensions.keystore.path");
+        String property = System.getProperty(KEYSTORE_PATH);
         File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         File file = PathResolver.getFile(property, installDir);
-        logger.debug("The system property [appdynamics.extensions.keystore.path] with value [{}] is resolved to file [{}]"
+        logger.debug("The system property [appdynamics.agent.monitors.keystore.path] with value [{}] is resolved to file [{}]"
                 , property, getPath(file));
         if (file == null || !file.exists()) {
             String sslKeyStore = (String) connection.get("sslKeyStorePath");
@@ -404,10 +406,10 @@ public class Http4ClientBuilder {
 
 
     protected static File resolveTrustStorePath(Map<String, ?> connection) {
-        String property = System.getProperty("appdynamics.extensions.truststore.path");
+        String property = System.getProperty(TRUSTSTORE_PATH);
         File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         File file = PathResolver.getFile(property, installDir);
-        logger.debug("The system property [appdynamics.extensions.truststore.path] with value [{}] is resolved to file [{}]"
+        logger.debug("The system property [appdynamics.agent.monitors.truststore.path] with value [{}] is resolved to file [{}]"
                 , property, getPath(file));
         if (file == null || !file.exists()) {
             String sslTrustStore = (String) connection.get("sslTrustStorePath");

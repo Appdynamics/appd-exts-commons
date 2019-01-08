@@ -20,6 +20,8 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Map;
 
+import static com.appdynamics.extensions.SystemPropertyConstants.*;
+
 /**
  * This controllerInfo is currently being called in a single threaded environment
  * 1st priority : config.yml
@@ -34,6 +36,7 @@ public class ControllerInfoFactory {
 
     public static ControllerInfo initialize(Map config, File installDir) {
         // #TODO There should be a clear method for all the previously set fields. Uncomment the unit test in ControllerModuleTest accordingly. Also check ControllerInfo test.
+        resetControllerInfo();
         if(installDir != null) {
             getControllerInfoFromXml(installDir);
         }
@@ -53,11 +56,33 @@ public class ControllerInfoFactory {
         return controllerInfo;
     }
 
+    private static void resetControllerInfo() {
+        controllerInfo.setControllerHost(null);
+        controllerInfo.setControllerPort(null);
+        controllerInfo.setControllerSslEnabled(null);
+        controllerInfo.setEnableOrchestration(null);
+        controllerInfo.setUniqueHostId(null);
+        controllerInfo.setUsername(null);
+        controllerInfo.setPassword(null);
+        controllerInfo.setEncryptedPassword(null);
+        controllerInfo.setEncryptionKey(null);
+        controllerInfo.setAccountAccessKey(null);
+        controllerInfo.setAccount(null);
+        controllerInfo.setMachinePath(null);
+        controllerInfo.setSimEnabled(null);
+        controllerInfo.setApplicationName(null);
+        controllerInfo.setTierName(null);
+        controllerInfo.setNodeName(null);
+    }
+
     private static void getControllerInfoFromXml(File directory) {
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
         if (directory.exists()) {
             File xmlControllerInfoFile = new File(new File(directory, "conf"), "controller-info.xml");
             if (xmlControllerInfoFile.exists()) {
+                fromXml(xmlControllerInfoFile);
+            } else if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.machine.agent.configFile"))) {
+                xmlControllerInfoFile = new File(System.getProperty("appdynamics.machine.agent.configFile"));
                 fromXml(xmlControllerInfoFile);
             }
         }
@@ -71,8 +96,8 @@ public class ControllerInfoFactory {
             XmlControllerInfo xmlControllerInfo = (XmlControllerInfo) unmarshaller.unmarshal(file);
             mergeValuesFromXML(xmlControllerInfo);
         } catch (JAXBException e) {
-            String msg = "Cannot unmarshall the controller-info.xml from " + file.getAbsolutePath();
-            throw new RuntimeException(msg, e);
+            String msg = "Cannot unmarshall the config file from " + file.getAbsolutePath();
+            logger.warn(msg, e);
         }
     }
 
@@ -112,23 +137,23 @@ public class ControllerInfoFactory {
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.username"))) {
-            controllerInfo.setUsername(System.getProperty("appdynamics.agent.monitors.controller.username"));
+        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_USERNAME))) {
+            controllerInfo.setUsername(System.getProperty(CONTROLLER_USERNAME));
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.password"))) {
-            controllerInfo.setPassword(System.getProperty("appdynamics.agent.monitors.controller.password"));
+        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_PASSWORD))) {
+            controllerInfo.setPassword(System.getProperty(CONTROLLER_PASSWORD));
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"))) {
-            controllerInfo.setEncryptionKey(System.getProperty("appdynamics.agent.monitors.controller.encryptionKey"));
+        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_ENCRYPTION_KEY))) {
+            controllerInfo.setEncryptionKey(System.getProperty(CONTROLLER_ENCRYPTION_KEY));
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"))) {
-            controllerInfo.setEncryptedPassword(System.getProperty("appdynamics.agent.monitors.controller.encryptedPassword"));
+        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_ENCRYPTED_PASSWORD))) {
+            controllerInfo.setEncryptedPassword(System.getProperty(CONTROLLER_ENCRYPTED_PASSWORD));
         }
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.uniqueHostId"))) {
             controllerInfo.setUniqueHostId(System.getProperty("appdynamics.agent.uniqueHostId"));

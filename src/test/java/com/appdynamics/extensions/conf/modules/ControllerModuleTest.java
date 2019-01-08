@@ -23,7 +23,7 @@ public class ControllerModuleTest {
 
     }
 
-   /* @Test
+    @Test
     public void whenControllerInfoNotValidatedAllThreeComponentsAreNullTest() {
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config_withIncompleteControllerInfo"));
         ControllerModule controllerModule = new ControllerModule();
@@ -32,5 +32,5 @@ public class ControllerModuleTest {
         Assert.assertNull(controllerModule.getControllerClient());
         Assert.assertNull(controllerModule.getControllerAPIService());
 
-    }*/
+    }
 }

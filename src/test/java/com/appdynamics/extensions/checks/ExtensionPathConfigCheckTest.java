@@ -4,7 +4,6 @@ import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
-import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
