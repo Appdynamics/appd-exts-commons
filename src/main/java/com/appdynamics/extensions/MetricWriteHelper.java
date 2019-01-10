@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ public class MetricWriteHelper {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricWriteHelper.class);
     private ABaseMonitor baseMonitor;
     private Long startTime;
+    protected ControllerInfo controllerInfo;
     //Used for Dashboard. Cache the current list of metrics.
     private boolean cacheMetrics;
     protected DerivedMetricsCalculator derivedMetricsCalculator;
@@ -53,11 +54,12 @@ public class MetricWriteHelper {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
         this.startTime = this.baseMonitor.getStartTime();
+        controllerInfo = baseMonitor.getContextConfiguration().getContext().getControllerInfo();
         derivedMetricsCalculator = baseMonitor.getContextConfiguration().getContext().createDerivedMetricsCalculator();
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (isValidMetric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
+        if (isValidMetric(controllerInfo, metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
             if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
                 logger.debug("Scheduled mode is enabled, caching the metric {}", metric);

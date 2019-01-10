@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,42 +13,49 @@
  * limitations under the License.
  */
 
-package com.appdynamics.extensions.crypto;
+package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
-
 import java.util.Map;
-
 import static com.appdynamics.extensions.Constants.*;
+import static com.appdynamics.extensions.SystemPropertyConstants.ENCRYPTION_KEY_PROPERTY;
 
 public class CryptoUtil {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CryptoUtil.class);
     private static URLCodec codec = new URLCodec("UTF-8");
-    public static final String SYSTEM_ARG_KEY = "appdynamics.extensions.key";
 
-    public static String getPassword(Map<String, String> taskArgs) {
-        if (taskArgs.containsKey(PASSWORD)) {
-            return taskArgs.get(PASSWORD);
-        } else if (taskArgs.containsKey(ENCRYPTED_PASSWORD)) {
-            String encryptedPassword = taskArgs.get(ENCRYPTED_PASSWORD);
-            String encryptionKey = taskArgs.get(ENCRYPTION_KEY);
+    //#TODO Refactor the following
+    public static String getPassword(Map<String, ?> configMap) {
+        String password = (String)configMap.get(PASSWORD);
+        if (!Strings.isNullOrEmpty(password)) {
+            return password;
+        } else {
+            String encryptedPassword = (String)configMap.get(ENCRYPTED_PASSWORD);
+            String encryptionKey = (String)configMap.get(ENCRYPTION_KEY);
             if (Strings.isNullOrEmpty(encryptionKey)) {
-                encryptionKey = System.getProperty(SYSTEM_ARG_KEY);
+                encryptionKey = System.getProperty(ENCRYPTION_KEY_PROPERTY);
             }
-            if (!Strings.isNullOrEmpty(encryptionKey)) {
+            if (!Strings.isNullOrEmpty(encryptionKey) && !Strings.isNullOrEmpty(encryptedPassword)) {
                 return new Decryptor(encryptionKey).decrypt(encryptedPassword);
-            } else {
-                String msg = "Encryption Key not specified. Please set the property 'encryption-key' in monitor.xml or add the System Property '-Dappdynamics.extensions.key'";
-                logger.error(msg);
-                throw new IllegalArgumentException(msg);
             }
         }
+        logger.warn("The password has not been set properly. Using empty password.");
         return "";
+    }
+
+    //#TODO Refactor the following
+    // #TODO Check pass by value and pass by reference.
+    public static String getPassword(Map<String, ?> configMap, String encryptionKey) {
+        Map<String, Object> configurationMap = Maps.newHashMap(configMap);
+        configurationMap.put(ENCRYPTION_KEY, encryptionKey);
+        return getPassword(configurationMap);
     }
 
     public static String encode(String val) {

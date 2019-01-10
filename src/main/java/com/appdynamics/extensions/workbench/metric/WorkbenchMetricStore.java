@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.workbench.metric;
 
 import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
@@ -54,13 +55,14 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         return _instance;
     }
 
-    public static void initialize(DerivedMetricsCalculator derivedMetricsCalculator) {
+    public static void initialize(ControllerInfo controllerInfo, DerivedMetricsCalculator derivedMetricsCalculator) {
+        _instance.controllerInfo = controllerInfo;
         _instance.derivedMetricsCalculator = derivedMetricsCalculator;
     }
 
     @Override
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (isValidMetric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
+        if (isValidMetric(controllerInfo, metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
             addMetric(metricPath, new BigDecimal(metricValue));
         } else {
             logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, metricValue);
@@ -68,7 +70,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
-        if (isValidString(metricPath) && isValidMetricPath(metricPath)) {
+        if (isValidString(metricPath) && isValidMetricPath(controllerInfo, metricPath)) {
             addMetric(metricPath, value);
         } else {
             logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, value);

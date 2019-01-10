@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,14 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.Constants;
-import com.appdynamics.extensions.crypto.CryptoUtil;
+import com.appdynamics.extensions.util.CryptoUtil;
 import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
 import com.appdynamics.extensions.util.YmlUtils;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -64,9 +65,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static com.appdynamics.extensions.Constants.AUTHTYPE;
-import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH;
-import static com.appdynamics.extensions.SystemPropertyConstants.TRUSTSTORE_PATH;
+import static com.appdynamics.extensions.Constants.*;
+import static com.appdynamics.extensions.SystemPropertyConstants.*;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -167,7 +167,7 @@ public class Http4ClientBuilder {
                         if (authScope != null) {
                             credsProvider.setCredentials(
                                     authScope,
-                                    new UsernamePasswordCredentials(username, getPassword(server, config)));
+                                    new UsernamePasswordCredentials(username, CryptoUtil.getPassword(server, (String)config.get(ENCRYPTION_KEY))));
                             logger.info("Created credentials for auth scope {}", authScope);
                         }
                     } else {
@@ -214,7 +214,7 @@ public class Http4ClientBuilder {
                     HttpHost proxy = new HttpHost(url.getHost(), url.getPort(), url.getProtocol());
                     String proxyUserName = proxyMap.get("username");
                     if (!Strings.isNullOrEmpty(proxyUserName)) {
-                        String proxyPassword = getPassword(proxyMap, propMap);
+                        String proxyPassword = CryptoUtil.getPassword(proxyMap, (String)propMap.get(ENCRYPTION_KEY));
                         credsProvider.setCredentials(
                                 new AuthScope(url.getHost(), url.getPort()),
                                 new UsernamePasswordCredentials(proxyUserName, proxyPassword));
@@ -235,40 +235,6 @@ public class Http4ClientBuilder {
         } else {
             logger.info("Not configuring proxy, the property [proxy] is not found");
         }
-    }
-
-    public static String getPassword(Map<String, ?> propMap, Map<String, ?> config) {
-        String password = (String) propMap.get("password");
-        if (!Strings.isNullOrEmpty(password)) {
-            return password;
-        } else {
-            String encrypted = (String) propMap.get("encryptedPassword");
-            if (!Strings.isNullOrEmpty(encrypted)) {
-                String encryptionKey = getEncryptionKey(config);
-                if (!Strings.isNullOrEmpty(encryptionKey)) {
-                    return new Decryptor(encryptionKey).decrypt(encrypted);
-                } else {
-                    logger.error("Cannot decrypt the password. Encryption key not set");
-                    throw new RuntimeException("Cannot decrypt [encryptedPassword], since [encryptionKey] is not set");
-                }
-            } else {
-                logger.warn("No password set, using empty string");
-                return "";
-            }
-        }
-    }
-
-    protected static String getEncryptionKey(Map<String, ?> propMap) {
-        String encryptionKey = System.getProperty(CryptoUtil.SYSTEM_ARG_KEY);
-        if (Strings.isNullOrEmpty(encryptionKey)) {
-            encryptionKey = (String) propMap.get("encryptionKey");
-            if (!Strings.isNullOrEmpty(encryptionKey)) {
-                logger.debug("Read the [encryptionKey] from config.yml");
-            }
-        } else {
-            logger.debug("Read the encryption key from the System Property");
-        }
-        return encryptionKey;
     }
 
     protected static void configureSSL(Map<String, ?> propMap, HttpClientBuilder builder) {
@@ -384,7 +350,7 @@ public class Http4ClientBuilder {
     }
 
     protected static File resolveKeyStorePath(Map<String, ?> connection) {
-        String property = System.getProperty(KEYSTORE_PATH);
+        String property = System.getProperty(KEYSTORE_PATH_PROPERTY);
         File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         File file = PathResolver.getFile(property, installDir);
         logger.debug("The system property [appdynamics.agent.monitors.keystore.path] with value [{}] is resolved to file [{}]"
@@ -406,7 +372,7 @@ public class Http4ClientBuilder {
 
 
     protected static File resolveTrustStorePath(Map<String, ?> connection) {
-        String property = System.getProperty(TRUSTSTORE_PATH);
+        String property = System.getProperty(TRUSTSTORE_PATH_PROPERTY);
         File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         File file = PathResolver.getFile(property, installDir);
         logger.debug("The system property [appdynamics.agent.monitors.truststore.path] with value [{}] is resolved to file [{}]"
@@ -427,38 +393,46 @@ public class Http4ClientBuilder {
     }
 
     protected static char[] getKeyStorePassword(Map<String, ?> propMap, Map<String, ?> connection) {
-        String sslKeyStorePassword = (String) connection.get("sslKeyStorePassword");
-        if (!Strings.isNullOrEmpty(sslKeyStorePassword)) {
-            return sslKeyStorePassword.toCharArray();
-        } else {
-            String sslKeyStorePasswordEncrypted = (String) connection.get("sslKeyStoreEncryptedPassword");
-            String encryptionKey = getEncryptionKey(propMap);
-            if (!Strings.isNullOrEmpty(sslKeyStorePasswordEncrypted) && !Strings.isNullOrEmpty(encryptionKey)) {
-                return new Decryptor(encryptionKey).decrypt(sslKeyStorePasswordEncrypted).toCharArray();
-            } else {
-                logger.warn("Returning null password for sslKeyStore. Please set the [connection.sslKeyStorePassword] or " +
-                        "[connection.sslKeyStoreEncryptedPassword + encryptionKey]");
-                return null;
+        if (connection != null) {
+            String password = (String)connection.get("sslKeyStorePassword");
+            String encryptedPassword = (String)connection.get("sslKeyStoreEncryptedPassword");
+            if (Strings.isNullOrEmpty(password)) {
+                password = System.getProperty(KEYSTORE_PASSWORD_PROPERTY);
             }
+            if(Strings.isNullOrEmpty(encryptedPassword)) {
+                encryptedPassword = System.getProperty(KEYSTORE_ENCRYPTED_PASSWORD_PROPERTY);
+            }
+            Map<String, Object> passwordMap = Maps.newHashMap();
+            passwordMap.put(PASSWORD, password);
+            passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
+            passwordMap.put(ENCRYPTION_KEY, propMap.get(ENCRYPTION_KEY));
+            String keystorePassword = CryptoUtil.getPassword(passwordMap);
+            return Strings.isNullOrEmpty(keystorePassword) ? null : keystorePassword.toCharArray();
         }
+        logger.warn("Returning null password for sslKeyStore");
+        return null;
     }
 
 
     protected static char[] getTrustStorePassword(Map<String, ?> propMap, Map<String, ?> connection) {
-        String sslTrustStorePassword = (String) connection.get("sslTrustStorePassword");
-        if (!Strings.isNullOrEmpty(sslTrustStorePassword)) {
-            return sslTrustStorePassword.toCharArray();
-        } else {
-            String sslTrustStoreEncryptedPassword = (String) connection.get("sslTrustStoreEncryptedPassword");
-            String encryptionKey = getEncryptionKey(propMap);
-            if (!Strings.isNullOrEmpty(sslTrustStoreEncryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
-                return new Decryptor(encryptionKey).decrypt(sslTrustStoreEncryptedPassword).toCharArray();
-            } else {
-                logger.warn("Returning null password for sslTrustStore. Please set the [connection.sslTrustStorePassword] or " +
-                        "[connection.sslTrustStoreEncryptedPassword + encryptionKey]");
-                return null;
+        if (connection != null) {
+            String password = (String)connection.get("sslTrustStorePassword");
+            String encryptedPassword = (String)connection.get("sslTrustStoreEncryptedPassword");
+            if (Strings.isNullOrEmpty(password)) {
+                password = System.getProperty(TRUSTSTORE_PASSWORD_PROPERTY);
             }
+            if(Strings.isNullOrEmpty(encryptedPassword)) {
+                encryptedPassword = System.getProperty(TRUSTSTORE_ENCRYPTED_PASSWORD_PROPERTY);
+            }
+            Map<String, Object> passwordMap = Maps.newHashMap();
+            passwordMap.put(PASSWORD, password);
+            passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
+            passwordMap.put(ENCRYPTION_KEY, propMap.get(ENCRYPTION_KEY));
+            String truststorePassword = CryptoUtil.getPassword(passwordMap);
+            return Strings.isNullOrEmpty(truststorePassword) ? null : truststorePassword.toCharArray();
         }
+        logger.warn("Returning null password for sslTrustStore");
+        return null;
     }
 
     private static Object getPath(File file) {

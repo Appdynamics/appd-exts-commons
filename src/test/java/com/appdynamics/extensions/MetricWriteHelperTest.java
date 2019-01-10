@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.CustomDashboardModule;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
 import com.appdynamics.extensions.conf.modules.MetricCharSequenceReplaceModule;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.util.MetricPathUtils;
@@ -183,9 +184,12 @@ public class MetricWriteHelperTest {
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
+        when(context.getControllerInfo()).thenReturn(controllerInfo);
+        when(controllerInfo.getSimEnabled()).thenReturn(true);
         CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
         when(context.getDashboardModule()).thenReturn(customDashboardModule);
         Mockito.doNothing().when(customDashboardModule).uploadDashboard();
@@ -208,6 +212,7 @@ public class MetricWriteHelperTest {
         Metric metric7 = new Metric("sample7", "10", "Server|Component:<TIER_ID>|Custom Metrics|Sample Monitor|sample7");
         Metric metric8 = new Metric("sample8", "10", "Server|Component:123|Custom metrics|Sample Monitor|sample8");
         Metric metric9 = new Metric("sample9", "10", "Custom metrics|Sample Monitor|sample9");
+        Metric metric10 = new Metric("sample10", "10", "Server|Component:123|Custom Metrics|Sample Monitor|sample10");
         metrics.add(metric1);
         metrics.add(metric2);
         metrics.add(metric3);
@@ -217,6 +222,7 @@ public class MetricWriteHelperTest {
         metrics.add(metric7);
         metrics.add(metric8);
         metrics.add(metric9);
+        metrics.add(metric10);
         metricWriteHelper.transformAndPrintMetrics(metrics);
         verify(metricWriter, never()).printMetric(stringArgumentCaptor.capture());
     }

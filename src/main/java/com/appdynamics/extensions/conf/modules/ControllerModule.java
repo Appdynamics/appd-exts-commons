@@ -1,9 +1,25 @@
+/*
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.controller.*;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIServiceFactory;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -30,6 +46,10 @@ public class ControllerModule {
      * */
     public void initController(File installDir, Map<String, ?> config) {
         Map controllerInfoMap = (Map) config.get("controllerInfo");
+        if(controllerInfoMap == null) {
+            controllerInfoMap = Maps.newHashMap();
+        }
+        controllerInfoMap.put(ENCRYPTION_KEY, config.get(ENCRYPTION_KEY));
         controllerInfo = ControllerInfoFactory.initialize(controllerInfoMap, installDir);
         ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
         if(controllerInfoValidator.isValidated()) {
@@ -38,8 +58,7 @@ public class ControllerModule {
                     (String)config.get(ENCRYPTION_KEY));
             controllerAPIService = ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
         } else {
-            controllerInfo = null;
-            logger.warn("ControllerInfo instance is not validated and resolved.....the ControllerClient is null");
+            logger.warn("ControllerInfo instance is not validated and resolved.....the ControllerClient and ControllerAPIService are null");
         }
     }
 

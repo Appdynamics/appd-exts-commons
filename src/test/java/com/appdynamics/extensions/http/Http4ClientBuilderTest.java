@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,8 +37,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH;
-import static com.appdynamics.extensions.SystemPropertyConstants.TRUSTSTORE_PATH;
+import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH_PROPERTY;
+import static com.appdynamics.extensions.SystemPropertyConstants.TRUSTSTORE_PATH_PROPERTY;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -283,10 +283,10 @@ public class Http4ClientBuilderTest {
         File file = Http4ClientBuilder.resolveTrustStorePath(connection);
         Assert.assertEquals("truststore.changethis.jks", file.getName());
 
-        System.setProperty(TRUSTSTORE_PATH, "src/test/resources/keystore/keystore.jks");
+        System.setProperty(TRUSTSTORE_PATH_PROPERTY, "src/test/resources/keystore/keystore.jks");
         file = Http4ClientBuilder.resolveTrustStorePath(connection);
         Assert.assertEquals("keystore.jks", file.getName());
-        System.getProperties().remove(TRUSTSTORE_PATH);
+        System.getProperties().remove(TRUSTSTORE_PATH_PROPERTY);
     }
 
     @Test
@@ -321,10 +321,10 @@ public class Http4ClientBuilderTest {
         File file = Http4ClientBuilder.resolveKeyStorePath(connection);
         Assert.assertEquals("server.jks", file.getName());
 
-        System.setProperty(KEYSTORE_PATH, "src/test/resources/keystore/keystore.jks");
+        System.setProperty(KEYSTORE_PATH_PROPERTY, "src/test/resources/keystore/keystore.jks");
         file = Http4ClientBuilder.resolveKeyStorePath(connection);
         Assert.assertEquals("keystore.jks", file.getName());
-        System.getProperties().remove(KEYSTORE_PATH);
+        System.getProperties().remove(KEYSTORE_PATH_PROPERTY);
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,15 +51,13 @@ public class HttpClientModule {
 
     private void initShutdown(final CloseableHttpClient oldHttpClient, final long wait) {
         if (oldHttpClient != null) {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        Thread.sleep(wait);
-                        logger.debug("Shutting down the old http client {}", httpClient);
-                        oldHttpClient.close();
-                    } catch (Exception e) {
-                        logger.error("Exception while shutting down the http client" + oldHttpClient, e);
-                    }
+            new Thread(() -> {
+                try {
+                    Thread.sleep(wait);
+                    logger.debug("Shutting down the old http client {}", httpClient);
+                    oldHttpClient.close();
+                } catch (Exception e) {
+                    logger.error("Exception while shutting down the http client" + oldHttpClient, e);
                 }
             }, "HttpClient-Shutdown-Task").start();
         }

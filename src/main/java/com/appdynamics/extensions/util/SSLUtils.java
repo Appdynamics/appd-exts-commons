@@ -1,8 +1,24 @@
+/*
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.slf4j.Logger;
@@ -21,7 +37,10 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 
-import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH;
+import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
+import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
+import static com.appdynamics.extensions.Constants.PASSWORD;
+import static com.appdynamics.extensions.SystemPropertyConstants.*;
 
 /**
  * Created by venkata.konala on 1/5/19.
@@ -92,7 +111,7 @@ public class SSLUtils {
             file = PathResolver.getFile((String)connectionMap.get("sslKeyStorePath"), installDir);
         }
         if (file == null || !file.exists()) {
-            file = PathResolver.getFile(System.getProperty(KEYSTORE_PATH), installDir);
+            file = PathResolver.getFile(System.getProperty(KEYSTORE_PATH_PROPERTY), installDir);
         }
         if(file == null || !file.exists()) {
             file = PathResolver.getFile("conf/extensions-clientcerts.jks", installDir);
@@ -104,11 +123,18 @@ public class SSLUtils {
         if (connectionMap != null) {
             String password = (String)connectionMap.get("sslKeyStorePassword");
             String encryptedPassword = (String)connectionMap.get("sslKeyStoreEncryptedPassword");
-            if (!Strings.isNullOrEmpty(password)) {
-                return password;
-            } else if (!Strings.isNullOrEmpty(encryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
-                return new Decryptor(encryptionKey).decrypt(encryptedPassword);
+            if (Strings.isNullOrEmpty(password)) {
+                password = System.getProperty(KEYSTORE_PASSWORD_PROPERTY);
             }
+            if(Strings.isNullOrEmpty(encryptedPassword)) {
+                encryptedPassword = System.getProperty(KEYSTORE_ENCRYPTED_PASSWORD_PROPERTY);
+            }
+            Map<String, Object> passwordMap = Maps.newHashMap();
+            passwordMap.put(PASSWORD, password);
+            passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
+            passwordMap.put(ENCRYPTION_KEY, encryptionKey);
+            String keystorePassword = CryptoUtil.getPassword(passwordMap);
+            return Strings.isNullOrEmpty(keystorePassword) ? null : keystorePassword;
         }
         logger.warn("Returning null password for sslKeyStore");
         return null;
@@ -140,7 +166,7 @@ public class SSLUtils {
             file = PathResolver.getFile((String)connectionMap.get("sslTrustStorePath"), installDir);
         }
         if (file == null || !file.exists()) {
-            file = PathResolver.getFile(System.getProperty(KEYSTORE_PATH), installDir);
+            file = PathResolver.getFile(System.getProperty(KEYSTORE_PATH_PROPERTY), installDir);
         }
         if(file == null || !file.exists()) {
             file = PathResolver.getFile("conf/extensions-cacerts.jks", installDir);
@@ -152,11 +178,18 @@ public class SSLUtils {
         if (connectionMap != null) {
             String password = (String)connectionMap.get("sslTrustStorePassword");
             String encryptedPassword = (String)connectionMap.get("sslTrustStoreEncryptedPassword");
-            if (!Strings.isNullOrEmpty(password)) {
-                return password;
-            } else if (!Strings.isNullOrEmpty(encryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)) {
-                return new Decryptor(encryptionKey).decrypt(encryptedPassword);
+            if (Strings.isNullOrEmpty(password)) {
+                password = System.getProperty(TRUSTSTORE_PASSWORD_PROPERTY);
             }
+            if(Strings.isNullOrEmpty(encryptedPassword)) {
+                encryptedPassword = System.getProperty(TRUSTSTORE_ENCRYPTED_PASSWORD_PROPERTY);
+            }
+            Map<String, Object> passwordMap = Maps.newHashMap();
+            passwordMap.put(PASSWORD, password);
+            passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
+            passwordMap.put(ENCRYPTION_KEY, encryptionKey);
+            String truststorePassword = CryptoUtil.getPassword(passwordMap);
+            return Strings.isNullOrEmpty(truststorePassword) ? null : truststorePassword;
         }
         logger.warn("Returning null password for sslTrustStore");
         return null;

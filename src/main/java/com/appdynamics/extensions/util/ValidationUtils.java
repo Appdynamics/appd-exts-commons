@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.controller.ControllerInfo;
@@ -21,10 +36,10 @@ public class ValidationUtils {
 
     // #TODO Move it out of here to a separate Validation class.
     // #TODO If SIM is enabled, then use Custom Metrics. Enforce this.
-    public static boolean isValidMetric(String metricPath, String metricValue,
+    public static boolean isValidMetric(ControllerInfo controllerInfo, String metricPath, String metricValue,
                                         String aggregationType, String timeRollup, String clusterRollup) {
        return isValidString(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&
-               isValidMetricPath(metricPath);
+               isValidMetricPath(controllerInfo, metricPath);
     }
 
     public static boolean isValidString(String... args) {
@@ -49,17 +64,22 @@ public class ValidationUtils {
         return false;
     }
 
-    public static boolean isValidMetricPath(String metricPath) {
+    public static boolean isValidMetricPath(ControllerInfo controllerInfo, String metricPath) {
         if (!metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher
-                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(metricPath)) {
+                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(controllerInfo, metricPath)) {
             return true;
         }
         logger.debug("The metric path {} is invalid", metricPath);
         return false;
     }
 
-    public static boolean isValidMetricPrefix(String metricPath) {
+    public static boolean isValidMetricPrefix(ControllerInfo controllerInfo, String metricPath) {
         if (metricPath.startsWith("Server|Component:")) {
+            if(Boolean.TRUE.equals(controllerInfo.getSimEnabled())) {
+                logger.warn("Metric prefix {} should start with 'Custom Metrics|' (case sensitive) when SIM is enabled ",
+                        metricPath);
+                return false;
+            }
             List<String> tokens = MetricPathUtils.PIPE_SPLITTER.splitToList(metricPath);
             if (tokens.size() > 3 && tokens.get(2).equals("Custom Metrics")) {
                 List<String> component = COLON_SPLITTER.splitToList(tokens.get(1));

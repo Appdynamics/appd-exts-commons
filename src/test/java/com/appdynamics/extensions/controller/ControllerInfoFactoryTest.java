@@ -1,13 +1,21 @@
 /*
- *   Copyright 2018 . AppDynamics LLC and its affiliates.
- *   All Rights Reserved.
- *   This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
- *   The copyright notice above does not evidence any actual or intended publication of such source code.
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.appdynamics.extensions.controller;
 
+import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +26,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.appdynamics.extensions.SystemPropertyConstants.*;
 
 /**
  * Created by bhuvnesh.kumar on 8/29/18.
@@ -38,7 +48,8 @@ public class ControllerInfoFactoryTest {
     public void whenControllerInfoNotPresentShouldGetConfigFilePathFromProperty() {
         setConfigFileSystemProperty();
         File file = new File("src/");
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(null, file);
+        Map<String, ?> controllerInfoMap = Maps.newHashMap();
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(controllerInfoMap, file);
         Assert.assertNotNull(controllerInfo.getControllerHost());
         Assert.assertNotNull(controllerInfo.getControllerPort());
         Assert.assertNull(controllerInfo.getAccount());
@@ -66,7 +77,7 @@ public class ControllerInfoFactoryTest {
         Assert.assertNull(controllerInfo.getControllerHost());
         Assert.assertNull(controllerInfo.getControllerPort());
         Assert.assertNull(controllerInfo.getUsername());
-        Assert.assertNull(controllerInfo.getPassword());
+        Assert.assertNotNull(controllerInfo.getPassword());
         Assert.assertNull(controllerInfo.getEncryptionKey());
         Assert.assertNull(controllerInfo.getEncryptedPassword());
         Assert.assertNull(controllerInfo.getControllerSslEnabled());
@@ -129,7 +140,7 @@ public class ControllerInfoFactoryTest {
     @Test
     public void testGetControllerInfoWithSystemProps() {
         setupSystemProps();
-        Map config = null;
+        Map config = Maps.newHashMap();
         File file = Mockito.mock(File.class);
         ControllerInfo controllerInfo = ControllerInfoFactory.initialize(config, file);
         removeSystemProperties();
@@ -240,10 +251,10 @@ public class ControllerInfoFactoryTest {
         System.setProperty("appdynamics.agent.tierName", "tierName");
         System.setProperty("appdynamics.agent.nodeName", "nodeName");
         System.setProperty("appdynamics.controller.hostName", "hostName");
-        System.setProperty("appdynamics.agent.monitors.controller.username", "username");
-        System.setProperty("appdynamics.agent.monitors.controller.password", "password");
-        System.setProperty("appdynamics.agent.monitors.controller.encryptionKey", "encryptionKey");
-        System.setProperty("appdynamics.agent.monitors.controller.encryptedPassword", "encryptedPassword");
+        System.setProperty(CONTROLLER_USERNAME_PROPERTY, "username");
+        System.setProperty(CONTROLLER_PASSWORD_PROPERTY, "password");
+        System.setProperty(ENCRYPTION_KEY_PROPERTY, "encryptionKey");
+        System.setProperty(CONTROLLER_ENCRYPTED_PASSWORD_PROPERTY, "encryptedPassword");
         System.setProperty("appdynamics.controller.port", "9090");
         System.setProperty("appdynamics.controller.ssl.enabled", "false");
         System.setProperty("appdynamics.agent.uniqueHostId", "uniqueHostID");
@@ -257,10 +268,10 @@ public class ControllerInfoFactoryTest {
         System.clearProperty("appdynamics.agent.tierName");
         System.clearProperty("appdynamics.agent.nodeName");
         System.clearProperty("appdynamics.controller.hostName");
-        System.clearProperty("appdynamics.agent.monitors.controller.username");
-        System.clearProperty("appdynamics.agent.monitors.controller.password");
-        System.clearProperty("appdynamics.agent.monitors.controller.encryptionKey");
-        System.clearProperty("appdynamics.agent.monitors.controller.encryptedPassword");
+        System.clearProperty(CONTROLLER_USERNAME_PROPERTY);
+        System.clearProperty(CONTROLLER_PASSWORD_PROPERTY);
+        System.clearProperty(ENCRYPTION_KEY_PROPERTY);
+        System.clearProperty(CONTROLLER_ENCRYPTED_PASSWORD_PROPERTY);
         System.clearProperty("appdynamics.controller.port");
         System.clearProperty("appdynamics.controller.ssl.enabled");
         System.clearProperty("appdynamics.agent.uniqueHostId");

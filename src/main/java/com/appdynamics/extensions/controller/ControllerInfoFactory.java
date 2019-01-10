@@ -1,17 +1,26 @@
 /*
- *   Copyright 2018 . AppDynamics LLC and its affiliates.
- *   All Rights Reserved.
- *   This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
- *   The copyright notice above does not evidence any actual or intended publication of such source code.
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.appdynamics.extensions.controller;
 
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.util.CryptoUtil;
 import com.appdynamics.extensions.util.NumberUtils;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -20,6 +29,9 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Map;
 
+import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
+import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
+import static com.appdynamics.extensions.Constants.PASSWORD;
 import static com.appdynamics.extensions.SystemPropertyConstants.*;
 
 /**
@@ -43,10 +55,9 @@ public class ControllerInfoFactory {
         logger.debug("The resolved properties from controller-info.xml are {}", controllerInfo);
         getControllerInfoFromSystemProperties();
         logger.debug("The resolved properties after controller-info.xml and system properties are {}", controllerInfo);
-        if (config != null) {
-            getControllerInfoFromYml(config);
-            logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", controllerInfo);
-        }
+        getControllerInfoFromYml(config);
+        controllerInfo.setPassword(CryptoUtil.getPassword(getPasswordMap()));
+        logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", controllerInfo);
         /*
         #TODO FULL AGENT RESOLVER
         1. MA with one app agent, automatically resolve app, tier and node.
@@ -137,23 +148,23 @@ public class ControllerInfoFactory {
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_USERNAME))) {
-            controllerInfo.setUsername(System.getProperty(CONTROLLER_USERNAME));
+        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_USERNAME_PROPERTY))) {
+            controllerInfo.setUsername(System.getProperty(CONTROLLER_USERNAME_PROPERTY));
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_PASSWORD))) {
-            controllerInfo.setPassword(System.getProperty(CONTROLLER_PASSWORD));
+        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_PASSWORD_PROPERTY))) {
+            controllerInfo.setPassword(System.getProperty(CONTROLLER_PASSWORD_PROPERTY));
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_ENCRYPTION_KEY))) {
-            controllerInfo.setEncryptionKey(System.getProperty(CONTROLLER_ENCRYPTION_KEY));
+        if (!Strings.isNullOrEmpty(System.getProperty(ENCRYPTION_KEY_PROPERTY))) {
+            controllerInfo.setEncryptionKey(System.getProperty(ENCRYPTION_KEY_PROPERTY));
         }
         //#TODO The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
         // called MonitorConstants at the ABaseMonitor level.
-        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_ENCRYPTED_PASSWORD))) {
-            controllerInfo.setEncryptedPassword(System.getProperty(CONTROLLER_ENCRYPTED_PASSWORD));
+        if (!Strings.isNullOrEmpty(System.getProperty(CONTROLLER_ENCRYPTED_PASSWORD_PROPERTY))) {
+            controllerInfo.setEncryptedPassword(System.getProperty(CONTROLLER_ENCRYPTED_PASSWORD_PROPERTY));
         }
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.uniqueHostId"))) {
             controllerInfo.setUniqueHostId(System.getProperty("appdynamics.agent.uniqueHostId"));
@@ -196,7 +207,7 @@ public class ControllerInfoFactory {
             controllerInfo.setUsername(config.get("username").toString());
         }
         if (!Strings.isNullOrEmpty((String) config.get("password"))) {
-            controllerInfo.setPassword(Http4ClientBuilder.getPassword(config, config));
+            controllerInfo.setPassword(config.get("password").toString());
         }
         if (!Strings.isNullOrEmpty((String) config.get("accountAccessKey"))) {
             controllerInfo.setAccountAccessKey(config.get("accountAccessKey").toString());
@@ -219,5 +230,13 @@ public class ControllerInfoFactory {
         if (!Strings.isNullOrEmpty((String) config.get("encryptionKey"))) {
             controllerInfo.setEncryptionKey(config.get("encryptionKey").toString());
         }
+    }
+
+    private static Map<String, ?> getPasswordMap() {
+        Map<String, Object> passwordMap = Maps.newHashMap();
+        passwordMap.put(PASSWORD, controllerInfo.getPassword());
+        passwordMap.put(ENCRYPTED_PASSWORD, controllerInfo.getEncryptedPassword());
+        passwordMap.put(ENCRYPTION_KEY, controllerInfo.getEncryptionKey());
+        return passwordMap;
     }
 }
