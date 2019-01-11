@@ -55,6 +55,7 @@ public class ConfigProcessor {
 
     private static void init() {
 
+        //#TODO use proper System naming conventions for extensions.
         String extensionsConfigFile = SYSTEM_ENV_VARS.get(EXTENSIONS_CONFIG_PROP_FILE);
         if (extensionsConfigFile != null) {
             logger.info("Extension config properties file provided and replacing placeholders in config file using [" + extensionsConfigFile + "]");
@@ -74,6 +75,12 @@ public class ConfigProcessor {
         }
     }
 
+
+    //#TODO Arrays or Lists is not supported. For eg. if the config.yml is
+    //sample1: ["${TEST_SERVER1}","${TEST_HOST1}"]
+    //sample2:
+    //   - ${TEST_SERVER1}
+    //   - ${TEST_HOST1}
     public static Map<String, ?> process(Map config) {
         if (config == null) {
             logger.error("Empty configuration passed, ignoring");

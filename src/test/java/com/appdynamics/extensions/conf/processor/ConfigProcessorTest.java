@@ -72,6 +72,7 @@ public class ConfigProcessorTest {
         Assert.assertEquals("localhost", server1Config.get("host"));
         Assert.assertEquals("8080", server1Config.get("port"));
         Assert.assertEquals("admin", server1Config.get("password"));
+        //Assert.assertEquals();
     }
 
     @Test
@@ -103,6 +104,7 @@ public class ConfigProcessorTest {
 
     @Test
     @PrepareForTest(ConfigProcessor.class)
+    //#TODO this test is not happening through properties file as the name suggests. The static initialization block is initialized only once when the ConfigProcessor class is loaded.
     public void testConfigEnvironmentVariablesFromPropFile() {
         PowerMockito.mockStatic(System.class);
         Map<String, String> valueMap = populateSystemEnvParams();
@@ -127,6 +129,7 @@ public class ConfigProcessorTest {
 
     @Test
     @PrepareForTest(ConfigProcessor.class)
+    //    //#TODO this test is not happening through properties file as the name suggests. The static initialization block is initialized only once when the ConfigProcessor class is loaded.
     public void testConfigEnvironmentVariablesForEC2FromPropFile() {
         PowerMockito.mockStatic(System.class);
         Map<String, String> valueMap = populateSystemEnvParamsForEC2();
@@ -157,6 +160,7 @@ public class ConfigProcessorTest {
 
     @Test(expected = ExceptionInInitializerError.class)
     @PrepareForTest(ConfigProcessor.class)
+    //    //#TODO this test is not happening through properties file as the name suggests. The static initialization block is initialized only once when the ConfigProcessor class is loaded. 
     public void testConfigEnvironmentVariablesFromNonExistingPropFile() {
         PowerMockito.mockStatic(System.class);
         Map<String, String> valueMap = populateSystemEnvParams();

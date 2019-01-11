@@ -59,7 +59,7 @@ public class MonitorContextConfiguration {
             logger.error("Unable to get data from the config file");
             return;
         }
-        rootElem = ConfigProcessor.process(rootElem);
+        rootElem =ConfigProcessor.process(rootElem);
         configYml = rootElem;
         Boolean enabled = (Boolean) configYml.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
