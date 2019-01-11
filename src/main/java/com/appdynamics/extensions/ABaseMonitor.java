@@ -205,6 +205,8 @@ public abstract class ABaseMonitor extends AManagedMonitor {
         }
     }
 
+
+    //#TODO remove this.
     public static void main(String args[]) throws Exception{
         ABaseMonitor aBaseMonitor = new ABaseMonitor() {
             @Override
