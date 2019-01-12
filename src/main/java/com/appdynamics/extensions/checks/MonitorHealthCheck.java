@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.checks;
 
+import com.appdynamics.extensions.Constants;
 import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.util.StringUtils;
 import org.apache.log4j.Level;
@@ -31,9 +32,7 @@ import java.util.LinkedList;
  * @author Satish Muddam
  */
 public class MonitorHealthCheck implements Runnable {
-    //#TODO @satish.muddam The naming has to be according to our new conventions, all these kind of constants need to be in a separate constants file
-    // called MonitorConstants at the ABaseMonitor level.
-    private static final String EXTENSIONS_CHECKS_LOG_LEVEL = "monitor.checks.log.level";
+
     public static Logger logger = null;
 
     private MonitorExecutorService executorService;
@@ -64,7 +63,7 @@ public class MonitorHealthCheck implements Runnable {
             fileAppender.setMaxBackupIndex(5);
             fileAppender.setMaxFileSize("5MB");
 
-            String property = System.getProperty(EXTENSIONS_CHECKS_LOG_LEVEL);
+            String property = System.getProperty(Constants.EXTENSIONS_CHECKS_LOG_LEVEL);
 
             Level level = Level.INFO;
             if (StringUtils.hasText(property)) {
@@ -76,7 +75,6 @@ public class MonitorHealthCheck implements Runnable {
             extCheckLogger.setAdditivity(false);
             extCheckLogger.addAppender(fileAppender);
         } catch (IOException e) {
-            // #TODO @satish.muddam Why is this sysout?
             System.out.println("Unable to initialise monitor check logger: " + e.getMessage());
         }
     }
@@ -119,7 +117,7 @@ public class MonitorHealthCheck implements Runnable {
                             logger.error(" Exception when running {} ", runAlwaysCheck, e);
                         }
                     }
-                }, 0, (int) runAlwaysCheck.getPeriod(), runAlwaysCheck.getTimeUnit());
+                }, 0, runAlwaysCheck.getPeriod(), runAlwaysCheck.getTimeUnit());
 
             } else {
                 //Nothing matched

@@ -47,7 +47,7 @@ public class ExtensionPathConfigCheckTest {
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(null, null, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test",null, controllerAPIService, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
@@ -57,36 +57,16 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
-    public void testNullMetricPrefix() {
-        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
-
-        ControllerInfo controllerInfo = mock(ControllerInfo.class);
-
-        ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
-        ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
-        when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, new HashMap<String, String>(), controllerAPIService, logger);
-        extensionPathConfigCheck.check();
-
-        Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
-
-        String value = logCaptor.getValue();
-        Assert.assertEquals(value, "Metric prefix not configured in config file");
-    }
-
-    @Test
     public void testMetricPrefixWithComponentAndSIMEnabled() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
 
-        HashMap<String, String> config = new HashMap<>();
-        config.put("metricPrefix", "Server|Component:Test|Custom Metrics|Test");
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:Test|Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
@@ -100,12 +80,10 @@ public class ExtensionPathConfigCheckTest {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
-        HashMap<String, String> config = new HashMap<>();
-        config.put("metricPrefix", "Custom Metrics|Test");
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
         extensionPathConfigCheck.check();
         Mockito.verify(logger, Mockito.times(1)).warn(logCaptor.capture());
         String value = logCaptor.getValue();
@@ -119,12 +97,10 @@ public class ExtensionPathConfigCheckTest {
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
 
-        HashMap<String, String> config = new HashMap<>();
-        config.put("metricPrefix", "Custom Metrics|Test");
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -148,9 +124,7 @@ public class ExtensionPathConfigCheckTest {
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
         when(applicationModelAPIService.getSpecificTierNode(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(tierRESTResponse()));
 
-        HashMap<String, String> config = new HashMap<>();
-        config.put("metricPrefix", "Server|Component:TestTier|Custom Metrics|Test");
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:TestTier|Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -175,9 +149,7 @@ public class ExtensionPathConfigCheckTest {
         when(applicationModelAPIService.getSpecificTierNode(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(tierRESTResponse()));
 
 
-        HashMap<String, String> config = new HashMap<>();
-        config.put("metricPrefix", "Server|Component:TestTier123|Custom Metrics|Test");
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck(controllerInfo, config, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:TestTier123|Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());

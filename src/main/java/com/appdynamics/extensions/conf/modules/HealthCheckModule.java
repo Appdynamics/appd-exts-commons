@@ -15,7 +15,11 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.checks.*;
+import com.appdynamics.extensions.checks.AppTierNodeCheck;
+import com.appdynamics.extensions.checks.ExtensionPathConfigCheck;
+import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
+import com.appdynamics.extensions.checks.MetricLimitCheck;
+import com.appdynamics.extensions.checks.MonitorHealthCheck;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.executorservice.MonitorExecutorService;
@@ -26,9 +30,7 @@ import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -38,14 +40,10 @@ import java.util.concurrent.TimeUnit;
 public class HealthCheckModule {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(HealthCheckModule.class);
-    /*
-     #TODO @satish.muddam Why is this map needed? We understand that this is caching the MonitorHealthCheck.
-     But a concurrentHashMap is not the right data structure. Can't we directly save it as MonitorHealthCheck?
-     */
-    private Map<String, MonitorHealthCheck> healthChecksForMonitors = new ConcurrentHashMap<>();
+    private MonitorHealthCheck healthCheckMonitor = null;
     private MonitorExecutorService executorService;
 
-    public void initMATroubleshootChecks(Map<String, ?> config, String monitorName, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
+    public void initMATroubleshootChecks(Map<String, ?> config, String monitorName, String metricPrefix, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
         // #TODO @venkata.konala These checks should not block this. Instead it should log in the health logs in the corresponding check.
         String enableHealthChecksSysPropString = System.getProperty("enableHealthChecks");
         Boolean enableHealthChecksSysProp = true;
@@ -72,28 +70,24 @@ public class HealthCheckModule {
             executorService = null;
         }
         /**
-         *  Initializing the thread pool with 2 threads.
+         *  Initializing the thread pool with 3 threads.
          *    one thread will be used for all the normal checks
-         *    second thread will be used for run-always check
+         *    2 thread will be used for run-always checks
          *
          **/
-        //#TODO @satish.muddam The size has to be 1 + number of runAlwaysChecks. Already changed it from 2 to 3. Please validate.
         executorService = new MonitorThreadPoolExecutor(new ScheduledThreadPoolExecutor(3));
         try {
             File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
-            MonitorHealthCheck healthCheckMonitor = healthChecksForMonitors.get(monitorName);
             if (healthCheckMonitor == null) {
                 healthCheckMonitor = new MonitorHealthCheck(monitorName, installDir, executorService);
-                healthChecksForMonitors.put(monitorName, healthCheckMonitor);
             } else {
                 healthCheckMonitor.updateMonitorExecutorService(executorService);
                 healthCheckMonitor.clearAllChecks();
             }
             healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new MaxMetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new MetricBlacklistLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(controllerInfo, Collections.unmodifiableMap(config), controllerAPIService, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new MetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, 60, TimeUnit.SECONDS, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(metricPrefix, controllerInfo, controllerAPIService, MonitorHealthCheck.logger));
             executorService.submit("HealthCheckMonitor", healthCheckMonitor);
 
         } catch (Exception e) {

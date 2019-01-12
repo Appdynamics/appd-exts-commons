@@ -23,25 +23,26 @@ import org.unix4j.line.Line;
 import org.unix4j.unix.Grep;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author Akshay Srivastava
+ * @author Satish Muddam
  */
-
-//#TODO @satish.muddam This healthcheck can be combined with MaxMetricLimitChack, using a single Pattern.
-public class MetricBlacklistLimitCheck implements RunAlwaysCheck {
+public class MetricLimitCheck implements RunAlwaysCheck {
 
     public Logger logger;
 
+    private static final String MAX_METRIC_ERROR_LINE = "ERROR ManagedMonitorDelegate - Maximum metrics limit reached";
     private static final String BLACKLIST_METRIC_LIMIT_ERROR_LINE = "WARN ManagedMonitorDelegate - Metric registration blacklist limit reached";
 
-    private long period;
+
+    private int period;
     private TimeUnit timeUnit;
     private boolean stop = false;
 
-    public MetricBlacklistLimitCheck(long period, TimeUnit timeUnit, Logger logger) {
+    public MetricLimitCheck(int period, TimeUnit timeUnit, Logger logger) {
         this.logger = logger;
         this.period = period;
         this.timeUnit = timeUnit;
@@ -52,29 +53,36 @@ public class MetricBlacklistLimitCheck implements RunAlwaysCheck {
     public void check() {
         if (!stop) {
             long start = System.currentTimeMillis();
-            logger.info("Starting MetricBlacklistLimitCheck");
+            logger.info("Starting MetricLimitCheck");
             File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
             if (directory.exists()) {
                 File logs = new File(directory, "logs");
                 //This is taking around 500ms for 25MB log files ( 5 files * 5 MB )
-                List<Line> blacklistLimitErrorLogLines = Unix4j.cd(logs).grep(Grep.Options.lineNumber, BLACKLIST_METRIC_LIMIT_ERROR_LINE, "*.log*").toLineList();
-                if (blacklistLimitErrorLogLines != null && blacklistLimitErrorLogLines.size() > 0) {
-                    logger.error("Found blacklist metric limit reached error, below are the details");
-                    for (Line line : blacklistLimitErrorLogLines) {
+                List<Line> metricLimitErrorLogLines = new ArrayList<>();
+                List<Line> maxMetricLimitErrors = Unix4j.cd(logs).grep(Grep.Options.lineNumber, MAX_METRIC_ERROR_LINE, "*.log*").toLineList();
+
+                List<Line> metricBlackListErrors = Unix4j.cd(logs).grep(Grep.Options.lineNumber, BLACKLIST_METRIC_LIMIT_ERROR_LINE, "*.log*").toLineList();
+
+                metricLimitErrorLogLines.addAll(maxMetricLimitErrors);
+                metricLimitErrorLogLines.addAll(metricBlackListErrors);
+
+                if (metricLimitErrorLogLines != null && metricLimitErrorLogLines.size() > 0) {
+                    logger.error("Found metric limit reached error, below are the details");
+                    for (Line line : metricLimitErrorLogLines) {
                         logger.error(line.toString());
                     }
                     stop = true;
                 }
             }
             long diff = System.currentTimeMillis() - start;
-            logger.info("MetricBlacklistLimitCheck took {} ms to complete ", diff);
+            logger.info("MetricLimitCheck took {} ms to complete ", diff);
         } else {
-            logger.info("Blacklist Metric limit is reached and the message logged. Not executing MetricBlacklistLimitCheck.");
+            logger.info("Metric limit is reached and the message logged. Not executing MetricLimitCheck.");
         }
     }
 
     @Override
-    public long getPeriod() {
+    public int getPeriod() {
         return period;
     }
 

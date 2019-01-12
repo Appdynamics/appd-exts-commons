@@ -48,7 +48,6 @@ public class AppTierNodeCheck implements RunOnceCheck {
         }
 
         Boolean simEnabled = controllerInfo.getSimEnabled();
-        //#TODO @satish.muddam Nodename is not mandatory. defaults to node1. Please check.
         if (Strings.isNullOrEmpty(controllerInfo.getApplicationName()) || Strings.isNullOrEmpty(controllerInfo.getTierName())
                 || Strings.isNullOrEmpty(controllerInfo.getNodeName())) {
 
