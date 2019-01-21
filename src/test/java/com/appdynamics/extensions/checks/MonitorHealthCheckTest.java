@@ -113,7 +113,7 @@ public class MonitorHealthCheckTest {
         }
 
         @Override
-        public long getPeriod() {
+        public int getPeriod() {
             return 2;
         }
 

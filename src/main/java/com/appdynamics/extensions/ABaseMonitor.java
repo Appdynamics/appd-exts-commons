@@ -205,34 +205,6 @@ public abstract class ABaseMonitor extends AManagedMonitor {
         }
     }
 
-    //#TODO Remove it before commit.
-    public static void main(String args[]) throws Exception{
-        ABaseMonitor aBaseMonitor = new ABaseMonitor() {
-            @Override
-            protected String getDefaultMetricPrefix() {
-                return "Custom Metrics | Sample Monitor";
-            }
-
-            @Override
-            public String getMonitorName() {
-                return "Sample Monitor";
-            }
-
-            @Override
-            protected void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider) {
-
-            }
-
-            @Override
-            protected List<Map<String, ?>> getServers() {
-                return Lists.newArrayList();
-            }
-        };
-        Map<String, String> arg = Maps.newHashMap();
-        arg.put("config-file", "/Users/venkata.konala/AppDynamics/Repos/Extensions/appd-exts-commons/src/test/resources/controller/configtest.yml");
-        aBaseMonitor.execute(arg, null);
-    }
-
     protected static String getImplementationVersion() {
         return ABaseMonitor.class.getPackage().getImplementationTitle();
     }

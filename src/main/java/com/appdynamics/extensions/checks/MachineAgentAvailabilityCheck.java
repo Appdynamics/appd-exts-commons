@@ -25,52 +25,67 @@ import com.google.common.net.UrlEscapers;
 import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author Satish Muddam
  */
-public class MachineAgentAvailabilityCheck implements RunOnceCheck {
+public class MachineAgentAvailabilityCheck implements RunAlwaysCheck {
 
     public Logger logger;
     private ControllerInfo controllerInfo;
     private ControllerAPIService controllerAPIService;
     private MetricAPIService metricAPIService;
+
+    private int period;
+    private TimeUnit timeUnit;
+    private boolean stop = false;
+
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
 
-    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerAPIService controllerAPIService, Logger logger) {
+
+    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerAPIService controllerAPIService, int period, TimeUnit timeUnit, Logger logger) {
         this.logger = logger;
         this.controllerInfo = controllerInfo;
         this.controllerAPIService = controllerAPIService;
+        this.period = period;
+        this.timeUnit = timeUnit;
     }
 
     @Override
     public void check() {
-        long start = System.currentTimeMillis();
-        logger.info("Starting MachineAgentAvailabilityCheck");
-        if (controllerInfo == null) {
-            logger.error("Received ControllerInfo as null. Not checking anything.");
-            return;
-        }
-        AssertUtils.assertNotNull(controllerAPIService, "The ControllerAPIService is null");
-        metricAPIService = controllerAPIService.getMetricAPIService();
-        AssertUtils.assertNotNull(metricAPIService, "The MetricAPIService is null");
-        if (controllerInfo.getSimEnabled()) {
-            logger.info("SIM is enabled, not checking MachineAgent availability metric");
-            //TODO @satish.muddam Check if MA status needs to be verified if SIM is enabled.
-            return;
-        }
-        int maStatus = getMAStatus();
-        if (maStatus == 1) {
-            logger.info("MachineAgent is reporting availability metric");
+        if(!stop) {
+            long start = System.currentTimeMillis();
+            logger.info("Starting MachineAgentAvailabilityCheck");
+            if (controllerInfo == null) {
+                logger.error("Received ControllerInfo as null. Not checking anything.");
+                return;
+            }
+            AssertUtils.assertNotNull(controllerAPIService, "The ControllerAPIService is null");
+            metricAPIService = controllerAPIService.getMetricAPIService();
+            AssertUtils.assertNotNull(metricAPIService, "The MetricAPIService is null");
+            if (controllerInfo.getSimEnabled()) {
+                logger.info("SIM is enabled, not checking MachineAgent availability metric");
+                //TODO @satish.muddam Check if MA status needs to be verified if SIM is enabled.
+                return;
+            }
+            int maStatus = getMAStatus();
+            if (maStatus == 1) {
+                logger.info("MachineAgent is reporting availability metric");
+                stop = true;
+            } else {
+                logger.error("MachineAgent is not reporting availability metric. Please check your configuration");
+            }
+            long diff = System.currentTimeMillis() - start;
+            logger.info("MachineAgentAvailabilityCheck took {} ms to complete ", diff);
         } else {
-            logger.error("MachineAgent is not reporting availability metric. Please check your configuration");
+            logger.info("Machine agent availability metric reported");
         }
-        long diff = System.currentTimeMillis() - start;
-        logger.info("MachineAgentAvailabilityCheck took {} ms to complete ", diff);
     }
 
     private int getMAStatus() {
         JsonNode jsonNode = metricAPIService.getMetricData(controllerInfo.getApplicationName(), getEndPointForMAStatusMetric());
-        if(jsonNode != null) {
+        if (jsonNode != null) {
             JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
             return valueNode == null ? 0 : valueNode.get(0).asInt();
         } else {
@@ -83,6 +98,21 @@ public class MachineAgentAvailabilityCheck implements RunOnceCheck {
         StringBuilder sb = new StringBuilder();
         sb.append("/metric-data?metric-path=Application Infrastructure Performance|")
                 .append(controllerInfo.getTierName()).append("|Agent|Machine|Availability&time-range-type=BEFORE_NOW&duration-in-mins=15&output=JSON");
-        return sb.toString();
+        return URL_ESCAPER.escape(sb.toString());
+    }
+
+    @Override
+    public int getPeriod() {
+        return period;
+    }
+
+    @Override
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    @Override
+    public boolean shouldStop() {
+        return stop;
     }
 }

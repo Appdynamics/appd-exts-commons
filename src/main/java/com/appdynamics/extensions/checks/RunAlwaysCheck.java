@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public interface RunAlwaysCheck extends Check {
     
-    long getPeriod();
+    int getPeriod();
 
     TimeUnit getTimeUnit();
 

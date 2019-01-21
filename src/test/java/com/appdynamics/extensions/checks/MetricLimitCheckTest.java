@@ -31,38 +31,37 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-
 /**
- * @author Akshay Srivastava
+ * @author Satish Muddam
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({MetricBlacklistLimitCheck.class, PathResolver.class})
-public class MetricBlacklistLimitCheckTest {
-
+@PrepareForTest({MetricLimitCheck.class, PathResolver.class})
+public class MetricLimitCheckTest {
 
     private Logger logger = Mockito.mock(Logger.class);
 
 
     @Test
-    public void testBlacklistMetricLimitReached() {
-
+    public void testMaxMetricLimitReached() {
+        
         PowerMockito.mockStatic(PathResolver.class);
         Mockito.when(PathResolver.resolveDirectory(AManagedMonitor.class)).thenReturn(new File("src/test/resources"));
 
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         long start = System.currentTimeMillis();
-        MetricBlacklistLimitCheck maxMetricLimitCheck = new MetricBlacklistLimitCheck(5, TimeUnit.SECONDS, logger);
+        MetricLimitCheck maxMetricLimitCheck = new MetricLimitCheck(5, TimeUnit.SECONDS, logger);
         maxMetricLimitCheck.check();
         long time = System.currentTimeMillis() - start;
 
-        Mockito.verify(logger, Mockito.times(2)).error(logCaptor.capture());
+        Mockito.verify(logger, Mockito.times(3)).error(logCaptor.capture());
 
         List<String> allValues = logCaptor.getAllValues();
 
         String value = allValues.get(0);
-        Assert.assertEquals(value, "Found blacklist metric limit reached error, below are the details");
+        Assert.assertEquals(value, "Found metric limit reached error, below are the details");
         Assert.assertNotNull(allValues.get(1));
+        Assert.assertNotNull(allValues.get(2));
         System.out.println("Took "+time+" ms");
     }
 }

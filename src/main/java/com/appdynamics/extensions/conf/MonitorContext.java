@@ -90,7 +90,7 @@ public class MonitorContext {
             cacheModule.initCache();
             metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(config);
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
-            healthCheckModule.initMATroubleshootChecks(config, monitorName, getControllerInfo(), getControllerAPIService());
+            healthCheckModule.initMATroubleshootChecks(config, monitorName, metricPrefix, getControllerInfo(), getControllerAPIService());
             dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, getControllerInfo(), getControllerAPIService());
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);

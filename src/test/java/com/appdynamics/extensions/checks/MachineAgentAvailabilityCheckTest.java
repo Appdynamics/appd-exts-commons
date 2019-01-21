@@ -15,6 +15,10 @@
 
 package com.appdynamics.extensions.checks;
 
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
@@ -27,10 +31,7 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Satish Muddam
@@ -46,7 +47,7 @@ public class MachineAgentAvailabilityCheckTest {
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         MetricAPIService metricAPIService = mock(MetricAPIService.class);
         when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(null, controllerAPIService, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(null, controllerAPIService, 5, TimeUnit.SECONDS, logger);
         machineAgentAvailabilityCheck.check();
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
         String value = logCaptor.getValue();
@@ -63,7 +64,7 @@ public class MachineAgentAvailabilityCheckTest {
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         MetricAPIService metricAPIService = mock(MetricAPIService.class);
         when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, 5, TimeUnit.SECONDS, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -87,7 +88,7 @@ public class MachineAgentAvailabilityCheckTest {
         when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
         when(metricAPIService.getMetricData(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(maStatusResponse(1)));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, 5, TimeUnit.SECONDS, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -111,7 +112,7 @@ public class MachineAgentAvailabilityCheckTest {
         when(controllerAPIService.getMetricAPIService()).thenReturn(metricAPIService);
         when(metricAPIService.getMetricData(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(maStatusResponse(0)));
 
-        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, logger);
+        MachineAgentAvailabilityCheck machineAgentAvailabilityCheck = new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, 5, TimeUnit.SECONDS, logger);
         machineAgentAvailabilityCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
@@ -127,15 +128,15 @@ public class MachineAgentAvailabilityCheckTest {
                 "  \"metricPath\": \"Application Infrastructure Performance|mytier|Agent|Machine|Availability\",\n" +
                 "  \"frequency\": \"ONE_MIN\",\n" +
                 "  \"metricValues\": [  {\n" +
-                "    \"occurrences\": "+value+",\n" +
+                "    \"occurrences\": " + value + ",\n" +
                 "    \"current\": \"+value+\",\n" +
                 "    \"min\": 2147483647,\n" +
                 "    \"max\": -2147483648,\n" +
                 "    \"startTimeInMillis\": 1508940780000,\n" +
                 "    \"useRange\": false,\n" +
-                "    \"count\": "+value+",\n" +
-                "    \"sum\": "+value+",\n" +
-                "    \"value\": "+value+",\n" +
+                "    \"count\": " + value + ",\n" +
+                "    \"sum\": " + value + ",\n" +
+                "    \"value\": " + value + ",\n" +
                 "    \"standardDeviation\": 0\n" +
                 "  }]\n" +
                 "}]s";
