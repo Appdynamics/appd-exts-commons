@@ -16,8 +16,7 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.Constants;
-import com.appdynamics.extensions.util.CryptoUtil;
-import com.appdynamics.extensions.crypto.Decryptor;
+import com.appdynamics.extensions.util.CryptoUtils;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.util.StringUtils;
@@ -167,7 +166,7 @@ public class Http4ClientBuilder {
                         if (authScope != null) {
                             credsProvider.setCredentials(
                                     authScope,
-                                    new UsernamePasswordCredentials(username, CryptoUtil.getPassword(server, (String)config.get(ENCRYPTION_KEY))));
+                                    new UsernamePasswordCredentials(username, CryptoUtils.getPassword(server, (String)config.get(ENCRYPTION_KEY))));
                             logger.info("Created credentials for auth scope {}", authScope);
                         }
                     } else {
@@ -214,7 +213,7 @@ public class Http4ClientBuilder {
                     HttpHost proxy = new HttpHost(url.getHost(), url.getPort(), url.getProtocol());
                     String proxyUserName = proxyMap.get("username");
                     if (!Strings.isNullOrEmpty(proxyUserName)) {
-                        String proxyPassword = CryptoUtil.getPassword(proxyMap, (String)propMap.get(ENCRYPTION_KEY));
+                        String proxyPassword = CryptoUtils.getPassword(proxyMap, (String)propMap.get(ENCRYPTION_KEY));
                         credsProvider.setCredentials(
                                 new AuthScope(url.getHost(), url.getPort()),
                                 new UsernamePasswordCredentials(proxyUserName, proxyPassword));
@@ -406,7 +405,7 @@ public class Http4ClientBuilder {
             passwordMap.put(PASSWORD, password);
             passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
             passwordMap.put(ENCRYPTION_KEY, propMap.get(ENCRYPTION_KEY));
-            String keystorePassword = CryptoUtil.getPassword(passwordMap);
+            String keystorePassword = CryptoUtils.getPassword(passwordMap);
             return Strings.isNullOrEmpty(keystorePassword) ? null : keystorePassword.toCharArray();
         }
         logger.warn("Returning null password for sslKeyStore");
@@ -428,7 +427,7 @@ public class Http4ClientBuilder {
             passwordMap.put(PASSWORD, password);
             passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
             passwordMap.put(ENCRYPTION_KEY, propMap.get(ENCRYPTION_KEY));
-            String truststorePassword = CryptoUtil.getPassword(passwordMap);
+            String truststorePassword = CryptoUtils.getPassword(passwordMap);
             return Strings.isNullOrEmpty(truststorePassword) ? null : truststorePassword.toCharArray();
         }
         logger.warn("Returning null password for sslTrustStore");

@@ -15,7 +15,6 @@
 
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.crypto.Decryptor;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -133,7 +132,7 @@ public class SSLUtils {
             passwordMap.put(PASSWORD, password);
             passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
             passwordMap.put(ENCRYPTION_KEY, encryptionKey);
-            String keystorePassword = CryptoUtil.getPassword(passwordMap);
+            String keystorePassword = CryptoUtils.getPassword(passwordMap);
             return Strings.isNullOrEmpty(keystorePassword) ? null : keystorePassword;
         }
         logger.warn("Returning null password for sslKeyStore");
@@ -188,7 +187,7 @@ public class SSLUtils {
             passwordMap.put(PASSWORD, password);
             passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
             passwordMap.put(ENCRYPTION_KEY, encryptionKey);
-            String truststorePassword = CryptoUtil.getPassword(passwordMap);
+            String truststorePassword = CryptoUtils.getPassword(passwordMap);
             return Strings.isNullOrEmpty(truststorePassword) ? null : truststorePassword;
         }
         logger.warn("Returning null password for sslTrustStore");

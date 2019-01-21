@@ -20,14 +20,17 @@ import org.junit.Test;
 
 public class EncryptDecryptTest {
 
-    private static final String PLAIN_TEXT = "This is a plain text.";
-    private static final String ENCRYPTION_KEY = "HelloWorld";
+    @Test
+    public void generateEncryptedTextTest() {
+        Encryptor encryptor = new Encryptor("encryptionKey");
+        String encryptedTextRetrieved = encryptor.encrypt("plainText");
+        Assert.assertEquals("avQa9cYNOoO6Ba1p3He+HQ==", encryptedTextRetrieved);
+    }
 
     @Test
-    public void canEncryptDecryptText(){
-        Encryptor encryptor = new Encryptor(ENCRYPTION_KEY);
-        String encryptedText = encryptor.encrypt(PLAIN_TEXT);
-        Decryptor decryptor = new Decryptor(ENCRYPTION_KEY);
-        Assert.assertTrue(PLAIN_TEXT.equals(decryptor.decrypt(encryptedText)));
+    public void generatePlainTextFromEncryptedTextAndEncryptionKeyTest() {
+        Decryptor decryptor = new Decryptor("encryptionKey");
+        String plainTextRetrieved = decryptor.decrypt("avQa9cYNOoO6Ba1p3He+HQ==");
+        Assert.assertEquals("plainText", plainTextRetrieved);
     }
 }

@@ -26,9 +26,9 @@ import java.util.Map;
 import static com.appdynamics.extensions.Constants.*;
 import static com.appdynamics.extensions.SystemPropertyConstants.ENCRYPTION_KEY_PROPERTY;
 
-public class CryptoUtil {
+public class CryptoUtils {
 
-    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CryptoUtil.class);
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(CryptoUtils.class);
     private static URLCodec codec = new URLCodec("UTF-8");
 
     //#TODO Refactor the following

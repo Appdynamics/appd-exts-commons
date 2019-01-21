@@ -15,9 +15,8 @@
 
 package com.appdynamics.extensions.controller;
 
-import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.CryptoUtil;
+import com.appdynamics.extensions.util.CryptoUtils;
 import com.appdynamics.extensions.util.NumberUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -56,7 +55,7 @@ public class ControllerInfoFactory {
         getControllerInfoFromSystemProperties();
         logger.debug("The resolved properties after controller-info.xml and system properties are {}", controllerInfo);
         getControllerInfoFromYml(config);
-        controllerInfo.setPassword(CryptoUtil.getPassword(getPasswordMap()));
+        controllerInfo.setPassword(CryptoUtils.getPassword(getPasswordMap()));
         logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", controllerInfo);
         /*
         #TODO FULL AGENT RESOLVER
