@@ -132,7 +132,7 @@ Possible values are AVERAGE, SUM and CURRENT.
 ****clusterRollUpType:**** The cluster-rollup qualifier specifies how the controller aggregates metric values from individual nodes in a tier.
 Possible values are INDIVIDUAL and COLLECTIVE.
 
-For more details on Metric Qualifers, refer to [Metric Qualifiers]().
+For more details on Metric Qualifers, refer to [Metric Qualifiers](https://docs.appdynamics.com/display/PRO45/Build+a+Monitoring+Extension+Using+Java#BuildaMonitoringExtensionUsingJava-create_mon_extCreatetheMonitoringExtensionClass).
 
 These qualifiers can be set for every metric in the `metrics.xml` or `config.yml`. If qualifiers for a particular metric are not specified, the SDK automatically applies `aggregationType=AVERAGE, timeRollupType=AVERAGE, clusterRollupType=INDIVIDUAL`. 
 
