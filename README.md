@@ -384,7 +384,7 @@ taskSchedule:
  
 ```
 
-For more details on how to use task scheduler, refer to [Task Scheduler](https://community.appdynamics.com/t5/Knowledge-Base/Task-Schedule-for-Extensions/ta-p/35414).
+For more details on how to use task scheduler, refer to [Task Schedule](https://community.appdynamics.com/t5/Knowledge-Base/Task-Schedule-for-Extensions/ta-p/35414).
 
 ## Workbench
 
