@@ -62,7 +62,8 @@ The `monitor.xml` should also point to a `config.yml`. Below is a sample `monito
 For more details on monitor.xml, refer to: [Creating monitor.xml](https://docs.appdynamics.com/display/PRO45/Build+a+Monitoring+Extension+Using+Java#BuildaMonitoringExtensionUsingJava-create_mon_xmlCreatemonitor.xml).
 ### config.yml
 Every monitoring extension should ship with a `config.yml`. This file should define the configuration of the extension artifact.
-In addition to the configuration, the SDK reads the `config.yml` to load and initialize all the different features mentioned [below](#Features).
+In addition to the configuration, the SDK reads the `config.yml` to load and initialize all the different features
+ mentioned [below](#Features).
   
 
 ### metrics.xml
@@ -97,7 +98,8 @@ public class SampleMonitor extends ABaseMonitor {
 ```
 
 
-For more details on how to use this Java SDK to build an AppDynamics extension, please check [Extension Starter project](https://github.com/Appdynamics/extension-starter).
+For more details on how to use this Java SDK to build an AppDynamics extension, 
+please check [Extension Starter project](https://github.com/Appdynamics/extension-starter).
 
 # Features
 
@@ -149,7 +151,7 @@ The SDK provides an automated utility that allows extensions developers to trans
 
 When MetricWriteHelper.transformAndPrintMetrics() is called, transformers applicable to every metric will be applied.  
 
-For more details on metric transformers, check [Metric Transformers]().
+For more details on metric transformers, check [Metric Transformers](https://community.appdynamics.com/t5/Knowledge-Base/Extensions-Commons-Library-Metric-Transformers/ta-p/35413).
 
 ## Metric Path CharSequence Replacement
 
@@ -174,7 +176,7 @@ metricPathReplacements:
 Note: The SDK, by default, loads certain metricPathReplacements rules to replace special characters like comma(,),|,colon(:) in the tokens with empty strings.
 These defaults can also be overridden using the `metricPathReplacements` section in the `config.yml`.
 
-For more details on CharSequence Replacement, refer [Metric Path CharSequence Replacement]().
+For more details on CharSequence Replacement, refer [Metric Path CharSequence Replacement](https://community.appdynamics.com/t5/Knowledge-Base/Metric-Path-CharSequence-Replacements-in-Extensions/ta-p/35412).
 
 ## Encrypting Clear Text Passwords
 The SDK provides a mechanism to encrypt clear text passwords that need to be defined in the `config.yml`. 
@@ -256,7 +258,7 @@ proxy:
   encryptedPassword: ""
 ```
 
-For more detailed explanation on HTTP Client, refer to [HTTP Client]().
+For more detailed explanation on HTTP Client, refer to [HTTP Client](https://community.appdynamics.com/t5/Knowledge-Base/HttpClient-used-in-Extensions/ta-p/35410).
 
 ## Controller Info
 The SDK automatically pulls the Controller information and builds a ControllerInfo object which is made available to the extension developer via
@@ -291,7 +293,7 @@ The ControllerInfo object is built by loading the properties from the following 
 2. System Properties
 3. config.yml
 
-For more details on ControllerInfo, check [How do I auto upload dashboards from Extensions]().
+For more details on ControllerInfo, check [How do I auto upload dashboards from Extensions](https://community.appdynamics.com/t5/Knowledge-Base/Uploading-Dashboards-automatically-with-AppDynamics-Extensions/ta-p/35408#ControllerInfo).
 
 ## Auto Upload Custom Dashboards
 
@@ -309,7 +311,7 @@ customDashboard:
     sslCertCheckEnabled: false
 ```
 
-For more details on this feature, check [Uploading Dashboards automatically with AppDynamics Extensions]().
+For more details on this feature, check [Uploading Dashboards automatically with AppDynamics Extensions](https://community.appdynamics.com/t5/Knowledge-Base/Uploading-Dashboards-automatically-with-AppDynamics-Extensions/ta-p/35408).
 
 
 
@@ -357,7 +359,7 @@ The Events Service client can be used to execute standard CRUD operations. The e
 ABaseMonitor.getContextConfiguration().getContext().getEventsServiceDataManager()
 ``` 
 
-For more details about the Events Service client, check [Events Service Client]().
+For more details about the Events Service client, check [Events Service Client](https://community.appdynamics.com/t5/Knowledge-Base/Use-Events-Service-with-Extensions/ta-p/35411).
 
 
 
@@ -382,7 +384,7 @@ taskSchedule:
  
 ```
 
-For more details on how to use task scheduler, refer to [Task Scheduler]().
+For more details on how to use task scheduler, refer to [Task Scheduler](https://community.appdynamics.com/t5/Knowledge-Base/Task-Schedule-for-Extensions/ta-p/35414).
 
 ## Workbench
 
@@ -413,7 +415,7 @@ For more details on workbench, check [How to use the Extensions WorkBench](https
 The SDK runs a few checks to validate the controller and machine agent configuration and to ensure an error-free run of any configured extension. These checks also monitor the log messages in the machine agent logs to help troubleshoot any issues. 
 A summary of all the different checks and issues detected is placed in `<machine-agent-dir>/logs/monitor-checks/<extension-name>.log`
 
-For more details on what health checks are defined, refer to [Health Checks]().
+For more details on what health checks are defined, refer to [Health Checks](https://community.appdynamics.com/t5/Knowledge-Base/Extension-HealthChecks/ta-p/35409).
 
 
 ## Extension Logger
