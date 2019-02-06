@@ -59,7 +59,7 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (isValidMetric(controllerInfo, metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
+        if (isValidMetric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
             if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
                 logger.debug("Scheduled mode is enabled, caching the metric {}", metric);

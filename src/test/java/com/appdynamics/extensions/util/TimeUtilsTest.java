@@ -39,6 +39,32 @@ public class TimeUtilsTest {
     }
 
     @Test
+    public void whenAppropriateTimeAndPatternAndTimeZoneThenReturnFormattedTime() {
+        Long timeInMillis = 1538962125642L;
+        String timeStamp = TimeUtils.getFormattedTimestamp(timeInMillis, "yyyy-MM-dd HH:mm:ss z", "GMT");
+        TimeZone zone = TimeZone.getDefault();
+        String displayName = zone.getDisplayName();
+        if(displayName.equalsIgnoreCase("Pacific Standard Time")) {
+            Assert.assertTrue(timeStamp.equals("2018-10-08 01:28:45 GMT"));
+        } else {
+            Assert.assertTrue(timeStamp != null && timeStamp.length() > 0);
+        }
+    }
+
+    @Test
+    public void testWithDifferentPattern() {
+        Long timeInMillis = System.currentTimeMillis();
+        String timeStamp = TimeUtils.getFormattedTimestamp(timeInMillis, "yyyy-MM-dd'T'HH:mm:ss'Z'", "GMT");
+        TimeZone zone = TimeZone.getDefault();
+        String displayName = zone.getDisplayName();
+        if(displayName.equalsIgnoreCase("Pacific Standard Time")) {
+            Assert.assertTrue(timeStamp.equals("2018-10-08T01:28:45Z"));
+        } else {
+            Assert.assertTrue(timeStamp != null && timeStamp.length() > 0);
+        }
+    }
+
+    @Test
     public void whenTimeIsNullAndPatternIsAppropriateThenReturnNull() {
         Long timeInMillis = null;
         String timeStamp = TimeUtils.getFormattedTimestamp(timeInMillis, "yyyy-MM-dd HH:mm:ss z");

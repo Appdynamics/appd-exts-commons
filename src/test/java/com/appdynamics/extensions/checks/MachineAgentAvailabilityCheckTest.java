@@ -15,10 +15,6 @@
 
 package com.appdynamics.extensions.checks;
 
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
@@ -32,6 +28,10 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Satish Muddam

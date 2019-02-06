@@ -20,6 +20,7 @@ import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.collect.Lists;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -34,10 +35,11 @@ import java.util.stream.Collectors;
 
 import static com.appdynamics.extensions.eventsservice.utils.Constants.*;
 import static com.appdynamics.extensions.http.HttpClientUtils.closeHttpResponse;
+import static com.appdynamics.extensions.http.HttpClientUtils.logger;
 
 /**
  * This class is an SDK for developers to communicate with the AppDynamics Events Service. It supports CRUD operations
- * for Schemas and batch publishing of Events.
+ * for Schemas, batch publishing of Events and querying for events.
  *
  * @author : Aditya Jagtiani
  * @since : 2.2.0
@@ -47,6 +49,7 @@ public class EventsServiceDataManager {
     private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceDataManager.class);
     private Map<String, ?> eventsServiceParameters;
     private CloseableHttpClient httpClient;
+    // #TODO HttpResponse is a shared object.Need to check this.
     private CloseableHttpResponse httpResponse;
     private HttpHost httpHost;
     private String globalAccountName, eventsApiKey;
@@ -75,7 +78,7 @@ public class EventsServiceDataManager {
      */
     public void createSchema(String schemaName, String schemaBody) {
         try {
-            httpResponse = executeHttpPost(buildRequestUri(schemaName, SCHEMA_PATH_PARAMS), schemaBody);
+            httpResponse = executeHttpPost(buildRequestUri(schemaName, SCHEMA_PATH), schemaBody);
             if (isResponseSuccessful(httpResponse)) {
                 LOGGER.info("Schema: {} successfully created & registered with the Events Service", schemaName);
             } else {
@@ -99,7 +102,7 @@ public class EventsServiceDataManager {
      * @return String representing the Schema body
      */
     public String retrieveSchema(String schemaName) {
-        HttpGet httpGet = new HttpGet(buildRequestUri(schemaName, SCHEMA_PATH_PARAMS));
+        HttpGet httpGet = new HttpGet(buildRequestUri(schemaName, SCHEMA_PATH));
         httpGet.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
         httpGet.setHeader(API_KEY_HEADER, eventsApiKey);
         httpGet.setHeader(ACCEPT_HEADER, ACCEPTED_CONTENT_TYPE);
@@ -131,7 +134,7 @@ public class EventsServiceDataManager {
         if (!StringUtils.hasText(retrieveSchema(schemaName))) {
             LOGGER.error("Schema: {} does not exist. Create the schema before proceeding", schemaName);
         } else {
-            HttpPatch httpPatch = new HttpPatch(buildRequestUri(schemaName, SCHEMA_PATH_PARAMS));
+            HttpPatch httpPatch = new HttpPatch(buildRequestUri(schemaName, SCHEMA_PATH));
             httpPatch.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
             httpPatch.setHeader(API_KEY_HEADER, eventsApiKey);
             httpPatch.setHeader(ACCEPT_HEADER, ACCEPTED_CONTENT_TYPE);
@@ -155,7 +158,6 @@ public class EventsServiceDataManager {
     // endregion
 
     //region <Schema Delete>
-
     /**
      * This method is used to delete existing Schemas
      *
@@ -176,7 +178,7 @@ public class EventsServiceDataManager {
         if (!StringUtils.hasText(retrieveSchema(schemaName))) {
             LOGGER.error("Schema: {} does not exist. Unable to delete", schemaName);
         } else {
-            HttpDelete httpDelete = new HttpDelete(buildRequestUri(schemaName, SCHEMA_PATH_PARAMS));
+            HttpDelete httpDelete = new HttpDelete(buildRequestUri(schemaName, SCHEMA_PATH));
             httpDelete.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
             httpDelete.setHeader(API_KEY_HEADER, eventsApiKey);
             try {
@@ -210,7 +212,7 @@ public class EventsServiceDataManager {
     private void publishBatch(String schemaName, List<String> eventBatch) {
         try {
             String batchBody = eventBatch.stream().collect(Collectors.joining(",", "[", "]"));
-            httpResponse = executeHttpPost(buildRequestUri(schemaName, EVENT_PATH_PARAM), batchBody);
+            httpResponse = executeHttpPost(buildRequestUri(schemaName, PUBLISH_PATH), batchBody);
             if (isResponseSuccessful(httpResponse)) {
                 LOGGER.info("Batch with {} events successfully published for schema: {}", eventBatch.size(), schemaName);
             } else {
@@ -221,6 +223,28 @@ public class EventsServiceDataManager {
         } finally {
             closeHttpResponse(httpResponse);
         }
+    }
+    //endregion
+
+    //region <Utilities>
+    /**
+     * This method is used to query events from the Events Service.
+     *
+     * @param query The required query to be executed on the Events Service.
+     */
+    public String querySchema(String query) {
+        try {
+            CloseableHttpResponse httpResponse = executeHttpPost(buildRequestUri("", QUERY_PATH), query);
+            if (isResponseSuccessful(httpResponse)) {
+                LOGGER.info("Query : {} successful", query);
+                return EntityUtils.toString(httpResponse.getEntity());
+            }
+        } catch (Exception e) {
+            logger.error("Error encountered while querying : " + query, e);
+        } finally {
+            closeHttpResponse(httpResponse);
+        }
+        return "";
     }
     //endregion
 

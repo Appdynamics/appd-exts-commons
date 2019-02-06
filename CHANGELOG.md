@@ -1,13 +1,16 @@
 # AppDynamics Extensions SDK CHANGELOG
 
-## 2.1.2 - Sept 21, 2018
-1. Capability to send a custom dashboard to the Controller
-2. Gather information to build a ControllerInfo Object that can be used to get all necessary information required to 
-send Dashboards, Health Rules, etc.
-
-## 2.1.1 - Sep 7th, 2018
-1. Removed getTaskCount()in ABaseMonitor.java and added getServers() to hold the list of servers from config.yml in ABaseMonitor.java and TaskExecutionServiceprovider.java.
-2. In MetricWriteHelper.java, added a new metric "Metrics Uploaded".
+## 2.2.0 - Feb 15, 2019
+1. Ability to pass configuration data to extensions via environment variables.
+2. ControllerInfo for representing the Controller Information, ControllerClient and ControllerAPIService for calling Controller APIs.
+3. Implemented SSLUtils for creating custom SSLContext.
+4. Created an EventsService API that can be used to create schemas, delete schemas and publish events to the EventsService.
+5. Implemeted the ability to upload custom dashboards to the controller.
+6. Health Checks feature that detects and logs some common issues to health check logs.
+7. Implemeted MetricCharReplacer.
+8. Enhanced Metric Validations to prevent invalid metric registrations.
+9. Added a new metric "Metrics Uploaded".
+10. Logging start time and endTime of each extension job run.
 
 ## 2.1.0 - Apr 5, 2018
 1. Extracted Configuration and Context from the MonitorConfiguration and dissolved it.

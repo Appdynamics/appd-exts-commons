@@ -51,22 +51,24 @@ public class ControllerInfoFactory {
         if(installDir != null) {
             getControllerInfoFromXml(installDir);
         }
-        logger.debug("The resolved properties from controller-info.xml are {}", controllerInfo);
+        logger.debug("The resolved properties from machine agent configFile are {}", controllerInfo);
         getControllerInfoFromSystemProperties();
-        logger.debug("The resolved properties after controller-info.xml and system properties are {}", controllerInfo);
+        logger.debug("The resolved properties after machine agent configFile and system properties are {}", controllerInfo);
         getControllerInfoFromYml(config);
         controllerInfo.setPassword(CryptoUtils.getPassword(getPasswordMap()));
-        logger.debug("The resolved properties after controller-info.xml, system properties and config.yml are {}", controllerInfo);
+        logger.debug("The resolved properties after machine agent configFile, system properties and config.yml are {}", controllerInfo);
         /*
         #TODO FULL AGENT RESOLVER
-        1. MA with one app agent, automatically resolve app, tier and node.
-        2. *MA with multiple app agents does *require* resolving. It can have non sim and non AppTierNode, for this case have a separate field in the controllerinfo*
-        3. MA with no agents, throw a run time exception.
+        1. MA with no agents (or) MA with app, tier, node configured => throw a run time exception.
+        2. MA with one app agent => It will have non sim and non AppTierNode, automatically resolve app, tier and node.
+        3. *MA with multiple app agents does *require* resolving => It will have non sim and non AppTierNode, for this case have a separate field in the controllerinfo*
+        4. SIM with app, tier, node configured (or) SIM with one or more app agents => It will have sim and AppTierNode, for this case have a separate field in the controllerinfo*
         */
         return controllerInfo;
     }
 
     private static void resetControllerInfo() {
+        logger.debug("Resetting the ControllerInfo");
         controllerInfo.setControllerHost(null);
         controllerInfo.setControllerPort(null);
         controllerInfo.setControllerSslEnabled(null);
@@ -89,9 +91,12 @@ public class ControllerInfoFactory {
         logger.info("The install directory is resolved to {}", directory.getAbsolutePath());
         if (directory.exists()) {
             File xmlControllerInfoFile = new File(new File(directory, "conf"), "controller-info.xml");
+            String configFilePath = System.getProperty("appdynamics.machine.agent.configFile");
             if (xmlControllerInfoFile.exists()) {
+                logger.debug("conf/controller-info.xml present. Getting ControllerInfo from conf/controller-info.xml");
                 fromXml(xmlControllerInfoFile);
-            } else if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.machine.agent.configFile"))) {
+            } else if (!Strings.isNullOrEmpty(configFilePath)) {
+                logger.debug("conf/controller-info.xml not present. Getting ControllerInfo from {}", configFilePath);
                 xmlControllerInfoFile = new File(System.getProperty("appdynamics.machine.agent.configFile"));
                 fromXml(xmlControllerInfoFile);
             }
@@ -127,6 +132,9 @@ public class ControllerInfoFactory {
     }
 
     private static void getControllerInfoFromSystemProperties() {
+        if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.machine.agent.hierarchyPath"))) {
+            controllerInfo.setMachinePath(System.getProperty("appdynamics.machine.agent.hierarchyPath"));
+        }
         if (!Strings.isNullOrEmpty(System.getProperty("appdynamics.agent.accountAccessKey"))) {
             controllerInfo.setAccountAccessKey(System.getProperty("appdynamics.agent.accountAccessKey"));
         }

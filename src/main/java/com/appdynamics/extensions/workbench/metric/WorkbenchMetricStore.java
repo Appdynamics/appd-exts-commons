@@ -62,7 +62,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
 
     @Override
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (isValidMetric(controllerInfo, metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
+        if (isValidMetric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
             addMetric(metricPath, new BigDecimal(metricValue));
         } else {
             logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, metricValue);
@@ -70,7 +70,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
-        if (isValidString(metricPath) && isValidMetricPath(controllerInfo, metricPath)) {
+        if (isValidString(metricPath) && isValidMetricPath(metricPath)) {
             addMetric(metricPath, value);
         } else {
             logger.error("The metric is not valid. Path - [{}], Value - {}", metricPath, value);

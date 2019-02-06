@@ -48,19 +48,27 @@ public class SSLUtils {
 
     private static Logger logger = ExtensionsLoggerFactory.getLogger(SSLUtils.class);
 
-    public static SSLSocketFactory createSSLSocketFactory(File installDir, Map<String, ?> propMap) throws Exception {
+    public static SSLContext createSSLContext(File installDir, Map<String, ?> propMap) throws Exception {
         try {
             Map<String, ?> connectionMap = (Map<String, ?>)propMap.get("connection");
             String encryptionKey = (String)propMap.get("encryptionKey");
             //#TODO Add protocols from connections.
             SSLContext context = SSLContext.getInstance(getSSLProtocol(connectionMap));
+
             KeyStore keyStore = buildKeyStore(installDir, connectionMap, encryptionKey);
-            String keyStorePassword = getKeyStorePassword(connectionMap, encryptionKey);
+            if(keyStore == null) {
+                logger.info("Couldn't resolve the keystore. It will be null");
+            }
+            char[] keyStorePassword = getKeyStorePassword(connectionMap, encryptionKey);
+
             KeyStore trustStore = buildTrustStore(installDir, connectionMap, encryptionKey);
+            if(trustStore == null) {
+                logger.info("Couldn't resolve the truststore. The default jre truststore will be used");
+            }
 
             //#TODO Check for an empty keystore.
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore, keyStorePassword == null ? null : keyStorePassword.toCharArray());
+            keyManagerFactory.init(keyStore, keyStorePassword);
             KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
 
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -68,7 +76,7 @@ public class SSLUtils {
             TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
 
             context.init( keyManagers, trustManagers, new SecureRandom());
-            return context.getSocketFactory();
+            return context;
         } catch (Exception e) {
             throw e;
         }
@@ -82,7 +90,7 @@ public class SSLUtils {
                 return protocol;
             }
         }
-        return "default";
+        return "TLS";
     }
 
     //#TODO Need to fall back on ma-cacerts as well
@@ -92,33 +100,37 @@ public class SSLUtils {
         if(file != null && file.exists()) {
             try {
                 keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                String keyStorePath = (String)connectionMap.get("sslKeyStorePath");
-                String keyStorePassword = getKeyStorePassword(connectionMap, encryptionKey);
-                InputStream inputStream = new FileInputStream(keyStorePath);
-                keyStore.load(inputStream, keyStorePassword == null ? null : keyStorePassword.toCharArray());
+                char[] keyStorePassword = getKeyStorePassword(connectionMap, encryptionKey);
+                keyStore.load(new FileInputStream(file), keyStorePassword);
                 return keyStore;
             } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-                logger.error("Exception while creating a custom keystore. Will fallback on the jre default keystore if available", e);
+                logger.warn("Exception while creating a custom keystore. Will return null", e);
             }
         }
+        logger.warn("The KeyStore has not been built properly, returning null");
         return null;
     }
 
-    public static File getKeyStoreFile(File installDir, Map<String, ?> connectionMap) {
+    private static File getKeyStoreFile(File installDir, Map<String, ?> connectionMap) {
         File file = null;
-        if (connectionMap != null && connectionMap.get("sslKeyStorePath") != null && connectionMap.get("sslKeyStorePassword") != null) {
+        if (connectionMap != null && connectionMap.get("sslKeyStorePath") != null) {
             file = PathResolver.getFile((String)connectionMap.get("sslKeyStorePath"), installDir);
         }
         if (file == null || !file.exists()) {
+            logger.debug("The sslKeyStorePath field is either null or the file specified does not exist. Checking {} property", KEYSTORE_PATH_PROPERTY);
             file = PathResolver.getFile(System.getProperty(KEYSTORE_PATH_PROPERTY), installDir);
         }
         if(file == null || !file.exists()) {
+            logger.debug("The {} property is null or the file specified does not exist. Checking conf/extensions-clientcerts.jks", KEYSTORE_PATH_PROPERTY);
             file = PathResolver.getFile("conf/extensions-clientcerts.jks", installDir);
+        }
+        if(file == null || !file.exists()) {
+            logger.debug("The conf/extensions-clientcerts.jks is null or does not exist.");
         }
         return file;
     }
 
-    public static String getKeyStorePassword(Map<String, ?> connectionMap, String encryptionKey) {
+    public static char[] getKeyStorePassword(Map<String, ?> connectionMap, String encryptionKey) {
         if (connectionMap != null) {
             String password = (String)connectionMap.get("sslKeyStorePassword");
             String encryptedPassword = (String)connectionMap.get("sslKeyStoreEncryptedPassword");
@@ -133,7 +145,7 @@ public class SSLUtils {
             passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
             passwordMap.put(ENCRYPTION_KEY, encryptionKey);
             String keystorePassword = CryptoUtils.getPassword(passwordMap);
-            return Strings.isNullOrEmpty(keystorePassword) ? null : keystorePassword;
+            return Strings.isNullOrEmpty(keystorePassword) ? null : keystorePassword.toCharArray();
         }
         logger.warn("Returning null password for sslKeyStore");
         return null;
@@ -147,33 +159,37 @@ public class SSLUtils {
         if(file != null && file.exists()) {
             try {
                 trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                String trustStorePath = (String)connectionMap.get("sslTrustStorePath");
-                String trustStorePassword = getTrustStorePassword(connectionMap, encryptionKey);
-                InputStream inputStream = new FileInputStream(trustStorePath);
-                trustStore.load(inputStream, trustStorePassword == null ? null : trustStorePassword.toCharArray());
+                char[] trustStorePassword = getTrustStorePassword(connectionMap, encryptionKey);
+                trustStore.load(new FileInputStream(file), trustStorePassword);
                 return trustStore;
             } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-                logger.error("Exception while creating a custom truststore. Will fallback on the jre default truststore if available", e);
+                logger.warn("Exception while creating a custom truststore. Will fallback on the jre default truststore if available", e);
             }
         }
+        logger.warn("The TrustStore has not been built properly, returning null");
         return null;
     }
 
-    public static File getTrustStoreFile(File installDir, Map<String, ?> connectionMap) {
+    private static File getTrustStoreFile(File installDir, Map<String, ?> connectionMap) {
         File file = null;
-        if (connectionMap != null && connectionMap.get("sslTrustStorePath") != null && connectionMap.get("sslTrustStorePassword") != null) {
+        if (connectionMap != null && connectionMap.get("sslTrustStorePath") != null) {
             file = PathResolver.getFile((String)connectionMap.get("sslTrustStorePath"), installDir);
         }
         if (file == null || !file.exists()) {
-            file = PathResolver.getFile(System.getProperty(KEYSTORE_PATH_PROPERTY), installDir);
+            logger.debug("The sslTrustStorePath field is either null or the file specified does not exist. Checking {} property", TRUSTSTORE_PATH_PROPERTY);
+            file = PathResolver.getFile(System.getProperty(TRUSTSTORE_PATH_PROPERTY), installDir);
         }
         if(file == null || !file.exists()) {
+            logger.debug("The {} property is null or the file specified does not exist. Checking conf/extensions-cacerts.jks", TRUSTSTORE_PATH_PROPERTY);
             file = PathResolver.getFile("conf/extensions-cacerts.jks", installDir);
+        }
+        if(file == null || !file.exists()) {
+            logger.debug("The conf/extensions-cacerts.jks is null or does not exist.");
         }
         return file;
     }
 
-    public static String getTrustStorePassword(Map<String, ?> connectionMap, String encryptionKey) {
+    public static char[] getTrustStorePassword(Map<String, ?> connectionMap, String encryptionKey) {
         if (connectionMap != null) {
             String password = (String)connectionMap.get("sslTrustStorePassword");
             String encryptedPassword = (String)connectionMap.get("sslTrustStoreEncryptedPassword");
@@ -188,7 +204,7 @@ public class SSLUtils {
             passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
             passwordMap.put(ENCRYPTION_KEY, encryptionKey);
             String truststorePassword = CryptoUtils.getPassword(passwordMap);
-            return Strings.isNullOrEmpty(truststorePassword) ? null : truststorePassword;
+            return Strings.isNullOrEmpty(truststorePassword) ? null : truststorePassword.toCharArray();
         }
         logger.warn("Returning null password for sslTrustStore");
         return null;

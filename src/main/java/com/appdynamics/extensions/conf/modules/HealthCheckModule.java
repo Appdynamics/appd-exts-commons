@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static com.appdynamics.extensions.SystemPropertyConstants.HEALTHCHECKS_ENABLE_PROPERTY;
+
 /**
  * @author Satish Muddam
  */
@@ -45,7 +47,7 @@ public class HealthCheckModule {
 
     public void initMATroubleshootChecks(Map<String, ?> config, String monitorName, String metricPrefix, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
         // #TODO @venkata.konala These checks should not block this. Instead it should log in the health logs in the corresponding check.
-        String enableHealthChecksSysPropString = System.getProperty("enableHealthChecks");
+        String enableHealthChecksSysPropString = System.getProperty(HEALTHCHECKS_ENABLE_PROPERTY);
         Boolean enableHealthChecksSysProp = true;
         if (enableHealthChecksSysPropString != null) {
             enableHealthChecksSysProp = Boolean.valueOf(enableHealthChecksSysPropString);

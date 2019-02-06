@@ -15,17 +15,13 @@
 
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.crypto.Encryptor;
 import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Map;
-import java.util.zip.CheckedOutputStream;
 
-import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
-import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
-import static com.appdynamics.extensions.Constants.PASSWORD;
+import static com.appdynamics.extensions.Constants.*;
 import static com.appdynamics.extensions.SystemPropertyConstants.ENCRYPTION_KEY_PROPERTY;
 
 /**

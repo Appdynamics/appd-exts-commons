@@ -16,11 +16,9 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.Constants;
-import com.appdynamics.extensions.util.CryptoUtils;
+import com.appdynamics.extensions.util.*;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.appdynamics.extensions.util.PathResolver;
-import com.appdynamics.extensions.util.StringUtils;
-import com.appdynamics.extensions.util.YmlUtils;
+import com.appdynamics.extensions.util.SSLUtils.AllHostnameVerifier;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -73,8 +71,8 @@ import static com.appdynamics.extensions.SystemPropertyConstants.*;
  * appd-exts-commons/src/test/resources/expected.config.yml
  */
 public class Http4ClientBuilder {
-    public static final Logger logger = ExtensionsLoggerFactory.getLogger(Http4ClientBuilder.class);
 
+    public static final Logger logger = ExtensionsLoggerFactory.getLogger(Http4ClientBuilder.class);
 
     public static HttpClientBuilder getBuilder(String configYmlPath) {
         File file = PathResolver.getFile(configYmlPath, AManagedMonitor.class);
@@ -93,6 +91,10 @@ public class Http4ClientBuilder {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Error while reading the contextConfiguration from " + getPath(file), e);
         }
+    }
+
+    private static Object getPath(File file) {
+        return file != null ? file.getAbsolutePath() : null;
     }
 
     public static HttpClientBuilder getBuilder(Map<String, ?> propMap) {
@@ -202,7 +204,6 @@ public class Http4ClientBuilder {
         }
     }
 
-
     protected static void configureProxy(Map<String, ?> propMap, HttpClientBuilder builder, CredentialsProvider credsProvider) {
         Map<String, String> proxyMap = (Map<String, String>) propMap.get("proxy");
         if (proxyMap != null) {
@@ -237,7 +238,9 @@ public class Http4ClientBuilder {
     }
 
     protected static void configureSSL(Map<String, ?> propMap, HttpClientBuilder builder) {
+        File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
         Map connection = (Map) propMap.get("connection");
+        String encryptionKey = (String) propMap.get("encryptionKey");
         if (connection != null) {
             String[] sslProtocols = YmlUtils.asStringArray(connection.get("sslProtocols"));
             logger.info("The supported ssl protocols are {}", sslProtocols != null ? Arrays.toString(sslProtocols) : "default");
@@ -269,10 +272,15 @@ public class Http4ClientBuilder {
                 } else {
                     hostnameVerifier = new BrowserCompatHostnameVerifier();
                 }
-                KeyStore trustStore = loadDefaultTrustStore(propMap);
-                //for client certificates in keystore aka mutual auth on ssl
-                char[] keyStorePassword = getKeyStorePassword(propMap, connection);
-                KeyStore keyStore = loadKeyStore(propMap, keyStorePassword);
+                KeyStore trustStore = SSLUtils.buildTrustStore(installDir, connection, encryptionKey);
+                if(trustStore == null) {
+                    logger.info("Couldn't resolve the truststore for extensions. The default jre truststore will be used");
+                }
+                KeyStore keyStore = SSLUtils.buildKeyStore(installDir, connection, encryptionKey);
+                if(keyStore == null) {
+                    logger.info("Couldn't resolve the keystore for extensions. It will be null");
+                }
+                char[] keyStorePassword = SSLUtils.getKeyStorePassword(connection, encryptionKey);
 
                 try {
                     SSLContext sslContext = getSslContext(trustStore, keyStore, keyStorePassword);
@@ -298,7 +306,6 @@ public class Http4ClientBuilder {
         }
     }
 
-
     private static SSLContext getSslContext(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
         SSLContextBuilder sslContextBuilder = SSLContexts.custom();
         if (trustStore != null) {
@@ -310,154 +317,8 @@ public class Http4ClientBuilder {
         return sslContextBuilder.build();
     }
 
-    protected static KeyStore loadKeyStore(Map<String, ?> propMap, char[] keystorePassword) {
-        Map<String, ?> connection = (Map<String, ?>) propMap.get("connection");
-        File file = resolveKeyStorePath(connection);
-        if (file != null && file.exists()) {
-            try {
-                logger.debug("Loading the keystore from [{}]", file.getAbsolutePath());
-                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-                keystore.load(new FileInputStream(file), keystorePassword);
-                return keystore;
-            } catch (Exception e) {
-                logger.error("Error while loading the keystore from " + file.getAbsolutePath(), e);
-            }
-        } else {
-            logger.info("Couldn't resolve the keystore for extensions. The default jre keystore will be used");
-        }
-        return null;
-    }
-
-
-    protected static KeyStore loadDefaultTrustStore(Map<String, ?> propMap) {
-        Map<String, ?> connection = (Map<String, ?>) propMap.get("connection");
-        File file = resolveTrustStorePath(connection);
-        if (file != null && file.exists()) {
-            try {
-                logger.debug("Loading the truststore from [{}]", file.getAbsolutePath());
-                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-                char[] password = getTrustStorePassword(propMap, connection);
-                keystore.load(new FileInputStream(file), password);
-                return keystore;
-            } catch (Exception e) {
-                logger.error("Error while loading the truststore from " + file.getAbsolutePath(), e);
-            }
-        } else {
-            logger.info("Couldn't resolve the truststore for extensions. The default jre truststore will be used");
-        }
-        return null;
-    }
-
-    protected static File resolveKeyStorePath(Map<String, ?> connection) {
-        String property = System.getProperty(KEYSTORE_PATH_PROPERTY);
-        File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
-        File file = PathResolver.getFile(property, installDir);
-        logger.debug("The system property [appdynamics.agent.monitors.keystore.path] with value [{}] is resolved to file [{}]"
-                , property, getPath(file));
-        if (file == null || !file.exists()) {
-            String sslKeyStore = (String) connection.get("sslKeyStorePath");
-            file = PathResolver.getFile(sslKeyStore, installDir);
-            logger.debug("The config property [sslKeyStorePath] with value [{}] is resolved to file [{}]"
-                    , sslKeyStore, getPath(file));
-        }
-        if (file == null || !file.exists()) {
-            file = PathResolver.getFile("conf/extensions-clientcerts.jks", installDir);
-            if (file == null || !file.exists()) {
-                logger.debug("The sslKeyStorePath [{}] doesn't exist", getPath(file));
-            }
-        }
-        return file;
-    }
-
-
-    protected static File resolveTrustStorePath(Map<String, ?> connection) {
-        String property = System.getProperty(TRUSTSTORE_PATH_PROPERTY);
-        File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
-        File file = PathResolver.getFile(property, installDir);
-        logger.debug("The system property [appdynamics.agent.monitors.truststore.path] with value [{}] is resolved to file [{}]"
-                , property, getPath(file));
-        if (file == null || !file.exists()) {
-            String sslTrustStore = (String) connection.get("sslTrustStorePath");
-            file = PathResolver.getFile(sslTrustStore, installDir);
-            logger.debug("The config property [sslTrustStorePath] with value [{}] is resolved to file [{}]"
-                    , sslTrustStore, getPath(file));
-        }
-        if (file == null || !file.exists()) {
-            file = PathResolver.getFile("conf/extensions-cacerts.jks", installDir);
-            if (file == null || !file.exists()) {
-                logger.debug("The sslTrustStorePath [{}] doesn't exist", getPath(file));
-            }
-        }
-        return file;
-    }
-
-    protected static char[] getKeyStorePassword(Map<String, ?> propMap, Map<String, ?> connection) {
-        if (connection != null) {
-            String password = (String)connection.get("sslKeyStorePassword");
-            String encryptedPassword = (String)connection.get("sslKeyStoreEncryptedPassword");
-            if (Strings.isNullOrEmpty(password)) {
-                password = System.getProperty(KEYSTORE_PASSWORD_PROPERTY);
-            }
-            if(Strings.isNullOrEmpty(encryptedPassword)) {
-                encryptedPassword = System.getProperty(KEYSTORE_ENCRYPTED_PASSWORD_PROPERTY);
-            }
-            Map<String, Object> passwordMap = Maps.newHashMap();
-            passwordMap.put(PASSWORD, password);
-            passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
-            passwordMap.put(ENCRYPTION_KEY, propMap.get(ENCRYPTION_KEY));
-            String keystorePassword = CryptoUtils.getPassword(passwordMap);
-            return Strings.isNullOrEmpty(keystorePassword) ? null : keystorePassword.toCharArray();
-        }
-        logger.warn("Returning null password for sslKeyStore");
-        return null;
-    }
-
-
-    protected static char[] getTrustStorePassword(Map<String, ?> propMap, Map<String, ?> connection) {
-        if (connection != null) {
-            String password = (String)connection.get("sslTrustStorePassword");
-            String encryptedPassword = (String)connection.get("sslTrustStoreEncryptedPassword");
-            if (Strings.isNullOrEmpty(password)) {
-                password = System.getProperty(TRUSTSTORE_PASSWORD_PROPERTY);
-            }
-            if(Strings.isNullOrEmpty(encryptedPassword)) {
-                encryptedPassword = System.getProperty(TRUSTSTORE_ENCRYPTED_PASSWORD_PROPERTY);
-            }
-            Map<String, Object> passwordMap = Maps.newHashMap();
-            passwordMap.put(PASSWORD, password);
-            passwordMap.put(ENCRYPTED_PASSWORD, encryptedPassword);
-            passwordMap.put(ENCRYPTION_KEY, propMap.get(ENCRYPTION_KEY));
-            String truststorePassword = CryptoUtils.getPassword(passwordMap);
-            return Strings.isNullOrEmpty(truststorePassword) ? null : truststorePassword.toCharArray();
-        }
-        logger.warn("Returning null password for sslTrustStore");
-        return null;
-    }
-
-    private static Object getPath(File file) {
-        return file != null ? file.getAbsolutePath() : null;
-    }
-
     private static class TrustAllStrategy implements TrustStrategy {
         public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            return true;
-        }
-    }
-
-    private static class AllHostnameVerifier implements X509HostnameVerifier {
-        public void verify(String host, SSLSocket ssl)
-                throws IOException {
-        }
-
-        public void verify(String host, X509Certificate cert)
-                throws SSLException {
-        }
-
-        public void verify(String host, String[] cns,
-                           String[] subjectAlts) throws SSLException {
-        }
-
-        public boolean verify(String s, SSLSession sslSession) {
             return true;
         }
     }

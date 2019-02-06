@@ -36,9 +36,6 @@ public class Constants {
     public static final String ENCRYPTION_KEY = "encryptionKey";
     public static final String ENABLED = "enabled";
 
-    public static final String EXTENSIONS_CHECKS_LOG_LEVEL = "monitor.checks.log.level";
-
-
     public static String defaultIfEmpty(Map<String, String> taskArgs, String key, String defaultValue) {
         if (taskArgs.containsKey(key)) {
             String value = taskArgs.get(key);

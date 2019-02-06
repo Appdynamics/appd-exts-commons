@@ -19,8 +19,9 @@ package com.appdynamics.extensions.eventsservice.utils;
  * @author : Aditya Jagtiani
  */
 public class Constants {
-    public static final String SCHEMA_PATH_PARAMS = "/events/schema/";
-    public static final String EVENT_PATH_PARAM = "/events/publish/";
+    public static final String SCHEMA_PATH = "/events/schema/";
+    public static final String PUBLISH_PATH = "/events/publish/";
+    public static final String QUERY_PATH = "/events/query";
     public static final String ACCOUNT_NAME_HEADER = "X-Events-API-AccountName";
     public static final String API_KEY_HEADER = "X-Events-API-Key";
     public static final String ACCEPT_HEADER = "Accept";

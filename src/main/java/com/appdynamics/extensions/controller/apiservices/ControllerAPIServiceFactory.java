@@ -29,15 +29,8 @@ public class ControllerAPIServiceFactory {
     //#TODO Assert for ControllerClient
     public static ControllerAPIService initialize(ControllerInfo controllerInfo, ControllerClient controllerClient) {
         //#TODO @venkata.konala this reset is not needed.
-        resetControllerAPIService();
         AssertUtils.assertNotNull(controllerClient, "The ControllerClient is null");
         controllerAPIService.initialize(controllerInfo, controllerClient);
         return controllerAPIService;
-    }
-
-    private static void resetControllerAPIService() {
-        controllerAPIService.setApplicationModelAPIService(null);
-        controllerAPIService.setCustomDashboardAPIService(null);
-        controllerAPIService.setMetricAPIService(null);
     }
 }

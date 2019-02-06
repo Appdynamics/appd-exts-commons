@@ -36,10 +36,10 @@ public class ValidationUtils {
 
     // #TODO Move it out of here to a separate Validation class.
     // #TODO If SIM is enabled, then use Custom Metrics. Enforce this.
-    public static boolean isValidMetric(ControllerInfo controllerInfo, String metricPath, String metricValue,
+    public static boolean isValidMetric(String metricPath, String metricValue,
                                         String aggregationType, String timeRollup, String clusterRollup) {
        return isValidString(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue) &&
-               isValidMetricPath(controllerInfo, metricPath);
+               isValidMetricPath(metricPath);
     }
 
     public static boolean isValidString(String... args) {
@@ -64,22 +64,17 @@ public class ValidationUtils {
         return false;
     }
 
-    public static boolean isValidMetricPath(ControllerInfo controllerInfo, String metricPath) {
+    public static boolean isValidMetricPath(String metricPath) {
         if (!metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher
-                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(controllerInfo, metricPath)) {
+                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(metricPath)) {
             return true;
         }
         logger.debug("The metric path {} is invalid", metricPath);
         return false;
     }
 
-    public static boolean isValidMetricPrefix(ControllerInfo controllerInfo, String metricPath) {
+    public static boolean isValidMetricPrefix(String metricPath) {
         if (metricPath.startsWith("Server|Component:")) {
-            if(Boolean.TRUE.equals(controllerInfo.getSimEnabled())) {
-                logger.warn("Metric prefix {} should start with 'Custom Metrics|' (case sensitive) when SIM is enabled ",
-                        metricPath);
-                return false;
-            }
             List<String> tokens = MetricPathUtils.PIPE_SPLITTER.splitToList(metricPath);
             if (tokens.size() > 3 && tokens.get(2).equals("Custom Metrics")) {
                 List<String> component = COLON_SPLITTER.splitToList(tokens.get(1));
@@ -88,8 +83,8 @@ public class ValidationUtils {
                     return hasText(tier) && !tier.startsWith("<") && !tier.endsWith(">");
                 }
             }
-            logger.debug("Metric prefix {} is invalid. The third token of prefix should be 'Custom Metrics' (case sensitive) " +
-                    "Component should be configured", metricPath);
+            logger.debug("Metric prefix {} is invalid. Please make sure that the third token of prefix is 'Custom Metrics' (case sensitive) and " +
+                    "the 'Component' is configured", metricPath);
             return false;
         }
         if (metricPath.startsWith("Custom Metrics|")) {

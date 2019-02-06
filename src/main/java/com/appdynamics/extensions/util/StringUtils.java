@@ -85,6 +85,14 @@ public class StringUtils {
         return str;
     }
 
+    public static String trim(String str, String... trims) {
+        for(String trim : trims) {
+            str = trimLeading(str, trim);
+            str = trimTrailing(str, trim);
+        }
+        return str;
+    }
+
     public static String stripQuote(String str) {
         if (str != null) {
             return str.replaceAll("\"", "");

@@ -88,6 +88,26 @@ public class MockJettyServer {
         return server;
     }
 
+    public static Server startSSL(int port, String protocol, String keyStorePath) {
+        SslContextFactory factory = new SslContextFactory();
+        if (protocol != null) {
+            factory.setIncludeProtocols(protocol);
+        }
+        factory.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+        factory.setKeyStorePassword("changeit");
+        SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
+        sslConnector.setPort(port);
+        final Server server = new Server();
+        server.setConnectors(new Connector[]{sslConnector});
+        server.setHandler(new HelloHandler());
+        try {
+            server.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return server;
+    }
+
     public static Server startSSLWithMutualAuth(int port, String protocol, String keyStorePath, String keyStoreType, String trustStorePath, String trustStoreType) {
         SslContextFactory factory = new SslContextFactory();
         if (protocol != null) {

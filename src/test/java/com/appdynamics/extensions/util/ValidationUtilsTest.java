@@ -15,12 +15,8 @@
 
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.controller.ControllerInfo;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by venkata.konala on 1/11/19.
@@ -47,29 +43,23 @@ public class ValidationUtilsTest {
 
     @Test
     public void validMetricPathTest() {
-        ControllerInfo controllerInfo = mock(ControllerInfo.class);
-        when(controllerInfo.getSimEnabled()).thenReturn(false);
-        Assert.assertTrue(ValidationUtils.isValidMetricPath(controllerInfo, "Server|Component:123|Custom Metrics|Redis Monitor|test"));
-        Assert.assertFalse(ValidationUtils.isValidMetricPath(controllerInfo, "Server|Component:123|Custom Metrics|Redis Monitor|test|"));
-        Assert.assertFalse(ValidationUtils.isValidMetricPath(controllerInfo, "Server|Component:123|Custom Metrics|Redis,Monitor|test"));
-        Assert.assertFalse(ValidationUtils.isValidMetricPath(controllerInfo, "Server|Component:123|Custom Metrics|Redis Monitor||test"));
+        Assert.assertTrue(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis Monitor|test"));
+        Assert.assertFalse(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis Monitor|test|"));
+        Assert.assertFalse(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis,Monitor|test"));
+        Assert.assertFalse(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis Monitor||test"));
     }
 
     @Test
     public void validMetricPrefixWhenSIMEnabledTest() {
-        ControllerInfo controllerInfo = mock(ControllerInfo.class);
-        when(controllerInfo.getSimEnabled()).thenReturn(true);
-        Assert.assertFalse(ValidationUtils.isValidMetricPrefix(controllerInfo, "Server|Component:123|Custom Metrics|Redis Monitor|test"));
-        Assert.assertTrue(ValidationUtils.isValidMetricPrefix(controllerInfo, "Custom Metrics|Redis Monitor|test"));
+        Assert.assertTrue(ValidationUtils.isValidMetricPrefix("Server|Component:123|Custom Metrics|Redis Monitor|test"));
+        Assert.assertTrue(ValidationUtils.isValidMetricPrefix("Custom Metrics|Redis Monitor|test"));
 
     }
 
     @Test
     public void validMetricPrefixWhenSIMNotEnabledTest() {
-        ControllerInfo controllerInfo = mock(ControllerInfo.class);
-        when(controllerInfo.getSimEnabled()).thenReturn(false);
-        Assert.assertTrue(ValidationUtils.isValidMetricPrefix(controllerInfo, "Server|Component:123|Custom Metrics|Redis Monitor|test"));
-        Assert.assertFalse(ValidationUtils.isValidMetricPrefix(controllerInfo, "Server|Component:123|Agent|Redis Monitor|test"));
-        Assert.assertFalse(ValidationUtils.isValidMetricPrefix(controllerInfo, "Server|Component:<TIER ID>|Redis Monitor|test"));
+        Assert.assertTrue(ValidationUtils.isValidMetricPrefix("Server|Component:123|Custom Metrics|Redis Monitor|test"));
+        Assert.assertFalse(ValidationUtils.isValidMetricPrefix("Server|Component:123|Agent|Redis Monitor|test"));
+        Assert.assertFalse(ValidationUtils.isValidMetricPrefix("Server|Component:<TIER ID>|Redis Monitor|test"));
     }
 }

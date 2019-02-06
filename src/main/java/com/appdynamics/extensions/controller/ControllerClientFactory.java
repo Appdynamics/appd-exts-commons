@@ -15,11 +15,14 @@
 
 package com.appdynamics.extensions.controller;
 
+import com.appdynamics.extensions.conf.modules.ControllerModule;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,7 @@ import static com.appdynamics.extensions.Constants.*;
  * Created by venkata.konala on 12/19/18.
  */
 public class ControllerClientFactory {
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(ControllerClientFactory.class);
     private static String controllerBaseURL;
     private static HttpClientBuilder httpClientBuilder;
     private static final ControllerClient controllerClient = new ControllerClient();
@@ -37,12 +41,14 @@ public class ControllerClientFactory {
     public static ControllerClient initialize(ControllerInfo controllerInfo, Map<String, ?> connectionMap, Map<String, ?> proxyMap, String encryptionKey) {
         resetControllerClient();
         controllerBaseURL = buildURI(controllerInfo.getControllerHost(), String.valueOf(controllerInfo.getControllerPort()), controllerInfo.getControllerSslEnabled());
+        logger.debug("The controllerBaseURL has been built to {}", controllerBaseURL);
         httpClientBuilder = Http4ClientBuilder.getBuilder(getPropMap(controllerInfo, connectionMap, proxyMap, encryptionKey));
         initializeControllerClient();
         return controllerClient;
     }
 
     private static void resetControllerClient() {
+        logger.debug("Resetting the ControllerClient");
         controllerClient.setBaseURL(null);
         controllerClient.setHttpClient(null);
         controllerClient.setCookiesCsrf(null);

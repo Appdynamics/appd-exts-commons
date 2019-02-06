@@ -27,7 +27,6 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;

@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
+import static com.appdynamics.extensions.SystemPropertyConstants.WORKBENCH_MODE_PROPERTY;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -212,7 +212,7 @@ public class WorkBenchServer extends NanoHTTPD {
         final Map<String, String> taskArgs = getTaskArgs(monitor);
         final Object implClass = getImplClassInstance(monitor);
         if (implClass != null) {
-            System.setProperty(EXTENSION_WORKBENCH_MODE, "true");
+            System.setProperty(WORKBENCH_MODE_PROPERTY, "true");
             String host = "0.0.0.0";
             int port = 9090;
             if (args.length > 0) {

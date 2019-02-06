@@ -40,7 +40,7 @@ import java.util.Map;
 
 import static com.appdynamics.extensions.Constants.URI;
 import static com.appdynamics.extensions.util.SSLUtils.createHostNameVerifier;
-import static com.appdynamics.extensions.util.SSLUtils.createSSLSocketFactory;
+import static com.appdynamics.extensions.util.SSLUtils.createSSLContext;
 
 /**
  * Created by venkata.konala on 1/1/19.
@@ -97,7 +97,7 @@ public class CustomDashboardAPIService extends APIService{
             }
             if (connection instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                httpsURLConnection.setSSLSocketFactory(createSSLSocketFactory(PathResolver.resolveDirectory(ABaseMonitor.class), propMap));
+                httpsURLConnection.setSSLSocketFactory(createSSLContext(PathResolver.resolveDirectory(ABaseMonitor.class), propMap).getSocketFactory());
                 httpsURLConnection.setHostnameVerifier(createHostNameVerifier(connectionMap));
             }
             connection.setUseCaches(false);

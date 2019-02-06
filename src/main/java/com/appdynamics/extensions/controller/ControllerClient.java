@@ -67,6 +67,7 @@ public class ControllerClient {
     public synchronized CookiesCsrf getCookiesCsrf() throws ControllerHttpRequestException{
         if (cookiesCsrf == null) {
             cookiesCsrf = getCookiesAndAuthToken();
+            logger.debug("The cookiesCsrf of the ControllerClient has been set.");
         }
         return cookiesCsrf;
     }
@@ -86,7 +87,7 @@ public class ControllerClient {
                 responseString = EntityUtils.toString(response.getEntity());
                 logger.debug("Response for url [{}] is [{}]", url, responseString);
             } else if (statusLine != null) {
-                logger.error("The controller API returned an invalid response {}, so cannot get a list of all dashboards."
+                logger.error("The controller API returned an invalid response {}"
                         , statusLine.getStatusCode());
             }
             return responseString;
@@ -129,7 +130,7 @@ public class ControllerClient {
                 }
                 logger.debug("The controller login is successful, the cookie is [{}] and csrf is {}", cookies, csrf);
             } else if (statusLine != null) {
-                logger.error("Custom Dashboard Upload Failed. The login to the controller is unsuccessful. The response code is {}"
+                logger.error("The login to the controller is unsuccessful. The response code is {}"
                         , statusLine.getStatusCode());
                 logger.error("The response headers are {} and content is {}", Arrays.toString(response.getAllHeaders()), response.getEntity());
             }

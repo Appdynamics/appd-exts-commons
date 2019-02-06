@@ -19,6 +19,7 @@ import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
  * Created by venkata.konala on 9/6/18.
@@ -33,6 +34,17 @@ public class TimeUtils {
             return simpleDateFormat.format(timeInMilli);
         } catch (Exception e) {
             logger.error("The time " + timeInMilli + " cannot be formatted to the pattern " + pattern);
+        }
+        return null;
+    }
+
+    public static String getFormattedTimestamp(Long timeInMilli, String pattern, String timeZone) {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
+            return simpleDateFormat.format(timeInMilli);
+        } catch (Exception e) {
+            logger.error("The time " + timeInMilli + " cannot be formatted to the pattern " + pattern + " and timeZone " + timeZone);
         }
         return null;
     }

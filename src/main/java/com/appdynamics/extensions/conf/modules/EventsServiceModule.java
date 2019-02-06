@@ -38,6 +38,8 @@ public class EventsServiceModule {
                 LOGGER.info("Events Service parameters validated successfully for monitor: {}. Initializing..", monitorName);
                 eventsServiceDataManager = new EventsServiceDataManager(eventsServiceParameters);
             } else {
+                //#TODO Added this null case to cover the config.yml refresh case.
+                eventsServiceDataManager = null;
                 LOGGER.error("Events Service parameters invalid for monitor: {}. Check your config.yml and retry before " +
                         "proceeding", monitorName);
             }

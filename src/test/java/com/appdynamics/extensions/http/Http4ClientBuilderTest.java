@@ -15,7 +15,6 @@
 
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.extensions.crypto.Encryptor;
 import com.appdynamics.extensions.util.MockJettyServer;
 import com.appdynamics.extensions.util.YmlUtils;
 import org.apache.http.HttpResponse;
@@ -33,12 +32,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.net.ssl.SSLHandshakeException;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
-
-import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH_PROPERTY;
-import static com.appdynamics.extensions.SystemPropertyConstants.TRUSTSTORE_PATH_PROPERTY;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -278,82 +273,6 @@ public class Http4ClientBuilderTest {
     }
 
     @Test
-    public void resolveTrustStorePath() {
-        Map<String, String> connection = Collections.singletonMap("sslTrustStorePath", "src/test/resources/keystore/truststore.changethis.jks");
-        File file = Http4ClientBuilder.resolveTrustStorePath(connection);
-        Assert.assertEquals("truststore.changethis.jks", file.getName());
-
-        System.setProperty(TRUSTSTORE_PATH_PROPERTY, "src/test/resources/keystore/keystore.jks");
-        file = Http4ClientBuilder.resolveTrustStorePath(connection);
-        Assert.assertEquals("keystore.jks", file.getName());
-        System.getProperties().remove(TRUSTSTORE_PATH_PROPERTY);
-    }
-
-    @Test
-    public void getTrustStorePassword() {
-        Map propMap = new HashMap();
-
-        Map connection = new HashMap();
-        propMap.put("connection", connection);
-        String encrypted = new Encryptor("welcome").encrypt("welcome");
-        //No Pass
-        char[] pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
-        Assert.assertNull(pwd);
-
-        // Enc Pass without password
-        connection.put("sslTrustStoreEncryptedPassword", encrypted);
-        pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
-        Assert.assertNull(pwd);
-
-        //With enc key
-        propMap.put("encryptionKey", "welcome");
-        pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
-        Assert.assertEquals("welcome", new String(pwd));
-
-        connection.put("sslTrustStorePassword", "welcome1");
-        pwd = Http4ClientBuilder.getTrustStorePassword(propMap, connection);
-        Assert.assertEquals("welcome1", new String(pwd));
-    }
-
-    @Test
-    public void resolveKeyStorePath() {
-        Map<String, String> connection = Collections.singletonMap("sslKeyStorePath", "src/test/resources/clientCertWithHttps/hostverify/server.jks");
-        File file = Http4ClientBuilder.resolveKeyStorePath(connection);
-        Assert.assertEquals("server.jks", file.getName());
-
-        System.setProperty(KEYSTORE_PATH_PROPERTY, "src/test/resources/keystore/keystore.jks");
-        file = Http4ClientBuilder.resolveKeyStorePath(connection);
-        Assert.assertEquals("keystore.jks", file.getName());
-        System.getProperties().remove(KEYSTORE_PATH_PROPERTY);
-    }
-
-    @Test
-    public void getKeyStorePassword() {
-        Map propMap = new HashMap();
-
-        Map connection = new HashMap();
-        propMap.put("connection", connection);
-        String encrypted = new Encryptor("welcome").encrypt("welcome");
-        //No Pass
-        char[] pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
-        Assert.assertNull(pwd);
-
-        // Enc Pass without password
-        connection.put("sslKeyStoreEncryptedPassword", encrypted);
-        pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
-        Assert.assertNull(pwd);
-
-        //With enc key
-        propMap.put("encryptionKey", "welcome");
-        pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
-        Assert.assertEquals("welcome", new String(pwd));
-
-        connection.put("sslKeyStorePassword", "welcome1");
-        pwd = Http4ClientBuilder.getKeyStorePassword(propMap, connection);
-        Assert.assertEquals("welcome1", new String(pwd));
-    }
-
-    @Test
     public void testStringArray() {
         String[] protocols = YmlUtils.asStringArray(Arrays.asList("TLS", "SSL"));
         Assert.assertEquals("[TLS, SSL]", Arrays.toString(protocols));
@@ -545,8 +464,4 @@ public class Http4ClientBuilderTest {
         response.close();
         jetty.stop();
     }
-
-
-
-
 }

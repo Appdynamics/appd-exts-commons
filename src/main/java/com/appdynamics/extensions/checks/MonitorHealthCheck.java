@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import static com.appdynamics.extensions.SystemPropertyConstants.HEALTHCHECKS_LOG_LEVEL_PROPERTY;
+
 /**
  * @author Satish Muddam
  */
@@ -62,14 +64,11 @@ public class MonitorHealthCheck implements Runnable {
             fileAppender.setLayout(layout);
             fileAppender.setMaxBackupIndex(5);
             fileAppender.setMaxFileSize("5MB");
-
-            String property = System.getProperty(Constants.EXTENSIONS_CHECKS_LOG_LEVEL);
-
+            String property = System.getProperty(HEALTHCHECKS_LOG_LEVEL_PROPERTY);
             Level level = Level.INFO;
             if (StringUtils.hasText(property)) {
                 level = Level.toLevel(property);
             }
-
             org.apache.log4j.Logger extCheckLogger = org.apache.log4j.Logger.getLogger(monitorName);
             extCheckLogger.setLevel(level);
             extCheckLogger.setAdditivity(false);

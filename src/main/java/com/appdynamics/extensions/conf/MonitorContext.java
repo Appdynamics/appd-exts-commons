@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
+import com.appdynamics.extensions.SystemPropertyConstants;
 import com.appdynamics.extensions.conf.modules.*;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;
@@ -41,7 +42,6 @@ import java.util.concurrent.ConcurrentMap;
 public class MonitorContext {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorContext.class);
-    public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
     private String monitorName;
     private Map<String, ?> config;
     private String metricPrefix;
@@ -118,7 +118,7 @@ public class MonitorContext {
     }
 
     public static boolean isWorkbenchMode() {
-        return "true".equals(System.getProperty(EXTENSION_WORKBENCH_MODE));
+        return "true".equals(System.getProperty(SystemPropertyConstants.WORKBENCH_MODE_PROPERTY));
     }
 
     public WorkBenchModule getWorkBenchModule() {

@@ -50,16 +50,26 @@ public class ControllerModule {
             controllerInfoMap = Maps.newHashMap();
         }
         controllerInfoMap.put(ENCRYPTION_KEY, config.get(ENCRYPTION_KEY));
-        controllerInfo = ControllerInfoFactory.initialize(controllerInfoMap, installDir);
-        ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
-        if(controllerInfoValidator.isValidated()) {
-            controllerClient = ControllerClientFactory.initialize(controllerInfo,
-                    (Map<String, ?>) config.get("connection"), (Map<String, ?>) config.get("proxy"),
-                    (String)config.get(ENCRYPTION_KEY));
-            controllerAPIService = ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
-        } else {
+        try {
+            controllerInfo = ControllerInfoFactory.initialize(controllerInfoMap, installDir);
+            logger.info("Initialized ControllerInfo");
+            ControllerInfoValidator controllerInfoValidator = new ControllerInfoValidator(controllerInfo);
+            if (controllerInfoValidator.isValidated()) {
+                controllerClient = ControllerClientFactory.initialize(controllerInfo,
+                        (Map<String, ?>) config.get("connection"), (Map<String, ?>) config.get("proxy"),
+                        (String) config.get(ENCRYPTION_KEY));
+                logger.debug("Initialized ControllerClient");
+                controllerAPIService = ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);
+                logger.debug("Initialized ControllerAPIService");
+                return;
+            }
             logger.warn("ControllerInfo instance is not validated and resolved.....the ControllerClient and ControllerAPIService are null");
+        } catch (Exception e) {
+            logger.error("Unable to initialize the ControllerModule properly.....the ControllerClient and ControllerAPIService will be set to null", e);
         }
+        //#TODO Check if the following is ok.
+        controllerClient = null;
+        controllerAPIService = null;
     }
 
     public ControllerInfo getControllerInfo() {

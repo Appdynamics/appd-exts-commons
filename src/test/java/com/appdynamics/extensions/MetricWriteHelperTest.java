@@ -189,7 +189,6 @@ public class MetricWriteHelperTest {
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         when(context.getControllerInfo()).thenReturn(controllerInfo);
-        when(controllerInfo.getSimEnabled()).thenReturn(true);
         CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
         when(context.getDashboardModule()).thenReturn(customDashboardModule);
         Mockito.doNothing().when(customDashboardModule).uploadDashboard();
@@ -212,7 +211,7 @@ public class MetricWriteHelperTest {
         Metric metric7 = new Metric("sample7", "10", "Server|Component:<TIER_ID>|Custom Metrics|Sample Monitor|sample7");
         Metric metric8 = new Metric("sample8", "10", "Server|Component:123|Custom metrics|Sample Monitor|sample8");
         Metric metric9 = new Metric("sample9", "10", "Custom metrics|Sample Monitor|sample9");
-        Metric metric10 = new Metric("sample10", "10", "Server|Component:123|Custom Metrics|Sample Monitor|sample10");
+        Metric metric10 = new Metric("sample10", "10", "Server|Custom Metrics|Sample Monitor|sample10");
         metrics.add(metric1);
         metrics.add(metric2);
         metrics.add(metric3);
