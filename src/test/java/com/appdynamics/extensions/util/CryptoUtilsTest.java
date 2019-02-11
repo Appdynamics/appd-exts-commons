@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.crypto.Encryptor;
 import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Test;
@@ -90,4 +91,5 @@ public class CryptoUtilsTest {
         configMap.put(ENCRYPTION_KEY, "encryptionKey");
         return configMap;
     }
+
 }
