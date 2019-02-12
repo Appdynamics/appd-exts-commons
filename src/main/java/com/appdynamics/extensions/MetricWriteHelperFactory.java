@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,11 @@
 
 package com.appdynamics.extensions;
 
-import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
-
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import org.slf4j.Logger;
+
+import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 
 /**
  * Created by abey.tom on 3/20/16.

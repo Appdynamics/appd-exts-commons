@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ package com.appdynamics.extensions;
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.google.common.collect.Maps;
 import org.junit.Test;
 

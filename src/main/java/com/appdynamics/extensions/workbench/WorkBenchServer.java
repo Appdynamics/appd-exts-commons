@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,6 @@
  */
 
 package com.appdynamics.extensions.workbench;
-
-import static com.appdynamics.extensions.conf.MonitorContext.EXTENSION_WORKBENCH_MODE;
 
 import com.appdynamics.extensions.conf.monitorxml.Argument;
 import com.appdynamics.extensions.conf.monitorxml.Monitor;
@@ -43,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static com.appdynamics.extensions.SystemPropertyConstants.WORKBENCH_MODE_PROPERTY;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -212,7 +212,7 @@ public class WorkBenchServer extends NanoHTTPD {
         final Map<String, String> taskArgs = getTaskArgs(monitor);
         final Object implClass = getImplClassInstance(monitor);
         if (implClass != null) {
-            System.setProperty(EXTENSION_WORKBENCH_MODE, "true");
+            System.setProperty(WORKBENCH_MODE_PROPERTY, "true");
             String host = "0.0.0.0";
             int port = 9090;
             if (args.length > 0) {

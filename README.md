@@ -257,7 +257,6 @@ proxy:
   password: ""
   encryptedPassword: ""
 ```
-
 For more detailed explanation on HTTP Client, refer to [HTTP Client](https://community.appdynamics.com/t5/Knowledge-Base/HttpClient-used-in-Extensions/ta-p/35410).
 
 ## Controller Info
@@ -436,4 +435,3 @@ The ExtensionLoggerFactory prefixes the name of the extension to every log state
 # Getting Help
 
 For any help related AppDynamics Extensions, please open a ticket on [AppDynamics Support Portal](http://help.appdynamics.com).
-

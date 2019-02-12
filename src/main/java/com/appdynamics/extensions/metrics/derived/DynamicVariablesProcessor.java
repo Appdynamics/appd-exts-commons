@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,6 @@
 
 package com.appdynamics.extensions.metrics.derived;
 
-import static com.appdynamics.extensions.util.MetricPathUtils.PIPE_SPLITTER;
-
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.MetricPathUtils;
 import com.appdynamics.extensions.util.NumberUtils;
@@ -30,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static com.appdynamics.extensions.util.MetricPathUtils.PIPE_SPLITTER;
 
 /**
  * Created by venkata.konala on 8/28/17.

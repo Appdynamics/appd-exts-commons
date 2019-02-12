@@ -7,5 +7,6 @@
 target/
 build/
 bin/
+monitors/
 .DS_Store
 .idea

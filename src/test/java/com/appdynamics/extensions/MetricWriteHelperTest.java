@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,10 @@ package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.conf.modules.CustomDashboardModule;
 import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
 import com.appdynamics.extensions.conf.modules.MetricCharSequenceReplaceModule;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.util.MetricPathUtils;
@@ -29,6 +31,7 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -38,8 +41,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
-
-
 /**
  * Created by venkata.konala on 10/31/17.
  */
@@ -59,12 +60,10 @@ public class MetricWriteHelperTest {
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample", "2.04", "Custom Metrics|Sample Monitor|sample");
         metricList.add(metric1);
-
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         metricWriteHelper.transformAndPrintMetrics(metricList);
         verify(metricWriter, times(1)).printMetric(stringArgumentCaptor.capture());
-
         List<String> stringArgs = stringArgumentCaptor.getAllValues();
         Assert.assertTrue(stringArgs.get(0).equals("2"));
     }
@@ -76,15 +75,18 @@ public class MetricWriteHelperTest {
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
+        when(aBaseMonitor.getContextConfiguration().getContext()).thenReturn(context);
+        when(aBaseMonitor.getContextConfiguration().getContext().getDashboardModule()).thenReturn(customDashboardModule);
+        Mockito.doNothing().when(customDashboardModule).uploadDashboard();
+        when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor|");
         when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");
         DerivedMetricsModule derivedMetricsModule = new DerivedMetricsModule();
-
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/DerivedSample.yml"));
         DerivedMetricsCalculator derivedMetricsCalculator = derivedMetricsModule.initDerivedMetricsCalculator(conf, "Custom Metrics|Sample Monitor");
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(derivedMetricsCalculator);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
-
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample1", "2.04", "Custom Metrics|Sample Monitor|sample1");
         Metric metric2 = new Metric("sample2", "2.06", "Custom Metrics|Sample Monitor|sample2");
@@ -112,11 +114,8 @@ public class MetricWriteHelperTest {
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
-
-
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
-
         metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|sample1",  new BigDecimal("2"), "AVG.SUM.IND");
         metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|sample2",  new BigDecimal("2.5"), "SUM.AVG.IND");
         metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|sample3",  new BigDecimal("2.45"), "OBS.CUR.COL");
@@ -139,8 +138,6 @@ public class MetricWriteHelperTest {
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
-
-
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         metricWriteHelper.printMetric("Custom Metrics|Sample Monitor|sample1", null,MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE,
@@ -154,12 +151,13 @@ public class MetricWriteHelperTest {
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         configuration.setConfigYml("src/test/resources/conf/config_WithMultipleServersDisplayNameCheck.yml");
-
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");
         when(configuration.getContext()).thenReturn(context);
-
+        CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
+        when(context.getDashboardModule()).thenReturn(customDashboardModule);
+        Mockito.doNothing().when(customDashboardModule).uploadDashboard();
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
         List<Metric> metricList = Lists.newArrayList();
         Metric metric1 = new Metric("sample1", "10", "Custom Metrics|Sample Monitor|sample1");
@@ -186,9 +184,14 @@ public class MetricWriteHelperTest {
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
         MonitorContext context = mock(MonitorContext.class);
+        ControllerInfo controllerInfo = mock(ControllerInfo.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(configuration.getContext()).thenReturn(context);
         when(context.createDerivedMetricsCalculator()).thenReturn(null);
+        when(context.getControllerInfo()).thenReturn(controllerInfo);
+        CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
+        when(context.getDashboardModule()).thenReturn(customDashboardModule);
+        Mockito.doNothing().when(customDashboardModule).uploadDashboard();
         MetricWriteHelper metricWriteHelper = new MetricWriteHelper(aBaseMonitor);
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
@@ -208,6 +211,7 @@ public class MetricWriteHelperTest {
         Metric metric7 = new Metric("sample7", "10", "Server|Component:<TIER_ID>|Custom Metrics|Sample Monitor|sample7");
         Metric metric8 = new Metric("sample8", "10", "Server|Component:123|Custom metrics|Sample Monitor|sample8");
         Metric metric9 = new Metric("sample9", "10", "Custom metrics|Sample Monitor|sample9");
+        Metric metric10 = new Metric("sample10", "10", "Server|Custom Metrics|Sample Monitor|sample10");
         metrics.add(metric1);
         metrics.add(metric2);
         metrics.add(metric3);
@@ -217,6 +221,7 @@ public class MetricWriteHelperTest {
         metrics.add(metric7);
         metrics.add(metric8);
         metrics.add(metric9);
+        metrics.add(metric10);
         metricWriteHelper.transformAndPrintMetrics(metrics);
         verify(metricWriter, never()).printMetric(stringArgumentCaptor.capture());
     }
@@ -231,6 +236,9 @@ public class MetricWriteHelperTest {
         when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");
         when(configuration.getContext()).thenReturn(context);
         MetricPathUtils.registerMetricCharSequenceReplacer(aBaseMonitor);
+        CustomDashboardModule customDashboardModule = mock(CustomDashboardModule.class);
+        when(context.getDashboardModule()).thenReturn(customDashboardModule);
+        Mockito.doNothing().when(customDashboardModule).uploadDashboard();
         MetricWriter metricWriter = mock(MetricWriter.class);
         when(aBaseMonitor.getMetricWriter(anyString(), anyString(), anyString(), anyString())).thenReturn(metricWriter);
         MetricCharSequenceReplaceModule metricCharSequenceReplaceModule = new MetricCharSequenceReplaceModule();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 package com.appdynamics.extensions.http;
 
-import com.appdynamics.extensions.TaskInputArgs;
+import com.appdynamics.extensions.Constants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,9 +45,9 @@ public class UrlBuilderTest {
     @Test
     public void test(){
         HashMap<String, String> map = new HashMap<String, String>();
-        map.put(TaskInputArgs.USE_SSL,"true");
-        map.put(TaskInputArgs.HOST,"192.168.57.101");
-        map.put(TaskInputArgs.PORT,"1234");
+        map.put(Constants.USE_SSL,"true");
+        map.put(Constants.HOST,"192.168.57.101");
+        map.put(Constants.PORT,"1234");
         String url = new UrlBuilder(map).build();
         Assert.assertEquals("https://192.168.57.101:1234", url);
     }
@@ -55,9 +55,9 @@ public class UrlBuilderTest {
     @Test
     public void testPathAndQueryString(){
         HashMap<String, String> map = new HashMap<String, String>();
-        map.put(TaskInputArgs.USE_SSL,"false");
-        map.put(TaskInputArgs.HOST,"192.168.57.101");
-        map.put(TaskInputArgs.PORT,"1234");
+        map.put(Constants.USE_SSL,"false");
+        map.put(Constants.HOST,"192.168.57.101");
+        map.put(Constants.PORT,"1234");
         String url = new UrlBuilder(map)
                 .path("path1/")
                 .path("/path2")
@@ -69,9 +69,9 @@ public class UrlBuilderTest {
     @Test
     public void testPathAndQueryNoValue(){
         HashMap<String, String> map = new HashMap<String, String>();
-        map.put(TaskInputArgs.USE_SSL,"false");
-        map.put(TaskInputArgs.HOST,"192.168.57.101");
-        map.put(TaskInputArgs.PORT,"1234");
+        map.put(Constants.USE_SSL,"false");
+        map.put(Constants.HOST,"192.168.57.101");
+        map.put(Constants.PORT,"1234");
         String url = new UrlBuilder(map)
                 .path("path1////")
                 .path("/////////path2")

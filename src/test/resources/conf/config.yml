@@ -125,9 +125,29 @@ derivedMetrics:
       formula: "{x}|hits / ({x}|hits + {x}|misses)"
 
 
+# Generate a custom dashboard based on the provided template
+customDashboard:
+    enabled: true
+    dashboardName: "Sample Monitor Dashboard"
+
+    # Update the path to the dashboard file.
+    pathToSIMDashboard: "monitors/SampleMonitor/normalDashboard.json"
+    pathToNormalDashboard: "monitors/SampleMonitor/normalDashboard.json"
+
+# To upload the dashboard, please create a user from Controller UI or
+# add the credentials of an existing user.
+controllerInfo:
+    controllerHost: "localhost"
+    controllerPort: 8090
+    controllerSslEnabled: false
+    account: ""
+    username: ""
+    password: ""
+    encryptedPassword: ""
+
 eventsServiceParameters:
   host: dummyHost
   port: 9080
   globalAccountName: dummyAccount
   eventsApiKey: dummyKey
-  useSsl: false
+  useSSL: false

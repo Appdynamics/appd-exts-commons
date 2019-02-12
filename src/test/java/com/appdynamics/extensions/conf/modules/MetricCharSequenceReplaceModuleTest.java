@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,22 +15,20 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import static org.mockito.Mockito.*;
-
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
 import com.appdynamics.extensions.yml.YmlReader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
-
+import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.Map;
+
+import static org.mockito.Mockito.*;
 
 /**
  * @author pradeep.nair

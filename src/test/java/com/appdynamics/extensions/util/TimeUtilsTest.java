@@ -1,7 +1,21 @@
+/*
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.appdynamics.extensions.util;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.TimeZone;
@@ -22,6 +36,20 @@ public class TimeUtilsTest {
         } else {
             Assert.assertTrue(timeStamp != null && timeStamp.length() > 0);
         }
+    }
+
+    @Test
+    public void whenAppropriateTimeAndPatternAndTimeZoneThenReturnFormattedTime() {
+        Long timeInMillis = 1538962125642L;
+        String timeStamp = TimeUtils.getFormattedTimestamp(timeInMillis, "yyyy-MM-dd HH:mm:ss z", "GMT");
+        Assert.assertTrue(timeStamp.equals("2018-10-08 01:28:45 GMT"));
+    }
+
+    @Test
+    public void whenAppropriateTimeAndDifferentPatternAndTimeZoneThenReturnFormattedTime() {
+        Long timeInMillis = 1549496026110L;
+        String timeStamp = TimeUtils.getFormattedTimestamp(timeInMillis, "yyyy-MM-dd'T'HH:mm:ss'Z'", "GMT");
+        Assert.assertTrue(timeStamp.equals("2019-02-06T23:33:46Z"));
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.workbench.metric;
 
 import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
@@ -24,20 +25,14 @@ import org.slf4j.Logger;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static com.appdynamics.extensions.util.StringUtils.isValidMetric;
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricPath;
-import static com.appdynamics.extensions.util.StringUtils.isValidString;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidMetric;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidMetricPath;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidString;
 
 /**
  * Created by abey.tom on 3/16/16.
@@ -60,7 +55,8 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
         return _instance;
     }
 
-    public static void initialize(DerivedMetricsCalculator derivedMetricsCalculator) {
+    public static void initialize(ControllerInfo controllerInfo, DerivedMetricsCalculator derivedMetricsCalculator) {
+        _instance.controllerInfo = controllerInfo;
         _instance.derivedMetricsCalculator = derivedMetricsCalculator;
     }
 

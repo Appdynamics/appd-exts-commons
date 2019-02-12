@@ -1,13 +1,22 @@
 /*
- *  Copyright 2018. AppDynamics LLC and its affiliates.
- * All Rights Reserved.
- * This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
- * The copyright notice above does not evidence any actual or intended publication of such source code.
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.Constants;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.util.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
@@ -19,12 +28,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import static com.appdynamics.extensions.SystemPropertyConstants.HEALTHCHECKS_LOG_LEVEL_PROPERTY;
+
 /**
  * @author Satish Muddam
  */
 public class MonitorHealthCheck implements Runnable {
 
-    private static final String EXTENSIONS_CHECKS_LOG_LEVEL = "monitor.checks.log.level";
     public static Logger logger = null;
 
     private MonitorExecutorService executorService;
@@ -42,11 +52,11 @@ public class MonitorHealthCheck implements Runnable {
         this.executorService = executorService;
     }
 
-    private static void configureLogger(File installDir, String extensionName) {
+    private static void configureLogger(File installDir, String monitorName) {
         try {
             PatternLayout layout = new PatternLayout("%d{ABSOLUTE} %5p [%t] %c{1} - %m%n");
             RollingFileAppender fileAppender = new RollingFileAppender();
-            File file = new File(installDir, "logs/monitor-checks/" + extensionName + ".log");
+            File file = new File(installDir, "logs/monitor-checks/" + monitorName + ".log");
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -54,15 +64,12 @@ public class MonitorHealthCheck implements Runnable {
             fileAppender.setLayout(layout);
             fileAppender.setMaxBackupIndex(5);
             fileAppender.setMaxFileSize("5MB");
-
-            String property = System.getProperty(EXTENSIONS_CHECKS_LOG_LEVEL);
-
+            String property = System.getProperty(HEALTHCHECKS_LOG_LEVEL_PROPERTY);
             Level level = Level.INFO;
             if (StringUtils.hasText(property)) {
                 level = Level.toLevel(property);
             }
-
-            org.apache.log4j.Logger extCheckLogger = org.apache.log4j.Logger.getLogger(extensionName);
+            org.apache.log4j.Logger extCheckLogger = org.apache.log4j.Logger.getLogger(monitorName);
             extCheckLogger.setLevel(level);
             extCheckLogger.setAdditivity(false);
             extCheckLogger.addAppender(fileAppender);
@@ -109,7 +116,7 @@ public class MonitorHealthCheck implements Runnable {
                             logger.error(" Exception when running {} ", runAlwaysCheck, e);
                         }
                     }
-                }, 0, (int) runAlwaysCheck.getPeriod(), runAlwaysCheck.getTimeUnit());
+                }, 0, runAlwaysCheck.getPeriod(), runAlwaysCheck.getTimeUnit());
 
             } else {
                 //Nothing matched

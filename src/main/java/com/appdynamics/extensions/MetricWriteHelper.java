@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions;
 
+import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
@@ -26,29 +27,23 @@ import com.appdynamics.extensions.util.TimeUtils;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-
-import static com.appdynamics.extensions.util.StringUtils.isValidMetric;
-import static com.appdynamics.extensions.util.StringUtils.isValidString;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidMetric;
+import static com.appdynamics.extensions.util.ValidationUtils.isValidString;
 
 public class MetricWriteHelper {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricWriteHelper.class);
-
     private ABaseMonitor baseMonitor;
-
     private Long startTime;
-
+    protected ControllerInfo controllerInfo;
     //Used for Dashboard. Cache the current list of metrics.
     private boolean cacheMetrics;
-
     protected DerivedMetricsCalculator derivedMetricsCalculator;
-
     private Map<String, String> metricsMap = Maps.newConcurrentMap();
 
     //used from WorkBench.
@@ -59,6 +54,7 @@ public class MetricWriteHelper {
         AssertUtils.assertNotNull(baseMonitor, "The ABaseMonitor instance cannot be null");
         this.baseMonitor = baseMonitor;
         this.startTime = this.baseMonitor.getStartTime();
+        controllerInfo = baseMonitor.getContextConfiguration().getContext().getControllerInfo();
         derivedMetricsCalculator = baseMonitor.getContextConfiguration().getContext().createDerivedMetricsCalculator();
     }
 
@@ -82,7 +78,7 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            logger.warn("The metric is not valid. Name - {}, Value - {}, Path - {}, Qualifiers - {}, {}, {}",
+            logger.warn("The metric is not valid. Not reporting the metric to the machine agent. Name - {}, Value - {}, Path - {}, Qualifiers - {}, {}, {}",
                     MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup,
                     clusterRollup);
         }
@@ -141,8 +137,9 @@ public class MetricWriteHelper {
      * -------------------------
      * 1. Triggers the DerivedMetricsCalculator based on all the metrics published from all the tasks in a job
      *    run.
-     * 2. Prints the total metrics published in the current job run.
-     * 3. Logs the total execution time from the time execute() method is triggered to the time "Metrics uploaded"
+     * 2. Uploads the dashboard if initialized properly and not uploaded already.
+     * 3. Prints the total metrics published in the current job run.
+     * 4. Logs the total execution time from the time execute() method is triggered to the time "Metrics uploaded"
      *    metric is published.
      *
      */
@@ -151,6 +148,7 @@ public class MetricWriteHelper {
         if (derivedMetricsCalculator != null) {
             triggerDerivedMetrics();
         }
+        baseMonitor.getContextConfiguration().getContext().getDashboardModule().uploadDashboard();
         printMetricsUploaded();
         logTime();
     }

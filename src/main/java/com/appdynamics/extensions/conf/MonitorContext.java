@@ -1,16 +1,28 @@
 /*
- *  Copyright 2018. AppDynamics LLC and its affiliates.
- * All Rights Reserved.
- * This is unpublished proprietary source code of AppDynamics LLC and its affiliates.
- * The copyright notice above does not evidence any actual or intended publication of such source code.
+ * Copyright (c) 2019 AppDynamics,Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
-import com.appdynamics.extensions.MonitorExecutorService;
+import com.appdynamics.extensions.SystemPropertyConstants;
 import com.appdynamics.extensions.conf.modules.*;
+import com.appdynamics.extensions.controller.ControllerClient;
+import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.eventsservice.EventsServiceDataManager;
+import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricCharSequenceReplacer;
@@ -20,21 +32,21 @@ import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-
 /**
  * Created by venkata.konala on 3/29/18.
  */
 public class MonitorContext {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorContext.class);
-    public static final String EXTENSION_WORKBENCH_MODE = "extension.workbench.mode";
     private String monitorName;
     private Map<String, ?> config;
     private String metricPrefix;
-
+    private File installDir;
+    private ControllerModule controllerModule;
     private WorkBenchModule workBenchModule;
     private HttpClientModule httpClientModule;
     private MonitorExecutorServiceModule monitorExecutorServiceModule;
@@ -43,11 +55,14 @@ public class MonitorContext {
     private DerivedMetricsModule derivedMetricsModule;
     private PerMinValueCalculatorModule perMinValueCalculatorModule;
     private HealthCheckModule healthCheckModule;
+    private CustomDashboardModule dashboardModule;
     private MetricCharSequenceReplaceModule metricCharSequenceReplaceModule;
     private EventsServiceModule eventsServiceModule;
 
-    MonitorContext(String monitorName) {
+    MonitorContext(String monitorName, File installDir) {
+        this.installDir = installDir;
         this.monitorName = monitorName;
+        controllerModule = new ControllerModule();
         workBenchModule = new WorkBenchModule();
         httpClientModule = new HttpClientModule();
         monitorExecutorServiceModule = new MonitorExecutorServiceModule();
@@ -55,9 +70,10 @@ public class MonitorContext {
         cacheModule = new CacheModule();
         derivedMetricsModule = new DerivedMetricsModule();
         perMinValueCalculatorModule = new PerMinValueCalculatorModule();
-        healthCheckModule = new HealthCheckModule();
         metricCharSequenceReplaceModule = new MetricCharSequenceReplaceModule();
         eventsServiceModule = new EventsServiceModule();
+        healthCheckModule = new HealthCheckModule();
+        dashboardModule = new CustomDashboardModule();
     }
 
     public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
@@ -65,30 +81,48 @@ public class MonitorContext {
         this.metricPrefix = metricPrefix;
         Boolean enabled = (Boolean) config.get("enabled");
         if (!Boolean.FALSE.equals(enabled)) {
-            workBenchModule.initWorkBenchStore(config, metricPrefix);
+            logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
+            controllerModule.initController(installDir, config);
+            workBenchModule.initWorkBenchStore(config, metricPrefix, getControllerInfo());
             httpClientModule.initHttpClient(config);
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
-            healthCheckModule.initMATroubleshootChecks(monitorName, config);
             metricCharSequenceReplaceModule.initMetricCharSequenceReplacer(config);
-            logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
             eventsServiceModule.initEventsServiceDataManager(monitorName, config);
+            healthCheckModule.initMATroubleshootChecks(config, monitorName, metricPrefix, getControllerInfo(), getControllerAPIService());
+            dashboardModule.initCustomDashboard(config, metricPrefix, monitorName, getControllerInfo(), getControllerAPIService());
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
     }
 
-    public static boolean isWorkbenchMode() {
-        return "true".equals(System.getProperty(EXTENSION_WORKBENCH_MODE));
+    public void setControllerModule(ControllerModule controllerModule) {
+        this.controllerModule = controllerModule;
     }
 
-    public WorkBenchModule getWorkBenchModule() {
-        return workBenchModule;
+    public ControllerInfo getControllerInfo() {
+        return controllerModule.getControllerInfo();
+    }
+
+    public ControllerClient getControllerClient() {
+        return controllerModule.getControllerClient();
+    }
+
+    public ControllerAPIService getControllerAPIService() {
+        return controllerModule.getControllerAPIService();
     }
 
     public void setWorkBenchModule(WorkBenchModule workBenchModule) {
         this.workBenchModule = workBenchModule;
+    }
+
+    public static boolean isWorkbenchMode() {
+        return "true".equals(System.getProperty(SystemPropertyConstants.WORKBENCH_MODE_PROPERTY));
+    }
+
+    public WorkBenchModule getWorkBenchModule() {
+        return workBenchModule;
     }
 
     public void setHttpClientModule(HttpClientModule httpClientModule) {
@@ -107,20 +141,20 @@ public class MonitorContext {
         return monitorExecutorServiceModule.getExecutorService();
     }
 
-    public JobScheduleModule getJobScheduleModule() {
-        return jobScheduleModule;
-    }
-
     public void setJobScheduleModule(JobScheduleModule jobScheduleModule) {
         this.jobScheduleModule = jobScheduleModule;
     }
 
-    public void setCacheModule(CacheModule cacheModule) {
-        this.cacheModule = cacheModule;
-    }
-
     public boolean isScheduledModeEnabled() {
         return jobScheduleModule.getScheduler() != null;
+    }
+
+    public JobScheduleModule getJobScheduleModule() {
+        return jobScheduleModule;
+    }
+
+    public void setCacheModule(CacheModule cacheModule) {
+        this.cacheModule = cacheModule;
     }
 
     public ConcurrentMap<String, Metric> getCachedMetrics() {
@@ -131,12 +165,12 @@ public class MonitorContext {
         cacheModule.putInMetricCache(metricPath, metric);
     }
 
-    public MetricWriter getFromWriterCache(String metricPath) {
-        return cacheModule.getWriterCache().getIfPresent(metricPath);
-    }
-
     public void putInWriterCache(String metricPath, MetricWriter writer) {
         cacheModule.putInWriterCache(metricPath, writer);
+    }
+
+    public MetricWriter getFromWriterCache(String metricPath) {
+        return cacheModule.getWriterCache().getIfPresent(metricPath);
     }
 
     public DerivedMetricsCalculator createDerivedMetricsCalculator() {
@@ -147,19 +181,27 @@ public class MonitorContext {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
 
+    public void setMetricCharSequenceReplaceModule (MetricCharSequenceReplaceModule metricCharSequenceReplaceModule) {
+        this.metricCharSequenceReplaceModule = metricCharSequenceReplaceModule;
+    }
+
     public MetricCharSequenceReplacer getMetricCharSequenceReplacer() {
         return metricCharSequenceReplaceModule.getMetricCharSequenceReplacer();
     }
 
-    public void setMetricCharSequenceReplaceModule (MetricCharSequenceReplaceModule metricCharSequenceReplaceModule) {
-        this.metricCharSequenceReplaceModule = metricCharSequenceReplaceModule;
+    public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
+        this.eventsServiceModule = eventsServiceModule;
     }
 
     public EventsServiceDataManager getEventsServiceDataManager() {
         return eventsServiceModule.getEventsServiceDataManager();
     }
 
-    public void setEventsServiceModule(EventsServiceModule eventsServiceModule) {
-        this.eventsServiceModule = eventsServiceModule;
+    public void setDashboardModule(CustomDashboardModule dashboardModule) {
+        this.dashboardModule = dashboardModule;
+    }
+
+    public CustomDashboardModule getDashboardModule() {
+        return dashboardModule;
     }
 }

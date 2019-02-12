@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 AppDynamics,Inc.
+ * Copyright (c) 2019 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,26 @@ public class MockJettyServer {
         final Server server = new Server();
         server.setConnectors(new Connector[]{sslConnector});
         server.setHandler(handler);
+        try {
+            server.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return server;
+    }
+
+    public static Server startSSL(int port, String protocol, String keyStorePath) {
+        SslContextFactory factory = new SslContextFactory();
+        if (protocol != null) {
+            factory.setIncludeProtocols(protocol);
+        }
+        factory.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+        factory.setKeyStorePassword("changeit");
+        SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
+        sslConnector.setPort(port);
+        final Server server = new Server();
+        server.setConnectors(new Connector[]{sslConnector});
+        server.setHandler(new HelloHandler());
         try {
             server.start();
         } catch (Exception e) {
