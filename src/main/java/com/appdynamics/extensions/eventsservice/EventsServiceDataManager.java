@@ -20,7 +20,6 @@ import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.collect.Lists;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -35,7 +34,6 @@ import java.util.stream.Collectors;
 
 import static com.appdynamics.extensions.eventsservice.utils.Constants.*;
 import static com.appdynamics.extensions.http.HttpClientUtils.closeHttpResponse;
-import static com.appdynamics.extensions.http.HttpClientUtils.logger;
 
 /**
  * This class is an SDK for developers to communicate with the AppDynamics Events Service. It supports CRUD operations
@@ -49,8 +47,6 @@ public class EventsServiceDataManager {
     private static final Logger LOGGER = ExtensionsLoggerFactory.getLogger(EventsServiceDataManager.class);
     private Map<String, ?> eventsServiceParameters;
     private CloseableHttpClient httpClient;
-    // #TODO HttpResponse is a shared object.Need to check this.
-    private CloseableHttpResponse httpResponse;
     private HttpHost httpHost;
     private String globalAccountName, eventsApiKey;
 
@@ -77,6 +73,7 @@ public class EventsServiceDataManager {
      * @param schemaBody Body of the Schema to be created
      */
     public void createSchema(String schemaName, String schemaBody) {
+        CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = executeHttpPost(buildRequestUri(schemaName, SCHEMA_PATH), schemaBody);
             if (isResponseSuccessful(httpResponse)) {
@@ -102,6 +99,7 @@ public class EventsServiceDataManager {
      * @return String representing the Schema body
      */
     public String retrieveSchema(String schemaName) {
+        CloseableHttpResponse httpResponse = null;
         HttpGet httpGet = new HttpGet(buildRequestUri(schemaName, SCHEMA_PATH));
         httpGet.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
         httpGet.setHeader(API_KEY_HEADER, eventsApiKey);
@@ -134,6 +132,7 @@ public class EventsServiceDataManager {
         if (!StringUtils.hasText(retrieveSchema(schemaName))) {
             LOGGER.error("Schema: {} does not exist. Create the schema before proceeding", schemaName);
         } else {
+            CloseableHttpResponse httpResponse = null;
             HttpPatch httpPatch = new HttpPatch(buildRequestUri(schemaName, SCHEMA_PATH));
             httpPatch.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
             httpPatch.setHeader(API_KEY_HEADER, eventsApiKey);
@@ -178,6 +177,7 @@ public class EventsServiceDataManager {
         if (!StringUtils.hasText(retrieveSchema(schemaName))) {
             LOGGER.error("Schema: {} does not exist. Unable to delete", schemaName);
         } else {
+            CloseableHttpResponse httpResponse = null;
             HttpDelete httpDelete = new HttpDelete(buildRequestUri(schemaName, SCHEMA_PATH));
             httpDelete.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
             httpDelete.setHeader(API_KEY_HEADER, eventsApiKey);
@@ -190,6 +190,9 @@ public class EventsServiceDataManager {
                 }
             } catch (IOException ex) {
                 LOGGER.error("Error encountered while deleting Schema: {}", schemaName, ex);
+            }
+            finally {
+                closeHttpResponse(httpResponse);
             }
         }
     }
@@ -210,6 +213,7 @@ public class EventsServiceDataManager {
     }
 
     private void publishBatch(String schemaName, List<String> eventBatch) {
+        CloseableHttpResponse httpResponse = null;
         try {
             String batchBody = eventBatch.stream().collect(Collectors.joining(",", "[", "]"));
             httpResponse = executeHttpPost(buildRequestUri(schemaName, PUBLISH_PATH), batchBody);
@@ -233,22 +237,21 @@ public class EventsServiceDataManager {
      * @param query The required query to be executed on the Events Service.
      */
     public String querySchema(String query) {
+        CloseableHttpResponse httpResponse = null;
         try {
-            CloseableHttpResponse httpResponse = executeHttpPost(buildRequestUri("", QUERY_PATH), query);
+            httpResponse = executeHttpPost(buildRequestUri("", QUERY_PATH), query);
             if (isResponseSuccessful(httpResponse)) {
                 LOGGER.info("Query : {} successful", query);
                 return EntityUtils.toString(httpResponse.getEntity());
             }
         } catch (Exception e) {
-            logger.error("Error encountered while querying : " + query, e);
+            LOGGER.error("Error encountered while querying : " + query, e);
         } finally {
             closeHttpResponse(httpResponse);
         }
         return "";
     }
-    //endregion
 
-    //region <Utilities>
     private CloseableHttpResponse executeHttpPost(String uri, String requestBody) throws IOException {
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
