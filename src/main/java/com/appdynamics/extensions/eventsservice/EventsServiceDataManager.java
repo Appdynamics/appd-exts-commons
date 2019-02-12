@@ -231,6 +231,27 @@ public class EventsServiceDataManager {
     //endregion
 
     //region <Utilities>
+    /**
+     * This method is used to query events from the Events Service.
+     *
+     * @param query The required query to be executed on the Events Service.
+     */
+    public String querySchema(String query) {
+        CloseableHttpResponse httpResponse = null;
+        try {
+            httpResponse = executeHttpPost(buildRequestUri("", QUERY_PATH), query);
+            if (isResponseSuccessful(httpResponse)) {
+                LOGGER.info("Query : {} successful", query);
+                return EntityUtils.toString(httpResponse.getEntity());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error encountered while querying : " + query, e);
+        } finally {
+            closeHttpResponse(httpResponse);
+        }
+        return "";
+    }
+
     private CloseableHttpResponse executeHttpPost(String uri, String requestBody) throws IOException {
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setHeader(ACCOUNT_NAME_HEADER, globalAccountName);
