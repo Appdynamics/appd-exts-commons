@@ -1,0 +1,132 @@
+#prefix used to show up metrics in AppDynamics. This will create this metric in all the tiers, under this path
+#metricPrefix: "Custom Metrics|Amazon EC2|"
+
+#This will create it in specific Tier/Component. Make sure to replace <COMPONENT_ID> with the appropriate one from your environment.
+#To find the <COMPONENT_ID> in your environment, please follow the screenshot https://docs.appdynamics.com/display/PRO42/Build+a+Monitoring+Extension+Using+Java
+metricPrefix: "Server|Component:<COMPONENT_ID>|Custom Metrics|Amazon EC2|"
+
+accounts:
+  - awsAccessKey: "${AWS_ACCESS_KEY1}"
+    awsSecretKey: "${AWS_SECRET_KEY1}"
+    displayAccountName: "AppD"
+    regions: ["us-east-1"]
+  - awsAccessKey: "${AWS_ACCESS_KEY2}"
+    awsSecretKey: "${AWS_SECRET_KEY2}"
+    displayAccountName: "AppD"
+    regions: ["us-east-1"]
+
+credentialsDecryptionConfig:
+    enableDecryption: "false"
+    encryptionKey:
+    
+proxyConfig:
+    host: "${PROXY_HOST}"
+    port: "${PROXY_PORT}"
+    username: "${PROXY_USER}"
+    password: "${PROXY_PASSWORD}"
+    
+ec2InstanceNameConfig:
+    useNameInMetrics: "true"
+    tagKey: "Name"
+
+#Filter the instances by tag name. tagValue is optional. if tagValue is not provided, we will fetch all the instances with the tagName.
+tags:
+  - name: "Name"
+    #value: ["tag1", "tag2", "tag3"]
+
+#Allowed values are Basic and Detailed. Refer https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch-new.html for more information
+# Basic will fire CloudWatch API calls every 5 minutes
+# Detailed will fire CloudWatch API calls every 1 minutes
+cloudWatchMonitoring: "Basic"
+
+#If you want any other interval ( other than the mentioned values in the above configuration ) configure it here, if not leave it empty. This value is in minutes
+#cloudWatchMonitoringInterval: 0
+
+concurrencyConfig:
+  noOfAccountThreads: 3
+  noOfRegionThreadsPerAccount: 3
+  noOfMetricThreadsPerRegion: 3
+  #Thread timeout in seconds
+  threadTimeOut: 30
+
+regionEndPoints:
+  ap-southeast-1: monitoring.ap-southeast-1.amazonaws.com
+  ap-southeast-2: monitoring.ap-southeast-2.amazonaws.com
+  ap-northeast-1: monitoring.ap-northeast-1.amazonaws.com
+  eu-central-1: monitoring.eu-central-1.amazonaws.com
+  eu-west-1: monitoring.eu-west-1.amazonaws.com
+  us-east-1: monitoring.us-east-1.amazonaws.com
+  us-west-1: monitoring.us-west-1.amazonaws.com
+  us-west-2: monitoring.us-west-2.amazonaws.com
+  sa-east-1: monitoring.sa-east-1.amazonaws.com
+
+
+# Global metrics config for all accounts
+metricsConfig:
+
+    # By default, all metrics retrieved from cloudwatch are 'Average' values.
+    # This option allows you to override the metric type.
+    #
+    # Allowed statTypes are: ave, max, min, sum, samplecount
+    #
+    # Note: Irrespective of the metric type, value will still be reported as
+    # Observed value to the Controller
+    includeMetrics:
+       - name: "CPUUtilization"
+         alias: "CPUUtilization"
+         statType: "ave"
+         delta: false
+         multiplier: 1
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+    # Time range configuration to individual metrics also supported. If not configured uses the global time range configuration
+    #    metricsTimeRange:
+    #       startTimeInMinsBeforeNow: 15
+    #       endTimeInMinsBeforeNow: 0
+       - name: "DiskReadOps"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+       - name: "DiskWriteOps"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+       - name: "DiskReadBytes"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+       - name: "DiskWriteBytes"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+       - name: "NetworkIn"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+       - name: "NetworkOut"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+       - name: "NetworkPacketsIn"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+       - name: "NetworkPacketsOut"
+         aggregationType: "AVERAGE"
+         timeRollUpType: "AVERAGE"
+         clusterRollUpType: "INDIVIDUAL"
+
+    # Global time range configuration, applicable to all the metrics configured above.
+    metricsTimeRange:
+      startTimeInMinsBeforeNow: 10
+      endTimeInMinsBeforeNow: 0
+
+    # Rate limit ( per second ) for GetMetricStatistics, default value is 400. https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_limits.html
+    getMetricStatisticsRateLimit: 400
+
+    #
+    # The max number of retry attempts for failed retryable requests
+    # (ex: 5xx error responses from a service) or throttling errors
+    #
+    maxErrorRetrySize: 0

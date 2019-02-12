@@ -60,7 +60,7 @@ import java.util.Map;
  * sub tasks to fetch metrics from an artifact concurrently.
  *
  * <pre> {@code
- * public class SampleMonitor extends AManagedMonitor {
+ * public class SampleMonitor extends ABaseMonitor {
  *
  * protected abstract String getDefaultMetricPrefix(){
  *     return "Custom Metrics|Sample Monitor"
@@ -70,7 +70,7 @@ import java.util.Map;
  *     return "Sample Monitor"
  * }
  *
- * protected abstract void doRun(TasksExecutionServiceProvider taskCounter){
+ * protected abstract void doRun(TasksExecutionServiceProvider tasksExecutionServiceProvider){
  *     //...logic to add the core logic for the SampleMonitor
  * }
  *
