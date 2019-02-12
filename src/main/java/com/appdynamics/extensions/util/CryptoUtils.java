@@ -32,6 +32,14 @@ public class CryptoUtils {
     private static URLCodec codec = new URLCodec("UTF-8");
 
     //#TODO Refactor the following
+    /**
+     * The getPassword(Map<String, ?> configMap) checks the configMap and returns the password
+     * if present. If password is not present, then it falls back on the encryptedPassword and
+     * encryptionKey(can be passed from {@link com.appdynamics.extensions.SystemPropertyConstants#ENCRYPTION_KEY_PROPERTY})
+     * to generate the password.
+     *
+     * @return the password if present or an empty password.
+     */
     public static String getPassword(Map<String, ?> configMap) {
         String password = (String)configMap.get(PASSWORD);
         if (!Strings.isNullOrEmpty(password)) {
@@ -68,5 +76,4 @@ public class CryptoUtils {
         }
         return val;
     }
-
 }
