@@ -441,7 +441,7 @@ public class Http4ClientBuilderTest {
 
     @Test
     public void whenSSLWithMutualAuthWithProperClientCertsAndWithProperHostnameThenAuthenticateSuccessfully() throws Exception{
-        int port = 8770;
+        int port = 8670;
         String uri = "https://localhost:" + port + "/test/hello/abey";
         Map map = new HashMap();
         List list = new ArrayList();
