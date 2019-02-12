@@ -27,6 +27,6 @@ public class EventsServiceUtils {
                 && eventsServiceParameters.get("port") != null
                 && eventsServiceParameters.get("globalAccountName") != null
                 && eventsServiceParameters.get("eventsApiKey") != null
-                && eventsServiceParameters.get("useSsl") != null;
+                && eventsServiceParameters.get("useSSL") != null;
     }
 }

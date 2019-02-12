@@ -32,7 +32,7 @@ public class Constants {
     public static final String USER = "username";
     public static final String PASSWORD = "password";
     public static final String ENCRYPTED_PASSWORD = "encryptedPassword";
-    public static final String USE_SSL = "useSsl";
+    public static final String USE_SSL = "useSSL";
     public static final String ENCRYPTION_KEY = "encryptionKey";
     public static final String ENABLED = "enabled";
 

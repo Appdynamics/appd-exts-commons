@@ -64,9 +64,9 @@ public class EventsServiceDataManager {
         int eventsServicePort = (Integer) eventsServiceParameters.get("port");
         globalAccountName = (String) eventsServiceParameters.get("globalAccountName");
         eventsApiKey = (String) eventsServiceParameters.get("eventsApiKey");
-        boolean useSsl = (Boolean) eventsServiceParameters.get("useSsl");
+        boolean useSSL = (Boolean) eventsServiceParameters.get("useSSL");
         httpClient = Http4ClientBuilder.getBuilder(eventsServiceParameters).build();
-        httpHost = new HttpHost(eventsServiceHost, eventsServicePort, useSsl ? "https" : "http");
+        httpHost = new HttpHost(eventsServiceHost, eventsServicePort, useSSL ? "https" : "http");
     }
 
     //region <Schema Creation>

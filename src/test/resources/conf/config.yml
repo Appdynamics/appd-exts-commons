@@ -150,4 +150,4 @@ eventsServiceParameters:
   port: 9080
   globalAccountName: dummyAccount
   eventsApiKey: dummyKey
-  useSsl: false
+  useSSL: false
