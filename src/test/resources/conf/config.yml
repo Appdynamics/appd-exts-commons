@@ -125,6 +125,9 @@ derivedMetrics:
       formula: "{x}|hits / ({x}|hits + {x}|misses)"
 
 
-
-
-
+eventsServiceParameters:
+  host: dummyHost
+  port: 9080
+  globalAccountName: dummyAccount
+  eventsApiKey: dummyKey
+  useSsl: false

@@ -15,9 +15,6 @@
 
 package com.appdynamics.extensions;
 
-import static com.appdynamics.extensions.util.StringUtils.isValidMetricValue;
-import static com.appdynamics.extensions.util.StringUtils.validateStrings;
-
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.MetricProperties;
@@ -36,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.appdynamics.extensions.util.StringUtils.isValidMetric;
+import static com.appdynamics.extensions.util.StringUtils.isValidString;
 
 public class MetricWriteHelper {
 
@@ -64,7 +63,7 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, String metricValue, String aggregationType, String timeRollup, String clusterRollup) {
-        if (validateStrings(metricPath, metricValue, timeRollup, clusterRollup) && isValidMetricValue(metricValue)) {
+        if (isValidMetric(metricPath, metricValue, aggregationType, timeRollup, clusterRollup)) {
             if (baseMonitor.getContextConfiguration().getContext().isScheduledModeEnabled()) {
                 Metric metric = new Metric(MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
                 logger.debug("Scheduled mode is enabled, caching the metric {}", metric);
@@ -83,9 +82,10 @@ public class MetricWriteHelper {
             addForDerivedMetricsCalculation(metricPath, metricValue);
             metricsMap.put(metricPath, metricValue);
         } else {
-            logger.error("The metric is not valid {},{},{},{},{},{}", MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup, clusterRollup);
+            logger.warn("The metric is not valid. Name - {}, Value - {}, Path - {}, Qualifiers - {}, {}, {}",
+                    MetricPathUtils.getMetricName(metricPath), metricValue, metricPath, aggregationType, timeRollup,
+                    clusterRollup);
         }
-
     }
 
     protected void addForDerivedMetricsCalculation(String metricPath, String metricValue) {
@@ -115,7 +115,7 @@ public class MetricWriteHelper {
     }
 
     public void printMetric(String metricPath, BigDecimal value, String metricType) {
-        if (validateStrings(metricPath, metricType) && value != null) {
+        if (isValidString(metricPath, metricType) && value != null) {
             String valStr = value.setScale(0, BigDecimal.ROUND_HALF_UP).toPlainString();
             String[] qualifiers = createMetricType(metricType);
             printMetric(metricPath, valStr, qualifiers[0], qualifiers[1], qualifiers[2]);
@@ -248,5 +248,4 @@ public class MetricWriteHelper {
 
     public void reset() {
     }
-
 }

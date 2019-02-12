@@ -52,3 +52,17 @@ numberOfThreads: 1
 taskSchedule:
   numberOfThreads: 1
   taskDelaySeconds: 300
+
+# This field contains the various parameters required to initiate a connection and send data to the AppDynamics Events Service.
+eventsServiceParameters:
+  host:
+  port:
+  globalAccountName:
+  eventsApiKey:
+  useSsl: false
+
+metricPathReplacements:
+  - replace: "&"
+    replaceWith: ""
+  - replace: "percent"
+    replaceWith: "%"
