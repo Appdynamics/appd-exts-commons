@@ -215,7 +215,7 @@ servers:
     # Uri is preferred instead of host-port-useSsl combo.
   - host: "" # Avoid this, use uri instead
     port: "" # Avoid this, use uri instead
-    useSsl: false # Avoid this, use uri instead.
+    useSSL: false # Avoid this, use uri instead.
     username: ""
     password: ""
     encryptedPassword: ""
@@ -231,25 +231,25 @@ Different settings related to the HTTP Client like SSL Certificates, Authenticat
     
 ```
 connection:
-  socketTimeout: 3000 # Read Timeout
-  connectTimeout: 1000
-  sslProtocols: ["TLSV1.2"] # Defaults to "default"
-  sslCertCheckEnabled: true
+  socketTimeout: 5000 # Read Timeout
+  connectTimeout: 5000 # Connection Timeout
+
+  sslCertCheckEnabled: true # Only used in Http4ClientBuilder. Not available in SSLUtils.
+  sslCipherSuites: [] # Only used in Http4ClientBuilder. Not available in SSLUtils. Defaults to "default".
+  enableCookies: false # Only used in Http4ClientBuilder. Not available in SSLUtils. Defaults to false.
+  enablePreemptiveAuth: true # Only used in Http4ClientBuilder. Not available in SSLUtils.
+
   sslVerifyHostname: true
+  sslProtocols: ["TLSV1.2"] # For SSLUtils, only the first one in the list is used. If null, by default TLSv1, TLSv1.1, TLSv1.2 are supported.
 
-  # This need not be exposed to user. Should be used on a need basis
-  sslCipherSuites: [] # Defaults to "default"
+  sslTrustStorePath: "" # If not set, will set value from "-Dappdynamics.agent.monitors.truststore.path=/path/cacerts" if present, else will set value as <MachineAgentHome>/conf/extensions-cacerts.jks.
+  sslTrustStorePassword: "" # If not set, will set value from "-Dappdynamics.agent.monitors.truststore.password=password".
+  sslTrustStoreEncryptedPassword: "" ## If not set, will set value from "-Dappdynamics.agent.monitors.truststore.encryptedPassword=ghrr121fgk23-2636guu".
 
-  sslTrustStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-cacerts.jks. The prop "-Dappdynamics.extensions.truststore.path=/path/cacerts" takes precedence if set
-  sslTrustStorePassword: ""
-  sslTrustStoreEncryptedPassword: ""
+  sslKeyStorePath: "" # If not set, will set value from "-Dappdynamics.agent.monitors.keystore.path=/path/clientcerts" if present, else will set value as <MachineAgentHome>/conf/extensions-clientcerts.jks.
+  sslKeyStorePassword: "" # If not set, will set value from "-Dappdynamics.agent.monitors.keystore.password=password".
+  sslKeyStoreEncryptedPassword: "" # If not set, will set value from "-Dappdynamics.agent.monitors.keystore.encryptedPassword=ghrr121fgk23-2636guu".
 
-  sslKeyStorePath: "" # If not set, defaulted to machine-agent/conf/extensions-clientcerts.jks. The prop "-Dappdynamics.extensions.keystore.path=/path/clientcerts" takes precedence if set
-  sslKeyStorePassword: ""
-  sslKeyStoreEncryptedPassword: ""
-
-  enableCookies: false #Defaults to false
-  enablePreemptiveAuth: true
 
 proxy:
   uri: ""
@@ -268,23 +268,24 @@ ABaseMonitor.getContextConfiguration().getContext().getControllerInfo()
 The controller information can also be provided in the `config.yml`
 
 ```
+# If any of the following fields are not set, the values of the specific fields are set from the system properties of the corresponding fields as specified in the comments.
+# If the system properties are not set for the field, then the data is retrieved from machine agent configFile. Please refer to ControllerInfoFactory for more details.
 controllerInfo:
-    controllerHost: ""
-    controllerPort: ""
-    account: ""
-    username: ""
-    password: ""
-    encryptedPassword: ""
-    encryptionKey: ""
-    controllerSslEnabled: ""
-    enableOrchestration: ""
-    uniqueHostId: ""
-    accountAccessKey: ""
-    machinePath: ""
-    simEnabled: ""
-    applicationName: ""
-    tierName: ""
-    nodeName: ""
+    controllerHost: "" # -Dappdynamics.controller.hostName
+    controllerPort: 8090 # -Dappdynamics.controller.port
+    controllerSslEnabled: false # -Dappdynamics.controller.ssl.enabled
+    enableOrchestration: false # N/A
+    uniqueHostId: "" # -Dappdynamics.agent.uniqueHostId
+    username: "" # -Dappdynamics.agent.monitors.controller.username
+    password: "" # -Dappdynamics.agent.monitors.controller.password
+    encryptedPassword: "" # -Dappdynamics.agent.monitors.controller.encryptedPassword
+    accountAccessKey: "" # -Dappdynamics.agent.accountAccessKey
+    account: "customer1" # -Dappdynamics.agent.accountName
+    machinePath: "" # -Dappdynamics.machine.agent.hierarchyPath
+    simEnabled: false # -Dappdynamics.sim.enabled
+    applicationName: "" # -Dappdynamics.agent.applicationName
+    tierName: "" # -Dappdynamics.agent.tierName
+    nodeName: "" # -Dappdynamics.agent.nodeName
 ```
 
 The ControllerInfo object is built by loading the properties from the following sources in the following order
@@ -349,7 +350,7 @@ eventsServiceParameters:
   port: 	#Events Service Port
   globalAccountName:	#Found in Controller -> Settings -> License -> Account
   eventsApiKey:		#Generated from Controller -> Analytics -> Configuration -> API Keys
-  useSsl: 	#true/false
+  useSSL: 	#true/false
 ```
 
 The Events Service client can be used to execute standard CRUD operations. The extension developer can obtain the client as follows
