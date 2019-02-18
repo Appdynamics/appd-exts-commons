@@ -50,8 +50,17 @@ public class Encryptor {
             System.out.println("***************Encrypted String***************");
             System.out.println(encrypted);
             System.out.println("**********************************************");
-        } else {
-            System.out.println("usage:  java -cp appd-exts-commons-1.1.0.jar com.appdynamics.extensions.encrypt.Encryptor <myKey> <myPassword>");
+        }
+
+        else {
+            //System.out.println("usage:  java -cp appd-exts-commons-1.1.0.jar com.appdynamics.extensions.encrypt.Encryptor <myKey> <myPassword>");
+            String args0 = System.getProperty("ENCRYPTION_KEY");
+            Encryptor encryptor = new Encryptor(args0);
+            String args1 = System.getProperty("PLAINTEXT_PWD");
+            String encrypted = encryptor.encrypt(args1);
+            System.out.println("***************Encrypted String***************");
+            System.out.println(encrypted);
+            System.out.println("**********************************************");
         }
     }
 
