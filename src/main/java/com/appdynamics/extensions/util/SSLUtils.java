@@ -26,7 +26,6 @@ import javax.net.ssl.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -36,9 +35,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 
-import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
-import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
-import static com.appdynamics.extensions.Constants.PASSWORD;
+import static com.appdynamics.extensions.Constants.*;
 import static com.appdynamics.extensions.SystemPropertyConstants.*;
 
 /**

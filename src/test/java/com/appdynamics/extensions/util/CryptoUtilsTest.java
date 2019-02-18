@@ -15,7 +15,6 @@
 
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.crypto.Encryptor;
 import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Test;

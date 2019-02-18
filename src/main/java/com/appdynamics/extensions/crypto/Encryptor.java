@@ -15,9 +15,14 @@
 
 package com.appdynamics.extensions.crypto;
 
+import com.google.common.base.Strings;
 import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
+
+import static com.appdynamics.extensions.SystemPropertyConstants.ENCRYPTION_KEY_PROPERTY;
+import static com.appdynamics.extensions.SystemPropertyConstants.PLAIN_TEXT_PROPERTY;
+
 
 
 public class Encryptor {
@@ -44,15 +49,27 @@ public class Encryptor {
 
 
     public static void main(String[] args) {
+        String encryptionKey;
+        String plainText;
+
         if ((args != null) && (args.length == 2)) {
-            Encryptor encryptor = new Encryptor(args[0]);
-            String encrypted = encryptor.encrypt(args[1]);
-            System.out.println("***************Encrypted String***************");
-            System.out.println(encrypted);
-            System.out.println("**********************************************");
+            encryptionKey = args[0];
+            plainText = args[1];
         } else {
-            System.out.println("usage:  java -cp appd-exts-commons-1.1.0.jar com.appdynamics.extensions.encrypt.Encryptor <myKey> <myPassword>");
+            encryptionKey = System.getProperty(ENCRYPTION_KEY_PROPERTY);
+            plainText = System.getProperty(PLAIN_TEXT_PROPERTY);
         }
+
+        if(!Strings.isNullOrEmpty(encryptionKey) && !Strings.isNullOrEmpty(plainText)) {
+            Encryptor encryptor = new Encryptor(encryptionKey);
+            String encryptedText = encryptor.encrypt(plainText);
+            System.out.println("****************************Encrypted Text**************************");
+            System.out.println(encryptedText);
+            System.out.println("********************************************************************");
+            return;
+        }
+        System.out.println("usage: java -cp appd-exts-commons-<version>.jar com.appdynamics.extensions.encrypt.Encryptor <myKey> <myPassword>    (or)");
+        System.out.println("usage: java -Dappdynamics.agent.monitors.encryptionKey=<mykey> -Dappdynamics.agent.monitors.plainText=<myPassword> -cp appd-exts-commons-<version>.jar com.appdynamics.extensions.encrypt.Encryptor");
     }
 
     public static class EncryptionException extends RuntimeException {

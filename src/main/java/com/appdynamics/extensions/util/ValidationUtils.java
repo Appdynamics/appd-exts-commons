@@ -15,7 +15,6 @@
 
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;

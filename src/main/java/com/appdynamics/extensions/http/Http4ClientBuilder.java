@@ -16,11 +16,10 @@
 package com.appdynamics.extensions.http;
 
 import com.appdynamics.extensions.Constants;
-import com.appdynamics.extensions.util.*;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.util.*;
 import com.appdynamics.extensions.util.SSLUtils.AllHostnameVerifier;
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -51,10 +50,10 @@ import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
@@ -62,8 +61,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static com.appdynamics.extensions.Constants.*;
-import static com.appdynamics.extensions.SystemPropertyConstants.*;
+import static com.appdynamics.extensions.Constants.AUTHTYPE;
+import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
 
 /**
  * Created by abey.tom on 6/30/15.

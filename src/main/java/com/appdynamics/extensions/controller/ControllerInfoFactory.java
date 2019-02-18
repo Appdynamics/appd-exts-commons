@@ -28,9 +28,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Map;
 
-import static com.appdynamics.extensions.Constants.ENCRYPTED_PASSWORD;
-import static com.appdynamics.extensions.Constants.ENCRYPTION_KEY;
-import static com.appdynamics.extensions.Constants.PASSWORD;
+import static com.appdynamics.extensions.Constants.*;
 import static com.appdynamics.extensions.SystemPropertyConstants.*;
 
 /**
