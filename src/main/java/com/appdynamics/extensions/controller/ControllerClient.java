@@ -76,7 +76,6 @@ public class ControllerClient {
         getCookiesCsrf();
         HttpGet get = new HttpGet(baseURL + url);
         if (!Strings.isNullOrEmpty(cookiesCsrf.getCsrf())) {
-            get.setHeader("Cookie", cookiesCsrf.getCookies());
             get.setHeader("X-CSRF-TOKEN", cookiesCsrf.getCsrf());
         }
         CloseableHttpResponse response = null;
