@@ -293,7 +293,7 @@ The ControllerInfo object is built by loading the properties from the following 
 2. System Properties
 3. config.yml
 
-For more details on ControllerInfo, check [ControllerInfo](https://community.appdynamics.com/t5/Knowledge-Base/Uploading-Dashboards-automatically-with-AppDynamics-Extensions/ta-p/35408#ControllerInfo).
+For more details on ControllerInfo, check [How do I auto upload dashboards from Extensions](https://community.appdynamics.com/t5/Knowledge-Base/Uploading-Dashboards-automatically-with-AppDynamics-Extensions/ta-p/35408#ControllerInfo).
 
 ## Auto Upload Custom Dashboards
 
