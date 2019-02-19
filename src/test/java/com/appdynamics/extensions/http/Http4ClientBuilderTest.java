@@ -414,7 +414,7 @@ public class Http4ClientBuilderTest {
 
     @Test(expected = java.net.SocketException.class)
     public void whenSSLWithMutualAuthWithNoClientCertsAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
-        int port = 8774;
+        int port = 8680;
         String uri = "https://localhost:" + port + "/test/hello/abey";
         Map map = new HashMap();
         List list = new ArrayList();
