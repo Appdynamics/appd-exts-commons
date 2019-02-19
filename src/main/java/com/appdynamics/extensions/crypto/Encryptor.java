@@ -68,8 +68,8 @@ public class Encryptor {
             System.out.println("********************************************************************");
             return;
         }
-        System.out.println("usage: java -cp appd-exts-commons-<version>.jar com.appdynamics.extensions.encrypt.Encryptor <myKey> <myPassword>    (or)");
-        System.out.println("usage: java -Dappdynamics.agent.monitors.encryptionKey=<mykey> -Dappdynamics.agent.monitors.plainText=<myPassword> -cp appd-exts-commons-<version>.jar com.appdynamics.extensions.encrypt.Encryptor");
+        System.out.println("usage: java -cp <monitoring-extension.jar> com.appdynamics.extensions.crypto.Encryptor <myEncryptionKey> <myClearTextPassword>    (or)");
+        System.out.println("usage: java -Dappdynamics.agent.monitors.encryptionKey=<myEncryptionKey> -Dappdynamics.agent.monitors.plainText=<myClearTextPassword> -cp <monitoring-extension.jar> com.appdynamics.extensions.crypto.Encryptor");
     }
 
     public static class EncryptionException extends RuntimeException {
