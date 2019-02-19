@@ -21,8 +21,8 @@ public class EncryptorTest {
     private ByteArrayOutputStream newOutputContent = new ByteArrayOutputStream();
     private PrintStream newOutputStream = new PrintStream(newOutputContent);
 
-    private final String usageOutput = "usage: java -cp appd-exts-commons-<version>.jar com.appdynamics.extensions.encrypt.Encryptor <myKey> <myPassword>    (or)\n" +
-            "usage: java -Dappdynamics.agent.monitors.encryptionKey=<mykey> -Dappdynamics.agent.monitors.plainText=<myPassword> -cp appd-exts-commons-<version>.jar com.appdynamics.extensions.encrypt.Encryptor\n";
+    private final String usageOutput = "usage: java -cp <monitoring-extension.jar> com.appdynamics.extensions.crypto.Encryptor <myEncryptionKey> <myClearTextPassword>    (or)\n" +
+            "usage: java -Dappdynamics.agent.monitors.encryptionKey=<myEncryptionKey> -Dappdynamics.agent.monitors.plainText=<myClearTextPassword> -cp <monitoring-extension.jar> com.appdynamics.extensions.crypto.Encryptor\n";
 
     private final String encryptedTextOutput = "****************************Encrypted Text**************************\n" +
             "avQa9cYNOoO6Ba1p3He+HQ==\n" +
