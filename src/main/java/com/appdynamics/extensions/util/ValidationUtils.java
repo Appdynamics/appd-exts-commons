@@ -65,7 +65,7 @@ public class ValidationUtils {
 
     public static boolean isValidMetricPath(String metricPath) {
         if (!metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher
-                .ascii().matchesAllOf(metricPath) && isValidMetricPrefix(metricPath)) {
+                .ASCII.matchesAllOf(metricPath) && isValidMetricPrefix(metricPath)) {
             return true;
         }
         logger.debug("The metric path {} is invalid", metricPath);
