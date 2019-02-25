@@ -251,6 +251,7 @@
                         <id>install</id>
                         <phase>install</phase>
                         <configuration>
+                            <goals>install</goals>
                             <target>
                                 <property name="maven.repo.dir" value="../maven-repo/releases/com/appdynamics/${project.artifactId}/${project.version}"/>
                                 <mkdir dir="${maven.repo.dir}"/>
@@ -265,7 +266,7 @@
                             </target>
                         </configuration>
                         <goals>
-                            <goal>install</goal>
+                            <goal>run</goal>
                         </goals>
                     </execution>
                 </executions>
