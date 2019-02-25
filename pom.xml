@@ -13,13 +13,12 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.appdynamics</groupId>
     <artifactId>appd-exts-commons</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>2.2.0</version>
     <packaging>jar</packaging>
     <name>extension-utils</name>
     <properties>
@@ -192,7 +191,7 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>com.appdynamics.extensions.workbench.WorkbenchServerLauncher</Main-Class>
@@ -219,16 +218,15 @@
                         <phase>install</phase>
                         <configuration>
                             <target>
-                                <property name="maven.repo.dir" value="../maven-repo/releases/com/appdynamics/${project.artifactId}/${project.version}"/>
-                                <mkdir dir="${maven.repo.dir}"/>
+                                <property name="maven.repo.dir" value="../maven-repo/releases/com/appdynamics/${project.artifactId}/${project.version}" />
+                                <mkdir dir="${maven.repo.dir}" />
                                 <copy todir="${maven.repo.dir}">
-                                    <fileset dir="target" includes="*.jar"/>
-                                    <fileset dir="${project.basedir}" includes="LICENSE.txt"/>
-                                    <fileset dir="${project.basedir}" includes="NOTICE.txt"/>
+                                    <fileset dir="target" includes="*.jar" />
+                                    <fileset dir="${project.basedir}" includes="LICENSE.txt" />
+                                    <fileset dir="${project.basedir}" includes="NOTICE.txt" />
                                 </copy>
-                                <copy tofile="${maven.repo.dir}/${project.artifactId}-${project.version}.pom" file="pom.xml"/>
-                                <copy todir="../maven-repo/releases/com/appdynamics/${project.artifactId}"
-                                      file="${settings.localRepository}/com/appdynamics/${project.artifactId}/maven-metadata-local.xml"/>
+                                <copy tofile="${maven.repo.dir}/${project.artifactId}-${project.version}.pom" file="pom.xml" />
+                                <copy todir="../maven-repo/releases/com/appdynamics/${project.artifactId}" file="${settings.localRepository}/com/appdynamics/${project.artifactId}/maven-metadata-local.xml" />
                             </target>
                         </configuration>
                         <goals>
@@ -281,5 +279,6 @@
     </repositories>
     <scm>
         <connection>scm:git:https://github.com/Appdynamics/appd-exts-commons</connection>
-    </scm>
+      <tag>appd-exts-commons-2.2.0</tag>
+  </scm>
 </project>
