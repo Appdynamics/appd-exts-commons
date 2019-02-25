@@ -268,7 +268,7 @@
     <distributionManagement>
         <repository>
             <id>github-maven-repo</id>
-            <url>https://github.com/Appdynamics/maven-repo/tree/master/releases</url>
+            <url>https://github.com/Appdynamics/maven-repo/raw/master/releases</url>
         </repository>
     </distributionManagement>
     <repositories>
