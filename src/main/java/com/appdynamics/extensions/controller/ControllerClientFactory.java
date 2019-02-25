@@ -15,7 +15,6 @@
 
 package com.appdynamics.extensions.controller;
 
-import com.appdynamics.extensions.conf.modules.ControllerModule;
 import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;

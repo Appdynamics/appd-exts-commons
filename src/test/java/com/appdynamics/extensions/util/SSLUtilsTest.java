@@ -1,7 +1,5 @@
 package com.appdynamics.extensions.util;
 
-import com.appdynamics.extensions.crypto.Encryptor;
-import com.appdynamics.extensions.http.Http4ClientBuilder;
 import com.google.common.collect.Maps;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -11,10 +9,8 @@ import org.eclipse.jetty.server.Server;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.security.KeyStore;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.appdynamics.extensions.SystemPropertyConstants.KEYSTORE_PATH_PROPERTY;

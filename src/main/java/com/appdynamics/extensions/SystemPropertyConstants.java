@@ -25,6 +25,7 @@ public class SystemPropertyConstants {
     public static final String HEALTHCHECKS_LOG_LEVEL_PROPERTY = "appdynamics.agent.monitors.healthchecks.log.level";
 
     public static final String ENCRYPTION_KEY_PROPERTY = "appdynamics.agent.monitors.encryptionKey";
+    public static final String PLAIN_TEXT_PROPERTY = "appdynamics.agent.monitors.plainText";
 
     public static final String CONTROLLER_USERNAME_PROPERTY = "appdynamics.agent.monitors.controller.username";
     public static final String CONTROLLER_PASSWORD_PROPERTY = "appdynamics.agent.monitors.controller.password";
