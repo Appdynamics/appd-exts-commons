@@ -265,9 +265,9 @@
                                       file="${settings.localRepository}/com/appdynamics/${project.artifactId}/maven-metadata-local.xml"/>
                             </target>
                         </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
+                        <!--<goals>
+                            <goal></goal>
+                        </goals>-->
                     </execution>
                 </executions>
                 <!--<configuration>
