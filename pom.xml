@@ -218,7 +218,7 @@
                         <phase>install</phase>
                         <configuration>
                             <target>
-                                <property name="maven.repo.dir" value="../maven-repo/releases/com/appdynamics/${project.artifactId}/${project.version}" />
+                                <property name="maven.repo.dir" value="${project.basedir}/../maven-repo/releases/com/appdynamics/${project.artifactId}/${project.version}" />
                                 <mkdir dir="${maven.repo.dir}" />
                                 <copy todir="${maven.repo.dir}">
                                     <fileset dir="target" includes="*.jar" />
