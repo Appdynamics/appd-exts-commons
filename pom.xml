@@ -233,26 +233,6 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                        <execution>
-                            <id>deploy</id>
-                            <phase>deploy</phase>
-                            <configuration>
-                                <target>
-                                    <property name="maven.repo.dir" value="../../../maven-repo/releases/com/appdynamics/${project.artifactId}/${project.version}" />
-                                    <mkdir dir="${maven.repo.dir}" />
-                                    <copy todir="${maven.repo.dir}">
-                                        <fileset dir="target" includes="*.jar" />
-                                        <fileset dir="${project.basedir}" includes="LICENSE.txt" />
-                                        <fileset dir="${project.basedir}" includes="NOTICE.txt" />
-                                    </copy>
-                                    <copy tofile="${maven.repo.dir}/${project.artifactId}-${project.version}.pom" file="pom.xml" />
-                                    <copy todir="../../../maven-repo/releases/com/appdynamics/${project.artifactId}" file="${settings.localRepository}/com/appdynamics/${project.artifactId}/maven-metadata-local.xml" />
-                                </target>
-                            </configuration>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                        </execution>
                 </executions>
             </plugin>
             <plugin>
