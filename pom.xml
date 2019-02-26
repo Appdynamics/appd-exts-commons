@@ -277,7 +277,7 @@
                             </target>
                         </configuration>
                         <goals>
-                            <goal>run</goal>
+                            <goal>perform</goal>
                         </goals>
                     </execution>
                 </executions>
