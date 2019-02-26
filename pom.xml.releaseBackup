@@ -18,7 +18,7 @@
 
     <groupId>com.appdynamics</groupId>
     <artifactId>appd-exts-commons</artifactId>
-    <version>2.2.7-SNAPSHOT</version>
+    <version>2.2.8-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>extension-utils</name>
     <properties>
@@ -268,7 +268,7 @@
     <distributionManagement>
         <repository>
             <id>github-maven-repo</id>
-            <url>https://github.com/Appdynamics/maven-repo/tree/master/releases</url>
+            <url>https://github.com/Appdynamics/maven-repo/raw/master/releases</url>
         </repository>
     </distributionManagement>
     <repositories>
