@@ -285,6 +285,12 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>local-maven-repo</id>
+            <url>file://${project.basedir}/../maven-repo/releases</url>
+        </repository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>github-maven-repo</id>
