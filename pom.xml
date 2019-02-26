@@ -281,9 +281,9 @@
                         </goals>
                     </execution>
                 </executions>
-                <!--<configuration>
+                <configuration>
                     <goals>install</goals>
-                </configuration>-->
+                </configuration>
             </plugin>
         </plugins>
     </build>
