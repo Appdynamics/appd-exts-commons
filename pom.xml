@@ -261,8 +261,8 @@
                 <version>2.5.1</version>
                 <executions>
                     <execution>
-                        <id>deploy</id>
-                        <phase>deploy</phase>
+                        <id>install</id>
+                        <phase>install</phase>
                         <configuration>
                             <target>
                                 <property name="maven.repo.dir" value="../../../maven-repo/releases/com/appdynamics/${project.artifactId}/${project.version}" />
