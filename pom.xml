@@ -277,7 +277,7 @@
                             </target>
                         </configuration>
                         <goals>
-                            <goal>perform</goal>
+                            <goal>install</goal>
                         </goals>
                     </execution>
                 </executions>
