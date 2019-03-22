@@ -242,7 +242,6 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
     @Override
     public void onComplete() {
         logger.debug("workbench onComplete() invoked...");
-        int baseMetricsSize = 0;
         if (derivedMetricsCalculator != null) {
             triggerDerivedMetrics();
         }
