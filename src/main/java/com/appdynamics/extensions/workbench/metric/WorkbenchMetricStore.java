@@ -19,6 +19,7 @@ import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
+import com.appdynamics.extensions.util.TimeUtils;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
 import org.slf4j.Logger;
 
@@ -236,6 +237,15 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
 
     public void setResetListener(ResetListener listener) {
         this.listener = listener;
+    }
+
+    public void onComplete() {
+        int baseMetricsSize = 0;
+        if (derivedMetricsCalculator != null) {
+            triggerDerivedMetrics();
+        }
+        Long endTime = System.currentTimeMillis();
+        logger.info("Finished executing at " + TimeUtils.getFormattedTimestamp(endTime, "yyyy-MM-dd HH:mm:ss z"));
     }
 
     public interface ResetListener {

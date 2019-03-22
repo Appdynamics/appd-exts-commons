@@ -155,7 +155,7 @@ public class MetricWriteHelper {
         logTime();
     }
 
-    private void triggerDerivedMetrics() {
+    protected void triggerDerivedMetrics() {
         int baseMetricsSize;List<Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
         baseMetricsSize = metricsMap.size();
         logger.debug("Total number of base metrics reported in this job run are : {}", baseMetricsSize);

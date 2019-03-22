@@ -60,10 +60,10 @@ public class Metric {
      * @param metricValue       Value of the metric
      * @param metricProperties  Map of metric properties
      * @param metricPrefix      Metric Path prefix
-     * @param tokens            Various tokens in metric path
+     * @param metricPathTokens  All tokens in metric path
      */
-    public Metric(String metricName, String metricValue, Map<String, ?> metricProperties, String metricPrefix, String... tokens) {
-        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, tokens), metricProperties);
+    public Metric(String metricName, String metricValue, Map<String, ?> metricProperties, String metricPrefix, String... metricPathTokens) {
+        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, metricPathTokens), metricProperties);
     }
 
     /**
@@ -73,10 +73,10 @@ public class Metric {
      * @param metricName        Name of the metric
      * @param metricValue       Value of the metric
      * @param metricPrefix      Metric Path prefix
-     * @param tokens            Various tokens in metric path
+     * @param metricPathTokens  All tokens in metric path
      */
-    public Metric(String metricName, String metricValue, String metricPrefix, String... tokens) {
-        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, tokens));
+    public Metric(String metricName, String metricValue, String metricPrefix, String... metricPathTokens) {
+        this(MetricPathUtils.getReplacedString(metricName), metricValue, MetricPathUtils.buildMetricPath(metricPrefix, metricPathTokens));
     }
 
     private MetricProperties buildMetricProperties(Map<String, ?> metricProperties){
