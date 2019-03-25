@@ -18,6 +18,7 @@ package com.appdynamics.extensions.workbench.metric;
 import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.util.TimeUtils;
 import com.appdynamics.extensions.workbench.ui.MetricStoreStats;
@@ -243,7 +244,9 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
     public void onComplete() {
         logger.debug("workbench onComplete() invoked...");
         if (derivedMetricsCalculator != null) {
-            triggerDerivedMetrics();
+            List<Metric> metricList = derivedMetricsCalculator.calculateAndReturnDerivedMetrics();
+            transformAndPrintMetrics(metricList);
+            derivedMetricsCalculator.clearBaseMetricsMap();
         }
         Long endTime = System.currentTimeMillis();
         logger.info("Finished executing at " + TimeUtils.getFormattedTimestamp(endTime, "yyyy-MM-dd HH:mm:ss z"));
