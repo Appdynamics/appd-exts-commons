@@ -1,6 +1,6 @@
 # AppDynamics Extensions SDK CHANGELOG
 
-## 2.2.0 - Feb 15, 2019
+## 2.2.0
 1. Ability to pass configuration data to extensions via environment variables.
 2. ControllerInfo for representing the Controller Information, ControllerClient and ControllerAPIService for calling Controller APIs.
 3. Implemented SSLUtils for creating custom SSLContext.
