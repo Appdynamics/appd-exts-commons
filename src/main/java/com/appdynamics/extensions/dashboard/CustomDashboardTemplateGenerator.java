@@ -81,6 +81,7 @@ public class CustomDashboardTemplateGenerator {
         dashboardString = setTierName(dashboardString);
         dashboardString = setNodeName(dashboardString);
         dashboardString = setHostName(dashboardString);
+        dashboardString = setUniqueHostID(dashboardString);
         dashboardString = setDashboardName(dashboardString);
         dashboardString = setMachinePath(dashboardString);
         return dashboardString;
@@ -130,6 +131,14 @@ public class CustomDashboardTemplateGenerator {
         if (dashboardString.contains(REPLACE_HOST_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_HOST_NAME, controllerInfo.getControllerHost());
             logger.debug(REPLACE_HOST_NAME + ": " + controllerInfo.getControllerHost());
+        }
+        return dashboardString;
+    }
+
+    private String setUniqueHostID(String dashboardString) {
+        if (dashboardString.contains(REPLACE_UNIQUE_HOST_ID)) {
+            dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_UNIQUE_HOST_ID, controllerInfo.getUniqueHostId());
+            logger.debug(REPLACE_UNIQUE_HOST_ID + ": " + controllerInfo.getUniqueHostId());
         }
         return dashboardString;
     }
