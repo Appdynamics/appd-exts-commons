@@ -29,6 +29,7 @@ public class DashboardConstants {
     public static final String REPLACE_DASHBOARD_NAME = "${DASHBOARD_NAME}";
     public static final String REPLACE_SIM_APPLICATION_NAME = "${SIM_APPLICATION_NAME}";
     public static final String REPLACE_HOST_NAME = "${HOST_NAME}";
+    public static final String REPLACE_UNIQUE_HOST_ID = "${UNIQUE_HOST_ID}";
     public static final String DASHBOARD_NAME = "dashboardName";
     public static final String SIM_APPLICATION_NAME = "Server & Infrastructure Monitoring";
     public static final String TRUE = "true";
