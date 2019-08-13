@@ -29,4 +29,18 @@ public class NumberUtilsTest {
         BigDecimal num = new BigDecimal(Double.MAX_VALUE + 10);
         Assert.assertTrue(NumberUtils.isNumber(num.toString()));
     }
+
+    @Test
+    public void whenNanThenReturnFalse(){
+        String naN = "NaN";
+        Assert.assertFalse(NumberUtils.isNumber(naN));
+    }
+
+    @Test
+    public void whenInfinityThenReturnFalse(){
+        String positiveInfinity = "Infinity";
+        String negativeInfinity = "-Infinity";
+        Assert.assertFalse("Dropiing Infinity", NumberUtils.isNumber(positiveInfinity));
+        Assert.assertFalse("Dropiing _Inifinity", NumberUtils.isNumber(negativeInfinity) );
+    }
 }

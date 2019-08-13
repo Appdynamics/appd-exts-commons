@@ -41,6 +41,7 @@ public class TransformerTest {
         metricPopertiesMap.put("multiplier", "10");
         metricPopertiesMap.put("delta",true);
         Metric metric3  = new Metric("ratio", "4.0", "Server|Redis|Custom Metric|Redis|Server1|ratio", metricPopertiesMap);
+
         metricList.add(metric1);
         metricList.add(metric2);
         metricList.add(metric3);
@@ -52,6 +53,7 @@ public class TransformerTest {
         Assert.assertTrue(metric2.getMetricValue().equals("2"));
         Assert.assertTrue(metric3.getMetricProperties().getAlias().equals("ratio_alias"));
         Assert.assertTrue(metric3.getMetricValue() == null);
+
     }
 
     @Test

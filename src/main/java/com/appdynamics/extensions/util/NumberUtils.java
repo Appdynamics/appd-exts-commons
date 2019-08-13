@@ -27,7 +27,8 @@ import java.math.RoundingMode;
  */
 public class NumberUtils {
     public static boolean isNumber(String str) {
-        if (str != null && !str.equalsIgnoreCase("nan")) {
+        if (str != null && !str.equalsIgnoreCase("nan") && !str.equalsIgnoreCase("Infinity")
+        && !str.equalsIgnoreCase("-Infinity") && !str.equalsIgnoreCase("undefined")) {
             str = str.trim();
             try {
                 Double.parseDouble(str);
