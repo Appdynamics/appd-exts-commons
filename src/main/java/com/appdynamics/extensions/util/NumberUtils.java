@@ -27,14 +27,15 @@ import java.math.RoundingMode;
  */
 public class NumberUtils {
     public static boolean isNumber(String str) {
-        if (str != null && !str.equalsIgnoreCase("nan") && !str.equalsIgnoreCase("Infinity")
-        && !str.equalsIgnoreCase("-Infinity") && !str.equalsIgnoreCase("undefined")) {
-            str = str.trim();
-            try {
-                Double.parseDouble(str);
-                return true;
-            } catch (Exception e) {
-            }
+         {
+             if(str !=  null) {
+                 str = str.trim();
+                 try {
+                     Double d = Double.parseDouble(str);
+                     return Double.isFinite(d);
+                 } catch (Exception e) {
+                 }
+             }
         }
         return false;
     }
