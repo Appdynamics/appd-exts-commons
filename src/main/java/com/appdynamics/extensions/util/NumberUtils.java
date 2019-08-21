@@ -15,6 +15,9 @@
 
 package com.appdynamics.extensions.util;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import org.slf4j.Logger;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -26,6 +29,8 @@ import java.math.RoundingMode;
  * To change this template use File | Settings | File Templates.
  */
 public class NumberUtils {
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(NumberUtils.class);
+
     public static boolean isNumber(String str) {
          {
              if(str !=  null) {
@@ -34,6 +39,7 @@ public class NumberUtils {
                      Double d = Double.parseDouble(str);
                      return Double.isFinite(d);
                  } catch (Exception e) {
+                     logger.warn("Unable to validate the value as a valid number", e);
                  }
              }
         }
