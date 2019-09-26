@@ -84,6 +84,7 @@ public class MonitorContext {
             logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
             controllerModule.initController(installDir, config);
             workBenchModule.initWorkBenchStore(config, metricPrefix, getControllerInfo());
+            //TODO: Fix on config reload/load
             httpClientModule.initHttpClient(config);
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);

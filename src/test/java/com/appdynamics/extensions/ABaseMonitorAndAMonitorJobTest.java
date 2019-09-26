@@ -16,32 +16,46 @@
 package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.conf.processor.K8SProcessor;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Created by venkata.konala on 11/1/17.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ABaseMonitor.class, K8SProcessor.class})
+@PowerMockIgnore({"javax.net.ssl.*"})
 public class ABaseMonitorAndAMonitorJobTest {
 
-   ABaseMonitor aBaseMonitor;
-   MonitorContextConfiguration configuration;
+   private ABaseMonitor aBaseMonitor;
+   private MonitorContextConfiguration configuration;
     @Before
     public void setUp(){
         aBaseMonitor = mock(ABaseMonitor.class);
         configuration = mock(MonitorContextConfiguration.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
+        PowerMockito.mockStatic(K8SProcessor.class);
+        when(K8SProcessor.process(anyMap())).thenReturn(new HashMap<>());
     }
 
 

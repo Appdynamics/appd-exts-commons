@@ -17,6 +17,7 @@ package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.conf.processor.K8SProcessor;
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
@@ -123,6 +124,15 @@ public abstract class ABaseMonitor extends AManagedMonitor {
             MetricPathUtils.registerMetricCharSequenceReplacer(this);
             initializeMoreStuff(args);
         }
+
+        if (contextConfiguration != null) {
+            K8SProcessor.process(contextConfiguration.getConfigYml());
+           /* HttpClientModule httpClientModule = new HttpClientModule();
+            httpClientModule.initHttpClient(config);
+            contextConfiguration.getContext().setHttpClientModule(httpClientModule);*/
+            //Init when the config is discovered from k8s
+            //contextConfiguration.getContext().initialize(monitorJob, contextConfiguration.getConfigYml(), contextConfiguration.getMetricPrefix());
+        }
     }
 
     private FileWatchListener createYmlFileListener(final String ymlFile) {
@@ -130,6 +140,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
             @Override
             public void onFileChange(File file) {
                 contextConfiguration.setConfigYml(ymlFile);
+                K8SProcessor.process(contextConfiguration.getConfigYml());
                 onConfigReload(file);
             }
         };
