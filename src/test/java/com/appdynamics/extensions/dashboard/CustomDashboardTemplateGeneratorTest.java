@@ -92,6 +92,9 @@ public class CustomDashboardTemplateGeneratorTest {
         if (dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains("hostNameYML"));
         }
+        if (dashboardString.contains(DashboardConstants.REPLACE_UNIQUE_HOST_ID)) {
+            Assert.assertTrue(updatedDashboardString.contains("uniqueHostIDYML"));
+        }
         if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
         }
@@ -118,6 +121,9 @@ public class CustomDashboardTemplateGeneratorTest {
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)) {
             Assert.assertTrue(updatedDashboardString.contains("Root|Test1|Test2|Test3"));
+        }
+        if (dashboardString.contains(DashboardConstants.REPLACE_UNIQUE_HOST_ID)) {
+            Assert.assertTrue(updatedDashboardString.contains("uniqueHostIDYML"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains("hostNameYML"));
