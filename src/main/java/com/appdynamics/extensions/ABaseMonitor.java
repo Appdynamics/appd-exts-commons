@@ -17,6 +17,7 @@ package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.file.FileWatcher;
 import com.appdynamics.extensions.conf.processor.K8SProcessor;
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
@@ -90,10 +91,6 @@ public abstract class ABaseMonitor extends AManagedMonitor {
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ABaseMonitor.class);
 
     private Long startTime;
-    /**
-     * The name of the monitor.
-     */
-    protected String monitorName;
 
     private File installDir;
 
@@ -103,11 +100,20 @@ public abstract class ABaseMonitor extends AManagedMonitor {
      */
     private MonitorContextConfiguration contextConfiguration;
 
+
+    /**
+     * The name of the monitor.
+     */
+    protected String monitorName;
+
     /**
      * A runnable which does all the leg work for fetching the
      * metrics in a separate thread.
      */
     protected AMonitorJob monitorJob;
+
+
+    protected FileWatcher fileWatcher = new FileWatcher();
 
     public ABaseMonitor() {
         this.monitorName = getMonitorName();
@@ -116,31 +122,34 @@ public abstract class ABaseMonitor extends AManagedMonitor {
     }
 
     protected void initialize(final Map<String, String> args) {
+        String ymlFilePath = args.get("config-file");
         if (contextConfiguration == null) {
             installDir = getInstallDirectory();
             monitorJob = createMonitorJob();
             contextConfiguration = createContextConfiguration();
-            contextConfiguration.registerListener(args.get("config-file"), createYmlFileListener(args.get("config-file")));
-            MetricPathUtils.registerMetricCharSequenceReplacer(this);
+            loadAndInitContext(ymlFilePath,false);
+            registerListeners(ymlFilePath);
+            //TODO check if commenting out the explicit initialize in the FileWatcher.createListener doesn't introduce bugs.
             initializeMoreStuff(args);
-        }
-
-        if (contextConfiguration != null) {
-            K8SProcessor.process(contextConfiguration.getConfigYml());
-           /* HttpClientModule httpClientModule = new HttpClientModule();
-            httpClientModule.initHttpClient(config);
-            contextConfiguration.getContext().setHttpClientModule(httpClientModule);*/
-            //Init when the config is discovered from k8s
-            //contextConfiguration.getContext().initialize(monitorJob, contextConfiguration.getConfigYml(), contextConfiguration.getMetricPrefix());
         }
     }
 
-    private FileWatchListener createYmlFileListener(final String ymlFile) {
+    private void loadAndInitContext(String ymlFilePath,boolean isConfigYmlReloaded) {
+        contextConfiguration.loadConfigYml(ymlFilePath);
+        contextConfiguration.initialize(monitorJob,isConfigYmlReloaded);
+    }
+
+    private void registerListeners(final String ymlFilePath) {
+        fileWatcher.createListener(ymlFilePath, createYmlFileListener(ymlFilePath), installDir, 3000);
+        //TODO figure out a better way to do this.
+        MetricPathUtils.registerMetricCharSequenceReplacer(this);
+    }
+
+    private FileWatchListener createYmlFileListener(final String ymlFilePath) {
         FileWatchListener fileWatchListener = new FileWatchListener() {
             @Override
             public void onFileChange(File file) {
-                contextConfiguration.setConfigYml(ymlFile);
-                K8SProcessor.process(contextConfiguration.getConfigYml());
+                loadAndInitContext(ymlFilePath,true);
                 onConfigReload(file);
             }
         };
@@ -156,7 +165,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
     }
 
     private MonitorContextConfiguration createContextConfiguration() {
-        return new MonitorContextConfiguration(getMonitorName(), getDefaultMetricPrefix(), installDir, monitorJob);
+        return new MonitorContextConfiguration(getMonitorName(), getDefaultMetricPrefix(), installDir);
     }
 
     protected void onConfigReload(File file) {

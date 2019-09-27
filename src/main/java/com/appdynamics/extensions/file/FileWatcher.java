@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-package com.appdynamics.extensions.conf.modules;
+package com.appdynamics.extensions.file;
 
-import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
@@ -34,9 +33,9 @@ import static com.appdynamics.extensions.conf.MonitorContext.isWorkbenchMode;
 /**
  * Created by venkata.konala on 10/24/17.
  */
-public class FileWatchListenerModule {
+public class FileWatcher {
 
-    private static final Logger logger = ExtensionsLoggerFactory.getLogger(FileWatchListenerModule.class);
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(FileWatcher.class);
     private Set<File> monitoredDirs;
     private Map<File, FileWatchListener> listenerMap;
     private FileAlterationMonitor monitor;
@@ -49,7 +48,8 @@ public class FileWatchListenerModule {
         createListener(file, fileWatchListener);
         createWatcher(file);
         //Initialize it for the fisrt time
-        fileWatchListener.onFileChange(file);
+        //TODO do we really need to initialize it explicitly?
+        //fileWatchListener.onFileChange(file,true);
     }
 
     private File resolvePath(String path, File installDir) {

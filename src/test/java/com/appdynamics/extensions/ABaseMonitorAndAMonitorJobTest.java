@@ -24,7 +24,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -119,7 +118,7 @@ public class ABaseMonitorAndAMonitorJobTest {
     public void cacheMetricsTest() throws TaskExecutionException, InterruptedException{
         SampleMonitor sampleMonitor = new SampleMonitor();
         Map<String, String> args = Maps.newHashMap();
-        configuration.setConfigYml("src/test/resources/conf/config.yml");
+        configuration.loadConfigYml("src/test/resources/conf/config.yml");
         args.put("config-file", "src/test/resources/conf/config.yml");
         sampleMonitor.execute(args, null);
         Thread.sleep(1000);

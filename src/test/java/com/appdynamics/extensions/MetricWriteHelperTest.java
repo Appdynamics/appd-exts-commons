@@ -150,7 +150,7 @@ public class MetricWriteHelperTest {
         ABaseMonitor aBaseMonitor = mock(ABaseMonitor.class);
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
         MonitorContextConfiguration configuration = mock(MonitorContextConfiguration.class);
-        configuration.setConfigYml("src/test/resources/conf/config_WithMultipleServersDisplayNameCheck.yml");
+        configuration.loadConfigYml("src/test/resources/conf/config_WithMultipleServersDisplayNameCheck.yml");
         MonitorContext context = mock(MonitorContext.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
         when(aBaseMonitor.getContextConfiguration().getMetricPrefix()).thenReturn("Custom Metrics|Sample Monitor");

@@ -16,7 +16,6 @@
 package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
-import com.appdynamics.extensions.conf.modules.FileWatchListenerModule;
 import com.appdynamics.extensions.conf.processor.ConfigProcessor;
 import com.appdynamics.extensions.file.FileWatchListener;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
@@ -41,25 +40,21 @@ public class MonitorContextConfiguration {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorContextConfiguration.class);
     private File installDir;
-    private AMonitorJob aMonitorJob;
     private Map<String, ?> configYml;
     private Object metricXml;
     private String metricPrefix;
     private String defaultMetricPrefix;
     private JAXBContext jaxbContext;
-    private FileWatchListenerModule fileWatchListenerModule;
     private boolean enabled;
     private MonitorContext context;
 
-    public MonitorContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir, AMonitorJob aMonitorJob) {
+    public MonitorContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir) {
         this.defaultMetricPrefix = defaultMetricPrefix;
         this.installDir = installDir;
-        this.aMonitorJob = aMonitorJob;
-        this.fileWatchListenerModule = new FileWatchListenerModule();
         this.context = new MonitorContext(monitorName, installDir);
     }
 
-    public void setConfigYml(String path) {
+    public void loadConfigYml(String path) {
         File configFile = resolvePath(path, installDir);
         logger.info("Loading the contextConfiguration from {}", configFile.getAbsolutePath());
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(configFile);
@@ -77,7 +72,6 @@ public class MonitorContextConfiguration {
             this.enabled = false;
             logger.error("The contextConfiguration is not enabled {}", configYml);
         }
-        context.initialize(aMonitorJob, getConfigYml(), getMetricPrefix());
     }
 
 
@@ -89,7 +83,7 @@ public class MonitorContextConfiguration {
         }
     }
 
-    public <T> void setMetricXml(String path, final Class<T> clazz) {
+    public <T> void loadMetricXml(String path, final Class<T> clazz) {
         File metricFile = resolvePath(path, installDir);
         if (jaxbContext == null) {
             try {
@@ -142,16 +136,16 @@ public class MonitorContextConfiguration {
         }
     }
 
-    public void registerListener(String path, FileWatchListener callback) {
-        fileWatchListenerModule.createListener(path, callback, installDir, 3000);
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
 
     public MonitorContext getContext() {
         return context;
+    }
+
+    public void initialize(AMonitorJob monitorJob, boolean isConfigYmlReloaded){
+        getContext().initialize(monitorJob,getConfigYml(),getMetricPrefix(),isConfigYmlReloaded);
     }
 
 }

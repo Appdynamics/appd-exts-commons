@@ -26,11 +26,11 @@ import java.io.File;
 public class MonitorContextConfigurationTest {
 
     //private File installDir = PathResolver.resolveDirectory()
-    private MonitorContextConfiguration monitorContextConfiguration = new MonitorContextConfiguration("Redis Monitor", "Custom Metrics|Redis", new File(""), null);
+    private MonitorContextConfiguration monitorContextConfiguration = new MonitorContextConfiguration("Redis Monitor", "Custom Metrics|Redis", new File(""));
 
     @Test
     public void configYMLreturnMapAndIntializesContextWhenFilePathIsValidTest(){
-        monitorContextConfiguration.setConfigYml("src/test/resources/conf/config.yml");
+        monitorContextConfiguration.loadConfigYml("src/test/resources/conf/config.yml");
         Assert.assertTrue(monitorContextConfiguration.isEnabled());
         Assert.assertTrue(monitorContextConfiguration.getConfigYml() != null);
         Assert.assertTrue(monitorContextConfiguration.getMetricPrefix().equals("Server|Component:AppLevels|Custom Metrics|Redis"));
@@ -40,7 +40,7 @@ public class MonitorContextConfigurationTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void configYMLreturnExceptionAndDoesNotInitialiseContextWhenFilePathIsNotValidTest(){
-        monitorContextConfiguration.setConfigYml("config.yml");
+        monitorContextConfiguration.loadConfigYml("config.yml");
         Assert.assertTrue(monitorContextConfiguration.getContext() == null);
     }
 }

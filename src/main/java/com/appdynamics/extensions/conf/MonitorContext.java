@@ -58,6 +58,7 @@ public class MonitorContext {
     private CustomDashboardModule dashboardModule;
     private MetricCharSequenceReplaceModule metricCharSequenceReplaceModule;
     private EventsServiceModule eventsServiceModule;
+    private KubernetesDiscoveryModule kubernetesDiscoveryModule;
 
     MonitorContext(String monitorName, File installDir) {
         this.installDir = installDir;
@@ -74,18 +75,24 @@ public class MonitorContext {
         eventsServiceModule = new EventsServiceModule();
         healthCheckModule = new HealthCheckModule();
         dashboardModule = new CustomDashboardModule();
+        kubernetesDiscoveryModule = new KubernetesDiscoveryModule();
     }
 
-    public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix) {
+    public void initialize(AMonitorJob monitorJob, Map<String, ?> config, String metricPrefix, boolean isConfigYmlReloaded) {
         this.config = config;
         this.metricPrefix = metricPrefix;
         Boolean enabled = (Boolean) config.get("enabled");
+        boolean isK8sDiscoveryModeEnabled = isK8sDiscoveryModeEnabled();
+        //TODO when now have isConfigYmlReloaded that denotes whether the yml was reloaded and we can decide which modules need to be reinitialized.
         if (!Boolean.FALSE.equals(enabled)) {
             logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
+            //k8s module needs to process first to update list of servers followed by httpClient.
+            if(isK8sDiscoveryModeEnabled) {
+                kubernetesDiscoveryModule.updateDiscoveredServers(config);
+            }
+            httpClientModule.initHttpClient(config);
             controllerModule.initController(installDir, config);
             workBenchModule.initWorkBenchStore(config, metricPrefix, getControllerInfo());
-            //TODO: Fix on config reload/load
-            httpClientModule.initHttpClient(config);
             monitorExecutorServiceModule.initExecutorService(config, monitorName);
             jobScheduleModule.initScheduledJob(config, monitorName, monitorJob);
             cacheModule.initCache();
@@ -96,6 +103,10 @@ public class MonitorContext {
         } else {
             logger.error("The contextConfiguration is not enabled {}", config);
         }
+    }
+
+    public boolean isK8sDiscoveryModeEnabled() {
+        return kubernetesDiscoveryModule.isK8sDiscoveryEnabled(config);
     }
 
     public void setControllerModule(ControllerModule controllerModule) {
@@ -204,5 +215,13 @@ public class MonitorContext {
 
     public CustomDashboardModule getDashboardModule() {
         return dashboardModule;
+    }
+
+    public KubernetesDiscoveryModule getKubernetesDiscoveryModule() {
+        return kubernetesDiscoveryModule;
+    }
+
+    public HttpClientModule getHttpClientModule() {
+        return httpClientModule;
     }
 }

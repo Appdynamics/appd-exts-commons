@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.conf.modules;
 
 import com.appdynamics.extensions.file.FileWatchListener;
+import com.appdynamics.extensions.file.FileWatcher;
 import org.junit.Test;
 
 import java.io.File;
@@ -29,20 +30,20 @@ import java.util.List;
 /**
  * Created by venkata.konala on 10/25/17.
  */
-public class FileWatchListenerModuleTest {
+public class FileWatcherTest {
 
     int count = 0;
 
     @Test
     public void whenFileChangedWillCountNumberOfChanges() throws IOException, InterruptedException {
 
-        FileWatchListenerModule fileWatchListenerModule = new FileWatchListenerModule();
+        FileWatcher fileWatcher = new FileWatcher();
         FileWatchListener fileWatchListener = new FileWatchListener() {
             public void onFileChange(File file) {
                    count++;
             }
         };
-        fileWatchListenerModule.createListener("src/test/resources/conf/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/conf"), 2000);
+        fileWatcher.createListener("src/test/resources/conf/config_WithFileWatchListener.yml", fileWatchListener, new File("/Users/venkata.konala/AppDynamics/Repos/appd-exts-commons/src/test/resources/conf"), 2000);
         int i = 0;
         while(i <= 2) {
             List<String> newLines = new ArrayList<>();
