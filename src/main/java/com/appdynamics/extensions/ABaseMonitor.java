@@ -17,9 +17,8 @@ package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
-import com.appdynamics.extensions.file.FileWatcher;
-import com.appdynamics.extensions.conf.processor.K8SProcessor;
 import com.appdynamics.extensions.file.FileWatchListener;
+import com.appdynamics.extensions.file.FileWatcher;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.MetricPathUtils;
@@ -127,16 +126,16 @@ public abstract class ABaseMonitor extends AManagedMonitor {
             installDir = getInstallDirectory();
             monitorJob = createMonitorJob();
             contextConfiguration = createContextConfiguration();
-            loadAndInitContext(ymlFilePath,false);
+            loadAndInitContext(ymlFilePath, false);
             registerListeners(ymlFilePath);
             //TODO check if commenting out the explicit initialize in the FileWatcher.createListener doesn't introduce bugs.
             initializeMoreStuff(args);
         }
     }
 
-    private void loadAndInitContext(String ymlFilePath,boolean isConfigYmlReloaded) {
+    private void loadAndInitContext(String ymlFilePath, boolean isConfigYmlReloaded) {
         contextConfiguration.loadConfigYml(ymlFilePath);
-        contextConfiguration.initialize(monitorJob,isConfigYmlReloaded);
+        contextConfiguration.initialize(monitorJob, isConfigYmlReloaded);
     }
 
     private void registerListeners(final String ymlFilePath) {
@@ -149,7 +148,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
         FileWatchListener fileWatchListener = new FileWatchListener() {
             @Override
             public void onFileChange(File file) {
-                loadAndInitContext(ymlFilePath,true);
+                loadAndInitContext(ymlFilePath, true);
                 onConfigReload(file);
             }
         };

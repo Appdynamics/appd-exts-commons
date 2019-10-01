@@ -16,7 +16,6 @@
 package com.appdynamics.extensions;
 
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
-import com.appdynamics.extensions.conf.processor.K8SProcessor;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
@@ -24,17 +23,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,27 +38,27 @@ import static org.mockito.Mockito.when;
  * Created by venkata.konala on 11/1/17.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ABaseMonitor.class, K8SProcessor.class})
+@PrepareForTest({ABaseMonitor.class})
 @PowerMockIgnore({"javax.net.ssl.*"})
 public class ABaseMonitorAndAMonitorJobTest {
 
-   private ABaseMonitor aBaseMonitor;
-   private MonitorContextConfiguration configuration;
+    private ABaseMonitor aBaseMonitor;
+    private MonitorContextConfiguration configuration;
+
     @Before
-    public void setUp(){
+    public void setUp() {
         aBaseMonitor = mock(ABaseMonitor.class);
         configuration = mock(MonitorContextConfiguration.class);
         when(aBaseMonitor.getContextConfiguration()).thenReturn(configuration);
-        PowerMockito.mockStatic(K8SProcessor.class);
-        when(K8SProcessor.process(anyMap())).thenReturn(new HashMap<>());
     }
 
 
-    public class sampleTaskRunnable implements AMonitorTaskRunnable{
+    public class sampleTaskRunnable implements AMonitorTaskRunnable {
 
         private MetricWriteHelper metricWriteHelper;
         private String value;
-        public sampleTaskRunnable(MetricWriteHelper metricWriteHelper, String value){
+
+        public sampleTaskRunnable(MetricWriteHelper metricWriteHelper, String value) {
             this.metricWriteHelper = metricWriteHelper;
             this.value = value;
         }
@@ -73,12 +69,12 @@ public class ABaseMonitorAndAMonitorJobTest {
         }
 
         @Override
-        public void run(){
+        public void run() {
             metricWriteHelper.printMetric("Custom Metrics|Sample|sample value", value, "AVERAGE", "AVERAGE", "INDIVIDUAL");
         }
     }
 
-    public class SampleMonitor extends ABaseMonitor{
+    public class SampleMonitor extends ABaseMonitor {
 
         @Override
         protected String getDefaultMetricPrefix() {
@@ -101,13 +97,13 @@ public class ABaseMonitorAndAMonitorJobTest {
 
         @Override
         protected List<Map<String, ?>> getServers() {
-           return (List<Map<String, ?>>) getContextConfiguration().getConfigYml().get("servers");
+            return (List<Map<String, ?>>) getContextConfiguration().getConfigYml().get("servers");
         }
     }
 
 
     @Test
-    public void sampleRun() throws TaskExecutionException{
+    public void sampleRun() throws TaskExecutionException {
         SampleMonitor sampleMonitor = new SampleMonitor();
         Map<String, String> args = Maps.newHashMap();
         args.put("config-file", "src/test/resources/conf/config.yml");
@@ -115,7 +111,7 @@ public class ABaseMonitorAndAMonitorJobTest {
     }
 
     @Test
-    public void cacheMetricsTest() throws TaskExecutionException, InterruptedException{
+    public void cacheMetricsTest() throws TaskExecutionException, InterruptedException {
         SampleMonitor sampleMonitor = new SampleMonitor();
         Map<String, String> args = Maps.newHashMap();
         configuration.loadConfigYml("src/test/resources/conf/config.yml");

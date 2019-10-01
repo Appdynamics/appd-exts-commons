@@ -4,6 +4,8 @@
 #The following prefix will populate the metrics under one tier
 metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
 
+kubernetes:
+  useKubernetes: "false"
 
 #Add your list of Redis servers here.
 servers:
