@@ -16,12 +16,12 @@
 package com.appdynamics.extensions.metrics;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.google.common.base.CharMatcher;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,10 +129,10 @@ public class MetricCharSequenceReplacer {
             final String replaceWith = replacement.get(REPLACEMENT_VALUE);
             if (replace == null || replace.isEmpty()) {
                 logger.debug("Skipping entry. Value for replace cannot be null or empty string");
-            } else if (replaceWith == null || hasDelimiter(replaceWith) || !CharMatcher.ASCII.matchesAllOf(replaceWith)) {
-                    logger.debug("replaceWith {} is null or has delimiters (|:,) or non-ascii characters. " +
-                            "Defaulting replaceWith to empty string", replaceWith);
-                    replacementMap.put(replace, EMPTY_STRING);
+            } else if (replaceWith == null || hasDelimiter(replaceWith) || !StandardCharsets.US_ASCII.newEncoder().canEncode(replaceWith)) {
+                logger.debug("replaceWith {} is null or has delimiters (|:,) or non-ascii characters. " +
+                        "Defaulting replaceWith to empty string", replaceWith);
+                replacementMap.put(replace, EMPTY_STRING);
             } else {
                 replacementMap.put(replace, replaceWith);
             }
