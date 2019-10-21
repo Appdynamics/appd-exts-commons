@@ -46,6 +46,7 @@ public class ValidationUtilsTest {
         Assert.assertTrue(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis Monitor|test"));
         Assert.assertFalse(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis Monitor|test|"));
         Assert.assertFalse(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis,Monitor|test"));
+        Assert.assertFalse(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Rédis,Monitor|test"));
         Assert.assertFalse(ValidationUtils.isValidMetricPath("Server|Component:123|Custom Metrics|Redis Monitor||test"));
     }
 

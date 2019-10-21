@@ -16,11 +16,11 @@
 package com.appdynamics.extensions.util;
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.appdynamics.extensions.util.StringUtils.hasText;
@@ -64,8 +64,8 @@ public class ValidationUtils {
     }
 
     public static boolean isValidMetricPath(String metricPath) {
-        if (!metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") && CharMatcher
-                .ASCII.matchesAllOf(metricPath) && isValidMetricPrefix(metricPath)) {
+        if (!metricPath.contains(",") && !metricPath.contains("||") && !metricPath.endsWith("|") &&
+                StandardCharsets.US_ASCII.newEncoder().canEncode(metricPath) && isValidMetricPrefix(metricPath)) {
             return true;
         }
         logger.debug("The metric path {} is invalid", metricPath);
