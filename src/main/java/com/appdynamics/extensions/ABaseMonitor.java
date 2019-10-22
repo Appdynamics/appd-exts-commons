@@ -244,6 +244,11 @@ public abstract class ABaseMonitor extends AManagedMonitor {
 
     protected void onComplete() {
         logger.info("Finished processing all tasks in the job for {}", getMonitorName());
+        Map.Entry<Boolean, Map> booleanMapMap = contextConfiguration.getContext().getKubernetesDiscoveryModule().updateDiscoveredServers(contextConfiguration.getConfigYml());
+        //update http client if k8s discovery gave changed set.
+        if (booleanMapMap.getKey()) {
+            contextConfiguration.getContext().getHttpClientModule().initHttpClient(contextConfiguration.getConfigYml());
+        }
     }
 
 }

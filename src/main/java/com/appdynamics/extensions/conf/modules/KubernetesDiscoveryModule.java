@@ -9,6 +9,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class KubernetesDiscoveryModule {
     }
 
 
-    public boolean updateDiscoveredServers(Map<String, ?> config) {
+    public Map.Entry<Boolean, Map> updateDiscoveredServers(Map<String, ?> config) {
         logger.info("KubernetesMode configured, trying to discover pods which are running nginx");
 
         if (baseServerConfig == null) {
@@ -108,6 +109,9 @@ public class KubernetesDiscoveryModule {
         }
 
         logger.debug("Final servers " + serversList);
-        return isServersUpdated;
+
+        Map.Entry<Boolean, Map> configUpdated = new AbstractMap.SimpleEntry<Boolean, Map>(isServersUpdated, config);
+
+        return configUpdated;
     }
 }

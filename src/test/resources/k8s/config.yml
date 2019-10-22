@@ -26,7 +26,8 @@ servers:
 
 encryptionKey: ""
 
-enabled: false
+enabled: true
+enableHealthChecks: false
 
 connection:
   sslCertCheckEnabled: false

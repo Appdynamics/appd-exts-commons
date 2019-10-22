@@ -43,25 +43,22 @@ public class AMonitorJob implements Runnable {
     }
 
     @Override
-    public void run () {
+    public void run() {
         logger.debug("Monitor {} Task Runner invoked", baseMonitor.getMonitorName());
         MonitorContextConfiguration contextConfiguration = baseMonitor.getContextConfiguration();
-        discoverAndUpdateServersFromK8s(contextConfiguration);
-        List<Map<String, ?>> servers =  baseMonitor.getServers();
+        //discoverAndUpdateServersFromK8s(contextConfiguration);
+        List<Map<String, ?>> servers = baseMonitor.getServers();
         AssertUtils.assertNotNull(servers, "getServers() cannot return null");
         TasksExecutionServiceProvider obj = new TasksExecutionServiceProvider(baseMonitor, MetricWriteHelperFactory.create(baseMonitor));
         baseMonitor.doRun(obj);
     }
 
-    private void discoverAndUpdateServersFromK8s(MonitorContextConfiguration contextConfiguration) {
-        if(contextConfiguration.getContext().isK8sDiscoveryModeEnabled()){
-            boolean hasServersChanged = contextConfiguration.getContext().getKubernetesDiscoveryModule().updateDiscoveredServers(contextConfiguration.getConfigYml());
-            //update http client if k8s discovery gave changed set.
-            if(hasServersChanged){
-                contextConfiguration.getContext().getHttpClientModule().initHttpClient(contextConfiguration.getConfigYml());
-            }
+    /*private void discoverAndUpdateServersFromK8s(MonitorContextConfiguration contextConfiguration) {
+        if (contextConfiguration.getContext().isK8sDiscoveryModeEnabled()) {
+            Pair<Boolean, Map> booleanMapMap = contextConfiguration.getContext().getKubernetesDiscoveryModule().updateDiscoveredServers(contextConfiguration.getConfigYml());
+            contextConfiguration.getContext().setConfigChanged(booleanMapMap.getKey());
         }
-    }
+    }*/
 
     public void printAllFromCache() {
         ConcurrentMap<String, Metric> map = baseMonitor.getContextConfiguration().getContext().getCachedMetrics();

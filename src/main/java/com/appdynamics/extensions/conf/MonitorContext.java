@@ -17,7 +17,19 @@ package com.appdynamics.extensions.conf;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.SystemPropertyConstants;
-import com.appdynamics.extensions.conf.modules.*;
+import com.appdynamics.extensions.conf.modules.CacheModule;
+import com.appdynamics.extensions.conf.modules.ControllerModule;
+import com.appdynamics.extensions.conf.modules.CustomDashboardModule;
+import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
+import com.appdynamics.extensions.conf.modules.EventsServiceModule;
+import com.appdynamics.extensions.conf.modules.HealthCheckModule;
+import com.appdynamics.extensions.conf.modules.HttpClientModule;
+import com.appdynamics.extensions.conf.modules.JobScheduleModule;
+import com.appdynamics.extensions.conf.modules.KubernetesDiscoveryModule;
+import com.appdynamics.extensions.conf.modules.MetricCharSequenceReplaceModule;
+import com.appdynamics.extensions.conf.modules.MonitorExecutorServiceModule;
+import com.appdynamics.extensions.conf.modules.PerMinValueCalculatorModule;
+import com.appdynamics.extensions.conf.modules.WorkBenchModule;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
@@ -36,6 +48,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+
 /**
  * Created by venkata.konala on 3/29/18.
  */
@@ -87,8 +100,9 @@ public class MonitorContext {
         if (!Boolean.FALSE.equals(enabled)) {
             logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
             //k8s module needs to process first to update list of servers followed by httpClient.
-            if(isK8sDiscoveryModeEnabled) {
-                kubernetesDiscoveryModule.updateDiscoveredServers(config);
+            if (isK8sDiscoveryModeEnabled) {
+                Map.Entry<Boolean, Map> booleanMapPair = kubernetesDiscoveryModule.updateDiscoveredServers(config);
+                this.config = booleanMapPair.getValue();
             }
             httpClientModule.initHttpClient(config);
             controllerModule.initController(installDir, config);
@@ -193,7 +207,7 @@ public class MonitorContext {
         return perMinValueCalculatorModule.getPerMinValueCalculator();
     }
 
-    public void setMetricCharSequenceReplaceModule (MetricCharSequenceReplaceModule metricCharSequenceReplaceModule) {
+    public void setMetricCharSequenceReplaceModule(MetricCharSequenceReplaceModule metricCharSequenceReplaceModule) {
         this.metricCharSequenceReplaceModule = metricCharSequenceReplaceModule;
     }
 
