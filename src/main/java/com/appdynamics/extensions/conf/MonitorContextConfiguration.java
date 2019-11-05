@@ -46,6 +46,7 @@ public class MonitorContextConfiguration {
     private String defaultMetricPrefix;
     private JAXBContext jaxbContext;
     private boolean enabled;
+    // TODO PN - I feel that MonitorContext like MonitorContextConfiguration should be in ABaseMonitor
     private MonitorContext context;
 
     public MonitorContextConfiguration(String monitorName, String defaultMetricPrefix, File installDir) {

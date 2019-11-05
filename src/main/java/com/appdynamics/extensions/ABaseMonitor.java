@@ -86,32 +86,24 @@ import java.util.Map;
  * @since 2.0
  */
 public abstract class ABaseMonitor extends AManagedMonitor {
-
     private static final Logger logger = ExtensionsLoggerFactory.getLogger(ABaseMonitor.class);
-
     private Long startTime;
-
     private File installDir;
-
     /**
      * A contextConfiguration object that reads the monitor's config file
      * and initializes the different bits required by the monitor.
      */
     private MonitorContextConfiguration contextConfiguration;
-
-
     /**
      * The name of the monitor.
      */
     protected String monitorName;
-
     /**
      * A runnable which does all the leg work for fetching the
      * metrics in a separate thread.
      */
+    // TODO: these instances can be private
     protected AMonitorJob monitorJob;
-
-
     protected FileWatcher fileWatcher = new FileWatcher();
 
     public ABaseMonitor() {
@@ -122,6 +114,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
 
     protected void initialize(final Map<String, String> args) {
         String ymlFilePath = args.get("config-file");
+        // TODO PN we are resolving this path in both MonitorContextConfiguration and FileWatcher we can resolve this path to File here itself
         if (contextConfiguration == null) {
             installDir = getInstallDirectory();
             monitorJob = createMonitorJob();
@@ -129,6 +122,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
             loadAndInitContext(ymlFilePath, false);
             registerListeners(ymlFilePath);
             //TODO check if commenting out the explicit initialize in the FileWatcher.createListener doesn't introduce bugs.
+            // TODO PN - if you mean calling onFileChange then no as config file is initialized in loadAndInitContext
             initializeMoreStuff(args);
         }
     }
@@ -141,14 +135,17 @@ public abstract class ABaseMonitor extends AManagedMonitor {
     private void registerListeners(final String ymlFilePath) {
         fileWatcher.createListener(ymlFilePath, createYmlFileListener(ymlFilePath), installDir, 3000);
         //TODO figure out a better way to do this.
+        // TODO PN - I think just like you have refactored FileWatcherListenerModule we can do similar changes
         MetricPathUtils.registerMetricCharSequenceReplacer(this);
     }
 
+    // TODO PN - this method does not need any argument if config file is resolved, file and ymlFilePath point to the same instance
     private FileWatchListener createYmlFileListener(final String ymlFilePath) {
         FileWatchListener fileWatchListener = new FileWatchListener() {
             @Override
             public void onFileChange(File file) {
                 loadAndInitContext(ymlFilePath, true);
+                // TODO PN I really don't understand the purpose of onConfigReload given that there is initializeMoreStuff, if this method is overridden in subclass what could be the possible things developer can do with this method that cannot be done with initializeMoreStuff. There is no need for this method that exposes the config file
                 onConfigReload(file);
             }
         };
@@ -207,6 +204,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
         return new TaskOutput(String.format("Monitor %s completes.", monitorName));
     }
 
+    // TODO PN we can make execute monitor synchronized to avoid any issue of config object being updated
     protected void executeMonitor() {
         if (contextConfiguration.isEnabled()) {
             MonitorContext context = contextConfiguration.getContext();
@@ -242,8 +240,13 @@ public abstract class ABaseMonitor extends AManagedMonitor {
 
     protected abstract List<Map<String, ?>> getServers();
 
+    // TODO PN if we are relying on this method to do extra stuff, this should be final and package private otherwise it can be overridden in extension. Or this can be
+    //  done in TaskExecutionServiceProvide.onComplete
     protected void onComplete() {
         logger.info("Finished processing all tasks in the job for {}", getMonitorName());
+        // TODO PN this should only be done if k8s monitoring is enabled
+        // TODO PN what if config file changes
+        // TODO PN should we leave this responsibility with the developer? This is true in case of HTTP based extension but not in case of other extensions
         Map.Entry<Boolean, Map> booleanMapMap = contextConfiguration.getContext().getKubernetesDiscoveryModule().updateDiscoveredServers(contextConfiguration.getConfigYml());
         //update http client if k8s discovery gave changed set.
         if (booleanMapMap.getKey()) {

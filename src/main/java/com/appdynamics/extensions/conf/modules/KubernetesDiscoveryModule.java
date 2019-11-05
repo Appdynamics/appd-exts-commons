@@ -35,12 +35,17 @@ public class KubernetesDiscoveryModule {
 
 
     public Map.Entry<Boolean, Map> updateDiscoveredServers(Map<String, ?> config) {
+        // TODO PN logger statement has to be updated to be generic
         logger.info("KubernetesMode configured, trying to discover pods which are running nginx");
 
+        // TODO PN I think baseServerConfig should be initialized in constructor itself
+        //  Also there baseServerConfig should be extracted to method, when config.yml is updated baseServerConfig will never reflect an update
         if (baseServerConfig == null) {
+            // TODO PN ABaseMonitor#getServers can be used
             List<Map<String, ?>> serversList = (List<Map<String, ?>>) config.get("servers");
             baseServerConfig = serversList.get(0);
         }
+
 
         Map<String, ?> kubernetesConfig = (Map<String, ?>) config.get("kubernetes");
 
@@ -52,6 +57,7 @@ public class KubernetesDiscoveryModule {
 
         if (podLabels != null && podLabels.size() > 0) {
 
+            // TODO PN there could be multiple value for a label are we supporting that case?
             for (Map<String, String> podLabel : podLabels) {
                 allPodLabels.put(podLabel.get("name"), podLabel.get("value"));
             }
@@ -80,6 +86,7 @@ public class KubernetesDiscoveryModule {
         int serverCount = 0;
         String serverName = "Server";
         boolean isServersUpdated = false;
+        // TODO PN should have a null check for discoveredPods will be null if no match in discover()
         for (PodAddress podAddress : discoveredPods) {
             Map<String, String> updatedServerConfig = Maps.newHashMap();
 
@@ -112,6 +119,7 @@ public class KubernetesDiscoveryModule {
 
         Map.Entry<Boolean, Map> configUpdated = new AbstractMap.SimpleEntry<Boolean, Map>(isServersUpdated, config);
 
+        //TODO PN if we are returning configUpdated which has config that has not been modified how are we getting the final server list?
         return configUpdated;
     }
 }

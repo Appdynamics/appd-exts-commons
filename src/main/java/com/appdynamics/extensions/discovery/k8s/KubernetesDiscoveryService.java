@@ -130,6 +130,7 @@ public class KubernetesDiscoveryService {
         List<PodAddress> endpoints = new ArrayList<PodAddress>();
 
         for (Pod pod : pods) {
+            // TODO PN we should not add a pod to endpoints if it is in a phase other than running
             String podIP = pod.getStatus().getPodIP();
             if (podIP != null) {
                 Integer port = extractContainerPort(pod);

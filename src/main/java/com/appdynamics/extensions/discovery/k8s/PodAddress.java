@@ -23,6 +23,7 @@ public class PodAddress {
         return port;
     }
 
+    // TODO PN are we using this anywhere?
     @Override
     public boolean equals(Object o) {
         if (this == o) {

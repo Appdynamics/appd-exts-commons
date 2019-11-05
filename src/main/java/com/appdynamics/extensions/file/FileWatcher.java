@@ -49,6 +49,7 @@ public class FileWatcher {
         createWatcher(file);
         //Initialize it for the fisrt time
         //TODO do we really need to initialize it explicitly?
+        // TODO PN - config.yml is already registered
         //fileWatchListener.onFileChange(file,true);
     }
 

@@ -45,6 +45,7 @@ public class AMonitorJob implements Runnable {
     @Override
     public void run() {
         logger.debug("Monitor {} Task Runner invoked", baseMonitor.getMonitorName());
+        // TODO MonitorContextConfiguration is not required here now
         MonitorContextConfiguration contextConfiguration = baseMonitor.getContextConfiguration();
         //discoverAndUpdateServersFromK8s(contextConfiguration);
         List<Map<String, ?>> servers = baseMonitor.getServers();
