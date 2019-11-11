@@ -1,5 +1,10 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.1
+1. Updated httpclient to 4.5.6, httpmime to 4.5.
+2. Discarding metrics that are not numbers.
+3. Replace Charmatcher#ASCII with Charset.newEncoder#canEncode to avoid guava lib dependency in workbench mode
+
 ## 2.2.0
 1. Ability to pass configuration data to extensions via environment variables.
 2. ControllerInfo for representing the Controller Information, ControllerClient and ControllerAPIService for calling Controller APIs.
