@@ -16,7 +16,6 @@
 package com.appdynamics.extensions;
 
 
-import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.AssertUtils;
@@ -45,21 +44,11 @@ public class AMonitorJob implements Runnable {
     @Override
     public void run() {
         logger.debug("Monitor {} Task Runner invoked", baseMonitor.getMonitorName());
-        // TODO MonitorContextConfiguration is not required here now
-        MonitorContextConfiguration contextConfiguration = baseMonitor.getContextConfiguration();
-        //discoverAndUpdateServersFromK8s(contextConfiguration);
         List<Map<String, ?>> servers = baseMonitor.getServers();
         AssertUtils.assertNotNull(servers, "getServers() cannot return null");
         TasksExecutionServiceProvider obj = new TasksExecutionServiceProvider(baseMonitor, MetricWriteHelperFactory.create(baseMonitor));
         baseMonitor.doRun(obj);
     }
-
-    /*private void discoverAndUpdateServersFromK8s(MonitorContextConfiguration contextConfiguration) {
-        if (contextConfiguration.getContext().isK8sDiscoveryModeEnabled()) {
-            Pair<Boolean, Map> booleanMapMap = contextConfiguration.getContext().getKubernetesDiscoveryModule().updateDiscoveredServers(contextConfiguration.getConfigYml());
-            contextConfiguration.getContext().setConfigChanged(booleanMapMap.getKey());
-        }
-    }*/
 
     public void printAllFromCache() {
         ConcurrentMap<String, Metric> map = baseMonitor.getContextConfiguration().getContext().getCachedMetrics();
@@ -75,5 +64,4 @@ public class AMonitorJob implements Runnable {
             logger.info("The Metric Cache is empty, no values are present");
         }
     }
-
 }

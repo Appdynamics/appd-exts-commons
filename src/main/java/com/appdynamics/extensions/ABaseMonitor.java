@@ -240,18 +240,7 @@ public abstract class ABaseMonitor extends AManagedMonitor {
 
     protected abstract List<Map<String, ?>> getServers();
 
-    // TODO PN if we are relying on this method to do extra stuff, this should be final and package private otherwise it can be overridden in extension. Or this can be
-    //  done in TaskExecutionServiceProvide.onComplete
     protected void onComplete() {
         logger.info("Finished processing all tasks in the job for {}", getMonitorName());
-        // TODO PN this should only be done if k8s monitoring is enabled
-        // TODO PN what if config file changes
-        // TODO PN should we leave this responsibility with the developer? This is true in case of HTTP based extension but not in case of other extensions
-        Map.Entry<Boolean, Map> booleanMapMap = contextConfiguration.getContext().getKubernetesDiscoveryModule().updateDiscoveredServers(contextConfiguration.getConfigYml());
-        //update http client if k8s discovery gave changed set.
-        if (booleanMapMap.getKey()) {
-            contextConfiguration.getContext().getHttpClientModule().initHttpClient(contextConfiguration.getConfigYml());
-        }
     }
-
 }

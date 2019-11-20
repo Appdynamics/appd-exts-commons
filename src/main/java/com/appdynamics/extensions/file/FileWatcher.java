@@ -107,6 +107,7 @@ public class FileWatcher {
             interval = fileWatcherInterval;
         }
         logger.debug("Created a FileAlterationMonitor with an interval of {}", interval);
+        //TODO: Polling every 3 secs might be costly, looks for alternatives.
         monitor = new FileAlterationMonitor(interval);
         try {
             monitor.start();

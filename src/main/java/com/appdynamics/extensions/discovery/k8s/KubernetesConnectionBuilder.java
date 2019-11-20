@@ -33,6 +33,4 @@ public class KubernetesConnectionBuilder {
         kubernetesClient = new DefaultKubernetesClient(kubeConfig);
         return kubernetesClient;
     }
-
-
 }

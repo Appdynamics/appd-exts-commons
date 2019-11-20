@@ -15,9 +15,11 @@
 
 package com.appdynamics.extensions;
 
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -61,6 +63,17 @@ public class TasksExecutionServiceProvider {
     private void onRunComplete() {
         metricWriteHelper.onComplete();
         aBaseMonitor.onComplete();
+
+        MonitorContextConfiguration contextConfiguration = aBaseMonitor.getContextConfiguration();
+
+        boolean k8sDiscoveryModeEnabled = contextConfiguration.getContext().isK8sDiscoveryModeEnabled();
+        if (k8sDiscoveryModeEnabled) {
+            Map.Entry<Boolean, Map> booleanMapMap = contextConfiguration.getContext().getKubernetesDiscoveryModule().updateDiscoveredServers(contextConfiguration.getConfigYml(), false);
+            //update http client if k8s discovery gave changed set.
+            if (booleanMapMap.getKey()) {
+                contextConfiguration.getContext().getHttpClientModule().initHttpClient(contextConfiguration.getConfigYml());
+            }
+        }
     }
 
     public MetricWriteHelper getMetricWriteHelper() {

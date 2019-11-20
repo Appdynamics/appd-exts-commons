@@ -169,6 +169,7 @@ public class ABaseMonitorAndAMonitorJobTest {
 
         Mockito.when(kubernetesDiscoveryBuilder.withNamespace(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withContainerImage(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
+        Mockito.when(kubernetesDiscoveryBuilder.withContainerPortName(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withLabels(Matchers.anyMap())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.build()).thenReturn(kubernetesDiscoveryService);
 
@@ -187,6 +188,7 @@ public class ABaseMonitorAndAMonitorJobTest {
 
         Mockito.when(kubernetesDiscoveryBuilder.withNamespace(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withContainerImage(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
+        Mockito.when(kubernetesDiscoveryBuilder.withContainerPortName(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withLabels(Matchers.anyMap())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.build()).thenReturn(kubernetesDiscoveryService);
 

@@ -34,37 +34,32 @@ public class KubernetesDiscoveryModule {
     }
 
 
-    public Map.Entry<Boolean, Map> updateDiscoveredServers(Map<String, ?> config) {
-        // TODO PN logger statement has to be updated to be generic
-        logger.info("KubernetesMode configured, trying to discover pods which are running nginx");
+    public Map.Entry<Boolean, Map> updateDiscoveredServers(Map<String, ?> config, boolean isConfigYmlReloaded) {
+        logger.info("KubernetesMode configured, trying to discover pods");
 
-        // TODO PN I think baseServerConfig should be initialized in constructor itself
-        //  Also there baseServerConfig should be extracted to method, when config.yml is updated baseServerConfig will never reflect an update
-        if (baseServerConfig == null) {
-            // TODO PN ABaseMonitor#getServers can be used
+        if (baseServerConfig == null || isConfigYmlReloaded) {
             List<Map<String, ?>> serversList = (List<Map<String, ?>>) config.get("servers");
             baseServerConfig = serversList.get(0);
         }
-
 
         Map<String, ?> kubernetesConfig = (Map<String, ?>) config.get("kubernetes");
 
         String kubernetesNamespace = (String) kubernetesConfig.get("namespace");
         String containerImageNameToMatch = (String) kubernetesConfig.get("containerImageNameToMatch");
+        String containerPortName = (String) kubernetesConfig.get("containerPortName");
         List<Map<String, String>> podLabels = (List<Map<String, String>>) kubernetesConfig.get("podLabels");
 
         Map<String, String> allPodLabels = Maps.newHashMap();
 
         if (podLabels != null && podLabels.size() > 0) {
 
-            // TODO PN there could be multiple value for a label are we supporting that case?
             for (Map<String, String> podLabel : podLabels) {
                 allPodLabels.put(podLabel.get("name"), podLabel.get("value"));
             }
         }
 
         KubernetesDiscoveryService kubernetesDiscoveryService = new KubernetesDiscoveryService.KubernetesDiscoveryBuilder().withNamespace(kubernetesNamespace).withContainerImage(containerImageNameToMatch)
-                .withLabels(allPodLabels).build();
+                .withContainerPortName(containerPortName).withLabels(allPodLabels).build();
 
         List<PodAddress> discoveredPods = null;
         try {
@@ -86,40 +81,40 @@ public class KubernetesDiscoveryModule {
         int serverCount = 0;
         String serverName = "Server";
         boolean isServersUpdated = false;
-        // TODO PN should have a null check for discoveredPods will be null if no match in discover()
-        for (PodAddress podAddress : discoveredPods) {
-            Map<String, String> updatedServerConfig = Maps.newHashMap();
+        if (discoveredPods != null) {
+            for (PodAddress podAddress : discoveredPods) {
+                Map<String, String> updatedServerConfig = Maps.newHashMap();
 
-            for (Map.Entry<String, ?> serverEntry : entries) {
-                String key = serverEntry.getKey();
-                String value = (String) serverEntry.getValue();
+                for (Map.Entry<String, ?> serverEntry : entries) {
+                    String key = serverEntry.getKey();
+                    String value = (String) serverEntry.getValue();
 
-                if (!Strings.isNullOrEmpty(value)) {
-                    if (value.contains(HOST_PATTERN)) {
-                        value = value.replace(HOST_PATTERN, podAddress.getHost());
+                    if (!Strings.isNullOrEmpty(value)) {
+                        if (value.contains(HOST_PATTERN)) {
+                            value = value.replace(HOST_PATTERN, podAddress.getHost());
+                        }
+
+                        if (value.contains(PORT_PATTERN)) {
+                            value = value.replace(PORT_PATTERN, String.valueOf(podAddress.getPort()));
+                        }
                     }
-
-                    if (value.contains(PORT_PATTERN)) {
-                        value = value.replace(PORT_PATTERN, String.valueOf(podAddress.getPort()));
-                    }
+                    updatedServerConfig.put(key, value);
                 }
-                updatedServerConfig.put(key, value);
-            }
 
-            String present = serversCache.getIfPresent(podAddress.getHost() + ":" + podAddress.getPort());
-            if (present == null) {
-                isServersUpdated = true;
-                serversCache.put(podAddress.getHost() + ":" + podAddress.getPort(), serverName + serverCount++);
-            }
+                String present = serversCache.getIfPresent(podAddress.getHost() + ":" + podAddress.getPort());
+                if (present == null) {
+                    isServersUpdated = true;
+                    serversCache.put(podAddress.getHost() + ":" + podAddress.getPort(), serverName + serverCount++);
+                }
 
-            serversList.add(updatedServerConfig);
+                serversList.add(updatedServerConfig);
+            }
         }
 
         logger.debug("Final servers " + serversList);
 
         Map.Entry<Boolean, Map> configUpdated = new AbstractMap.SimpleEntry<Boolean, Map>(isServersUpdated, config);
 
-        //TODO PN if we are returning configUpdated which has config that has not been modified how are we getting the final server list?
         return configUpdated;
     }
 }

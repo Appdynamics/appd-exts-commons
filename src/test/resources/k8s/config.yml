@@ -10,6 +10,7 @@ kubernetes:
   useKubernetes: "true"
   namespace: "default"
   containerImageNameToMatch: "nginx"
+  containerPortName:
   podLabels:
     - name: "run"
       value: "my-nginx"

@@ -28,9 +28,11 @@ public class KubernetesDiscoveryService {
     private String namespace = "default";
     private Map<String, String> labels;
     private String imageName;
+    private String containerPortName;
     private KubernetesClient kubernetesClient;
+    private final String PHASE_RUNNING = "Running";
 
-    private KubernetesDiscoveryService(KubernetesClient kubernetesClient, String namespace, Map<String, String> labels, String imageName) {
+    private KubernetesDiscoveryService(KubernetesClient kubernetesClient, String namespace, Map<String, String> labels, String imageName, String containerPortName) {
 
         if (!Strings.isNullOrEmpty(namespace)) {
             this.namespace = namespace;
@@ -39,6 +41,7 @@ public class KubernetesDiscoveryService {
         this.kubernetesClient = kubernetesClient;
         this.labels = labels;
         this.imageName = imageName;
+        this.containerPortName = containerPortName;
     }
 
     /**
@@ -51,6 +54,8 @@ public class KubernetesDiscoveryService {
         private Map<String, String> labels;
 
         private String imageName;
+
+        private String containerPortName;
 
         public KubernetesDiscoveryBuilder withNamespace(String namespace) {
             this.namespace = namespace;
@@ -76,9 +81,14 @@ public class KubernetesDiscoveryService {
             return this;
         }
 
+        public KubernetesDiscoveryBuilder withContainerPortName(String containerPortName) {
+            this.containerPortName = containerPortName;
+            return this;
+        }
+
         public KubernetesDiscoveryService build() {
             KubernetesClient kubernetesClientFromBuilder = new KubernetesConnectionBuilder().withNamespace(namespace).build();
-            return new KubernetesDiscoveryService(kubernetesClientFromBuilder, namespace, labels, imageName);
+            return new KubernetesDiscoveryService(kubernetesClientFromBuilder, namespace, labels, imageName, containerPortName);
         }
     }
 
@@ -130,16 +140,17 @@ public class KubernetesDiscoveryService {
         List<PodAddress> endpoints = new ArrayList<PodAddress>();
 
         for (Pod pod : pods) {
-            // TODO PN we should not add a pod to endpoints if it is in a phase other than running
+            String phase = pod.getStatus().getPhase();
             String podIP = pod.getStatus().getPodIP();
-            if (podIP != null) {
+            if (PHASE_RUNNING.equalsIgnoreCase(phase) && podIP != null) {
                 Integer port = extractContainerPort(pod);
-
                 if (port == null) {
                     logger.error("Could not get port for pod with ip [{}].", podIP);
                 } else {
                     endpoints.add(new PodAddress(podIP, port));
                 }
+            } else {
+                logger.info("Ignoring pod [{}] as either the ip is null or the status is not Running.", pod.getMetadata().getName());
             }
         }
         return endpoints;
@@ -178,7 +189,16 @@ public class KubernetesDiscoveryService {
             Integer containerPort = containerPorts.get(0).getContainerPort();
             return containerPort;
         } else {
-            throw new KubernetesClientException("Not able to determine the port of the container, found multiple.");
+            if (Strings.isNullOrEmpty(containerPortName)) {
+                throw new KubernetesClientException("Not able to determine the port of the container, found multiple and containerPortName not configured.");
+            } else {
+                for (ContainerPort containerPort : containerPorts) {
+                    if (containerPortName.equalsIgnoreCase(containerPort.getName())) {
+                        return containerPort.getContainerPort();
+                    }
+                }
+                throw new KubernetesClientException("Not able to determine the port of the container, found multiple and containerPortName did not match");
+            }
         }
     }
 }

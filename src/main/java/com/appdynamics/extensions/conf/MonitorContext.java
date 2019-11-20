@@ -101,7 +101,7 @@ public class MonitorContext {
             logger.info("Charset is {}, file encoding is {}", Charset.defaultCharset(), System.getProperty("file.encoding"));
             //k8s module needs to process first to update list of servers followed by httpClient.
             if (isK8sDiscoveryModeEnabled) {
-                Map.Entry<Boolean, Map> booleanMapPair = kubernetesDiscoveryModule.updateDiscoveredServers(config);
+                Map.Entry<Boolean, Map> booleanMapPair = kubernetesDiscoveryModule.updateDiscoveredServers(config, isConfigYmlReloaded);
                 this.config = booleanMapPair.getValue();
             }
             httpClientModule.initHttpClient(config);

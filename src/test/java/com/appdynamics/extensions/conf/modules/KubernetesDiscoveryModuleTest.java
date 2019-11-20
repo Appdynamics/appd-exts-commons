@@ -39,6 +39,7 @@ public class KubernetesDiscoveryModuleTest {
 
         Mockito.when(kubernetesDiscoveryBuilder.withNamespace(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withContainerImage(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
+        Mockito.when(kubernetesDiscoveryBuilder.withContainerPortName(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withLabels(Matchers.anyMap())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.build()).thenReturn(kubernetesDiscoveryService);
 
@@ -46,7 +47,7 @@ public class KubernetesDiscoveryModuleTest {
 
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_FILE));
 
-        Map.Entry<Boolean, Map> configAfterProcess = kubernetesDiscoveryModule.updateDiscoveredServers(rootElem);
+        Map.Entry<Boolean, Map> configAfterProcess = kubernetesDiscoveryModule.updateDiscoveredServers(rootElem, false);
 
         Assert.assertNotNull("Config after process should not be null", configAfterProcess);
 
@@ -71,6 +72,7 @@ public class KubernetesDiscoveryModuleTest {
 
         Mockito.when(kubernetesDiscoveryBuilder.withNamespace(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withContainerImage(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
+        Mockito.when(kubernetesDiscoveryBuilder.withContainerPortName(Matchers.anyString())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.withLabels(Matchers.anyMap())).thenReturn(kubernetesDiscoveryBuilder);
         Mockito.when(kubernetesDiscoveryBuilder.build()).thenReturn(kubernetesDiscoveryService);
 
@@ -78,7 +80,7 @@ public class KubernetesDiscoveryModuleTest {
 
         Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File(CONFIG_FILE));
 
-        Map.Entry<Boolean, Map> configAfterProcess = kubernetesDiscoveryModule.updateDiscoveredServers(rootElem);
+        Map.Entry<Boolean, Map> configAfterProcess = kubernetesDiscoveryModule.updateDiscoveredServers(rootElem, false);
 
         Assert.assertNotNull("Config after process should not be null", configAfterProcess);
 
