@@ -433,6 +433,46 @@ The ExtensionLoggerFactory prefixes the name of the extension to every log state
 [Monitor-Task-Thread4] 06 Dec 2018 14:29:36,646 DEBUG JMXMetricCollector-HBase Monitor - Collecting metrics from RegionServer2
 ```
 
+## Kubernetes auto discovery
+
+From versoin 2.2.2, commons SDK provides a feature to auto discover pods running certain artifact ( Apache, Nginx etc...) using labels and collects metrics from these artifacts without manual configuration.
+
+To use this feature extensions has to make the following changes
+
+1. Configure Kubernetes in config.yml
+
+```
+kubernetes:
+  useKubernetes: "true"
+  namespace: "default"
+  containerImageNameToMatch: "nginx"
+  containerPortName:
+  podLabels:
+    - name: "run"
+      value: "my-nginx"
+```
+The above configuration auto discovers pods running in default namespace having "run":"my-nginx" label. Once we have the pods, we filter the container using the "containerImageNameToMatch" value and grabs the IP of the container. We discover the port using the "containerPort" of the k8s deployment. If there are multiple "containerPort" values then we filter the port using "containerPortName" value provided in the above config.
+
+2. Configure servers template which has place holders for IP and Port in config.yml
+
+```
+servers:
+  - displayName:
+    uri: "http://${host}:${port}/nginx_status" # append port if needed
+    username: ""
+    password: ""
+    encryptedPassword:
+    nginx_plus: "false"  # true for nginx-plus else false
+```
+
+Here ${host} and ${port} are the place holders for host and port and will be replaced after discovering the pods.
+
+3. Make displayName optional
+
+Pods in kubernetes are not constant, depending on the load we scale them up or down. So we can not display metrics of individual pod using its displayname because this causes stale metrics when the pods scale down. To tackle this we report collective metrics of all the available pods by removing the pod identifier.
+
+
+
 # Getting Help
 
 For any help related AppDynamics Extensions, please open a ticket on [AppDynamics Support Portal](http://help.appdynamics.com).
