@@ -15,6 +15,7 @@
 
 package com.appdynamics.extensions.checks;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MetricLimitCheck implements RunAlwaysCheck {
 
-    public Logger logger;
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricLimitCheck.class);
 
     private static final String MAX_METRIC_ERROR_LINE = "ERROR ManagedMonitorDelegate - Maximum metrics limit reached";
     private static final String BLACKLIST_METRIC_LIMIT_ERROR_LINE = "WARN ManagedMonitorDelegate - Metric registration blacklist limit reached";
@@ -42,8 +43,7 @@ public class MetricLimitCheck implements RunAlwaysCheck {
     private TimeUnit timeUnit;
     private boolean stop = false;
 
-    public MetricLimitCheck(int period, TimeUnit timeUnit, Logger logger) {
-        this.logger = logger;
+    public MetricLimitCheck(int period, TimeUnit timeUnit) {
         this.period = period;
         this.timeUnit = timeUnit;
     }

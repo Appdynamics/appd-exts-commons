@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.workbench;
 
 
+import com.appdynamics.extensions.SystemPropertyConstants;
 import com.appdynamics.extensions.conf.monitorxml.Monitor;
 import com.appdynamics.extensions.util.PathResolver;
 
@@ -51,7 +52,7 @@ public class WorkbenchServerLauncher {
                     List<String> commands = new ArrayList<>();
                     commands.add(java.getAbsolutePath());
                     commands.addAll(workbenchSysProps);
-                    commands.add("-DenableHealthChecks=false");
+                    commands.add("-D" + SystemPropertyConstants.HEALTHCHECKS_ENABLE_PROPERTY + "=false");
                     commands.add("-cp");
                     commands.add(cp);
                     commands.add(WorkBenchServer.class.getName());
@@ -121,7 +122,6 @@ public class WorkbenchServerLauncher {
         File file = new File(extensionDir.getParentFile().getParentFile(), "machineagent.jar");
         if (file.exists()) {
             List<File> urls = new ArrayList<File>();
-            urls.add(file);
             String classpath = monitor.getMonitorRunTask().getJavaTask().getClasspath();
             if (classpath != null) {
                 String[] split = classpath.split(";");
@@ -144,6 +144,8 @@ public class WorkbenchServerLauncher {
                 error("The <classpath> element cannot be null in monitor.xml");
                 return null;
             }
+            //Adding the extension jars first and MA jar later to load the log4j config available in extension jar instead of the one available in MA
+            urls.add(file);
             return urls;
         } else {
             String msg = String.format("Cannot located the [%s] from [%s]. This jar can be run only from inside the <MachineAgent>/monitors/<MonitorName> durectory"

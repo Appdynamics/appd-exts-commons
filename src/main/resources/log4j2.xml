@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="Warn" monitorInterval="30">
+
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{ABSOLUTE} %5p [%t] %c{1} - %m%n"/>
+        </Console>
+
+        <RollingFile name="FileAppender" fileName="../../logs/workbench.log"
+                     filePattern="../../logs/workbench.log.%i">
+            <PatternLayout>
+                <Pattern>%d{ABSOLUTE} %5p [%t] %c{1} - %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5000 KB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="com.appdynamics" level="debug" additivity="false">
+            <AppenderRef ref="FileAppender"/>
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+        
+        <Root level="error">
+            <AppenderRef ref="FileAppender"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

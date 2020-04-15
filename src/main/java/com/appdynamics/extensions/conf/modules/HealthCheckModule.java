@@ -15,7 +15,11 @@
 
 package com.appdynamics.extensions.conf.modules;
 
-import com.appdynamics.extensions.checks.*;
+import com.appdynamics.extensions.checks.AppTierNodeCheck;
+import com.appdynamics.extensions.checks.ExtensionPathConfigCheck;
+import com.appdynamics.extensions.checks.MachineAgentAvailabilityCheck;
+import com.appdynamics.extensions.checks.MetricLimitCheck;
+import com.appdynamics.extensions.checks.MonitorHealthCheck;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.executorservice.MonitorExecutorService;
@@ -77,15 +81,15 @@ public class HealthCheckModule {
         try {
             File installDir = PathResolver.resolveDirectory(AManagedMonitor.class);
             if (healthCheckMonitor == null) {
-                healthCheckMonitor = new MonitorHealthCheck(monitorName, installDir, executorService);
+                healthCheckMonitor = new MonitorHealthCheck(executorService);
             } else {
                 healthCheckMonitor.updateMonitorExecutorService(executorService);
                 healthCheckMonitor.clearAllChecks();
             }
-            healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new MetricLimitCheck(20, TimeUnit.SECONDS, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, 60, TimeUnit.SECONDS, MonitorHealthCheck.logger));
-            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(metricPrefix, controllerInfo, controllerAPIService, MonitorHealthCheck.logger));
+            healthCheckMonitor.registerChecks(new AppTierNodeCheck(controllerInfo));
+            healthCheckMonitor.registerChecks(new MetricLimitCheck(20, TimeUnit.SECONDS));
+            healthCheckMonitor.registerChecks(new MachineAgentAvailabilityCheck(controllerInfo, controllerAPIService, 60, TimeUnit.SECONDS));
+            healthCheckMonitor.registerChecks(new ExtensionPathConfigCheck(metricPrefix, controllerInfo, controllerAPIService));
             executorService.submit("HealthCheckMonitor", healthCheckMonitor);
 
         } catch (Exception e) {

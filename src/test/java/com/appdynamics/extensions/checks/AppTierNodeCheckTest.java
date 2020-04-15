@@ -16,61 +16,85 @@
 package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.List;
 
 /**
  * @author Satish Muddam
  */
+@RunWith(PowerMockRunner.class)
 public class AppTierNodeCheckTest {
 
-    private Logger logger = Mockito.mock(Logger.class);
+    @Mock
+    private org.slf4j.Logger logger;
 
 
-    @Test
-    public void testNullControllerInfo() {
-        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
-
-        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(null, logger);
-        appTierNodeCheck.check();
-
-        Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
-
-        String value = logCaptor.getValue();
-        Assert.assertEquals(value, "Received ControllerInfo as null. Not checking anything.");
+    public void setup() {
+        PowerMockito.mockStatic(ExtensionsLoggerFactory.class);
+        Mockito.when(ExtensionsLoggerFactory.getLogger(AppTierNodeCheck.class)).thenReturn(logger);
     }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
+    public void testNullControllerInfo() {
+
+        setup();
+
+        ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
+
+        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(null);
+        appTierNodeCheck.check();
+
+        Mockito.verify(logger, Mockito.times(1)).error(logArgsCaptor.capture());
+
+        String value = logArgsCaptor.getValue();
+        Assert.assertTrue(value.contains("Received ControllerInfo as null. Not checking anything."));
+    }
+
+    @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeNotConfiguredSIMNotEnabled() {
-        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+
+        setup();
+
+        ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
 
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
 
-        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo, logger);
+        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo);
         appTierNodeCheck.check();
 
-        Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
+        Mockito.verify(logger, Mockito.times(1)).error(logArgsCaptor.capture());
 
-        String value = logCaptor.getValue();
+        String value = logArgsCaptor.getValue();
         Assert.assertTrue(value.contains("SIM is not enabled and Application name, Tier name or node name not resolved"));
     }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeNotConfiguredSIMEnabled() {
+
+        setup();
+
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
 
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(true);
 
-        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo, logger);
+        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo);
         appTierNodeCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -80,7 +104,11 @@ public class AppTierNodeCheckTest {
     }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeConfiguredSIMNotEnabled() {
+
+        setup();
+
         ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -91,7 +119,7 @@ public class AppTierNodeCheckTest {
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
 
-        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo, logger);
+        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo);
         appTierNodeCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).info(logArgsCaptor.capture(), logArgsCaptor.capture(), logArgsCaptor.capture(), logArgsCaptor.capture());
@@ -111,7 +139,11 @@ public class AppTierNodeCheckTest {
     }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeConfiguredSIMEnabled() {
+
+        setup();
+
         ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -122,7 +154,7 @@ public class AppTierNodeCheckTest {
         Mockito.when(controllerInfo.getNodeName()).thenReturn("TestNode");
 
 
-        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo, logger);
+        AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(controllerInfo);
         appTierNodeCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).info(logArgsCaptor.capture(), logArgsCaptor.capture(), logArgsCaptor.capture(), logArgsCaptor.capture());

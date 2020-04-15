@@ -15,17 +15,18 @@
 
 package com.appdynamics.extensions.checks;
 
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.List;
@@ -35,22 +36,32 @@ import java.util.concurrent.TimeUnit;
  * @author Satish Muddam
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({MetricLimitCheck.class, PathResolver.class})
+@PrepareForTest({MetricLimitCheck.class, PathResolver.class, ExtensionsLoggerFactory.class})
 public class MetricLimitCheckTest {
 
-    private Logger logger = Mockito.mock(Logger.class);
+    @Mock
+    private org.slf4j.Logger logger;
+
+
+    public void setup() {
+        PowerMockito.mockStatic(ExtensionsLoggerFactory.class);
+        Mockito.when(ExtensionsLoggerFactory.getLogger(MetricLimitCheck.class)).thenReturn(logger);
+        Mockito.when(ExtensionsLoggerFactory.getLogger(PathResolver.class)).thenReturn(logger);
+    }
 
 
     @Test
     public void testMaxMetricLimitReached() {
-        
+
+        setup();
+
         PowerMockito.mockStatic(PathResolver.class);
         Mockito.when(PathResolver.resolveDirectory(AManagedMonitor.class)).thenReturn(new File("src/test/resources"));
 
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         long start = System.currentTimeMillis();
-        MetricLimitCheck maxMetricLimitCheck = new MetricLimitCheck(5, TimeUnit.SECONDS, logger);
+        MetricLimitCheck maxMetricLimitCheck = new MetricLimitCheck(5, TimeUnit.SECONDS);
         maxMetricLimitCheck.check();
         long time = System.currentTimeMillis() - start;
 
@@ -62,6 +73,6 @@ public class MetricLimitCheckTest {
         Assert.assertEquals(value, "Found metric limit reached error, below are the details");
         Assert.assertNotNull(allValues.get(1));
         Assert.assertNotNull(allValues.get(2));
-        System.out.println("Took "+time+" ms");
+        System.out.println("Took " + time + " ms");
     }
 }

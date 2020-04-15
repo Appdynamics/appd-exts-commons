@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.controller.ControllerInfo;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 
@@ -26,13 +27,12 @@ import org.slf4j.Logger;
 // fail. In that case this check is not required.
 public class AppTierNodeCheck implements RunOnceCheck {
 
-    public Logger logger;
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(AppTierNodeCheck.class);
 
     private ControllerInfo controllerInfo;
 
-    public AppTierNodeCheck(ControllerInfo controllerInfo, Logger logger) {
+    public AppTierNodeCheck(ControllerInfo controllerInfo) {
         this.controllerInfo = controllerInfo;
-        this.logger = logger;
     }
 
     @Override

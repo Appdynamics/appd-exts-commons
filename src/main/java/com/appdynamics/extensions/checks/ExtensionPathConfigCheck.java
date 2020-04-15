@@ -18,6 +18,7 @@ package com.appdynamics.extensions.checks;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
 import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
@@ -31,14 +32,14 @@ import org.slf4j.Logger;
 // "Custom Metrics| Extension"
 public class ExtensionPathConfigCheck implements RunOnceCheck {
 
-    public Logger logger;
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(ExtensionPathConfigCheck.class);
+
     private ControllerInfo controllerInfo;
     private ControllerAPIService controllerAPIService;
     private ApplicationModelAPIService applicationModelAPIService;
     private String metricPrefix;
 
-    public ExtensionPathConfigCheck(String metricPrefix, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService, Logger logger) {
-        this.logger = logger;
+    public ExtensionPathConfigCheck(String metricPrefix, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
         this.controllerInfo = controllerInfo;
         this.controllerAPIService = controllerAPIService;
         this.metricPrefix = metricPrefix;

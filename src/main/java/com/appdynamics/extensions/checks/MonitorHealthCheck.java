@@ -16,67 +16,29 @@
 package com.appdynamics.extensions.checks;
 
 import com.appdynamics.extensions.executorservice.MonitorExecutorService;
-import com.appdynamics.extensions.util.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
-
-import static com.appdynamics.extensions.SystemPropertyConstants.HEALTHCHECKS_LOG_LEVEL_PROPERTY;
 
 /**
  * @author Satish Muddam
  */
 public class MonitorHealthCheck implements Runnable {
 
-    public static Logger logger = null;
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(MonitorHealthCheck.class);
 
     private MonitorExecutorService executorService;
 
     private LinkedList<Check> healthChecks = new LinkedList<>();
 
-    public MonitorHealthCheck(String monitorName, File installDir, MonitorExecutorService executorService) {
-        configureLogger(installDir, monitorName);
-        //Do not change this logger
-        logger = LoggerFactory.getLogger(monitorName);
+    public MonitorHealthCheck(MonitorExecutorService executorService) {
         this.executorService = executorService;
     }
 
     public void updateMonitorExecutorService(MonitorExecutorService executorService) {
         this.executorService = executorService;
     }
-
-    private static void configureLogger(File installDir, String monitorName) {
-        try {
-            PatternLayout layout = new PatternLayout("%d{ABSOLUTE} %5p [%t] %c{1} - %m%n");
-            RollingFileAppender fileAppender = new RollingFileAppender();
-            File file = new File(installDir, "logs/monitor-checks/" + monitorName + ".log");
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
-            }
-            fileAppender.setFile(file.getAbsolutePath(), true, false, 8 * 1024);
-            fileAppender.setLayout(layout);
-            fileAppender.setMaxBackupIndex(5);
-            fileAppender.setMaxFileSize("5MB");
-            String property = System.getProperty(HEALTHCHECKS_LOG_LEVEL_PROPERTY);
-            Level level = Level.INFO;
-            if (StringUtils.hasText(property)) {
-                level = Level.toLevel(property);
-            }
-            org.apache.log4j.Logger extCheckLogger = org.apache.log4j.Logger.getLogger(monitorName);
-            extCheckLogger.setLevel(level);
-            extCheckLogger.setAdditivity(false);
-            extCheckLogger.addAppender(fileAppender);
-        } catch (IOException e) {
-            System.out.println("Unable to initialise monitor check logger: " + e.getMessage());
-        }
-    }
-
 
     public void registerChecks(Check healthCheck) {
         if (healthCheck != null) {
