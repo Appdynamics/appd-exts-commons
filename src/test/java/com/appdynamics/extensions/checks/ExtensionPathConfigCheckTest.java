@@ -19,7 +19,7 @@ import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

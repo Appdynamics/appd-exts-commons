@@ -18,7 +18,7 @@ package com.appdynamics.extensions.controller.apiservices;
 import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 
 public class ControllerAPIServiceFactoryTest {
     @Test
-    public void whenControllerClientIsValidAndHTTPCallSuccessfulShouldReturnValidData() throws ControllerHttpRequestException{
+    public void whenControllerClientIsValidAndHTTPCallSuccessfulShouldReturnValidData() throws ControllerHttpRequestException {
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
         ControllerClient controllerClient = mock(ControllerClient.class);
         when(controllerClient.sendGetRequest(isA(String.class))).thenReturn("{\"key\": \"1\"}");
@@ -44,7 +44,7 @@ public class ControllerAPIServiceFactoryTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void whenControllerClientIsNullShouldThrowAnException() throws ControllerHttpRequestException{
+    public void whenControllerClientIsNullShouldThrowAnException() throws ControllerHttpRequestException {
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
         ControllerClient controllerClient = null;
         ControllerAPIService controllerAPIService = ControllerAPIServiceFactory.initialize(controllerInfo, controllerClient);

@@ -21,9 +21,9 @@ import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.JsonUtils;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
-import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 
 import java.util.concurrent.TimeUnit;
@@ -55,7 +55,7 @@ public class MachineAgentAvailabilityCheck implements RunAlwaysCheck {
 
     @Override
     public void check() {
-        if(!stop) {
+        if (!stop) {
             long start = System.currentTimeMillis();
             logger.info("Starting MachineAgentAvailabilityCheck");
             if (controllerInfo == null) {

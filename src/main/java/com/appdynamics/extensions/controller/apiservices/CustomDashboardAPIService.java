@@ -22,10 +22,10 @@ import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.CookiesCsrf;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -45,7 +45,7 @@ import static com.appdynamics.extensions.util.SSLUtils.createSSLContext;
 /**
  * Created by venkata.konala on 1/1/19.
  */
-public class CustomDashboardAPIService extends APIService{
+public class CustomDashboardAPIService extends APIService {
 
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(CustomDashboardAPIService.class);
 
@@ -54,7 +54,7 @@ public class CustomDashboardAPIService extends APIService{
     }
 
     public JsonNode getAllDashboards() {
-        if(controllerClient != null) {
+        if (controllerClient != null) {
             JsonNode allDashboardsNode = null;
             String alldashboards;
             try {
@@ -73,8 +73,8 @@ public class CustomDashboardAPIService extends APIService{
 
     // #TODO Check if cookiesCsrf from a different HttpClient can be used.
     public void uploadDashboard(Map<String, ?> propMap, String dashboardName, String fileExtension, String fileContent, String fileContentType) throws ControllerHttpRequestException {
-        Map<String, ?> connectionMap = (Map<String, ?>)propMap.get("connection");
-        Map<String, ?> proxyMap = (Map<String, ?>)propMap.get("proxy");
+        Map<String, ?> connectionMap = (Map<String, ?>) propMap.get("connection");
+        Map<String, ?> proxyMap = (Map<String, ?>) propMap.get("proxy");
 
         CookiesCsrf cookiesCsrf = controllerClient.getCookiesCsrf();
         String filename = dashboardName + "." + fileExtension;
@@ -86,8 +86,8 @@ public class CustomDashboardAPIService extends APIService{
         HttpURLConnection connection = null;
         try {
             URL url = new URL(urlStr);
-            if (proxyMap != null && !proxyMap.isEmpty() && !Strings.isNullOrEmpty((String)proxyMap.get(URI))) {
-                URL proxyURL = new URL((String)proxyMap.get(URI));
+            if (proxyMap != null && !proxyMap.isEmpty() && !Strings.isNullOrEmpty((String) proxyMap.get(URI))) {
+                URL proxyURL = new URL((String) proxyMap.get(URI));
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyURL.getHost()
                         , proxyURL.getPort()));
                 connection = (HttpURLConnection) url.openConnection(proxy);
