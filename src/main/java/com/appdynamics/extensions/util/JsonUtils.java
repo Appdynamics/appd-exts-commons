@@ -17,10 +17,10 @@ package com.appdynamics.extensions.util;
 
 
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
@@ -110,7 +110,7 @@ public class JsonUtils {
     private static ArrayNode getChildren(JsonNode node) {
         if (node != null) {
             ArrayNode nodes = JsonNodeFactory.instance.arrayNode();
-            Iterator<JsonNode> elements = node.getElements();
+            Iterator<JsonNode> elements = node.elements();
             while (elements.hasNext()) {
                 JsonNode jsonNode = elements.next();
                 nodes.add(jsonNode);

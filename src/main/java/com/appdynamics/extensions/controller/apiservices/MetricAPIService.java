@@ -19,8 +19,8 @@ import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ import java.io.IOException;
 /**
  * Created by venkata.konala on 1/2/19.
  */
-public class MetricAPIService extends APIService{
+public class MetricAPIService extends APIService {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(MetricAPIService.class);
 
     MetricAPIService(ControllerInfo controllerInfo, ControllerClient controllerClient) {
@@ -36,7 +36,7 @@ public class MetricAPIService extends APIService{
     }
 
     public JsonNode getMetricData(String applicationName, String metricPathEndPoint) {
-        if(controllerClient != null) {
+        if (controllerClient != null) {
             JsonNode metricDataNode = null;
             String metricData;
             try {

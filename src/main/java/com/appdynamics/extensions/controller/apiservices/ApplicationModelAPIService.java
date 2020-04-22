@@ -19,8 +19,8 @@ import com.appdynamics.extensions.controller.ControllerClient;
 import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class ApplicationModelAPIService extends APIService {
     }
 
     public JsonNode getSpecificTierNode(String applicationName, String tierName) {
-        if(controllerClient != null) {
+        if (controllerClient != null) {
             JsonNode specificTierNode = null;
             String specificTierData;
             try {

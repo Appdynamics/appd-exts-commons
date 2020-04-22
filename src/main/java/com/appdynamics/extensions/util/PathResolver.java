@@ -31,7 +31,7 @@ import java.security.ProtectionDomain;
  * Time: 9:10 AM
  * To change this template use File | Settings | File Templates.
  */
-public class PathResolver {
+public class  PathResolver {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(PathResolver.class);
 
     public static File resolveDirectory(Class clazz) {

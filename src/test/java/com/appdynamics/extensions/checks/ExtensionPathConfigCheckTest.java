@@ -15,16 +15,21 @@
 
 package com.appdynamics.extensions.checks;
 
-import com.appdynamics.extensions.controller.ControllerHttpRequestException;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ApplicationModelAPIService;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 
@@ -35,18 +40,27 @@ import static org.mockito.Mockito.when;
 /**
  * @author Satish Muddam
  */
+@RunWith(PowerMockRunner.class)
 public class ExtensionPathConfigCheckTest {
 
-    private Logger logger = mock(Logger.class);
+    @Mock
+    private org.slf4j.Logger logger;
 
+
+    @Before
+    public void setup() {
+        PowerMockito.mockStatic(ExtensionsLoggerFactory.class);
+        Mockito.when(ExtensionsLoggerFactory.getLogger(ExtensionPathConfigCheck.class)).thenReturn(logger);
+    }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testNullControllerInfo() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test",null, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test", null, controllerAPIService);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
@@ -56,6 +70,7 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixWithComponentAndSIMEnabled() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -65,7 +80,7 @@ public class ExtensionPathConfigCheckTest {
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:Test|Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:Test|Custom Metrics|Test", controllerInfo, controllerAPIService);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
@@ -75,6 +90,7 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixSIMNotEnabled() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
@@ -82,7 +98,7 @@ public class ExtensionPathConfigCheckTest {
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test", controllerInfo, controllerAPIService);
         extensionPathConfigCheck.check();
         Mockito.verify(logger, Mockito.times(1)).warn(logCaptor.capture());
         String value = logCaptor.getValue();
@@ -90,6 +106,7 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
+    @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixSIMEnabled() {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -99,7 +116,7 @@ public class ExtensionPathConfigCheckTest {
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Custom Metrics|Test", controllerInfo, controllerAPIService);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -109,7 +126,8 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
-    public void testMetricPrefixWithComponentAndSIMNotEnabled() throws IOException, ControllerHttpRequestException {
+    @PrepareForTest(ExtensionsLoggerFactory.class)
+    public void testMetricPrefixWithComponentAndSIMNotEnabled() throws IOException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
@@ -123,7 +141,7 @@ public class ExtensionPathConfigCheckTest {
         when(controllerAPIService.getApplicationModelAPIService()).thenReturn(applicationModelAPIService);
         when(applicationModelAPIService.getSpecificTierNode(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(tierRESTResponse()));
 
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:TestTier|Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:TestTier|Custom Metrics|Test", controllerInfo, controllerAPIService);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(2)).info(logCaptor.capture());
@@ -133,7 +151,8 @@ public class ExtensionPathConfigCheckTest {
     }
 
     @Test
-    public void testMetricPrefixWithWrongComponentAndSIMNotEnabled() throws IOException, ControllerHttpRequestException {
+    @PrepareForTest(ExtensionsLoggerFactory.class)
+    public void testMetricPrefixWithWrongComponentAndSIMNotEnabled() throws IOException {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
@@ -148,7 +167,7 @@ public class ExtensionPathConfigCheckTest {
         when(applicationModelAPIService.getSpecificTierNode(isA(String.class), isA(String.class))).thenReturn(new ObjectMapper().readTree(tierRESTResponse()));
 
 
-        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:TestTier123|Custom Metrics|Test", controllerInfo, controllerAPIService, logger);
+        ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:TestTier123|Custom Metrics|Test", controllerInfo, controllerAPIService);
         extensionPathConfigCheck.check();
 
         Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());

@@ -1,5 +1,8 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.2
+1. Code changes related to logger update from log4j to log4j2.
+
 ## 2.2.1
 1. Updated httpclient to 4.5.6, httpmime to 4.5.
 2. Discarding metrics that are not numbers.

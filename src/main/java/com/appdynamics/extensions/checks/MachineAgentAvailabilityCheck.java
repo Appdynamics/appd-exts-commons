@@ -18,11 +18,12 @@ package com.appdynamics.extensions.checks;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
+import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.JsonUtils;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
-import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 
 import java.util.concurrent.TimeUnit;
@@ -32,7 +33,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class MachineAgentAvailabilityCheck implements RunAlwaysCheck {
 
-    public Logger logger;
+    private static final Logger logger = ExtensionsLoggerFactory.getLogger(MachineAgentAvailabilityCheck.class);
+
     private ControllerInfo controllerInfo;
     private ControllerAPIService controllerAPIService;
     private MetricAPIService metricAPIService;
@@ -44,8 +46,7 @@ public class MachineAgentAvailabilityCheck implements RunAlwaysCheck {
     private static final Escaper URL_ESCAPER = UrlEscapers.urlFragmentEscaper();
 
 
-    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerAPIService controllerAPIService, int period, TimeUnit timeUnit, Logger logger) {
-        this.logger = logger;
+    public MachineAgentAvailabilityCheck(ControllerInfo controllerInfo, ControllerAPIService controllerAPIService, int period, TimeUnit timeUnit) {
         this.controllerInfo = controllerInfo;
         this.controllerAPIService = controllerAPIService;
         this.period = period;
@@ -54,7 +55,7 @@ public class MachineAgentAvailabilityCheck implements RunAlwaysCheck {
 
     @Override
     public void check() {
-        if(!stop) {
+        if (!stop) {
             long start = System.currentTimeMillis();
             logger.info("Starting MachineAgentAvailabilityCheck");
             if (controllerInfo == null) {

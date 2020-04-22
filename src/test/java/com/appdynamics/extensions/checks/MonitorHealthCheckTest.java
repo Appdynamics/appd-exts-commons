@@ -47,7 +47,7 @@ public class MonitorHealthCheckTest {
     @Test
     public void testRegisteredChecksForRunOnce() {
 
-        monitorHealthCheck = new MonitorHealthCheck("TestMonitor", new File("monitors/TestMonitor"), executorService);
+        monitorHealthCheck = new MonitorHealthCheck(executorService);
         TestCheck testCheck = new TestCheck();
         TestCheck spyTestCheck = Mockito.spy(testCheck);
 
@@ -63,7 +63,7 @@ public class MonitorHealthCheckTest {
 
         MonitorThreadPoolExecutor monitorThreadPoolExecutor = new MonitorThreadPoolExecutor((ThreadPoolExecutor) Executors.newScheduledThreadPool(1));
 
-        monitorHealthCheck = new MonitorHealthCheck("TestMonitor", new File("monitors/TestMonitor"), monitorThreadPoolExecutor);
+        monitorHealthCheck = new MonitorHealthCheck(monitorThreadPoolExecutor);
         TestCheckAlways testCheck = new TestCheckAlways();
         TestCheckAlways spyTestCheck = Mockito.spy(testCheck);
 
