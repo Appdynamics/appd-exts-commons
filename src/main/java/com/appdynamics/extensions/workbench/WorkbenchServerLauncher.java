@@ -52,7 +52,7 @@ public class WorkbenchServerLauncher {
                     List<String> commands = new ArrayList<>();
                     commands.add(java.getAbsolutePath());
                     commands.addAll(workbenchSysProps);
-                    commands.add("-D" + SystemPropertyConstants.HEALTHCHECKS_ENABLE_PROPERTY + "=false");
+                    commands.add("-D" + SystemPropertyConstants.HEALTHCHECKS_ENABLE_PROPERTY + "=" + healthCheckEnabled());
                     commands.add("-cp");
                     commands.add(cp);
                     commands.add(WorkBenchServer.class.getName());
@@ -111,6 +111,11 @@ public class WorkbenchServerLauncher {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
+    }
+
+    private static boolean healthCheckEnabled() {
+        String healthCheck = System.getProperty(SystemPropertyConstants.HEALTHCHECKS_ENABLE_PROPERTY);
+        return Boolean.valueOf(healthCheck);
     }
 
     private static boolean isWin() {
