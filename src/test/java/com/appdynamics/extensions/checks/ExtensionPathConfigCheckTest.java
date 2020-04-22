@@ -21,6 +21,7 @@ import com.appdynamics.extensions.controller.apiservices.ControllerAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +47,7 @@ public class ExtensionPathConfigCheckTest {
     private org.slf4j.Logger logger;
 
 
+    @Before
     public void setup() {
         PowerMockito.mockStatic(ExtensionsLoggerFactory.class);
         Mockito.when(ExtensionsLoggerFactory.getLogger(ExtensionPathConfigCheck.class)).thenReturn(logger);
@@ -54,9 +56,6 @@ public class ExtensionPathConfigCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testNullControllerInfo() {
-
-        setup();
-
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         ApplicationModelAPIService applicationModelAPIService = mock(ApplicationModelAPIService.class);
@@ -73,7 +72,6 @@ public class ExtensionPathConfigCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixWithComponentAndSIMEnabled() {
-        setup();
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
@@ -94,9 +92,6 @@ public class ExtensionPathConfigCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixSIMNotEnabled() {
-
-        setup();
-
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
         Mockito.when(controllerInfo.getSimEnabled()).thenReturn(false);
@@ -113,9 +108,6 @@ public class ExtensionPathConfigCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixSIMEnabled() {
-
-        setup();
-
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
@@ -136,9 +128,6 @@ public class ExtensionPathConfigCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixWithComponentAndSIMNotEnabled() throws IOException {
-
-        setup();
-
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = mock(ControllerInfo.class);
@@ -164,9 +153,6 @@ public class ExtensionPathConfigCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMetricPrefixWithWrongComponentAndSIMNotEnabled() throws IOException {
-
-        setup();
-
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = mock(ControllerInfo.class);

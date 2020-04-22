@@ -19,6 +19,7 @@ import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.appdynamics.extensions.util.PathResolver;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -43,6 +44,7 @@ public class MetricLimitCheckTest {
     private org.slf4j.Logger logger;
 
 
+    @Before
     public void setup() {
         PowerMockito.mockStatic(ExtensionsLoggerFactory.class);
         Mockito.when(ExtensionsLoggerFactory.getLogger(MetricLimitCheck.class)).thenReturn(logger);
@@ -52,8 +54,6 @@ public class MetricLimitCheckTest {
 
     @Test
     public void testMaxMetricLimitReached() {
-
-        setup();
 
         PowerMockito.mockStatic(PathResolver.class);
         Mockito.when(PathResolver.resolveDirectory(AManagedMonitor.class)).thenReturn(new File("src/test/resources"));

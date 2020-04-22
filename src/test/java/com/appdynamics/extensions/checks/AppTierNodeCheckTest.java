@@ -18,6 +18,7 @@ package com.appdynamics.extensions.checks;
 import com.appdynamics.extensions.controller.ControllerInfo;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -39,6 +40,7 @@ public class AppTierNodeCheckTest {
     private org.slf4j.Logger logger;
 
 
+    @Before
     public void setup() {
         PowerMockito.mockStatic(ExtensionsLoggerFactory.class);
         Mockito.when(ExtensionsLoggerFactory.getLogger(AppTierNodeCheck.class)).thenReturn(logger);
@@ -47,9 +49,6 @@ public class AppTierNodeCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testNullControllerInfo() {
-
-        setup();
-
         ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
 
         AppTierNodeCheck appTierNodeCheck = new AppTierNodeCheck(null);
@@ -64,8 +63,6 @@ public class AppTierNodeCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeNotConfiguredSIMNotEnabled() {
-
-        setup();
 
         ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -85,9 +82,6 @@ public class AppTierNodeCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeNotConfiguredSIMEnabled() {
-
-        setup();
-
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -106,9 +100,6 @@ public class AppTierNodeCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeConfiguredSIMNotEnabled() {
-
-        setup();
-
         ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);
@@ -141,9 +132,6 @@ public class AppTierNodeCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeConfiguredSIMEnabled() {
-
-        setup();
-
         ArgumentCaptor<String> logArgsCaptor = ArgumentCaptor.forClass(String.class);
 
         ControllerInfo controllerInfo = Mockito.mock(ControllerInfo.class);

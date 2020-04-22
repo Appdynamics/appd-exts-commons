@@ -21,6 +21,7 @@ import com.appdynamics.extensions.controller.apiservices.MetricAPIService;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -46,7 +47,7 @@ public class MachineAgentAvailabilityCheckTest {
     @Mock
     private org.slf4j.Logger logger;
 
-
+    @Before
     public void setup() {
         PowerMockito.mockStatic(ExtensionsLoggerFactory.class);
         Mockito.when(ExtensionsLoggerFactory.getLogger(MachineAgentAvailabilityCheck.class)).thenReturn(logger);
@@ -56,8 +57,6 @@ public class MachineAgentAvailabilityCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testNullControllerInfo() {
-
-        setup();
 
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
@@ -73,8 +72,6 @@ public class MachineAgentAvailabilityCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testAppTierNodeNotConfiguredSIMEnabled() {
-
-        setup();
 
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -96,8 +93,6 @@ public class MachineAgentAvailabilityCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMAStatusAvailable() throws IOException {
-
-        setup();
 
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -124,8 +119,6 @@ public class MachineAgentAvailabilityCheckTest {
     @Test
     @PrepareForTest(ExtensionsLoggerFactory.class)
     public void testMAStatusNotAvailable() throws IOException {
-
-        setup();
 
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
 
