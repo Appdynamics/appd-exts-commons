@@ -138,14 +138,8 @@ customDashboard:
 # add the credentials of an existing user.
 
 controllerInfo:
-    controllerHost: "localhost"
-    controllerPort: 8090
-    controllerSslEnabled: false
-    account: "accountName"
     username: "user"
     password: "password"
-    encryptedPassword: ""
-    simEnabled: true
 
 eventsServiceParameters:
   host: dummyHost

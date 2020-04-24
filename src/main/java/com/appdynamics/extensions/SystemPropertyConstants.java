@@ -22,7 +22,6 @@ public class SystemPropertyConstants {
     public static final String WORKBENCH_MODE_PROPERTY = "appdynamics.agent.monitors.workbench.mode";
 
     public static final String HEALTHCHECKS_ENABLE_PROPERTY = "appdynamics.agent.monitors.healthchecks.enable";
-    public static final String HEALTHCHECKS_LOG_LEVEL_PROPERTY = "appdynamics.agent.monitors.healthchecks.log.level";
 
     public static final String ENCRYPTION_KEY_PROPERTY = "appdynamics.agent.monitors.encryptionKey";
     public static final String PLAIN_TEXT_PROPERTY = "appdynamics.agent.monitors.plainText";

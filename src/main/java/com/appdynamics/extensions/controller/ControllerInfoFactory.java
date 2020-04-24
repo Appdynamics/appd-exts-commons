@@ -189,45 +189,12 @@ public class ControllerInfoFactory {
     }
 
     private static void getControllerInfoFromYml(Map config) {
-        if (!Strings.isNullOrEmpty((String) config.get("controllerHost"))) {
-            controllerInfo.setControllerHost(config.get("controllerHost").toString());
-        }
-        Number port = (Number) config.get("controllerPort");
-        if (port != null) {
-            controllerInfo.setControllerPort(port.intValue());
-        }
-        if (config.get("controllerSslEnabled") != null) {
-            controllerInfo.setControllerSslEnabled((Boolean) config.get("controllerSslEnabled"));
-        }
-        if (config.get("simEnabled") != null) {
-            controllerInfo.setSimEnabled((Boolean) config.get("simEnabled"));
-        }
-        if (!Strings.isNullOrEmpty((String) config.get("uniqueHostId"))) {
-            controllerInfo.setUniqueHostId(config.get("uniqueHostId").toString());
-        }
-        if (!Strings.isNullOrEmpty((String) config.get("account"))) {
-            controllerInfo.setAccount(config.get("account").toString());
-        }
+
         if (!Strings.isNullOrEmpty((String) config.get("username"))) {
             controllerInfo.setUsername(config.get("username").toString());
         }
         if (!Strings.isNullOrEmpty((String) config.get("password"))) {
             controllerInfo.setPassword(config.get("password").toString());
-        }
-        if (!Strings.isNullOrEmpty((String) config.get("accountAccessKey"))) {
-            controllerInfo.setAccountAccessKey(config.get("accountAccessKey").toString());
-        }
-        if (!Strings.isNullOrEmpty((String) config.get("applicationName"))) {
-            controllerInfo.setApplicationName(config.get("applicationName").toString());
-        }
-        if (!Strings.isNullOrEmpty((String) config.get("tierName"))) {
-            controllerInfo.setTierName(config.get("tierName").toString());
-        }
-        if (!Strings.isNullOrEmpty((String) config.get("nodeName"))) {
-            controllerInfo.setNodeName(config.get("nodeName").toString());
-        }
-        if (!Strings.isNullOrEmpty((String) config.get("machinePath"))) {
-            controllerInfo.setMachinePath(config.get("machinePath").toString());
         }
         if (!Strings.isNullOrEmpty((String) config.get("encryptedPassword"))) {
             controllerInfo.setEncryptedPassword(config.get("encryptedPassword").toString());

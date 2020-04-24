@@ -15,9 +15,7 @@
 
 package com.appdynamics.extensions.controller;
 
-import com.appdynamics.extensions.util.PathResolver;
 import com.appdynamics.extensions.yml.YmlReader;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,23 +31,25 @@ public class ControllerClientFactoryTest {
     @Test
     public void whenSSLNotEnabledThenShouldUseHttp() {
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/controller/config.yml"));
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
-        ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
+        File installDir = new File("src/test/resources/controller");
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>) config.get("controllerInfo"), installDir);
+        ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>) config.get("connection"), (Map<String, ?>) config.get("proxy"), (String) config.get("encryptionKey"));
         Assert.assertNotNull(controllerClient.getBaseURL());
         Assert.assertNotNull(controllerClient.getHttpClient());
-        Assert.assertEquals(controllerClient.getBaseURL(), "http://localhost:8090/");
+        Assert.assertEquals(controllerClient.getBaseURL(), "http://host:80/");
 
     }
 
     @Test
     public void whenSSLEnabledThenShouldUseHttps() {
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/controller/config.yml"));
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
+        File installDir = new File("src/test/resources/controller");
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>) config.get("controllerInfo"), installDir);
         controllerInfo.setControllerSslEnabled(true);
-        ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
+        ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>) config.get("connection"), (Map<String, ?>) config.get("proxy"), (String) config.get("encryptionKey"));
         Assert.assertNotNull(controllerClient.getBaseURL());
         Assert.assertNotNull(controllerClient.getHttpClient());
-        Assert.assertEquals(controllerClient.getBaseURL(), "https://localhost:8090/");
+        Assert.assertEquals(controllerClient.getBaseURL(), "https://host:80/");
 
     }
 }

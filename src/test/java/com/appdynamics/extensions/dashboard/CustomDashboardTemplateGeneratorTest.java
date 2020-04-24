@@ -20,15 +20,12 @@ import com.appdynamics.extensions.controller.ControllerInfoFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CustomDashboardTemplateGeneratorTest {
-
-    private File file = Mockito.mock(File.class);
 
     /*@Before
     public void resetSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
@@ -39,7 +36,8 @@ public class CustomDashboardTemplateGeneratorTest {
 
     @Test
     public void replaceDefaultValuesInTheNormalDashboard() throws Exception {
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getConfigMap(), file);
+        File installDir = new File("src/test/resources/dashboard");
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getConfigMap(), installDir);
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
         Map dashboardConfig = new HashMap();
@@ -51,19 +49,19 @@ public class CustomDashboardTemplateGeneratorTest {
         String updatedDashboardString = customDashboardGen.getDashboardTemplate();
         Assert.assertFalse(dashboardString.equals(updatedDashboardString));
         if (dashboardString.contains(DashboardConstants.REPLACE_APPLICATION_NAME)) {
-            Assert.assertTrue(updatedDashboardString.contains("applicationNameYML"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlApplicationName"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_SIM_APPLICATION_NAME)) {
             Assert.assertTrue(updatedDashboardString.contains(DashboardConstants.SIM_APPLICATION_NAME));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_MACHINE_PATH)) {
-            Assert.assertTrue(updatedDashboardString.contains("MachinePath"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlMachinePath"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_TIER_NAME)) {
-            Assert.assertTrue(updatedDashboardString.contains("tierNameYML"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlTierName"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_NODE_NAME)) {
-            Assert.assertTrue(updatedDashboardString.contains("Node"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlNodeName"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
@@ -72,7 +70,9 @@ public class CustomDashboardTemplateGeneratorTest {
 
     @Test
     public void replaceDefaultValuesInTheSIMDashboard() throws Exception {
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getConfigMapForSim(), file);
+        File installDir = new File("src/test/resources/dashboard");
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getConfigMap(), installDir);
+        controllerInfo.setSimEnabled(true);
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
         Map dashboardConfig = new HashMap();
@@ -90,10 +90,10 @@ public class CustomDashboardTemplateGeneratorTest {
             Assert.assertTrue(updatedDashboardString.contains("Root"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)) {
-            Assert.assertTrue(updatedDashboardString.contains("hostNameYML"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlHost"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_UNIQUE_HOST_ID)) {
-            Assert.assertTrue(updatedDashboardString.contains("uniqueHostIDYML"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlUniqueHostId"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
@@ -103,9 +103,11 @@ public class CustomDashboardTemplateGeneratorTest {
 
     @Test
     public void verifyTheCorrectMachinePath() throws Exception {
-        Map controllerInfoMapWithMachinePath = getConfigMapForSim();
-        controllerInfoMapWithMachinePath.put("machinePath", "Test1|Test2|Test3|Test4");
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(controllerInfoMapWithMachinePath, file);
+        File installDir = new File("src/test/resources/dashboard");
+        Map controllerInfoMapWithMachinePath = getConfigMap();
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(controllerInfoMapWithMachinePath, installDir);
+        controllerInfo.setSimEnabled(true);
+        controllerInfo.setMachinePath("Test1|Test2|Test3|Test4");
         String metricPrefix = "Custom Metrics|Extension|";
         String dashboardName = "DashboardName";
         Map dashboardConfig = new HashMap();
@@ -123,10 +125,10 @@ public class CustomDashboardTemplateGeneratorTest {
             Assert.assertTrue(updatedDashboardString.contains("Root|Test1|Test2|Test3"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_UNIQUE_HOST_ID)) {
-            Assert.assertTrue(updatedDashboardString.contains("uniqueHostIDYML"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlUniqueHostId"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_HOST_NAME)) {
-            Assert.assertTrue(updatedDashboardString.contains("hostNameYML"));
+            Assert.assertTrue(updatedDashboardString.contains("xmlHost"));
         }
         if (dashboardString.contains(DashboardConstants.REPLACE_METRIC_PREFIX)) {
             Assert.assertTrue(updatedDashboardString.contains(metricPrefix));
@@ -135,36 +137,8 @@ public class CustomDashboardTemplateGeneratorTest {
 
     private Map getConfigMap() {
         Map config = new HashMap<>();
-        config.put("controllerHost", "hostNameYML");
-        config.put("controllerPort", 9999);
-        config.put("controllerSslEnabled", false);
-        config.put("uniqueHostId", "uniqueHostIDYML");
-        config.put("account", "accountNameYML");
         config.put("username", "usernameYML");
         config.put("password", "passwordYML");
-        config.put("accountAccessKey", "accessKeyYML");
-        config.put("applicationName", "applicationNameYML");
-        config.put("tierName", "tierNameYML");
-        config.put("nodeName", "nodeNameYML");
-        config.put("simEnabled", false);
         return config;
     }
-
-    private Map getConfigMapForSim() {
-        Map config = new HashMap<>();
-        config.put("controllerHost", "hostNameYML");
-        config.put("controllerPort", 9999);
-        config.put("controllerSslEnabled", false);
-        config.put("uniqueHostId", "uniqueHostIDYML");
-        config.put("account", "accountNameYML");
-        config.put("username", "usernameYML");
-        config.put("password", "passwordYML");
-        config.put("accountAccessKey", "accessKeyYML");
-        config.put("applicationName", "applicationNameYML");
-        config.put("tierName", "tierNameYML");
-        config.put("nodeName", "nodeNameYML");
-        config.put("simEnabled", true);
-        return config;
-    }
-
 }
