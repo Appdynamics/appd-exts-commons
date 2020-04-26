@@ -137,6 +137,10 @@ customDashboard:
 # To upload the dashboard, please create a user from Controller UI or
 # add the credentials of an existing user.
 controllerInfo:
+    controllerHost: "localhost"
+    controllerPort: 8090
+    controllerSslEnabled: false
+    account: ""
     username: ""
     password: ""
     encryptedPassword: ""

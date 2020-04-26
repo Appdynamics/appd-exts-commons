@@ -30,9 +30,8 @@ public class ControllerModuleTest {
     @Test
     public void whenControllerInfoValidatedAllThreeComponentsAreNotNullTest() {
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/controller/config.yml"));
-        File installDir = new File("src/test/resources/controller");
         ControllerModule controllerModule = new ControllerModule();
-        controllerModule.initController(installDir, conf);
+        controllerModule.initController(null, conf);
         Assert.assertNotNull(controllerModule.getControllerInfo());
         Assert.assertNotNull(controllerModule.getControllerClient());
         Assert.assertNotNull(controllerModule.getControllerAPIService());
@@ -42,10 +41,8 @@ public class ControllerModuleTest {
     @Test
     public void whenControllerInfoNotValidatedTwoComponentsAreNullTest() {
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/conf/config_withIncompleteControllerInfo"));
-        File installDir = new File("src/test/resources/controller");
-
         ControllerModule controllerModule = new ControllerModule();
-        controllerModule.initController(installDir, conf);
+        controllerModule.initController(null, conf);
         Assert.assertNotNull(controllerModule.getControllerInfo());
         Assert.assertNull(controllerModule.getControllerClient());
         Assert.assertNull(controllerModule.getControllerAPIService());

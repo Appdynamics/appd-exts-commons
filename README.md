@@ -270,10 +270,24 @@ The controller information can also be provided in the `config.yml`
 ```
 # If any of the following fields are not set, the values of the specific fields are set from the system properties of the corresponding fields as specified in the comments.
 # If the system properties are not set for the field, then the data is retrieved from machine agent configFile. Please refer to ControllerInfoFactory for more details.
+# Values provided here can be overridden if the same field is configured in either controller-info.xml or system properties.
+
 controllerInfo:
+    controllerHost: "" # -Dappdynamics.controller.hostName
+    controllerPort: 8090 # -Dappdynamics.controller.port
+    controllerSslEnabled: false # -Dappdynamics.controller.ssl.enabled
+    enableOrchestration: false # N/A
+    uniqueHostId: "" # -Dappdynamics.agent.uniqueHostId
     username: "" # -Dappdynamics.agent.monitors.controller.username
     password: "" # -Dappdynamics.agent.monitors.controller.password
     encryptedPassword: "" # -Dappdynamics.agent.monitors.controller.encryptedPassword
+    accountAccessKey: "" # -Dappdynamics.agent.accountAccessKey
+    account: "customer1" # -Dappdynamics.agent.accountName
+    machinePath: "" # -Dappdynamics.machine.agent.hierarchyPath
+    simEnabled: false # -Dappdynamics.sim.enabled
+    applicationName: "" # -Dappdynamics.agent.applicationName
+    tierName: "" # -Dappdynamics.agent.tierName
+    nodeName: "" # -Dappdynamics.agent.nodeName
 ```
 
 The ControllerInfo object is built by loading the properties from the following sources in the following order

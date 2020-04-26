@@ -31,7 +31,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,8 +80,7 @@ public class CustomDashboardModuleTest {
         config.put("proxy", Maps.newHashMap());
         String metricPrefix = "Custom Metrics|MonitorName";
         String monitorName = "MonitorName";
-        File installDir = new File("src/test/resources/dashboard");
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getControllerInfoMap(), installDir);
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getControllerInfoMap(), null);
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         CustomDashboardAPIService customDashboardAPIService = mock(CustomDashboardAPIService.class);
         when(controllerAPIService.getCustomDashboardAPIService()).thenReturn(customDashboardAPIService);
@@ -103,8 +101,7 @@ public class CustomDashboardModuleTest {
         config.put("proxy", Maps.newHashMap());
         String metricPrefix = "Custom Metrics|MonitorName";
         String monitorName = "MonitorName";
-        File installDir = new File("src/test/resources/dashboard");
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getControllerInfoMap(), installDir);
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize(getControllerInfoMap(), null);
         ControllerAPIService controllerAPIService = mock(ControllerAPIService.class);
         CustomDashboardAPIService customDashboardAPIService = mock(CustomDashboardAPIService.class);
         when(controllerAPIService.getCustomDashboardAPIService()).thenReturn(customDashboardAPIService);
