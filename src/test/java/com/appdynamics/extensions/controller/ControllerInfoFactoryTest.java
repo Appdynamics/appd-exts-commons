@@ -125,22 +125,22 @@ public class ControllerInfoFactoryTest {
         Map config = getConfigMap();
         File file = new File("src/test/resources/dashboard/");
         ControllerInfo controllerInfo = ControllerInfoFactory.initialize(config, file);
-        Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
-        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
-        Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationNameYML"));
-        Assert.assertTrue(controllerInfo.getTierName().equals("tierNameYML"));
-        Assert.assertTrue(controllerInfo.getNodeName().equals("nodeNameYML"));
-        Assert.assertTrue(controllerInfo.getControllerHost().equals("hostNameYML"));
-        Assert.assertTrue(controllerInfo.getControllerPort().equals(9999));
+        Assert.assertTrue(controllerInfo.getAccount().equals("xmlAccountName"));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("xmlAccessKey"));
+        Assert.assertTrue(controllerInfo.getApplicationName().equals("xmlApplicationName"));
+        Assert.assertTrue(controllerInfo.getTierName().equals("xmlTierName"));
+        Assert.assertTrue(controllerInfo.getNodeName().equals("xmlNodeName"));
+        Assert.assertTrue(controllerInfo.getControllerHost().equals("xmlHost"));
+        Assert.assertTrue(controllerInfo.getControllerPort().equals(8090));
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
-        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
+        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("xmlUniqueHostId"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
     }
 
     @Test
     public void testGetControllerInfoWithSystemProps() {
         setupSystemProps();
-        Map config = Maps.newHashMap();
+        Map config = getConfigMap();
         File file = Mockito.mock(File.class);
         ControllerInfo controllerInfo = ControllerInfoFactory.initialize(config, file);
         removeSystemProperties();
@@ -167,19 +167,19 @@ public class ControllerInfoFactoryTest {
         File file = Mockito.mock(File.class);
         ControllerInfo controllerInfo = ControllerInfoFactory.initialize(config, file);
         removeSystemProperties();
-        Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
-        Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
+        Assert.assertTrue(controllerInfo.getUsername().equals("username"));
+        Assert.assertTrue(controllerInfo.getPassword().equals("password"));
         Assert.assertTrue(controllerInfo.getEncryptionKey().equals("encryptionKey"));
         Assert.assertTrue(controllerInfo.getEncryptedPassword().equals("encryptedPassword"));
-        Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
-        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
-        Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationNameYML"));
-        Assert.assertTrue(controllerInfo.getTierName().equals("tierNameYML"));
-        Assert.assertTrue(controllerInfo.getNodeName().equals("nodeNameYML"));
-        Assert.assertTrue(controllerInfo.getControllerHost().equals("hostNameYML"));
-        Assert.assertTrue(controllerInfo.getControllerPort().equals(9999));
+        Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
+        Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
+        Assert.assertTrue(controllerInfo.getTierName().equals("tierName"));
+        Assert.assertTrue(controllerInfo.getNodeName().equals("nodeName"));
+        Assert.assertTrue(controllerInfo.getControllerHost().equals("hostName"));
+        Assert.assertTrue(controllerInfo.getControllerPort().equals(9090));
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
-        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
+        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostID"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
 
     }
@@ -212,19 +212,19 @@ public class ControllerInfoFactoryTest {
         File file = new File("src/test/resources/dashboard/");
         ControllerInfo controllerInfo = ControllerInfoFactory.initialize(config, file);
         removeSystemProperties();
-        Assert.assertTrue(controllerInfo.getUsername().equals("usernameYML"));
-        Assert.assertTrue(controllerInfo.getPassword().equals("passwordYML"));
+        Assert.assertTrue(controllerInfo.getUsername().equals("username"));
+        Assert.assertTrue(controllerInfo.getPassword().equals("password"));
         Assert.assertTrue(controllerInfo.getEncryptionKey().equals("encryptionKey"));
         Assert.assertTrue(controllerInfo.getEncryptedPassword().equals("encryptedPassword"));
-        Assert.assertTrue(controllerInfo.getAccount().equals("accountNameYML"));
-        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKeyYML"));
-        Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationNameYML"));
-        Assert.assertTrue(controllerInfo.getTierName().equals("tierNameYML"));
-        Assert.assertTrue(controllerInfo.getNodeName().equals("nodeNameYML"));
-        Assert.assertTrue(controllerInfo.getControllerHost().equals("hostNameYML"));
-        Assert.assertTrue(controllerInfo.getControllerPort().equals(9999));
+        Assert.assertTrue(controllerInfo.getAccount().equals("accountName"));
+        Assert.assertTrue(controllerInfo.getAccountAccessKey().equals("accessKey"));
+        Assert.assertTrue(controllerInfo.getApplicationName().equals("applicationName"));
+        Assert.assertTrue(controllerInfo.getTierName().equals("tierName"));
+        Assert.assertTrue(controllerInfo.getNodeName().equals("nodeName"));
+        Assert.assertTrue(controllerInfo.getControllerHost().equals("hostName"));
+        Assert.assertTrue(controllerInfo.getControllerPort().equals(9090));
         Assert.assertTrue(controllerInfo.getControllerSslEnabled().equals(false));
-        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostIDYML"));
+        Assert.assertTrue(controllerInfo.getUniqueHostId().equals("uniqueHostID"));
         Assert.assertTrue(controllerInfo.getSimEnabled().equals(false));
     }
 

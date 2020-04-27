@@ -33,7 +33,7 @@ public class ControllerClientFactoryTest {
     @Test
     public void whenSSLNotEnabledThenShouldUseHttp() {
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/controller/config.yml"));
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), null);
         ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
         Assert.assertNotNull(controllerClient.getBaseURL());
         Assert.assertNotNull(controllerClient.getHttpClient());
@@ -44,7 +44,7 @@ public class ControllerClientFactoryTest {
     @Test
     public void whenSSLEnabledThenShouldUseHttps() {
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/controller/config.yml"));
-        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), PathResolver.resolveDirectory(AManagedMonitor.class));
+        ControllerInfo controllerInfo = ControllerInfoFactory.initialize((Map<String, ?>)config.get("controllerInfo"), null);
         controllerInfo.setControllerSslEnabled(true);
         ControllerClient controllerClient = ControllerClientFactory.initialize(controllerInfo, (Map<String, ?>)config.get("connection"), (Map<String, ?>)config.get("proxy"),(String)config.get("encryptionKey"));
         Assert.assertNotNull(controllerClient.getBaseURL());

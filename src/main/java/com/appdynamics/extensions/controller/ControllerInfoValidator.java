@@ -49,7 +49,7 @@ public class ControllerInfoValidator {
             checkAppTierNode(controllerInfo);
         }
         if (unresolvedProps != null) {
-            logger.error("The following properties {} failed to resolve. Please add them to the 'customDashboard' " +
+            logger.error("The following properties {} failed to resolve. Please add them to the 'controllerInfo' " +
                     "section in config.yml", unresolvedProps);
             return false;
         }

@@ -88,7 +88,11 @@ public class MachineAgentAvailabilityCheck implements RunAlwaysCheck {
         JsonNode jsonNode = metricAPIService.getMetricData(controllerInfo.getApplicationName(), getEndPointForMAStatusMetric());
         if (jsonNode != null) {
             JsonNode valueNode = JsonUtils.getNestedObject(jsonNode, "*", "metricValues", "*", "value");
-            return valueNode == null ? 0 : valueNode.get(0).asInt();
+            if (valueNode == null || valueNode.size() <= 0) {
+                return 0;
+            } else {
+                return valueNode.get(0).asInt();
+            }
         } else {
             return 0;
         }
