@@ -415,7 +415,6 @@ For more details on workbench, check [How to use the Extensions WorkBench](https
 ## Health Checks
 
 The SDK runs a few checks to validate the controller and machine agent configuration and to ensure an error-free run of any configured extension. These checks also monitor the log messages in the machine agent logs to help troubleshoot any issues. 
-A summary of all the different checks and issues detected is placed in `<machine-agent-dir>/logs/monitor-checks/<extension-name>.log`
 
 For more details on what health checks are defined, refer to [Health Checks](https://community.appdynamics.com/t5/Knowledge-Base/Extension-HealthChecks/ta-p/35409).
 

@@ -50,13 +50,13 @@ public class Transformer {
     private void applyTransforms(Metric metric) {
         aliasTransform.applyAlias(metric);
         if (metric.getMetricValue() != null) {
+            convertTransform.convert(metric);
+        }
+        if (metric.getMetricValue() != null) {
             deltaTranform.applyDelta(metric);
         }
         if (metric.getMetricValue() != null) {
             multiplierTransform.multiply(metric);
-        }
-        if (metric.getMetricValue() != null) {
-            convertTransform.convert(metric);
         }
         if (metric.getMetricValue() != null) {
             try {

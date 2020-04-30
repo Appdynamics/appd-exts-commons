@@ -1,5 +1,10 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.3
+1. HealthCheckModule reinitialization bug fix.
+2. Convert Transform bug fix to enable multiplier and delta on converted data.
+3. README.md update.
+
 ## 2.2.2
 1. Code changes related to logger update from log4j to log4j2.
 
