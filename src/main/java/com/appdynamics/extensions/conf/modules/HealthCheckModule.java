@@ -46,6 +46,10 @@ public class HealthCheckModule {
     private MonitorExecutorService executorService;
 
     public void initMATroubleshootChecks(Map<String, ?> config, String monitorName, String metricPrefix, ControllerInfo controllerInfo, ControllerAPIService controllerAPIService) {
+        if (executorService != null) {
+            executorService.shutdown();
+            executorService = null;
+        }
         // #TODO @venkata.konala These checks should not block this. Instead it should log in the health logs in the corresponding check.
         String enableHealthChecksSysPropString = System.getProperty(HEALTHCHECKS_ENABLE_PROPERTY);
         Boolean enableHealthChecksSysProp = true;
@@ -66,10 +70,6 @@ public class HealthCheckModule {
         if (monitorName == null) {
             logger.warn("Not initializing extension health checks as I have no idea on what extension is running now");
             return;
-        }
-        if (executorService != null) {
-            executorService.shutdown();
-            executorService = null;
         }
         /**
          *  Initializing the thread pool with 3 threads.

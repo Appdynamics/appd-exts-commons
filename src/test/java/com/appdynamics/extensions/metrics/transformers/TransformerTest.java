@@ -97,7 +97,7 @@ public class TransformerTest {
         metricList.add(metric1);
         Transformer transformer2 = new Transformer(metricList);
         transformer2.transform();
-        Assert.assertTrue(new BigDecimal(metric1.getMetricValue()).equals(BigDecimal.ONE));
+        Assert.assertTrue(new BigDecimal(metric1.getMetricValue()).equals(BigDecimal.TEN));
     }
 
     @Test
