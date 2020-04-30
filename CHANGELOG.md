@@ -1,5 +1,9 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.3
+1. Fixed config.yml reload HealthCheckModule bug.
+2. Fixed "convert" transform metric value bug.     
+
 ## 2.2.2
 1. Code changes related to logger update from log4j to log4j2.
 
