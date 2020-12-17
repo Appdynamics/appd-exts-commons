@@ -52,7 +52,7 @@ public class HealthCheckModule {
         }
         // #TODO @venkata.konala These checks should not block this. Instead it should log in the health logs in the corresponding check.
         String enableHealthChecksSysPropString = System.getProperty(HEALTHCHECKS_ENABLE_PROPERTY);
-        Boolean enableHealthChecksSysProp = true;
+        Boolean enableHealthChecksSysProp = false;
         if (enableHealthChecksSysPropString != null) {
             enableHealthChecksSysProp = Boolean.valueOf(enableHealthChecksSysPropString);
         }

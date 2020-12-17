@@ -16,9 +16,11 @@
 package com.appdynamics.extensions.crypto;
 
 import com.google.common.base.Strings;
-import sun.misc.BASE64Encoder;
+//import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
+
+import java.util.Base64;
 
 import static com.appdynamics.extensions.SystemPropertyConstants.ENCRYPTION_KEY_PROPERTY;
 import static com.appdynamics.extensions.SystemPropertyConstants.PLAIN_TEXT_PROPERTY;
@@ -41,7 +43,8 @@ public class Encryptor {
         try {
             byte[] utf8 = plainText.getBytes("UTF-8");
             byte[] enc = cipher.doFinal(utf8);
-            return new BASE64Encoder().encode(enc);
+            //return new BASE64Encoder().encode(enc);
+            return Base64.getEncoder().encodeToString(enc);
         } catch (Exception e) {
             throw new EncryptionException(e);
         }

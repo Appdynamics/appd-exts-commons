@@ -25,7 +25,7 @@ public class AssertUtils {
         if (o instanceof String) {
             String str = (String) o;
             if (Strings.isNullOrEmpty(str)) {
-                throw new ValidationException(str);
+                throw new ValidationException(message);
             }
         } else if (o == null) {
             throw new ValidationException(message);
