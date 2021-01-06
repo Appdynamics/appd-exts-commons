@@ -18,9 +18,10 @@ package com.appdynamics.extensions.crypto;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import sun.misc.BASE64Decoder;
+//import sun.misc.BASE64Decoder;
 
 import javax.crypto.Cipher;
+import java.util.Base64;
 
 public class Decryptor {
 
@@ -38,7 +39,8 @@ public class Decryptor {
 
     public String decrypt(String encryptedText) {
         try {
-            byte[] bytes = new BASE64Decoder().decodeBuffer(encryptedText);
+            //byte[] bytes = new BASE64Decoder().decodeBuffer(encryptedText);
+            byte[] bytes = Base64.getDecoder().decode(encryptedText);
             byte[] enc = cipher.doFinal(bytes);
             return new String(enc, "UTF-8");
         } catch (Exception e) {

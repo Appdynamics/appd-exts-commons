@@ -1,5 +1,12 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.4
+1. Added JAXB dependencies to support JRE 11.
+2. Upgraded snakeyaml version to 1.26 to support JRE 11.
+3. Changes related to password encryption and decryption to support JRE 11.
+4. Disabled HealthCheckModule by default.
+5. Fix error in AssertUtil for strings.
+
 ## 2.2.3
 1. HealthCheckModule reinitialization bug fix.
 2. Convert Transform bug fix to enable multiplier and delta on converted data.
