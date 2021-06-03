@@ -1,5 +1,8 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.5
+1. Upgraded jackson-databind version from 2.10.3 and 2.12.0
+
 ## 2.2.4
 1. Added JAXB dependencies to support JRE 11.
 2. Upgraded snakeyaml version to 1.26 to support JRE 11.
