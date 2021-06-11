@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.*;
 
 /**
@@ -359,8 +360,7 @@ public class Http4ClientBuilderTest {
         jetty.stop();
     }
 
-
-    @Test(expected = java.net.SocketException.class)
+    @Test
     public void whenSSLWithMutualAuthAndIncorrectClientCertsAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
         int port = 8775;
         String uri = "https://localhost:" + port + "/test/hello/abey";
@@ -381,9 +381,18 @@ public class Http4ClientBuilderTest {
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         final CloseableHttpClient client = builder.build();
         HttpGet get = new HttpGet(uri);
-        CloseableHttpResponse response = client.execute(get);
-        response.close();
-        jetty.stop();
+        CloseableHttpResponse response=null;
+        try{
+            response = client.execute(get);
+            Assert.assertTrue(Boolean.FALSE);
+        } catch(SSLHandshakeException | SocketException ex){
+            Assert.assertTrue(Boolean.TRUE);
+        } finally{
+            if(response!=null){
+                response.close();
+            }
+            jetty.stop();
+        }
     }
 
     @Test(expected = javax.net.ssl.SSLHandshakeException.class)
@@ -411,8 +420,7 @@ public class Http4ClientBuilderTest {
         jetty.stop();
     }
 
-
-    @Test(expected = java.net.SocketException.class)
+    @Test
     public void whenSSLWithMutualAuthWithNoClientCertsAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
         int port = 8680;
         String uri = "https://localhost:" + port + "/test/hello/abey";
@@ -432,11 +440,19 @@ public class Http4ClientBuilderTest {
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         final CloseableHttpClient client = builder.build();
         HttpGet get = new HttpGet(uri);
-        CloseableHttpResponse response = client.execute(get);
-        response.close();
-        jetty.stop();
+        CloseableHttpResponse response=null;
+        try{
+            response = client.execute(get);
+            Assert.assertTrue(Boolean.FALSE);
+        } catch(SSLHandshakeException | SocketException ex){
+            Assert.assertTrue(Boolean.TRUE);
+        } finally{
+            if(response!=null){
+                response.close();
+            }
+            jetty.stop();
+        }
     }
-
 
 
     @Test
