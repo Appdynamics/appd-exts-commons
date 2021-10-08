@@ -21,7 +21,7 @@ Please go over the [Extension Prerequisites Guide](https://community.appdynamics
 <dependency>
   <groupId>com.appdynamics</groupId>
   <artifactId>appd-exts-commons</artifactId>
-  <version>2.2.4</version>
+  <version>2.2.6</version>
 </dependency>
 ```
 

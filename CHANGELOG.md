@@ -1,5 +1,8 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.6
+1. Upgraded guava dependency from 24.1.1-jre to 30.1.1-jre and http client dependency from 4.5.6 to 4.5.13
+
 ## 2.2.5
 1. Upgraded jackson-databind version from 2.10.3 and 2.12.0
 
