@@ -23,7 +23,6 @@
     <name>extension-utils</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <log4j.version>2.13.1</log4j.version>
     </properties>
     <dependencies>
         <dependency>
