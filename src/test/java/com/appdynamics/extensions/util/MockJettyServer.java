@@ -18,13 +18,9 @@ package com.appdynamics.extensions.util;
 import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
@@ -47,10 +43,25 @@ public class MockJettyServer {
     }
 
     public static Server start(int port, Handler handler) {
-        SelectChannelConnector sslConnector = new SelectChannelConnector();
-        sslConnector.setPort(port);
         final Server server = new Server();
-        server.setConnectors(new Connector[]{sslConnector});
+
+        HttpConfiguration http_config = new HttpConfiguration();
+
+        ServerConnector http = new ServerConnector(server,
+                new HttpConnectionFactory(http_config));
+        http.setPort(port);
+
+        HttpConfiguration https_config = new HttpConfiguration(http_config);
+        SecureRequestCustomizer src = new SecureRequestCustomizer();
+        src.setStsMaxAge(2000);
+        src.setStsIncludeSubDomains(true);
+        https_config.addCustomizer(src);
+
+        ServerConnector https = new ServerConnector(server,
+                new HttpConnectionFactory(https_config));
+        https.setPort(port);
+
+        server.setConnectors(new Connector[]{http, https});
         server.setHandler(handler);
         try {
             server.start();
@@ -61,25 +72,31 @@ public class MockJettyServer {
     }
 
     public static Server startSSL(int port) {
-        return startSSL(port, null);
+        return startSSL(port, new HelloHandler());
     }
 
-    public static Server startSSL(int port, String protocol) {
-        return startSSL(port, protocol, new HelloHandler());
-    }
+    public static Server startSSL(int port, Handler handler) {
 
-    public static Server startSSL(int port, String protocol, Handler handler) {
-        SslContextFactory factory = new SslContextFactory();
-        if (protocol != null) {
-            factory.setIncludeProtocols(protocol);
-        }
-        factory.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
-        factory.setKeyStorePassword("changeit");
-        SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
-        sslConnector.setPort(port);
+        SslContextFactory.Server serverSSLContext = new SslContextFactory.Server();
+        serverSSLContext.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
+        serverSSLContext.setKeyStorePassword("changeit");
+        serverSSLContext.setIncludeProtocols("TLSv1.2","TLSv1.1","TLSv1");
+        SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(serverSSLContext, HttpVersion.HTTP_1_1.asString());
+
+        HttpConfiguration config = new HttpConfiguration();
+        config.setSecureScheme("https");
+        config.setSecurePort(port);
+        HttpConfiguration sslConfiguration = new HttpConfiguration(config);
+        sslConfiguration.addCustomizer(new SecureRequestCustomizer());
+        HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(sslConfiguration);
+
         final Server server = new Server();
-        server.setConnectors(new Connector[]{sslConnector});
+
+        ServerConnector connector = new ServerConnector(server, sslConnectionFactory, httpConnectionFactory);
+        connector.setPort(port);
+        server.setConnectors(new Connector[]{connector});
         server.setHandler(handler);
+
         try {
             server.start();
         } catch (Exception e) {
@@ -88,18 +105,29 @@ public class MockJettyServer {
         return server;
     }
 
-    public static Server startSSL(int port, String protocol, String keyStorePath) {
-        SslContextFactory factory = new SslContextFactory();
-        if (protocol != null) {
-            factory.setIncludeProtocols(protocol);
-        }
-        factory.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
-        factory.setKeyStorePassword("changeit");
-        SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
-        sslConnector.setPort(port);
+    public static Server startSSL(int port, String keyStorePath) {
+
+        SslContextFactory.Server serverSSLContext = new SslContextFactory.Server();
+        serverSSLContext.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+        serverSSLContext.setKeyStorePassword("changeit");
+        serverSSLContext.setIncludeProtocols("TLSv1.2","TLSv1.1","TLSv1");
+
+        SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(serverSSLContext, HttpVersion.HTTP_1_1.asString());
+
+        HttpConfiguration config = new HttpConfiguration();
+        config.setSecureScheme("https");
+        config.setSecurePort(port);
+        HttpConfiguration sslConfiguration = new HttpConfiguration(config);
+        sslConfiguration.addCustomizer(new SecureRequestCustomizer());
+        HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(sslConfiguration);
+
         final Server server = new Server();
-        server.setConnectors(new Connector[]{sslConnector});
+
+        ServerConnector connector = new ServerConnector(server, sslConnectionFactory, httpConnectionFactory);
+        connector.setPort(port);
+        server.setConnectors(new Connector[]{connector});
         server.setHandler(new HelloHandler());
+
         try {
             server.start();
         } catch (Exception e) {
@@ -108,28 +136,38 @@ public class MockJettyServer {
         return server;
     }
 
-    public static Server startSSLWithMutualAuth(int port, String protocol, String keyStorePath, String keyStoreType, String trustStorePath, String trustStoreType) {
-        SslContextFactory factory = new SslContextFactory();
-        if (protocol != null) {
-            factory.setIncludeProtocols(protocol);
-        }
+    public static Server startSSLWithMutualAuth(int port, String keyStorePath, String keyStoreType, String trustStorePath, String trustStoreType) {
+
+        SslContextFactory.Server serverSSLContext = new SslContextFactory.Server();
+
+        serverSSLContext.setIncludeProtocols("TLSv1.2","TLSv1.1","TLSv1");
+
         if (keyStorePath != null) {
-            factory.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
-            factory.setKeyStoreType(keyStoreType);
-            factory.setKeyStorePassword("changeit");
+            serverSSLContext.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+            serverSSLContext.setKeyStoreType(keyStoreType);
+            serverSSLContext.setKeyStorePassword("changeit");
         }
         if (trustStorePath != null) {
-            factory.setTrustStoreResource(Resource.newClassPathResource(trustStorePath));
-            factory.setTrustStoreType(trustStoreType);
-            factory.setTrustStorePassword("changeit");
+            serverSSLContext.setTrustStoreResource(Resource.newClassPathResource(trustStorePath));
+            serverSSLContext.setTrustStoreType(trustStoreType);
+            serverSSLContext.setTrustStorePassword("changeit");
         }
 
+        serverSSLContext.setNeedClientAuth(true);
+        SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(serverSSLContext, HttpVersion.HTTP_1_1.asString());
 
-        factory.setNeedClientAuth(true);
-        SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(factory);
-        sslConnector.setPort(port);
+        HttpConfiguration config = new HttpConfiguration();
+        config.setSecureScheme("https");
+        config.setSecurePort(port);
+        HttpConfiguration sslConfiguration = new HttpConfiguration(config);
+        sslConfiguration.addCustomizer(new SecureRequestCustomizer());
+        HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(sslConfiguration);
+
         final Server server = new Server();
-        server.setConnectors(new Connector[]{sslConnector});
+        ServerConnector connector = new ServerConnector(server, sslConnectionFactory, httpConnectionFactory);
+        connector.setPort(port);
+
+        server.setConnectors(new Connector[]{connector});
         server.setHandler(new HelloHandler());
         try {
             server.start();
