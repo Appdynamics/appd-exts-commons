@@ -19,6 +19,7 @@ import com.appdynamics.extensions.logging.ExtensionsLoggerFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.*;
@@ -35,7 +36,7 @@ public class YmlReader {
     public static final Logger logger = ExtensionsLoggerFactory.getLogger(YmlReader.class);
 
     public static <T> T read(InputStream inputStream, Class<T> clazz) {
-        Yaml yaml = new Yaml(new Constructor(clazz));
+        Yaml yaml = new Yaml(new Constructor(clazz, new LoaderOptions() ));
         return (T) yaml.load(inputStream);
     }
 
