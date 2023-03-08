@@ -24,15 +24,15 @@ public class SSLUtilsTest {
     @Test
     public void whenNoProtocolSpecifiedShouldSupportTLStest() throws Exception {
         int port = 8900;
-        Server server = MockJettyServer.startSSL(port, "TLSv1.2", "/keystore/keystore.jks");
+        Server server = MockJettyServer.startSSL(port, "/keystore/keystore.jks");
         Map<String, Object> propMap = Maps.newHashMap();
         Map<String, Object> connectionMap = Maps.newHashMap();
         connectionMap.put("sslTrustStorePath", "src/test/resources/keystore/truststore.jks");
         connectionMap.put("sslTrustStorePassword", "changeit");
         propMap.put("connection", connectionMap);
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-        httpClientBuilder.setSslcontext(SSLUtils.createSSLContext(null, propMap));
-        httpClientBuilder.setHostnameVerifier(new SSLUtils.AllHostnameVerifier());
+        httpClientBuilder.setSSLContext(SSLUtils.createSSLContext(null, propMap));
+        httpClientBuilder.setSSLHostnameVerifier(new SSLUtils.AllHostnameVerifier());
         CloseableHttpClient client = httpClientBuilder.build();
         HttpGet get = new HttpGet("https://localhost:" + port);
         CloseableHttpResponse response = client.execute(get);
