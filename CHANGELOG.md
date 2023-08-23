@@ -1,5 +1,11 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.9
+1. Upgraded guava from 30.1.1-jre to 32.1.2-jre
+
+## 2.2.8
+1. Upgraded commons-io from 2.4 to 2.7, jackson-databind from 2.12.0 to 2.14.1, snakeyaml from 1.26 to 2.0, gson from 2.8.2 to 2.8.9, nanohttpd 2.3.0 to 2.3.1 
+
 ## 2.2.6
 1. Upgraded guava dependency from 24.1.1-jre to 30.1.1-jre and http client dependency from 4.5.6 to 4.5.13
 
