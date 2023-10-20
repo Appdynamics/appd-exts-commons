@@ -23,12 +23,12 @@ import com.appdynamics.extensions.util.JsonUtils;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import com.appdynamics.extensions.workbench.ui.MetricTreeBuilder;
 import com.appdynamics.extensions.workbench.util.MimeTypes;
-import fi.iki.elonen.NanoHTTPD;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.CodeSource;
@@ -39,74 +39,114 @@ import java.util.Map;
 
 import static com.appdynamics.extensions.SystemPropertyConstants.WORKBENCH_MODE_PROPERTY;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+
 /**
  * Created by abey.tom on 3/16/16.
  */
-public class WorkBenchServer extends NanoHTTPD {
+public class WorkBenchServer extends AbstractHandler {
     public static Logger logger;
 
     private WorkbenchMetricStore metricStore;
     private MetricTreeBuilder treeBuilder;
+    private String hostname;
+    private int port;
 
     public WorkBenchServer(String hostname, int port, WorkbenchMetricStore metricStore) {
-        super(hostname, port);
+        this.hostname=hostname;
+        this.port=port;
         this.metricStore = metricStore;
         this.treeBuilder = new MetricTreeBuilder(metricStore);
     }
-
+    public void Start() throws Exception{
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname, port);
+        Server server = new Server(inetSocketAddress);
+        server.setHandler(this);
+        server.start();
+    }
     @Override
-    public Response serve(IHTTPSession session) {
-        String uri = session.getUri();
-        if (uri.isEmpty() || uri.equals("/")) {
-            Response response = newFixedLengthResponse(Response.Status.REDIRECT, "text/plain", "");
-            response.addHeader("location", "workbench/index.html");
-            return response;
+    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{
+        String uri = request.getRequestURI();
+        if(uri.isEmpty() || uri.equals("/")) {
+            response.sendRedirect("workbench/index.html");
         } else if (uri.startsWith("/workbench")) {
             String mimeType = getMimeType(uri);
             InputStream in = getResourceAsStream(uri);
-            return newChunkedResponse(Response.Status.OK, mimeType, in);
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType(mimeType);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                response.getOutputStream().write(buffer, 0, bytesRead);
+            }
+            in.close();
         } else if (uri.startsWith("/api/metric-tree")) {
-            return newFixedLengthResponse(Response.Status.OK, "application/json", treeBuilder.metricTreeAsJson());
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json");
+            String jsonPayload = treeBuilder.metricTreeAsJson();
+            response.getWriter().println(jsonPayload);
+            response.getWriter().flush();
         } else if (uri.startsWith("/api/metric-paths")) {
             String paths;
             String contentType;
-            if (isContentTypeJson(session)) {
+            if (isContentTypeJson(request)) {
                 paths = JsonUtils.asJson(metricStore.getMetricPaths());
                 contentType = "application/json";
             } else {
                 paths = metricStore.getMetricPathsAsPlainStr();
                 contentType = "text/plain";
             }
-            return newFixedLengthResponse(Response.Status.OK, contentType, paths);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.setContentType(contentType);
+                String stringPayload = paths ;
+                response.getWriter().println(stringPayload);
+                response.getWriter().flush();
+
         } else if (uri.startsWith("/api/metric-data")) {
-            Map<String, String> parms = session.getParms();
-            String metricPath = parms.get("metric-path");
-            String countStr = parms.get("count");
-            int count = 10;
+          String metricPath = request.getParameter("metric-path");
+          String countStr = request.getParameter("count");
+          int count = 10;
             if (countStr != null && !countStr.trim().isEmpty()) {
                 count = Integer.parseInt(countStr);
             }
-            List<WorkbenchMetricStore.MetricData> metricData = metricStore.getMetricData(metricPath);
-            return newFixedLengthResponse(Response.Status.OK, "application/json", JsonUtils.asJson(metricData));
-        } else if (uri.startsWith("/api/stats")) {
+            List<WorkbenchMetricStore.MetricData> metricData = null ;
+            if(metricPath != null) {
+                metricData = metricStore.getMetricData(metricPath) ;
+            }
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json");
+            response.getWriter().println(JsonUtils.asJson(metricData));
+            response.getWriter().flush();
+        } else if(uri.startsWith("/api/stats")) {
             String content;
             String contentType;
-            if (isContentTypeJson(session)) {
+            if (isContentTypeJson(request)) {
                 content = JsonUtils.asJson(metricStore.getStats());
                 contentType = "application/json";
             } else {
                 content = metricStore.getStatsAsStr();
                 contentType = "text/plain";
             }
-            return newFixedLengthResponse(Response.Status.OK, contentType, content);
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType(contentType);
+            response.getWriter().println(content);
+            response.getWriter().flush();
         } else {
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, "application/json", "");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
+            response.getWriter().println("");
+            response.getWriter().flush();
         }
-
+        baseRequest.setHandled(true);
     }
 
-    private boolean isContentTypeJson(IHTTPSession session) {
-        String accept = session.getHeaders().get("accept");
+    private boolean isContentTypeJson(HttpServletRequest request) {
+        String accept = request.getHeader("accept");
         return accept != null && accept.contains("json");
     }
 
@@ -127,7 +167,7 @@ public class WorkBenchServer extends NanoHTTPD {
 
     }
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
         File extensionDir = resolveDirectory(WorkBenchServer.class);
         if (extensionDir != null) {
             logger = ExtensionsLoggerFactory.getLogger(WorkBenchServer.class);
@@ -137,7 +177,7 @@ public class WorkBenchServer extends NanoHTTPD {
         }
     }
 
-    public static void bootstrap(String[] args, File extensionDir) throws IOException {
+    public static void bootstrap(String[] args, File extensionDir) throws IOException,Exception {
         final Monitor monitor = Monitor.from(extensionDir);
         final Map<String, String> taskArgs = getTaskArgs(monitor);
         final Object implClass = getImplClassInstance(monitor);
@@ -162,7 +202,7 @@ public class WorkBenchServer extends NanoHTTPD {
             System.out.println("****");
             System.out.println("*********************************************************************");
             WorkBenchServer workBenchServer = new WorkBenchServer(host, port, metricStore);
-            workBenchServer.start(5000, false);
+            workBenchServer.Start();
             metricStore.setResetListener(new WorkbenchMetricStore.ResetListener() {
                 public void onReset() {
                     logger.info("Running the Task on Reset");

@@ -40,11 +40,11 @@ public class MockWorkBenchServer extends WorkBenchServer {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException,Exception {
         final WorkbenchMetricStore store = WorkbenchMetricStore.getInstance();
         setupData(store);
         MockWorkBenchServer server = new MockWorkBenchServer("0.0.0.0", 9191, store);
-        server.start(5000, false);
+        server.Start();
         new Thread(new Runnable() {
             public void run() {
                 while (true) {
