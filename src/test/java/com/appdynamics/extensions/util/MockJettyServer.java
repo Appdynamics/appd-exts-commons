@@ -21,16 +21,19 @@ import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
 
 /**
  * Created by abey.tom on 6/30/15.
@@ -78,7 +81,7 @@ public class MockJettyServer {
     public static Server startSSL(int port, Handler handler) {
 
         SslContextFactory.Server serverSSLContext = new SslContextFactory.Server();
-        serverSSLContext.setKeyStoreResource(Resource.newClassPathResource("/keystore/keystore.jks"));
+        serverSSLContext.setKeyStoreResource(ResourceFactory.closeable().newClassLoaderResource("/keystore/keystore.jks"));
         serverSSLContext.setKeyStorePassword("changeit");
         serverSSLContext.setIncludeProtocols("TLSv1.2","TLSv1.1","TLSv1");
         SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(serverSSLContext, HttpVersion.HTTP_1_1.asString());
@@ -108,7 +111,7 @@ public class MockJettyServer {
     public static Server startSSL(int port, String keyStorePath) {
 
         SslContextFactory.Server serverSSLContext = new SslContextFactory.Server();
-        serverSSLContext.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+        serverSSLContext.setKeyStoreResource(ResourceFactory.closeable().newClassLoaderResource(keyStorePath));
         serverSSLContext.setKeyStorePassword("changeit");
         serverSSLContext.setIncludeProtocols("TLSv1.2","TLSv1.1","TLSv1");
 
@@ -143,12 +146,12 @@ public class MockJettyServer {
         serverSSLContext.setIncludeProtocols("TLSv1.2","TLSv1.1","TLSv1");
 
         if (keyStorePath != null) {
-            serverSSLContext.setKeyStoreResource(Resource.newClassPathResource(keyStorePath));
+            serverSSLContext.setKeyStoreResource(ResourceFactory.closeable().newClassLoaderResource(keyStorePath));
             serverSSLContext.setKeyStoreType(keyStoreType);
             serverSSLContext.setKeyStorePassword("changeit");
         }
         if (trustStorePath != null) {
-            serverSSLContext.setTrustStoreResource(Resource.newClassPathResource(trustStorePath));
+            serverSSLContext.setTrustStoreResource(ResourceFactory.closeable().newClassLoaderResource(trustStorePath));
             serverSSLContext.setTrustStoreType(trustStoreType);
             serverSSLContext.setTrustStorePassword("changeit");
         }
@@ -177,59 +180,60 @@ public class MockJettyServer {
         return server;
     }
 
-    private static class HelloHandler extends AbstractHandler {
+    private static class HelloHandler extends Handler.Abstract {
 
         private HelloHandler() {
         }
 
-        public void handle(String target, Request baseRequest, HttpServletRequest request,
-                           HttpServletResponse response) throws IOException, ServletException {
+         public boolean handle(Request request, Response response, Callback callback) 
+                            throws IOException, ServletException{
             response.setStatus(200);
-            ServletOutputStream out = response.getOutputStream();
-            out.write("hello from server".getBytes());
-            out.flush();
-            out.close();
+            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+            byteBuffer.put("hello from server".getBytes());
+            response.write(true,byteBuffer,callback);
+            return response.hasLastWrite();
         }
     }
 
-    public static class ProxyHandler extends AbstractHandler {
+    public static class ProxyHandler extends Handler.Abstract {
         private boolean authenticate;
 
         public ProxyHandler(boolean authenticate) {
             this.authenticate = authenticate;
         }
 
-        public void handle(String target, Request baseRequest, HttpServletRequest request
-                , HttpServletResponse response) throws IOException, ServletException {
-            PrintWriter writer = response.getWriter();
+        public boolean handle(Request request, Response response, Callback callback) throws IOException, ServletException{
             if (authenticate) {
-                String header = request.getHeader("Proxy-Authorization");
+                String header = request.getHeaders().get("Proxy-Authorization");
                 if (Strings.isNullOrEmpty(header)) {
                     response.setStatus(407);
-                    response.setHeader("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
+                    response.getHeaders().add("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
                 } else {
                     String value = header.replace("Basic ", "");
                     String s = new String(Base64.decodeBase64(value));
                     if (s.equals("proxyuser:proxypassword")) {
-                        writer.write("AuthSuccess");
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+                        byteBuffer.put("AuthSuccess".getBytes());
+                        response.write(true,byteBuffer,callback);
                     } else {
                         response.setStatus(407);
-                        response.setHeader("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
+                        response.getHeaders().add("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
                     }
                 }
             } else {
-                writer.write("NoAuth");
+                ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+                byteBuffer.put("NoAuth".getBytes());
+                response.write(true,byteBuffer,callback);
             }
-            baseRequest.setHandled(true);
-            writer.close();
+            callback.succeeded();
+            return response.hasLastWrite();
         }
     }
 
-    public static class AuthenticatedHandler extends AbstractHandler {
+    public static class AuthenticatedHandler extends Handler.Abstract {
 
-        public void handle(String target, Request baseRequest, HttpServletRequest request,
-                           HttpServletResponse response) throws IOException, ServletException {
-            String authorization = request.getHeader("Authorization");
+        public boolean handle(Request request, Response response, Callback callback) throws IOException, ServletException{
+            String authorization = request.getHeaders().get("Authorization");
             if (!Strings.isNullOrEmpty(authorization)) {
                 logger.info("The Auth Header is {}", authorization);
                 String userPass = new String(Base64.decodeBase64(authorization.replace("Basic ", "")));
@@ -241,12 +245,12 @@ public class MockJettyServer {
             } else {
                 response.setStatus(401);
                 logger.info("Auth not present, requesting authentication");
-                response.setHeader("WWW-Authenticate", "Basic realm=\"Mock Test\"");
+                response.getHeaders().add("WWW-Authenticate", "Basic realm=\"Mock Test\"");
             }
-            ServletOutputStream out = response.getOutputStream();
-            out.write("hello from server".getBytes());
-            out.flush();
-            out.close();
+            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+            byteBuffer.put("hello from server".getBytes());
+            response.write(true,byteBuffer,callback);
+            return response.hasLastWrite();
         }
     }
 

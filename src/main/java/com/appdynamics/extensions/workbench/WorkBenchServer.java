@@ -23,6 +23,9 @@ import com.appdynamics.extensions.util.JsonUtils;
 import com.appdynamics.extensions.workbench.metric.WorkbenchMetricStore;
 import com.appdynamics.extensions.workbench.ui.MetricTreeBuilder;
 import com.appdynamics.extensions.workbench.util.MimeTypes;
+
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.server.Handler;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -31,6 +34,7 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
@@ -41,15 +45,16 @@ import static com.appdynamics.extensions.SystemPropertyConstants.WORKBENCH_MODE_
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Created by abey.tom on 3/16/16.
  */
-public class WorkBenchServer extends AbstractHandler {
+public class WorkBenchServer extends Handler.Abstract {
     public static Logger logger;
 
     private WorkbenchMetricStore metricStore;
@@ -70,27 +75,27 @@ public class WorkBenchServer extends AbstractHandler {
         server.start();
     }
     @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{
-        String uri = request.getRequestURI();
+    public boolean handle(Request request, Response response, Callback callback) throws Exception{
+        String uri = request.getHttpURI().getPath();
         if(uri.isEmpty() || uri.equals("/")) {
-            response.sendRedirect("workbench/index.html");
+            response.setStatus(302);
+            response.getHeaders().add("Location","workbench/index.html");
         } else if (uri.startsWith("/workbench")) {
             String mimeType = getMimeType(uri);
             InputStream in = getResourceAsStream(uri);
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(mimeType);
+            response.getHeaders().add(HttpHeader.CONTENT_TYPE, mimeType);
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
-                response.getOutputStream().write(buffer, 0, bytesRead);
+                response.write(true, ByteBuffer.wrap(new byte[0]), callback);
             }
             in.close();
         } else if (uri.startsWith("/api/metric-tree")) {
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("application/json");
+            response.getHeaders().add(HttpHeader.CONTENT_TYPE,"application/json");
             String jsonPayload = treeBuilder.metricTreeAsJson();
-            response.getWriter().println(jsonPayload);
-            response.getWriter().flush();
+            response.write(true, ByteBuffer.wrap(jsonPayload.getBytes()), callback);
         } else if (uri.startsWith("/api/metric-paths")) {
             String paths;
             String contentType;
@@ -102,14 +107,13 @@ public class WorkBenchServer extends AbstractHandler {
                 contentType = "text/plain";
             }
                 response.setStatus(HttpServletResponse.SC_OK);
-                response.setContentType(contentType);
+                response.getHeaders().add(HttpHeader.CONTENT_TYPE,contentType);
                 String stringPayload = paths ;
-                response.getWriter().println(stringPayload);
-                response.getWriter().flush();
+                response.write(true, ByteBuffer.wrap(stringPayload.getBytes()), callback);
 
         } else if (uri.startsWith("/api/metric-data")) {
-          String metricPath = request.getParameter("metric-path");
-          String countStr = request.getParameter("count");
+          String metricPath = Request.getParameters(request).getValue("metricPath").toString();
+          String countStr = Request.getParameters(request).getValue("count").toString();
           int count = 10;
             if (countStr != null && !countStr.trim().isEmpty()) {
                 count = Integer.parseInt(countStr);
@@ -119,9 +123,8 @@ public class WorkBenchServer extends AbstractHandler {
                 metricData = metricStore.getMetricData(metricPath) ;
             }
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("application/json");
-            response.getWriter().println(JsonUtils.asJson(metricData));
-            response.getWriter().flush();
+            response.getHeaders().add(HttpHeader.CONTENT_TYPE,"application/json");
+            response.write(true, ByteBuffer.wrap(JsonUtils.asJson(metricData).getBytes()), callback);
         } else if(uri.startsWith("/api/stats")) {
             String content;
             String contentType;
@@ -133,20 +136,19 @@ public class WorkBenchServer extends AbstractHandler {
                 contentType = "text/plain";
             }
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(contentType);
-            response.getWriter().println(content);
-            response.getWriter().flush();
+            response.getHeaders().add(HttpHeader.CONTENT_TYPE,contentType);
+            response.write(true, ByteBuffer.wrap(content.getBytes()), callback);
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().println("");
-            response.getWriter().flush();
+            response.getHeaders().add(HttpHeader.CONTENT_TYPE,"application/json");
+            response.write(true, ByteBuffer.wrap("".getBytes()), callback);
         }
-        baseRequest.setHandled(true);
+        callback.succeeded();
+        return true;
     }
 
-    private boolean isContentTypeJson(HttpServletRequest request) {
-        String accept = request.getHeader("accept");
+    private boolean isContentTypeJson(Request request) {
+        String accept = request.getHeaders().get("accept");
         return accept != null && accept.contains("json");
     }
 
