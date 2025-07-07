@@ -62,6 +62,7 @@ public class MockJettyServer {
 
         ServerConnector https = new ServerConnector(server,
                 new HttpConnectionFactory(https_config));
+        https.setHost("127.0.0.1");
         https.setPort(port);
 
         server.setConnectors(new Connector[]{http, https});
