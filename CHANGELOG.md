@@ -1,5 +1,10 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.14
+1. Upgraded java version to 17.
+2. Upgraded all jetty packages (jetty-server, jetty-webapp jetty-servlet) to 12.0.15
+3. Upgraded maven plugins and test pacakges in accordance with the java upgrade.
+
 ## 2.2.9
 1. Upgraded guava from 30.1.1-jre to 32.1.2-jre
 
