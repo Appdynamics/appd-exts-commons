@@ -19,11 +19,11 @@ import com.appdynamics.extensions.executorservice.MonitorExecutorService;
 import com.appdynamics.extensions.executorservice.MonitorThreadPoolExecutor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
@@ -67,16 +67,17 @@ public class MonitorHealthCheckTest {
         TestCheckAlways testCheck = new TestCheckAlways();
         TestCheckAlways spyTestCheck = Mockito.spy(testCheck);
 
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+        // Unused stub.
+        // Mockito.doAnswer(new Answer() {
+        //     @Override
+        //     public Object answer(InvocationOnMock invocation) throws Throwable {
 
-                Runnable task = (Runnable) invocation.getArguments()[1];
-                task.run();
+        //         Runnable task = (Runnable) invocation.getArguments()[1];
+        //         task.run();
 
-                return null;
-            }
-        }).when(executorService).scheduleAtFixedRate(Matchers.anyString(), Matchers.any(Runnable.class), Matchers.anyInt(), Matchers.anyInt(), Matchers.any(TimeUnit.class));
+        //         return null;
+        //     }
+        // }).when(executorService).scheduleAtFixedRate(ArgumentMatchers.anyString(), ArgumentMatchers.any(Runnable.class), ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.any(TimeUnit.class));
 
         monitorHealthCheck.registerChecks(spyTestCheck);
 

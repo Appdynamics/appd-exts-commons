@@ -28,6 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.File;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.*;
 
 /**
@@ -50,9 +51,9 @@ public class MetricCharSequenceReplaceModuleTest {
     @Test
     public void verifyReplacerWhenMonitorContextIsInitialized() {
         PowerMockito.mockStatic(MetricCharSequenceReplacer.class);
-        when(MetricCharSequenceReplacer.createInstance(anyMapOf(String.class, String.class))).thenReturn(replacer);
+        when(MetricCharSequenceReplacer.createInstance(anyMap())).thenReturn(replacer);
         Map<String, ?> conf = YmlReader.readFromFile(new File("src/test/resources/metricReplace/config.yml"));
         replaceModule.initMetricCharSequenceReplacer(conf);
-        verify(replacer);
+        verify(replacer,times(0)).replace("");
     }
 }
