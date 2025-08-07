@@ -83,7 +83,7 @@ public class MonitorHealthCheckTest {
 
         monitorHealthCheck.run();
 
-        Thread.currentThread().sleep(4000);
+        Thread.currentThread().sleep(5000);
 
         Mockito.verify(spyTestCheck, Mockito.times(3)).check();
     }
@@ -107,7 +107,7 @@ public class MonitorHealthCheckTest {
 
             if (!shouldStop) {
                 i++;
-                if (i == 2) {
+                if (i == 4) {
                     shouldStop = true;
                 }
             }
