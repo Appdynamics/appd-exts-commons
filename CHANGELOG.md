@@ -1,5 +1,8 @@
 # AppDynamics Extensions SDK CHANGELOG
 
+## 2.2.16
+1. Update Apache commons lang3 to 3.18.0
+
 ## 2.2.15
 1. Upgraded java version to 17.
 2. Upgraded all jetty packages (jetty-server, jetty-webapp jetty-servlet) to 12.0.15
