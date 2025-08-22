@@ -24,6 +24,17 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <!-- Force latest Jakarta Servlet API version -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.1.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
@@ -126,17 +137,17 @@
         <dependency>
             <groupId>org.eclipse.jetty.ee10</groupId>
             <artifactId>jetty-ee10-webapp</artifactId>
-            <version>12.0.23</version>
+            <version>12.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>12.0.23</version>
+            <version>12.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.ee10</groupId>
             <artifactId>jetty-ee10-servlet</artifactId>
-            <version>12.0.23</version>
+            <version>12.1.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
