@@ -54,9 +54,8 @@ public class MetricLimitCheck implements RunAlwaysCheck {
         if (!stop) {
             long start = System.currentTimeMillis();
             logger.info("Starting MetricLimitCheck");
-            File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
-            if (directory.exists()) {
-                File logs = new File(directory, "logs");
+            File logs = getLogsDirectory();
+            if (logs != null && logs.exists() && logs.isDirectory()) {
                 //This is taking around 500ms for 25MB log files ( 5 files * 5 MB )
                 List<Line> metricLimitErrorLogLines = new ArrayList<>();
                 List<Line> maxMetricLimitErrors = Unix4j.cd(logs).grep(Grep.Options.lineNumber, MAX_METRIC_ERROR_LINE, "*.log*").toLineList();
@@ -72,6 +71,15 @@ public class MetricLimitCheck implements RunAlwaysCheck {
                         logger.error(line.toString());
                     }
                     stop = true;
+                }
+            } else {
+                String customLogDir = System.getProperty("appdynamics.agent.logs.dir");
+                if (customLogDir != null && !customLogDir.trim().isEmpty()) {
+                    logger.error("MetricLimitCheck failed - custom logs directory not found or not a valid directory: {}. " +
+                                "Please verify the path specified in -Dappdynamics.agent.logs.dir", customLogDir);
+                } else {
+                    logger.error("MetricLimitCheck failed - default logs directory not found. " +
+                                "Please ensure the Machine Agent is properly installed or specify a custom logs directory using -Dappdynamics.agent.logs.dir");
                 }
             }
             long diff = System.currentTimeMillis() - start;
@@ -94,5 +102,38 @@ public class MetricLimitCheck implements RunAlwaysCheck {
     @Override
     public boolean shouldStop() {
         return stop;
+    }
+
+    /**
+     * Determines the correct logs directory to use.
+     * First checks if a custom log directory is set via system property 'appdynamics.agent.logs.dir'.
+     * If not set, falls back to the default logs directory relative to the AManagedMonitor class location.
+     * 
+     * @return File object representing the logs directory, or null if neither custom nor default directory can be resolved
+     */
+    private File getLogsDirectory() {
+        // First check if custom log directory is set via system property
+        String customLogDir = System.getProperty("appdynamics.agent.logs.dir");
+        if (customLogDir != null && !customLogDir.trim().isEmpty()) {
+            File customLogsDir = new File(customLogDir.trim());
+            if (customLogsDir.exists() && customLogsDir.isDirectory()) {
+                logger.info("Using custom logs directory: {}", customLogsDir.getAbsolutePath());
+                return customLogsDir;
+            } else {
+                logger.warn("Custom logs directory specified but does not exist or is not a directory: {}", customLogsDir.getAbsolutePath());
+                // Fall through to default logic
+            }
+        }
+        
+        // Fall back to default logs directory
+        File directory = PathResolver.resolveDirectory(AManagedMonitor.class);
+        if (directory != null && directory.exists()) {
+            File defaultLogsDir = new File(directory, "logs");
+            logger.info("Using default logs directory: {}", defaultLogsDir.getAbsolutePath());
+            return defaultLogsDir;
+        }
+        
+        logger.error("Could not resolve any logs directory - neither custom nor default directory found");
+        return null;
     }
 }
