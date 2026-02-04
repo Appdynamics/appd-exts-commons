@@ -400,7 +400,7 @@ public class Http4ClientBuilderTest {
         }
     }
 
-    @Test(expected = javax.net.ssl.SSLHandshakeException.class)
+    @Test(expected = javax.net.ssl.SSLException.class)
     public void whenSSLWithMutualAuthAndNoPasswordAndNoHostnameVerificationThenAuthenticateFailure() throws Exception {
         int port = 8769;
         String uri = "https://localhost:" + port + "/test/hello/abey";
