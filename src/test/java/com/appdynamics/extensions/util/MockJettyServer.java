@@ -209,24 +209,25 @@ public class MockJettyServer {
                 if (Strings.isNullOrEmpty(header)) {
                     response.setStatus(407);
                     response.getHeaders().add("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
+                    response.write(true, ByteBuffer.allocate(0), callback);
                 } else {
                     String value = header.replace("Basic ", "");
                     String s = new String(Base64.decodeBase64(value));
                     if (s.equals("proxyuser:proxypassword")) {
                         ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
                         byteBuffer.put("AuthSuccess".getBytes());
-                        response.write(true,byteBuffer,callback);
+                        response.write(true, byteBuffer, callback);
                     } else {
                         response.setStatus(407);
                         response.getHeaders().add("Proxy-Authenticate", "Basic realm=\"proxy.com\"");
+                        response.write(true, ByteBuffer.allocate(0), callback);
                     }
                 }
             } else {
                 ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
                 byteBuffer.put("NoAuth".getBytes());
-                response.write(true,byteBuffer,callback);
+                response.write(true, byteBuffer, callback);
             }
-            callback.succeeded();
             return response.hasLastWrite();
         }
     }

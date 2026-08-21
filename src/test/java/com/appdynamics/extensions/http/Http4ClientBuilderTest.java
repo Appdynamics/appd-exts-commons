@@ -82,7 +82,7 @@ public class Http4ClientBuilderTest {
         proxyProps.put("uri", PROXY_URI);
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         CloseableHttpClient client = builder.build();
-        HttpGet get = new HttpGet("https://www.google.com");
+        HttpGet get = new HttpGet("http://www.google.com");
         CloseableHttpResponse response = client.execute(get);
         Assert.assertEquals(407, response.getStatusLine().getStatusCode());
         response.close();
@@ -118,7 +118,7 @@ public class Http4ClientBuilderTest {
         proxyProps.put("password", PROXYPASSWORD + "1");
         HttpClientBuilder builder = Http4ClientBuilder.getBuilder(map);
         CloseableHttpClient client = builder.build();
-        HttpGet get = new HttpGet("https://www.google.com");
+        HttpGet get = new HttpGet("http://www.google.com");
         CloseableHttpResponse response = client.execute(get);
         Assert.assertEquals(407, response.getStatusLine().getStatusCode());
         response.close();
