@@ -146,7 +146,7 @@ public class CustomDashboardAPIService extends APIService {
                 }
 
             } catch (IOException e) {
-                logger.error("Error while uploading the dashboard " + urlStr, e);
+                logger.error("Error while uploading the dashboard {}", urlStr, e);
                 InputStream errorStream = connection.getErrorStream();
                 String content = null;
                 if (errorStream != null) {

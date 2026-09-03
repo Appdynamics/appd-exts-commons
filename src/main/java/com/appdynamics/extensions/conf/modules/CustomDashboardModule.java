@@ -73,7 +73,7 @@ public class CustomDashboardModule {
                     dashboardUploader.checkAndUpload(dashboardName, dashboardTemplate, config, overwrite);
                     lastRecordedTime.set(currentTime);
                     long endTime = System.currentTimeMillis();
-                    logger.debug("Time to complete customDashboardModule  :" + (endTime - currentTime) + " ms");
+                    logger.debug("Time to complete customDashboardModule  :{} ms", (endTime - currentTime));
                 } catch (ControllerHttpRequestException e) {
                     logger.error("Error while checking and uploading dashboard", e);
                 } catch (Exception e) {

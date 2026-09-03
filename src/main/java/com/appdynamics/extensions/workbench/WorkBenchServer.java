@@ -218,7 +218,7 @@ public class WorkBenchServer extends Handler.Abstract {
 
     private static void runTask(Object implClass, Map<String, String> taskArgs, Monitor monitor, long interval) {
         while (true) {
-            logger.info("Executing the class " + implClass);
+            logger.info("Executing the class {}", implClass);
             executeTask(implClass, taskArgs);
             try {
                 Thread.sleep(interval * 1000);
@@ -246,10 +246,10 @@ public class WorkBenchServer extends Handler.Abstract {
                 Class<?> monitorClazz = Thread.currentThread().getContextClassLoader().loadClass(implClass.trim());
                 return monitorClazz.newInstance();
             } catch (Exception e) {
-                logger.error("Cannot create an instance of the class " + implClass, e);
+                logger.error("Cannot create an instance of the class {}", implClass, e);
             }
         } else {
-            logger.error("Cannot find the implementation class from the monitor.xml" + implClass);
+            logger.error("Cannot find the implementation class from the monitor.xml {}", implClass);
         }
         return null;
     }

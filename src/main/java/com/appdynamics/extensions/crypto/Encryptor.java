@@ -29,22 +29,25 @@ import static com.appdynamics.extensions.SystemPropertyConstants.PLAIN_TEXT_PROP
 
 public class Encryptor {
 
-    private Cipher cipher;
+    private final String encryptionKey;
 
     public Encryptor(String encryptionKey) {
-        try {
-            cipher = CipherFactory.getInstance().createCipher(encryptionKey, Cipher.ENCRYPT_MODE);
-        } catch (CipherInitException e) {
-            e.printStackTrace();
-        }
+        this.encryptionKey = encryptionKey;
     }
 
     public String encrypt(String plainText) {
         try {
+            CipherFactory factory = CipherFactory.getInstance();
+            byte[] iv = factory.generateIv();
+            Cipher cipher = factory.createCipher(encryptionKey, iv, Cipher.ENCRYPT_MODE);
             byte[] utf8 = plainText.getBytes("UTF-8");
             byte[] enc = cipher.doFinal(utf8);
-            //return new BASE64Encoder().encode(enc);
-            return Base64.getEncoder().encodeToString(enc);
+            // Output format: [version (1 byte)][iv (16 bytes)][ciphertext]
+            byte[] payload = new byte[1 + iv.length + enc.length];
+            payload[0] = CipherFactory.FORMAT_VERSION;
+            System.arraycopy(iv, 0, payload, 1, iv.length);
+            System.arraycopy(enc, 0, payload, 1 + iv.length, enc.length);
+            return Base64.getEncoder().encodeToString(payload);
         } catch (Exception e) {
             throw new EncryptionException(e);
         }

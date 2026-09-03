@@ -69,8 +69,8 @@ public class ExtensionPathConfigCheck implements RunOnceCheck {
                     if (extensionTier.equals(maTierID) || extensionTier.equals(controllerInfo.getTierName())) {
                         logger.info("Extension configured correct tier id/tier name");
                     } else {
-                        logger.error("Extension did not configure correct tier. Tier to configure [" + controllerInfo.getTierName() +
-                                "] with tier id [" + maTierID + "], but configured tier [" + extensionTier + "]");
+                        logger.error("Extension did not configure correct tier. Tier to configure [{}] with tier id [{}], but configured tier [{}]",
+                                controllerInfo.getTierName(), maTierID, extensionTier);
                     }
                 }
             }

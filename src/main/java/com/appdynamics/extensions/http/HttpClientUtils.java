@@ -60,7 +60,7 @@ public class HttpClientUtils {
                         return mapper.readValue(entity.getContent(), clazz);
                     }
                 } catch (IOException e) {
-                    logger.error("Error while converting the response of [" + url + "] to JSON", e);
+                    logger.error("Error while converting the response of [{}] to JSON", url, e);
                     return null;
                 }
             }
@@ -78,7 +78,7 @@ public class HttpClientUtils {
                     }
                     return response;
                 } catch (IOException e) {
-                    logger.error("Error while converting response of url [" + url + "] to string " + entity, e);
+                    logger.error("Error while converting response of url [{}] to string {}", url, entity, e);
                     return null;
                 }
             }
@@ -95,7 +95,7 @@ public class HttpClientUtils {
                     }
                     return lines;
                 } catch (IOException e) {
-                    logger.error("Error while converting response of url [" + url + "] to lines " + entity, e);
+                    logger.error("Error while converting response of url [{}] to lines {}", url, entity, e);
                     return null;
                 }
             }
@@ -133,7 +133,7 @@ public class HttpClientUtils {
             }
         } catch (Exception e) {
             printError(response, url);
-            logger.error("Exception while executing the request [" + url + "]", e);
+            logger.error("Exception while executing the request [{}]", url, e);
         } finally {
             if (response != null) {
                 try {

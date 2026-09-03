@@ -249,7 +249,7 @@ public class WorkbenchMetricStore extends MetricWriteHelper {
             derivedMetricsCalculator.clearBaseMetricsMap();
         }
         Long endTime = System.currentTimeMillis();
-        logger.info("Finished executing at " + TimeUtils.getFormattedTimestamp(endTime, "yyyy-MM-dd HH:mm:ss z"));
+        logger.info("Finished executing at {}", TimeUtils.getFormattedTimestamp(endTime, "yyyy-MM-dd HH:mm:ss z"));
     }
 
     public interface ResetListener {

@@ -22,9 +22,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Map;
 
@@ -116,8 +116,7 @@ public class ControllerInfoFactory {
             XmlControllerInfo xmlControllerInfo = (XmlControllerInfo) unmarshaller.unmarshal(file);
             mergeValuesFromXML(xmlControllerInfo);
         } catch (JAXBException e) {
-            String msg = "Cannot unmarshall the config file from " + file.getAbsolutePath();
-            logger.warn(msg, e);
+            logger.warn("Cannot unmarshall the config file from {}", file.getAbsolutePath(), e);
         }
     }
 

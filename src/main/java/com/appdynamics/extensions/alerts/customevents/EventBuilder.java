@@ -46,7 +46,7 @@ public class EventBuilder {
                 return otherEvent;
             }
         }
-        logger.error("Event is not valid. Args passed are ::" + args);
+        logger.error("Event is not valid. Args passed are ::{}", args);
         return null;
     }
 

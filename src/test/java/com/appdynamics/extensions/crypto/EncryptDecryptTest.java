@@ -21,16 +21,28 @@ import org.junit.Test;
 public class EncryptDecryptTest {
 
     @Test
-    public void generateEncryptedTextTest() {
+    public void encryptProducesRandomIvFormatRoundTrip() {
         Encryptor encryptor = new Encryptor("encryptionKey");
-        String encryptedTextRetrieved = encryptor.encrypt("plainText");
-        Assert.assertEquals("avQa9cYNOoO6Ba1p3He+HQ==", encryptedTextRetrieved);
+        String encrypted = encryptor.encrypt("plainText");
+        // New format includes version byte + random IV, so result is non-deterministic and longer than legacy
+        Assert.assertFalse("avQa9cYNOoO6Ba1p3He+HQ==".equals(encrypted));
+        Decryptor decryptor = new Decryptor("encryptionKey");
+        Assert.assertEquals("plainText", decryptor.decrypt(encrypted));
     }
 
     @Test
-    public void generatePlainTextFromEncryptedTextAndEncryptionKeyTest() {
+    public void decryptLegacyCiphertextWithStaticIv() {
+        // Values encrypted before this fix (static IV) must still decrypt correctly
         Decryptor decryptor = new Decryptor("encryptionKey");
         String plainTextRetrieved = decryptor.decrypt("avQa9cYNOoO6Ba1p3He+HQ==");
         Assert.assertEquals("plainText", plainTextRetrieved);
+    }
+
+    @Test
+    public void encryptTwiceShouldProduceDifferentCiphertexts() {
+        Encryptor encryptor = new Encryptor("encryptionKey");
+        String first = encryptor.encrypt("plainText");
+        String second = encryptor.encrypt("plainText");
+        Assert.assertFalse("Same plaintext should produce different ciphertexts with random IV", first.equals(second));
     }
 }

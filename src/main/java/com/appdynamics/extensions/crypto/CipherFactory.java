@@ -25,35 +25,39 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 
-class   CipherFactory {
+class CipherFactory {
 
     private static final CipherFactory _instance = new CipherFactory();
 
-    private static final byte[] INITIALIZATION_VECTOR = {(byte) 0xC2, (byte) 0xB9, (byte) 0xC8, (byte) 0x52,
+    // Legacy static IV kept only for decrypting values encrypted before this fix.
+    static final byte[] LEGACY_IV = {(byte) 0xC2, (byte) 0xB9, (byte) 0xC8, (byte) 0x52,
             (byte) 0x96, (byte) 0x14, (byte) 0xE4, (byte) 0x53, (byte) 0x54, (byte) 0xC9, (byte) 0x76, (byte) 0x67,
             (byte) 0x78, (byte) 0x94, (byte) 0x12, (byte) 0x32};
 
-    static CipherFactory getInstance(){
+    // Version byte prepended to new-format ciphertexts so Decryptor can tell them apart from legacy ones.
+    static final byte FORMAT_VERSION = 0x01;
+
+    static CipherFactory getInstance() {
         return _instance;
     }
 
-    Cipher createCipher(String encryptionKey, int mode) throws CipherInitException {
+    Cipher createCipher(String encryptionKey, byte[] iv, int mode) throws CipherInitException {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             byte[] hash = getHash(encryptionKey);
             SecretKey secret = new SecretKeySpec(hash, "AES");
-            cipher.init(mode, secret,new IvParameterSpec(INITIALIZATION_VECTOR));
+            cipher.init(mode, secret, new IvParameterSpec(iv));
             return cipher;
-        }
-        catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw new CipherInitException(e);
         } catch (InvalidKeyException e) {
             throw new CipherInitException(e);
-        }  catch (NoSuchPaddingException e) {
+        } catch (NoSuchPaddingException e) {
             throw new CipherInitException(e);
-        }  catch (InvalidAlgorithmParameterException e) {
+        } catch (InvalidAlgorithmParameterException e) {
             throw new CipherInitException(e);
         }
     }
@@ -72,9 +76,13 @@ class   CipherFactory {
 
     private byte[] get16ByteHash(byte[] passHash) {
         byte[] hash_16_byte = new byte[16];
-        System.arraycopy(passHash,16,hash_16_byte,0,16);
+        System.arraycopy(passHash, 16, hash_16_byte, 0, 16);
         return hash_16_byte;
     }
 
-
+    byte[] generateIv() {
+        byte[] iv = new byte[16];
+        new SecureRandom().nextBytes(iv);
+        return iv;
+    }
 }

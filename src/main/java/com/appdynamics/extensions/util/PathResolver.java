@@ -48,7 +48,7 @@ public class  PathResolver {
                         if (dir.exists()) {
                             installDir = dir;
                         } else {
-                            logger.error("Install dir resolved to " + dir.getAbsolutePath() + ", however it doesnt exist.");
+                            logger.error("Install dir resolved to {}, however it doesnt exist.", dir.getAbsolutePath());
                         }
                     }
                 } else {
@@ -60,11 +60,11 @@ public class  PathResolver {
             logger.error("Error while resolving the Install Dir", e);
         }
         if (installDir != null) {
-            logger.info("Install dir resolved to " + installDir.getAbsolutePath());
+            logger.info("Install dir resolved to {}", installDir.getAbsolutePath());
             return installDir;
         } else {
             File workDir = new File("");
-            logger.info("Failed to resolve install dir, returning current work dir" + workDir.getAbsolutePath());
+            logger.info("Failed to resolve install dir, returning current work dir {}", workDir.getAbsolutePath());
             return workDir;
         }
     }

@@ -24,13 +24,8 @@ public class EncryptorTest {
     private final String usageOutput = "usage: java -cp <monitoring-extension.jar> com.appdynamics.extensions.crypto.Encryptor <myEncryptionKey> <myClearTextPassword>    (or)\n" +
             "usage: java -Dappdynamics.agent.monitors.encryptionKey=<myEncryptionKey> -Dappdynamics.agent.monitors.plainText=<myClearTextPassword> -cp <monitoring-extension.jar> com.appdynamics.extensions.crypto.Encryptor\n";
 
-    private final String encryptedTextOutput = "****************************Encrypted Text**************************\n" +
-            "avQa9cYNOoO6Ba1p3He+HQ==\n" +
-            "********************************************************************\n";
-
-    private final String encryptedTextOutput2 = "****************************Encrypted Text**************************\n" +
-            "nW3Yi3gzkxzjwEA3J21eOA==\n" +
-            "********************************************************************\n";
+    private final String encryptedOutputHeader = "****************************Encrypted Text**************************";
+    private final String encryptedOutputFooter = "********************************************************************";
 
     @Before
     public void setOutputStream() {
@@ -50,25 +45,38 @@ public class EncryptorTest {
 
     @Test
     public void whenArgumentsPassedAndNoSysPropsSetShouldPrintEncryptedTextOutput() {
-        String args[] = new String[] {"encryptionKey", "plainText"};
+        String[] args = new String[]{"encryptionKey", "plainText"};
         Encryptor.main(args);
-        Assert.assertTrue(encryptedTextOutput.equalsIgnoreCase(newOutputContent.toString()));
+        String output = newOutputContent.toString();
+        Assert.assertTrue(output.contains(encryptedOutputHeader));
+        Assert.assertTrue(output.contains(encryptedOutputFooter));
+        // Round-trip verify: extract the ciphertext line and decrypt it
+        String ciphertext = output.trim().split("\n")[1].trim();
+        Assert.assertEquals("plainText", new com.appdynamics.extensions.crypto.Decryptor("encryptionKey").decrypt(ciphertext));
     }
 
     @Test
     public void whenArgumentsNotPassedAndSysPropsSetShouldPrintEncryptedTextOutput() {
         setSysProps();
         Encryptor.main(null);
-        Assert.assertTrue(encryptedTextOutput.equalsIgnoreCase(newOutputContent.toString()));
+        String output = newOutputContent.toString();
+        Assert.assertTrue(output.contains(encryptedOutputHeader));
+        Assert.assertTrue(output.contains(encryptedOutputFooter));
+        String ciphertext = output.trim().split("\n")[1].trim();
+        Assert.assertEquals("plainText", new com.appdynamics.extensions.crypto.Decryptor("encryptionKey").decrypt(ciphertext));
         resetSysProps();
     }
 
     @Test
     public void whenArgumentsPassedAndSysPropsSetShouldPrintEncryptedTextOutputForTheArguments() {
         setSysProps();
-        String args[] = new String[] {"encryptionKey", "plainText2"};
+        String[] args = new String[]{"encryptionKey", "plainText2"};
         Encryptor.main(args);
-        Assert.assertTrue(encryptedTextOutput2.equalsIgnoreCase(newOutputContent.toString()));
+        String output = newOutputContent.toString();
+        Assert.assertTrue(output.contains(encryptedOutputHeader));
+        Assert.assertTrue(output.contains(encryptedOutputFooter));
+        String ciphertext = output.trim().split("\n")[1].trim();
+        Assert.assertEquals("plainText2", new com.appdynamics.extensions.crypto.Decryptor("encryptionKey").decrypt(ciphertext));
         resetSysProps();
     }
 

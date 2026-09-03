@@ -245,7 +245,7 @@ public class EventsServiceDataManager {
                 return EntityUtils.toString(httpResponse.getEntity());
             }
         } catch (Exception e) {
-            LOGGER.error("Error encountered while querying : " + query, e);
+            LOGGER.error("Error encountered while querying : {}", query, e);
         } finally {
             closeHttpResponse(httpResponse);
         }

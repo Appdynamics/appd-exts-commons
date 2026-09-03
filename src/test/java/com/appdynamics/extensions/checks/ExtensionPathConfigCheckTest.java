@@ -170,11 +170,14 @@ public class ExtensionPathConfigCheckTest {
         ExtensionPathConfigCheck extensionPathConfigCheck = new ExtensionPathConfigCheck("Server|Component:TestTier123|Custom Metrics|Test", controllerInfo, controllerAPIService);
         extensionPathConfigCheck.check();
 
-        Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture());
+        ArgumentCaptor<Object> arg1Captor = ArgumentCaptor.forClass(Object.class);
+        ArgumentCaptor<Object> arg2Captor = ArgumentCaptor.forClass(Object.class);
+        ArgumentCaptor<Object> arg3Captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(logger, Mockito.times(1)).error(logCaptor.capture(), arg1Captor.capture(), arg2Captor.capture(), arg3Captor.capture());
 
-        String value = logCaptor.getValue();
-        Assert.assertEquals(value, "Extension did not configure correct tier. Tier to configure [" + controllerInfo.getTierName() +
-                "] with tier id [19], but configured tier [TestTier123]");
+        Assert.assertEquals(logCaptor.getValue(), "Extension did not configure correct tier. Tier to configure [{}] with tier id [{}], but configured tier [{}]");
+        Assert.assertEquals(arg1Captor.getValue(), controllerInfo.getTierName());
+        Assert.assertEquals(arg3Captor.getValue(), "TestTier123");
     }
 
     private String tierRESTResponse() {

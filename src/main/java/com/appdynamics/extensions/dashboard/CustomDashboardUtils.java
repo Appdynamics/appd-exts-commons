@@ -66,7 +66,7 @@ public class CustomDashboardUtils {
             }
             dashboardMetricPrefix.append(metricPrefix);
         }
-        logger.debug("Dashboard Metric Prefix = " + dashboardMetricPrefix.toString());
+        logger.debug("Dashboard Metric Prefix = {}", dashboardMetricPrefix);
         return dashboardMetricPrefix.toString();
     }
 
