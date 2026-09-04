@@ -94,7 +94,7 @@ public class Aggregator<K> {
         try {
             return new BigDecimal(value);
         } catch (Exception e) {
-            logger.error("Error while parsing the value " + value + " to BigDecimal, returning zero", e);
+            logger.error("Error while parsing the value {} to BigDecimal, returning zero", value, e);
             return new BigDecimal(0);
         }
     }

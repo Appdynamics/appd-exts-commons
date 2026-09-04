@@ -54,13 +54,13 @@ public class ConfigProcessor {
         //#TODO use proper System naming conventions for extensions.
         String extensionsConfigFile = SYSTEM_ENV_VARS.get(EXTENSIONS_CONFIG_PROP_FILE);
         if (extensionsConfigFile != null) {
-            logger.info("Extension config properties file provided and replacing placeholders in config file using [" + extensionsConfigFile + "]");
+            logger.info("Extension config properties file provided and replacing placeholders in config file using [{}]", extensionsConfigFile);
 
             Properties properties = new Properties();
             try {
                 properties.load(new FileInputStream(extensionsConfigFile));
             } catch (Exception e) {
-                logger.error("Unable to load properties from the provided extension config properties file [" + extensionsConfigFile + "]", e);
+                logger.error("Unable to load properties from the provided extension config properties file [{}]", extensionsConfigFile, e);
                 throw new IllegalArgumentException("Unable to load properties from the provided extension config properties file [" + extensionsConfigFile + "]", e);
             }
 

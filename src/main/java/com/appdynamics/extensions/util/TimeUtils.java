@@ -35,7 +35,7 @@ public class TimeUtils {
 
             return simpleDateFormat.format(timeInMilli);
         } catch (Exception e) {
-            logger.error("The time " + timeInMilli + " cannot be formatted to the pattern " + pattern);
+            logger.error("The time {} cannot be formatted to the pattern {}", timeInMilli, pattern);
         }
         return null;
     }
@@ -46,7 +46,7 @@ public class TimeUtils {
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
             return simpleDateFormat.format(timeInMilli);
         } catch (Exception e) {
-            logger.error("The time " + timeInMilli + " cannot be formatted to the pattern " + pattern + " and timeZone " + timeZone);
+            logger.error("The time {} cannot be formatted to the pattern {} and timeZone {}", timeInMilli, pattern, timeZone);
         }
         return null;
     }

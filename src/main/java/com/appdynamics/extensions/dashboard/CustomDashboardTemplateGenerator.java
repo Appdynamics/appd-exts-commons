@@ -90,7 +90,7 @@ public class CustomDashboardTemplateGenerator {
     private String setMetricPrefix(String dashboardString) {
         if (dashboardString.contains(REPLACE_METRIC_PREFIX)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_METRIC_PREFIX, metricPrefix);
-            logger.debug(REPLACE_METRIC_PREFIX + ": " + metricPrefix);
+            logger.debug("{}: {}", REPLACE_METRIC_PREFIX, metricPrefix);
         }
         return dashboardString;
     }
@@ -98,7 +98,7 @@ public class CustomDashboardTemplateGenerator {
     private String setApplicationName(String dashboardString) {
         if (dashboardString.contains(REPLACE_APPLICATION_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_APPLICATION_NAME, controllerInfo.getApplicationName());
-            logger.debug(REPLACE_APPLICATION_NAME + ": " + controllerInfo.getApplicationName());
+            logger.debug("{}: {}", REPLACE_APPLICATION_NAME, controllerInfo.getApplicationName());
         }
         return dashboardString;
     }
@@ -106,7 +106,7 @@ public class CustomDashboardTemplateGenerator {
     private String setSimApplicationName(String dashboardString) {
         if (dashboardString.contains(REPLACE_SIM_APPLICATION_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_SIM_APPLICATION_NAME, SIM_APPLICATION_NAME);
-            logger.debug(REPLACE_SIM_APPLICATION_NAME + ": " + SIM_APPLICATION_NAME);
+            logger.debug("{}: {}", REPLACE_SIM_APPLICATION_NAME, SIM_APPLICATION_NAME);
         }
         return dashboardString;
     }
@@ -114,7 +114,7 @@ public class CustomDashboardTemplateGenerator {
     private String setTierName(String dashboardString) {
         if (dashboardString.contains(REPLACE_TIER_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_TIER_NAME, controllerInfo.getTierName());
-            logger.debug(REPLACE_TIER_NAME + ": " + controllerInfo.getTierName());
+            logger.debug("{}: {}", REPLACE_TIER_NAME, controllerInfo.getTierName());
         }
         return dashboardString;
     }
@@ -122,7 +122,7 @@ public class CustomDashboardTemplateGenerator {
     private String setNodeName(String dashboardString) {
         if (dashboardString.contains(REPLACE_NODE_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_NODE_NAME, controllerInfo.getNodeName());
-            logger.debug(REPLACE_NODE_NAME + ": " + controllerInfo.getNodeName());
+            logger.debug("{}: {}", REPLACE_NODE_NAME, controllerInfo.getNodeName());
         }
         return dashboardString;
     }
@@ -130,7 +130,7 @@ public class CustomDashboardTemplateGenerator {
     private String setHostName(String dashboardString) {
         if (dashboardString.contains(REPLACE_HOST_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_HOST_NAME, controllerInfo.getControllerHost());
-            logger.debug(REPLACE_HOST_NAME + ": " + controllerInfo.getControllerHost());
+            logger.debug("{}: {}", REPLACE_HOST_NAME, controllerInfo.getControllerHost());
         }
         return dashboardString;
     }
@@ -138,7 +138,7 @@ public class CustomDashboardTemplateGenerator {
     private String setUniqueHostID(String dashboardString) {
         if (dashboardString.contains(REPLACE_UNIQUE_HOST_ID)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_UNIQUE_HOST_ID, controllerInfo.getUniqueHostId());
-            logger.debug(REPLACE_UNIQUE_HOST_ID + ": " + controllerInfo.getUniqueHostId());
+            logger.debug("{}: {}", REPLACE_UNIQUE_HOST_ID, controllerInfo.getUniqueHostId());
         }
         return dashboardString;
     }
@@ -146,7 +146,7 @@ public class CustomDashboardTemplateGenerator {
     private String setDashboardName(String dashboardString) {
         if (dashboardString.contains(REPLACE_DASHBOARD_NAME)) {
             dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_DASHBOARD_NAME, dashboardName);
-            logger.debug(REPLACE_DASHBOARD_NAME + ": " + dashboardName);
+            logger.debug("{}: {}", REPLACE_DASHBOARD_NAME, dashboardName);
         }
         return dashboardString;
     }
@@ -157,10 +157,10 @@ public class CustomDashboardTemplateGenerator {
                 String machinePath = ROOT + METRICS_SEPARATOR + controllerInfo.getMachinePath();
                 machinePath = machinePath.substring(0, machinePath.lastIndexOf(METRICS_SEPARATOR));
                 dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_MACHINE_PATH, machinePath);
-                logger.debug(REPLACE_MACHINE_PATH + ": " + machinePath);
+                logger.debug("{}: {}", REPLACE_MACHINE_PATH, machinePath);
             } else {
                 dashboardString = org.apache.commons.lang3.StringUtils.replace(dashboardString, REPLACE_MACHINE_PATH, ROOT);
-                logger.debug(REPLACE_MACHINE_PATH + ": " + ROOT);
+                logger.debug("{}: {}", REPLACE_MACHINE_PATH, ROOT);
             }
         }
         return dashboardString;

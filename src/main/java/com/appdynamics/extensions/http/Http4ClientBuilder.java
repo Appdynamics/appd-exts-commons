@@ -47,7 +47,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
@@ -83,7 +85,7 @@ public class Http4ClientBuilder {
     }
 
     public static HttpClientBuilder getBuilder(File file) {
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         try {
             Map<String, ?> propMap = (Map) yaml.load(new FileReader(file));
             return getBuilder(propMap);
@@ -188,7 +190,7 @@ public class Http4ClientBuilder {
                 logger.info("Creating the auth scope for URI [{}]", uri);
                 return new AuthScope(url.getHost(), url.getPort());
             } catch (MalformedURLException e) {
-                logger.error("The url appears to be malformed " + uri, e);
+                logger.error("The url appears to be malformed {}", uri, e);
                 return null;
             }
         } else {
@@ -226,7 +228,7 @@ public class Http4ClientBuilder {
                     }
                     builder.setProxy(proxy);
                 } catch (MalformedURLException e) {
-                    logger.error("The proxy uri appears to be invalid " + proxyUri, e);
+                    logger.error("The proxy uri appears to be invalid {}", proxyUri, e);
                 }
             } else {
                 logger.info("Not configuring proxy, the property [uri] is not set");

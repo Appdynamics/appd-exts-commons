@@ -57,7 +57,7 @@ public class HttpClientModule {
                     logger.debug("Shutting down the old http client {}", httpClient);
                     oldHttpClient.close();
                 } catch (Exception e) {
-                    logger.error("Exception while shutting down the http client" + oldHttpClient, e);
+                    logger.error("Exception while shutting down the http client {}", oldHttpClient, e);
                 }
             }, "HttpClient-Shutdown-Task").start();
         }

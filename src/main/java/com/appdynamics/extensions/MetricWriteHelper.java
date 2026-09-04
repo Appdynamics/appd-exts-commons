@@ -172,9 +172,9 @@ public class MetricWriteHelper {
 
     private void logTime() {
         Long endTime = System.currentTimeMillis();
-        logger.info("Finished executing " + baseMonitor.getMonitorName() + " at " + TimeUtils.getFormattedTimestamp(endTime, "yyyy-MM-dd HH:mm:ss z"));
+        logger.info("Finished executing {} at {}", baseMonitor.getMonitorName(), TimeUtils.getFormattedTimestamp(endTime, "yyyy-MM-dd HH:mm:ss z"));
         Long totalTime = endTime - startTime;
-        logger.info("Total time taken to execute " + baseMonitor.getMonitorName() + " : " + totalTime + " ms");
+        logger.info("Total time taken to execute {} : {} ms", baseMonitor.getMonitorName(), totalTime);
     }
 
     public boolean isCacheMetrics() {

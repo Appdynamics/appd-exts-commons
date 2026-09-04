@@ -37,7 +37,7 @@ public class JsonUtils {
             try {
                 return mapper.writeValueAsString(object);
             } catch (Exception e) {
-                logger.error("Error while converting the Object to Json " + object, e);
+                logger.error("Error while converting the Object to Json {}", object, e);
             }
         }
         return null;

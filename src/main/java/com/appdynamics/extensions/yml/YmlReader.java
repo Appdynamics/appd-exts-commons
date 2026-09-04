@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.*;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class YmlReader {
     }
 
     public static Map<String, ?> readFromFile(File file) {
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         try {
             return (Map) yaml.load(new FileReader(file));
         } catch (FileNotFoundException e) {
@@ -81,7 +82,7 @@ public class YmlReader {
     }
 
     public static Map<String, ?> readFromFileAsMap(File file) {
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         try {
             return (Map) yaml.load(new FileReader(file));
         } catch (FileNotFoundException e) {

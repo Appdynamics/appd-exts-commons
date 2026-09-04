@@ -180,8 +180,8 @@ public abstract class ABaseMonitor extends AManagedMonitor {
     @Override
     public TaskOutput execute(Map<String, String> args, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
         startTime = System.currentTimeMillis();
-        logger.info("Started executing " + monitorName + " at " + TimeUtils.getFormattedTimestamp(startTime, "yyyy-MM-dd HH:mm:ss z"));
-        logger.info("Using {} Version [" + getImplementationVersion() + "]", monitorName);
+        logger.info("Started executing {} at {}", monitorName, TimeUtils.getFormattedTimestamp(startTime, "yyyy-MM-dd HH:mm:ss z"));
+        logger.info("Using {} Version [{}]", monitorName, getImplementationVersion());
         logger.debug("The raw arguments are {}", args);
         initialize(args);
         executeMonitor();
